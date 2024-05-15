@@ -9,7 +9,8 @@ env:
   pip_requirements: ${{ github.workspace }}/scripts/coverage-metrics/bin/utils/unit-test-coverage/requirements.txt
 
 jobs:
-  assess-unit-test-coverage:
+  verify-unit-test-coverage:
+    name: Verify Unit Test Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Check out reporting tools
