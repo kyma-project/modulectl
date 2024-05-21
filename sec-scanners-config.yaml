@@ -1,0 +1,8 @@
+module-name: modulectl
+whitesource:
+  language: golang-mod
+  exclude:
+    - "**/test/**"
+    - "**/*_test.go"
+    - "**/mocks/**"
+  subprojects: false
