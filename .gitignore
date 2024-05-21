@@ -11,6 +11,9 @@
 
 ## Plugin-specific files:
 
+# Output
+/bin/
+
 # IntelliJ
 /out/
 

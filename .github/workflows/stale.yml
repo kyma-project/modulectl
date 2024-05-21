@@ -1,4 +1,4 @@
-name: 'Manage Stale Issues and Pull Requests'
+name: Manage Stale Issues and Pull Requests
 
 on:
   schedule:

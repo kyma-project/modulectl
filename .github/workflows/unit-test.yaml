@@ -1,0 +1,21 @@
+name: Unit Test modulectl
+on:
+  pull_request:
+    branches:
+      - main
+      - 'release-**'
+  workflow_dispatch:
+jobs:
+  unit-test:
+    name: Unit Test modulectl
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout modulectl
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: 'go.sum'
+      - name: Run Unit Tests
+        run: make test

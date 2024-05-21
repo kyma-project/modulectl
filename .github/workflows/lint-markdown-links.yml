@@ -8,7 +8,8 @@ on:
     - cron: "0 5 * * *"
 
 jobs:
-  markdown-link-check:
+  lint:
+    name: Lint Markdown Links
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
