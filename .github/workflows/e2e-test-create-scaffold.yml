@@ -1,18 +1,9 @@
 name: E2E Test - Create Scaffold
-
 on:
-  push:
-    branches:
-      - main
-      - 'release-**'
   pull_request:
     branches:
       - main
       - 'release-**'
-    paths:
-      - 'go.mod'
-      - 'go.sum'
-      - '**.go'
 jobs:
   e2e-test:
     name: E2E Test - Create Scaffold
