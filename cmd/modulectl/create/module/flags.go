@@ -31,7 +31,7 @@ const (
 	outputFlagUsage   = `File to write the module template if the module is uploaded to a registry. (default "template.yaml")`
 
 	RegistryFlagName    = "registry"
-	RegistryFlagDefault = "origin"
+	RegistryFlagDefault = ""
 	registryFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
 
 	RegistryCredSelectorFlagName    = "registry-cred-selector"
