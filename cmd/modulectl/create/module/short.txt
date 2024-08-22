@@ -1,0 +1,1 @@
+Creates a module bundled as an OCI artifact

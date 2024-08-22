@@ -1,0 +1,59 @@
+package module
+
+import (
+	"github.com/kyma-project/modulectl/internal/service/module"
+	"github.com/spf13/pflag"
+)
+
+const (
+	// TODO: Can be extracted to one higher level
+	ModuleConfigFileFlagName    = "module-config-file"
+	ModuleConfigFileFlagDefault = "module-config.yaml"
+	moduleConfigFileFlagUsage   = "Specifies the module configuration file"
+	// ====================================
+
+	CredentialsFlagName    = "credentials"
+	credentialsFlagShort   = "c"
+	CredentialsFlagDefault = ""
+	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format"
+
+	GitRemoteFlagName    = "git-remote"
+	GitRemoteFlagDefault = "origin"
+	gitRemoteFlagUsage   = `Specifies the remote name of the wanted GitHub repository. For Example "origin" or "upstream" (default "origin")`
+
+	InsecureFlagName    = "insecure"
+	InsecureFlagDefault = false
+	insecureFlagUsage   = "Uses an insecure connection to access the registry"
+
+	OutputFlagName    = "output"
+	outputFlagShort   = "o"
+	OutputFlagDefault = "template.yaml"
+	outputFlagUsage   = `File to write the module template if the module is uploaded to a registry. (default "template.yaml")`
+
+	RegistryFlagName    = "registry"
+	RegistryFlagDefault = "origin"
+	registryFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
+
+	RegistryCredSelectorFlagName    = "registry-cred-selector"
+	RegistryCredSelectorFlagDefault = ""
+	registryCredSelectorFlagUsage   = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
+
+	// TODO: Extract one level above
+	SecScannersConfigFlagName    = "sec-scanners-config"
+	SecScannersConfigFlagDefault = "sec-scanners-config.yaml"
+	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration. (default "sec-scanners-config.yaml")`
+	// =============================
+)
+
+func parseFlags(flags *pflag.FlagSet, opts *module.Options) {
+	flags.StringVar(&opts.ModuleConfigFile, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
+	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault, credentialsFlagUsage)
+	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)
+	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
+	flags.StringVarP(&opts.TemplateOutput, OutputFlagName, outputFlagShort, OutputFlagDefault, outputFlagUsage)
+	flags.StringVar(&opts.RegistryURL, RegistryFlagName, RegistryFlagDefault, registryFlagUsage)
+	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault, registryCredSelectorFlagUsage)
+	flags.StringVar(&opts.SecurityScanConfig, SecScannersConfigFlagName, SecScannersConfigFlagDefault, secScannersConfigFlagUsage)
+
+	flags.Lookup(SecScannersConfigFlagName).NoOptDefVal = SecScannersConfigFlagDefault
+}
