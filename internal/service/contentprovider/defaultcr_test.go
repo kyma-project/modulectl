@@ -1,7 +1,6 @@
 package contentprovider_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -38,8 +37,7 @@ func Test_DefaultCR_GetDefaultContent_ReturnsExpectedValue(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		testcase := testcase
-		testName := fmt.Sprintf("TestCorrectContentProviderFor_%s", testcase.name)
+		testName := "TestCorrectContentProviderFor_" + testcase.name
 
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()

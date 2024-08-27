@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/kyma-project/modulectl/tools/io"
+
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 const (
@@ -21,7 +22,7 @@ const (
 )
 
 type Options struct {
-	Out                       io.Out
+	Out                       iotools.Out
 	Directory                 string
 	ModuleConfigFileName      string
 	ModuleConfigFileOverwrite bool
@@ -71,12 +72,11 @@ func (opts Options) validateDirectory() error {
 	}
 
 	fileInfo, err := os.Stat(opts.Directory)
-
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("%w: directory %s does not exist", ErrInvalidOption, opts.Directory)
 		}
-		return err
+		return fmt.Errorf("%w: failed to get directory info %s: %w", ErrInvalidOption, opts.Directory, err)
 	}
 
 	if !fileInfo.IsDir() {
@@ -93,7 +93,6 @@ func (opts Options) validateModuleName() error {
 
 	if len(opts.ModuleName) > moduleNameMaxLength {
 		return fmt.Errorf("%w: opts.ModuleName length must not exceed %q characters", ErrInvalidOption, moduleNameMaxLength)
-
 	}
 
 	if matched, err := regexp.MatchString(moduleNamePattern, opts.ModuleName); err != nil {

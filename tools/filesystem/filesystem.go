@@ -2,26 +2,27 @@ package filesystem
 
 import (
 	"errors"
+	"fmt"
 	"os"
 )
 
-type FileSystemUtil struct{}
+type Util struct{}
 
-func (u *FileSystemUtil) FileExists(path string) (bool, error) {
+func (u *Util) FileExists(path string) (bool, error) {
 	if _, err := os.Stat(path); err == nil {
 		return true, nil
-
 	} else if errors.Is(err, os.ErrNotExist) {
 		return false, nil
-
 	} else {
-		return false, err
+		return false, fmt.Errorf("failed check if file exists %s: %w", path, err)
 	}
 }
 
-func (u *FileSystemUtil) WriteFile(path, content string) error {
-	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
-		return err
+const perm = 0o600
+
+func (u *Util) WriteFile(path, content string) error {
+	if err := os.WriteFile(path, []byte(content), perm); err != nil {
+		return fmt.Errorf("failed to write file %s: %w", path, err)
 	}
 
 	return nil

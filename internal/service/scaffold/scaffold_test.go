@@ -36,6 +36,7 @@ func Test_NewService_ReturnsError_WhenManifestServiceIsNil(t *testing.T) {
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "manifestService")
 }
+
 func Test_NewService_ReturnsError_WhenDefaultCRServiceIsNil(t *testing.T) {
 	_, err := scaffold.NewService(
 		&moduleConfigForceExplicitOverwriteErrorStub{},
@@ -389,8 +390,10 @@ func Test_CreateScaffold_Succeeds(t *testing.T) {
 // ***************
 // Test Stubs
 // ***************
-var errSomeFileGeneratorError = errors.New("some file generator error")
-var errSomeUnexpectedError = errors.New("if you see this error, something went wrong in the test setup")
+var (
+	errSomeFileGeneratorError = errors.New("some file generator error")
+	errSomeUnexpectedError    = errors.New("if you see this error, something went wrong in the test setup")
+)
 
 type moduleConfigForceExplicitOverwriteErrorStub struct{}
 
@@ -525,7 +528,7 @@ const charset = "abcdefghijklmnopqrstuvwxyz"
 func getRandomName(length int) string {
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+		b[i] = charset[rand.Intn(len(charset))] //nolint:gosec // no need for cryptographically secure random number in tests
 	}
 	return string(b)
 }

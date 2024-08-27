@@ -1,11 +1,10 @@
 package scaffold_test
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 
-	"github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
+	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
 )
 
 func Test_ScaffoldFlagsDefaults(t *testing.T) {
@@ -14,21 +13,21 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 		value    string
 		expected string
 	}{
-		{name: scaffold.DirectoryFlagName, value: scaffold.DirectoryFlagDefault, expected: "./"},
-		{name: scaffold.ModuleConfigFileFlagName, value: scaffold.ModuleConfigFileFlagDefault, expected: "scaffold-module-config.yaml"},
-		{name: scaffold.ModuleConfigFileOverwriteFlagName, value: strconv.FormatBool(scaffold.ModuleConfigFileOverwriteFlagDefault), expected: "false"},
-		{name: scaffold.ManifestFileFlagName, value: scaffold.ManifestFileFlagDefault, expected: "manifest.yaml"},
-		{name: scaffold.DefaultCRFlagName, value: scaffold.DefaultCRFlagDefault, expected: ""},
-		{name: scaffold.DefaultCRFlagName, value: scaffold.DefaultCRFlagNoOptDefault, expected: "default-cr.yaml"},
-		{name: scaffold.SecurityConfigFileFlagName, value: scaffold.SecurityConfigFileFlagDefault, expected: ""},
-		{name: scaffold.SecurityConfigFileFlagName, value: scaffold.SecurityConfigFileFlagNoOptDefault, expected: "sec-scanners-config.yaml"},
-		{name: scaffold.ModuleNameFlagName, value: scaffold.ModuleNameFlagDefault, expected: "kyma-project.io/module/mymodule"},
-		{name: scaffold.ModuleVersionFlagName, value: scaffold.ModuleVersionFlagDefault, expected: "0.0.1"},
-		{name: scaffold.ModuleChannelFlagName, value: scaffold.ModuleChannelFlagDefault, expected: "regular"},
+		{name: scaffoldcmd.DirectoryFlagName, value: scaffoldcmd.DirectoryFlagDefault, expected: "./"},
+		{name: scaffoldcmd.ModuleConfigFileFlagName, value: scaffoldcmd.ModuleConfigFileFlagDefault, expected: "scaffold-module-config.yaml"},
+		{name: scaffoldcmd.ModuleConfigFileOverwriteFlagName, value: strconv.FormatBool(scaffoldcmd.ModuleConfigFileOverwriteFlagDefault), expected: "false"},
+		{name: scaffoldcmd.ManifestFileFlagName, value: scaffoldcmd.ManifestFileFlagDefault, expected: "manifest.yaml"},
+		{name: scaffoldcmd.DefaultCRFlagName, value: scaffoldcmd.DefaultCRFlagDefault, expected: ""},
+		{name: scaffoldcmd.DefaultCRFlagName, value: scaffoldcmd.DefaultCRFlagNoOptDefault, expected: "default-cr.yaml"},
+		{name: scaffoldcmd.SecurityConfigFileFlagName, value: scaffoldcmd.SecurityConfigFileFlagDefault, expected: ""},
+		{name: scaffoldcmd.SecurityConfigFileFlagName, value: scaffoldcmd.SecurityConfigFileFlagNoOptDefault, expected: "sec-scanners-config.yaml"},
+		{name: scaffoldcmd.ModuleNameFlagName, value: scaffoldcmd.ModuleNameFlagDefault, expected: "kyma-project.io/module/mymodule"},
+		{name: scaffoldcmd.ModuleVersionFlagName, value: scaffoldcmd.ModuleVersionFlagDefault, expected: "0.0.1"},
+		{name: scaffoldcmd.ModuleChannelFlagName, value: scaffoldcmd.ModuleChannelFlagDefault, expected: "regular"},
 	}
 
 	for _, testcase := range tests {
-		testName := fmt.Sprintf("TestFlagHasCorrectDefault_%s", testcase.name)
+		testName := "TestFlagHasCorrectDefault_" + testcase.name
 		t.Run(testName, func(t *testing.T) {
 			if testcase.value != testcase.expected {
 				t.Errorf("Flag '%s' has different default: expected = '%s', got = '%s'",

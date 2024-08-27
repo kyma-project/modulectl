@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type FileSystem interface {
@@ -14,7 +14,7 @@ type FileSystem interface {
 }
 
 type FileGenerator interface {
-	GenerateFile(out io.Out, path string, args types.KeyValueArgs) error
+	GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error
 }
 
 type Service struct {
@@ -24,12 +24,11 @@ type Service struct {
 
 func NewService(fileSystem FileSystem, fileGenerator FileGenerator) (*Service, error) {
 	if fileSystem == nil {
-		return nil, fmt.Errorf("%w: fileSystem must not be nil", errors.ErrInvalidArg)
-
+		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	if fileGenerator == nil {
-		return nil, fmt.Errorf("%w: fileGenerator must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: fileGenerator must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
@@ -41,7 +40,7 @@ func NewService(fileSystem FileSystem, fileGenerator FileGenerator) (*Service, e
 func (s *Service) ForceExplicitOverwrite(directory, fileName string, overwrite bool) error {
 	exists, err := s.fileSystem.FileExists(path.Join(directory, fileName))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check if file exists: %w", err)
 	}
 
 	if exists && !overwrite {
@@ -51,6 +50,9 @@ func (s *Service) ForceExplicitOverwrite(directory, fileName string, overwrite b
 	return nil
 }
 
-func (s *Service) GenerateFile(out io.Out, path string, args types.KeyValueArgs) error {
-	return s.fileGenerator.GenerateFile(out, path, args)
+func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
+	if err := s.fileGenerator.GenerateFile(out, path, args); err != nil {
+		return fmt.Errorf("failed to generate file: %w", err)
+	}
+	return nil
 }

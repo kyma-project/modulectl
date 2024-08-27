@@ -15,5 +15,5 @@ func NewDefaultOut(writer io.Writer) *DefaultOut {
 }
 
 func (o *DefaultOut) Write(msg string) {
-	o.writer.Write([]byte(msg))
+	_, _ = o.writer.Write([]byte(msg))
 }

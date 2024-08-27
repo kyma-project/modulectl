@@ -9,8 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kyma-project/modulectl/cmd/modulectl"
 	"github.com/spf13/cobra"
+
+	"github.com/kyma-project/modulectl/cmd/modulectl"
 )
 
 const (
@@ -49,21 +50,21 @@ func genMarkdownTree(cmd *cobra.Command, dir string) error {
 		}
 	}
 
-	basename := strings.Replace(cmd.CommandPath(), " ", "_", -1) + ".md"
+	basename := strings.ReplaceAll(cmd.CommandPath(), " ", "_") + ".md"
 	filename := filepath.Join(dir, basename)
-	f, err := os.Create(filename)
+	file, err := os.Create(filename)
 	if err != nil {
-		return err
+		return fmt.Errorf("file creation failed: %w", err)
 	}
-	defer f.Close()
+	defer file.Close()
 
-	if _, err := io.WriteString(f, filePrepender(cmd)); err != nil {
-		return err
+	if _, err = io.WriteString(file, filePrepender(cmd)); err != nil {
+		return fmt.Errorf("writing to file failed: %w", err)
 	}
-	return genMarkdown(cmd, f)
+	return genMarkdown(cmd, file)
 }
 
-func genMarkdown(cmd *cobra.Command, w io.Writer) error {
+func genMarkdown(cmd *cobra.Command, writer io.Writer) error {
 	cmd.InitDefaultHelpCmd()
 	cmd.InitDefaultHelpFlag()
 
@@ -87,8 +88,8 @@ func genMarkdown(cmd *cobra.Command, w io.Writer) error {
 
 	printSeeAlso(buf, cmd)
 
-	_, err := buf.WriteTo(w)
-	return err
+	_, err := buf.WriteTo(writer)
+	return fmt.Errorf("buffer write failed: %w", err)
 }
 
 func printShort(buf *bytes.Buffer, cmd *cobra.Command) {
@@ -167,7 +168,7 @@ func filePrepender(cmd *cobra.Command) string {
 func linkHandler(cmd *cobra.Command) string {
 	name := cmd.CommandPath()
 	formatted := strings.ReplaceAll(name, " ", "_")
-	return fmt.Sprintf("%s.md", formatted)
+	return formatted + ".md"
 }
 
 func hasSeeAlso(cmd *cobra.Command) bool {

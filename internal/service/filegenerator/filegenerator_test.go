@@ -4,11 +4,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func Test_NewService_ReturnsError_WhenKindIsEmpty(t *testing.T) {
@@ -40,7 +41,7 @@ func Test_GenerateFile_ReturnsError_WhenErrorGettingDefaultContent(t *testing.T)
 
 	require.ErrorIs(t, result, filegenerator.ErrGettingDefaultContent)
 	require.ErrorIs(t, result, errSomeContentProviderError)
-	require.Len(t, out.sink, 0)
+	require.Empty(t, out.sink)
 }
 
 func Test_GenerateFile_ReturnsError_WhenErrorWritingFile(t *testing.T) {
@@ -50,7 +51,7 @@ func Test_GenerateFile_ReturnsError_WhenErrorWritingFile(t *testing.T) {
 	result := svc.GenerateFile(out, "some-path", nil)
 
 	require.ErrorIs(t, result, filegenerator.ErrWritingFile)
-	require.Len(t, out.sink, 0)
+	require.Empty(t, out.sink)
 }
 
 func Test_GenerateFile_Succeeds_WhenFileIsGenerated(t *testing.T) {

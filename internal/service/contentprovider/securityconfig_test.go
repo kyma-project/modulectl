@@ -3,17 +3,18 @@ package contentprovider_test
 import (
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func Test_SecurityConfig_NewSecurityConfig_ReturnsError_WhenYamlConverterIsNil(t *testing.T) {
 	_, err := contentprovider.NewSecurityConfig(nil)
 
-	require.ErrorIs(t, err, errors.ErrInvalidArg)
+	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "yamlConverter")
 }
 
@@ -64,6 +65,6 @@ type objectToYAMLConverterStub struct{}
 
 const convertedContent = "content"
 
-func (o *objectToYAMLConverterStub) ConvertToYaml(obj interface{}) string {
+func (o *objectToYAMLConverterStub) ConvertToYaml(_ interface{}) string {
 	return convertedContent
 }

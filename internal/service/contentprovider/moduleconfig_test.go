@@ -1,20 +1,20 @@
 package contentprovider_test
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func Test_ModuleConfig_NewModuleConfig_ReturnsError_WhenYamlConverterIsNil(t *testing.T) {
 	_, err := contentprovider.NewModuleConfig(nil)
 
-	require.ErrorIs(t, err, errors.ErrInvalidArg)
+	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "yamlConverter")
 }
 
@@ -60,8 +60,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgsMissing(t 
 	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
 
 	for _, testcase := range tests {
-		testcase := testcase
-		testName := fmt.Sprintf("TestArgumentRequired_%s", testcase.argName)
+		testName := "TestArgumentRequired_" + testcase.argName
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()
 
@@ -109,8 +108,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
 
 	for _, testcase := range tests {
-		testcase := testcase
-		testName := fmt.Sprintf("TestArgumentRequired_%s", testcase.argName)
+		testName := "TestArgumentRequired_" + testcase.argName
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()
 
@@ -144,6 +142,6 @@ type mcObjectToYAMLConverterStub struct{}
 
 const mcConvertedContent = "content"
 
-func (o *mcObjectToYAMLConverterStub) ConvertToYaml(obj interface{}) string {
+func (o *mcObjectToYAMLConverterStub) ConvertToYaml(_ interface{}) string {
 	return mcConvertedContent
 }

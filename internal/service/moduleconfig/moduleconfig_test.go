@@ -10,7 +10,7 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/moduleconfig"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 const (
@@ -130,7 +130,7 @@ func (*errorStub) FileExists(_ string) (bool, error) {
 
 type fileGeneratorStub struct{}
 
-func (*fileGeneratorStub) GenerateFile(_ io.Out, _ string, _ types.KeyValueArgs) error {
+func (*fileGeneratorStub) GenerateFile(_ iotools.Out, _ string, _ types.KeyValueArgs) error {
 	return nil
 }
 
@@ -138,6 +138,6 @@ type fileGeneratorErrorStub struct{}
 
 var errSomeFileGeneratorError = errors.New("some file generator error")
 
-func (*fileGeneratorErrorStub) GenerateFile(out io.Out, path string, args types.KeyValueArgs) error {
+func (*fileGeneratorErrorStub) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
 	return errSomeFileGeneratorError
 }

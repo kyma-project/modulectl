@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
@@ -15,7 +15,7 @@ type ModuleConfig struct {
 
 func NewModuleConfig(yamlConverter ObjectToYAMLConverter) (*ModuleConfig, error) {
 	if yamlConverter == nil {
-		return nil, fmt.Errorf("%w: yamlConverter must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: yamlConverter must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &ModuleConfig{

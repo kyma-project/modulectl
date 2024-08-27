@@ -18,13 +18,13 @@ func (*ObjectToYAMLConverter) ConvertToYaml(obj interface{}) string {
 // generateYamlWithComments uses a "comment" tag in the struct definition to generate YAML with comments on corresponding lines.
 // Note: Map support is missing!
 func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, indentLevel int, commentPrefix string) {
-	t := obj.Type()
+	objType := obj.Type()
 
 	indentPrefix := strings.Repeat("  ", indentLevel)
 	originalCommentPrefix := commentPrefix
-	for i := 0; i < t.NumField(); i++ {
+	for i := range objType.NumField() {
 		commentPrefix = originalCommentPrefix
-		field := t.Field(i)
+		field := objType.Field(i)
 		value := obj.Field(i)
 		yamlTag := field.Tag.Get("yaml")
 		commentTag := field.Tag.Get("comment")
@@ -54,7 +54,7 @@ func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, i
 			if value.Len() == 0 {
 				yamlBuilder.WriteString(fmt.Sprintf("%s%s  -\n", commentPrefix, indentPrefix))
 			}
-			for j := 0; j < value.Len(); j++ {
+			for j := range value.Len() {
 				valueStr := getValueStr(value.Index(j))
 				yamlBuilder.WriteString(fmt.Sprintf("%s%s  - %s\n", "", indentPrefix, valueStr))
 			}
@@ -73,7 +73,7 @@ func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, i
 }
 
 func getValueStr(value reflect.Value) string {
-	valueStr := ""
+	var valueStr string
 	if value.Kind() == reflect.String {
 		valueStr = fmt.Sprintf("\"%v\"", value.Interface())
 	} else {

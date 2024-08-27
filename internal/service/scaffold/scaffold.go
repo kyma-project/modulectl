@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type ModuleConfigService interface {
@@ -16,7 +16,7 @@ type ModuleConfigService interface {
 }
 
 type FileGeneratorService interface {
-	GenerateFile(out io.Out, path string, args types.KeyValueArgs) error
+	GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error
 }
 
 type Service struct {
@@ -29,21 +29,22 @@ type Service struct {
 func NewService(moduleConfigService ModuleConfigService,
 	manifestService FileGeneratorService,
 	defaultCRService FileGeneratorService,
-	securityConfigService FileGeneratorService) (*Service, error) {
+	securityConfigService FileGeneratorService,
+) (*Service, error) {
 	if moduleConfigService == nil {
-		return nil, fmt.Errorf("%w: moduleConfigService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: moduleConfigService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	if manifestService == nil {
-		return nil, fmt.Errorf("%w: manifestService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: manifestService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	if defaultCRService == nil {
-		return nil, fmt.Errorf("%w: defaultCRService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: defaultCRService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	if securityConfigService == nil {
-		return nil, fmt.Errorf("%w: securityConfigService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: securityConfigService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
@@ -60,7 +61,7 @@ func (s *Service) CreateScaffold(opts Options) error {
 	}
 
 	if err := s.moduleConfigService.ForceExplicitOverwrite(opts.Directory, opts.ModuleConfigFileName, opts.ModuleConfigFileOverwrite); err != nil {
-		return err
+		return fmt.Errorf("%w %s: %w", ErrOverwritingFile, opts.ModuleConfigFileName, err)
 	}
 
 	manifestFilePath := path.Join(opts.Directory, opts.ManifestFileName)

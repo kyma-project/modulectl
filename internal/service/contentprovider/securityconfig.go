@@ -3,7 +3,7 @@ package contentprovider
 import (
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
@@ -13,7 +13,7 @@ type SecurityConfig struct {
 
 func NewSecurityConfig(yamlConverter ObjectToYAMLConverter) (*SecurityConfig, error) {
 	if yamlConverter == nil {
-		return nil, fmt.Errorf("%w: yamlConverter must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: yamlConverter must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &SecurityConfig{
@@ -49,8 +49,10 @@ func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 func (s *SecurityConfig) getSecurityConfig(moduleName string) securityScanConfig {
 	return securityScanConfig{
 		ModuleName: moduleName,
-		Protecode: []string{"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6"},
+		Protecode: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
+		},
 		WhiteSource: whiteSourceSecConfig{
 			Exclude: []string{"**/test/**", "**/*_test.go"},
 		},

@@ -12,11 +12,11 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
-GOLANG_CI_LINT_VERSION ?= v1.54.2
+GOLANG_CI_LINT_VERSION ?= v1.60.3
 
 lint:
 	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANG_CI_LINT_VERSION)
-	$(LOCALBIN)/golangci-lint run -v
+	$(LOCALBIN)/golangci-lint run --verbose -c .golangci.yaml
 
 FLAGS = -ldflags '-s -w -X github.com/kyma-project/modulectl/cmd/modulectl/version.Version=$(VERSION)'
 

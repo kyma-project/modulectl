@@ -1,14 +1,15 @@
 package scaffold
 
 import (
-	_ "embed"
 	"fmt"
 
 	"github.com/spf13/cobra"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
+
+	_ "embed"
 )
 
 //go:embed use.txt
@@ -29,7 +30,7 @@ type ScaffoldService interface {
 
 func NewCmd(scaffoldService ScaffoldService) (*cobra.Command, error) {
 	if scaffoldService == nil {
-		return nil, fmt.Errorf("%w: scaffoldService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: scaffoldService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	opts := scaffold.Options{}
@@ -45,7 +46,7 @@ func NewCmd(scaffoldService ScaffoldService) (*cobra.Command, error) {
 		},
 	}
 
-	opts.Out = io.NewDefaultOut(cmd.OutOrStdout())
+	opts.Out = iotools.NewDefaultOut(cmd.OutOrStdout())
 	parseFlags(cmd.Flags(), &opts)
 
 	return cmd, nil

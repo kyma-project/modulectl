@@ -6,7 +6,7 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type FileWriter interface {
@@ -30,7 +30,6 @@ func NewService(kind string, fileSystem FileWriter, defaultContentProvider Defau
 
 	if fileSystem == nil {
 		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
-
 	}
 
 	if defaultContentProvider == nil {
@@ -44,7 +43,7 @@ func NewService(kind string, fileSystem FileWriter, defaultContentProvider Defau
 	}, nil
 }
 
-func (s *Service) GenerateFile(out io.Out, path string, args types.KeyValueArgs) error {
+func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
 	defaultContent, err := s.defaultContentProvider.GetDefaultContent(args)
 	if err != nil {
 		return errors.Join(ErrGettingDefaultContent, err)

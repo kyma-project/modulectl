@@ -1,12 +1,13 @@
 package modulectl
 
 import (
-	_ "embed"
-
 	"fmt"
 
-	"github.com/kyma-project/modulectl/cmd/modulectl/create"
 	"github.com/spf13/cobra"
+
+	"github.com/kyma-project/modulectl/cmd/modulectl/create"
+
+	_ "embed"
 )
 
 //go:embed use.txt

@@ -3,9 +3,9 @@ package reusefilegenerator
 import (
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type FileReader interface {
@@ -13,7 +13,7 @@ type FileReader interface {
 }
 
 type FileGenerator interface {
-	GenerateFile(out io.Out, path string, args types.KeyValueArgs) error
+	GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error
 }
 
 type Service struct {
@@ -28,16 +28,15 @@ func NewService(
 	fileGenerator FileGenerator,
 ) (*Service, error) {
 	if kind == "" {
-		return nil, fmt.Errorf("%w: kind must not be empty", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: kind must not be empty", commonerrors.ErrInvalidArg)
 	}
 
 	if fileSystem == nil {
-		return nil, fmt.Errorf("%w: fileSystem must not be nil", errors.ErrInvalidArg)
-
+		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	if fileGenerator == nil {
-		return nil, fmt.Errorf("%w: fileGenerator must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: fileGenerator must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
@@ -47,7 +46,7 @@ func NewService(
 	}, nil
 }
 
-func (s *Service) GenerateFile(out io.Out, path string, args types.KeyValueArgs) error {
+func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
 	fileExists, err := s.fileReader.FileExists(path)
 	if err != nil {
 		return fmt.Errorf("%w %s: %w", ErrCheckingFileExistence, path, err)
@@ -58,5 +57,10 @@ func (s *Service) GenerateFile(out io.Out, path string, args types.KeyValueArgs)
 		return nil
 	}
 
-	return s.fileGenerator.GenerateFile(out, path, args)
+	err = s.fileGenerator.GenerateFile(out, path, args)
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrGeneratingFile, err)
+	}
+
+	return nil
 }
