@@ -27,7 +27,18 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 		var err error
 		initialDir, err = os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
-		workDir, workDirCleanup = resolveWorkingDirectory()
+		workDir := os.Getenv("SCAFFOLD_DIR")
+		if len(workDir) > 0 {
+			workDirCleanup = func() {}
+		} else {
+			workDir, err = os.MkdirTemp("", "create_scaffold_test")
+			if err != nil {
+				Fail(err.Error())
+			}
+			workDirCleanup = func() {
+				_ = os.RemoveAll(workDir)
+			}
+		}
 		err = os.Chdir(workDir)
 		Expect(err).ToNot(HaveOccurred())
 	}
@@ -245,24 +256,6 @@ func filesIn(dir string) []string {
 	}
 
 	return res
-}
-
-type cleanUpFunc func()
-
-func resolveWorkingDirectory() (string, cleanUpFunc) {
-	workDir := os.Getenv("SCAFFOLD_DIR")
-	if len(workDir) > 0 {
-		return workDir, func() {}
-	} else {
-		var err error
-		workDir, err = os.MkdirTemp("", "create_scaffold_test")
-		if err != nil {
-			Fail(err.Error())
-		}
-		return workDir, func() {
-			os.RemoveAll(workDir)
-		}
-	}
 }
 
 type createScaffoldCmd struct {
