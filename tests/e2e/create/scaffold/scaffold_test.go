@@ -21,31 +21,20 @@ const (
 var _ = Describe("Create Scaffold Command", Ordered, func() {
 	var initialDir string
 	var workDir string
-	var workDirCleanup func()
 
 	setup := func() {
 		var err error
 		initialDir, err = os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
-		workDir := os.Getenv("SCAFFOLD_DIR")
-		if len(workDir) > 0 {
-			workDirCleanup = func() {}
-		} else {
-			workDir, err = os.MkdirTemp("", "create_scaffold_test")
-			if err != nil {
-				Fail(err.Error())
-			}
-			workDirCleanup = func() {
-				_ = os.RemoveAll(workDir)
-			}
-		}
+		workDir = resolveWorkingDirectory()
 		err = os.Chdir(workDir)
 		Expect(err).ToNot(HaveOccurred())
 	}
+
 	teardown := func() {
 		err := os.Chdir(initialDir)
 		Expect(err).ToNot(HaveOccurred())
-		workDirCleanup()
+		cleanupWorkingDirectory(workDir)
 		workDir = ""
 		initialDir = ""
 	}
@@ -248,7 +237,7 @@ func filesIn(dir string) []string {
 	entries, err := fs.ReadDir(dirFs, ".")
 	Expect(err).ToNot(HaveOccurred())
 
-	res := []string{}
+	var res []string
 	for _, ent := range entries {
 		if ent.Type().IsRegular() {
 			res = append(res, ent.Name())
@@ -256,6 +245,25 @@ func filesIn(dir string) []string {
 	}
 
 	return res
+}
+
+func resolveWorkingDirectory() string {
+	scaffoldDir := os.Getenv("SCAFFOLD_DIR")
+	if len(scaffoldDir) > 0 {
+		return scaffoldDir
+	}
+
+	scaffoldDir, err := os.MkdirTemp("", "create_scaffold_test")
+	if err != nil {
+		Fail(err.Error())
+	}
+	return scaffoldDir
+}
+
+func cleanupWorkingDirectory(path string) {
+	if len(os.Getenv("SCAFFOLD_DIR")) == 0 {
+		_ = os.RemoveAll(path)
+	}
 }
 
 type createScaffoldCmd struct {
@@ -275,23 +283,23 @@ func (cmd *createScaffoldCmd) execute() error {
 	args := []string{"create", "scaffold"}
 
 	if cmd.moduleName != "" {
-		args = append(args, "--module-name"+cmd.moduleName)
+		args = append(args, "--module-name="+cmd.moduleName)
 	}
 
 	if cmd.moduleVersion != "" {
-		args = append(args, "--module-version"+cmd.moduleVersion)
+		args = append(args, "--module-version="+cmd.moduleVersion)
 	}
 
 	if cmd.moduleChannel != "" {
-		args = append(args, "--module-channel"+cmd.moduleChannel)
+		args = append(args, "--module-channel="+cmd.moduleChannel)
 	}
 
 	if cmd.moduleConfigFileFlag != "" {
-		args = append(args, "--module-config"+cmd.moduleConfigFileFlag)
+		args = append(args, "--module-config="+cmd.moduleConfigFileFlag)
 	}
 
 	if cmd.genDefaultCRFlag != "" {
-		args = append(args, "--gen-default-cr"+cmd.genDefaultCRFlag)
+		args = append(args, "--gen-default-cr="+cmd.genDefaultCRFlag)
 	}
 
 	if cmd.genSecurityScannersConfigFlag != "" {
@@ -299,7 +307,7 @@ func (cmd *createScaffoldCmd) execute() error {
 	}
 
 	if cmd.genManifestFlag != "" {
-		args = append(args, "--gen-manifest"+cmd.genManifestFlag)
+		args = append(args, "--gen-manifest="+cmd.genManifestFlag)
 	}
 
 	if cmd.overwrite {
@@ -392,18 +400,18 @@ func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 // It is expected that the moduleConfig struct will be made public in the future when introducing more commands.
 // Once it is public, this struct should be removed.
 type moduleConfig struct {
-	Name              string                     `yaml:"name"             comment:"required, the name of the Module"`
-	Version           string                     `yaml:"version"          comment:"required, the version of the Module"`
-	Channel           string                     `yaml:"channel"          comment:"required, channel that should be used in the ModuleTemplate"`
-	ManifestPath      string                     `yaml:"manifest"         comment:"required, relative path or remote URL to the manifests"`
-	Mandatory         bool                       `yaml:"mandatory"        comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath     string                     `yaml:"defaultCR"        comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName      string                     `yaml:"resourceName"     comment:"optional, default={NAME}-{CHANNEL}, the name for the ModuleTemplate that will be created"`
-	Namespace         string                     `yaml:"namespace"        comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security          string                     `yaml:"security"         comment:"optional, name of the security scanners config file"`
-	Internal          bool                       `yaml:"internal"         comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
-	Beta              bool                       `yaml:"beta"             comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
-	Labels            map[string]string          `yaml:"labels"           comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations       map[string]string          `yaml:"annotations"      comment:"optional, additional annotations for the ModuleTemplate"`
+	Name              string                     `yaml:"name" comment:"required, the name of the Module"`
+	Version           string                     `yaml:"version" comment:"required, the version of the Module"`
+	Channel           string                     `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
+	ManifestPath      string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	Mandatory         bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
+	DefaultCRPath     string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	ResourceName      string                     `yaml:"resourceName" comment:"optional, default={NAME}-{CHANNEL}, the name for the ModuleTemplate that will be created"`
+	Namespace         string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Security          string                     `yaml:"security" comment:"optional, name of the security scanners config file"`
+	Internal          bool                       `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
+	Beta              bool                       `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
+	Labels            map[string]string          `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
+	Annotations       map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
 	CustomStateChecks []v1beta2.CustomStateCheck `yaml:"customStateCheck" comment:"optional, specifies custom state check for module"`
 }
