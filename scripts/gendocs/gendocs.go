@@ -89,7 +89,10 @@ func genMarkdown(cmd *cobra.Command, writer io.Writer) error {
 	printSeeAlso(buf, cmd)
 
 	_, err := buf.WriteTo(writer)
-	return fmt.Errorf("buffer write failed: %w", err)
+	if err != nil {
+		return fmt.Errorf("buffer write failed: %w", err)
+	}
+	return nil
 }
 
 func printShort(buf *bytes.Buffer, cmd *cobra.Command) {
