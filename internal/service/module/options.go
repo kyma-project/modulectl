@@ -18,7 +18,7 @@ type Options struct {
 	TemplateOutput       string
 	RegistryURL          string
 	RegistryCredSelector string
-	SecurityScanConfig   string
+	SecScannerConfig     string
 }
 
 func (opts Options) validate() error {
@@ -49,7 +49,7 @@ func (opts Options) validate() error {
 		return fmt.Errorf("%w:  opts.RegistryURL does not start with http(s)", ErrInvalidOption)
 	}
 
-	if opts.SecurityScanConfig == "" {
+	if opts.SecScannerConfig == "" {
 		return fmt.Errorf("%w:  opts.SecurityScanConfig must not be empty", ErrInvalidOption)
 	}
 

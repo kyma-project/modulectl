@@ -53,7 +53,5 @@ func parseFlags(flags *pflag.FlagSet, opts *module.Options) {
 	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault, templateOutputFlagUsage)
 	flags.StringVar(&opts.RegistryURL, RegistryURLFlagName, RegistryURLFlagDefault, registryURLFlagUsage)
 	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault, registryCredSelectorFlagUsage)
-	flags.StringVar(&opts.SecurityScanConfig, SecScannersConfigFlagName, SecScannersConfigFlagDefault, secScannersConfigFlagUsage)
-
-	flags.Lookup(SecScannersConfigFlagName).NoOptDefVal = SecScannersConfigFlagDefault
+	flags.StringVar(&opts.SecScannerConfig, SecScannersConfigFlagName, SecScannersConfigFlagDefault, secScannersConfigFlagUsage)
 }

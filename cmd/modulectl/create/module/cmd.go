@@ -39,7 +39,7 @@ func NewCmd(moduleService ModuleService) (*cobra.Command, error) {
 		Short:   short,
 		Long:    long,
 		Example: example,
-		Args:    cobra.NoArgs,
+		// Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return moduleService.CreateModule(opts)
 		},

@@ -68,7 +68,8 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 	svc := &scaffoldServiceStub{}
 	cmd, _ := scaffoldcmd.NewCmd(svc)
 
-	_ = cmd.Execute()
+	err := cmd.Execute()
+	require.NoError(t, err)
 
 	assert.Equal(t, moduleName, svc.opts.ModuleName)
 	assert.Equal(t, directory, svc.opts.Directory)
@@ -91,7 +92,8 @@ func Test_Execute_ParsesShortOptions(t *testing.T) {
 	svc := &scaffoldServiceStub{}
 	cmd, _ := scaffoldcmd.NewCmd(svc)
 
-	_ = cmd.Execute()
+	err := cmd.Execute()
+	require.NoError(t, err)
 
 	assert.Equal(t, directory, svc.opts.Directory)
 	assert.True(t, svc.opts.ModuleConfigFileOverwrite)
@@ -104,7 +106,8 @@ func Test_Execute_ParsesDefaults(t *testing.T) {
 	svc := &scaffoldServiceStub{}
 	cmd, _ := scaffoldcmd.NewCmd(svc)
 
-	_ = cmd.Execute()
+	err := cmd.Execute()
+	require.NoError(t, err)
 
 	assert.Equal(t, scaffoldcmd.ModuleNameFlagDefault, svc.opts.ModuleName)
 	assert.Equal(t, scaffoldcmd.DirectoryFlagDefault, svc.opts.Directory)

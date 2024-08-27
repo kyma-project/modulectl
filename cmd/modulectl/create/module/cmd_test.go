@@ -2,7 +2,9 @@ package module_test
 
 import (
 	"errors"
+	"math/rand"
 	"os"
+	"strconv"
 	"testing"
 
 	modulecmd "github.com/kyma-project/modulectl/cmd/modulectl/create/module"
@@ -43,19 +45,68 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
-	moduleConfigFile := "some random file path"
+	const maxNameLength int = 10
+
+	moduleConfigFile := getRandomName(maxNameLength)
+	credentials := getRandomName(maxNameLength)
+	gitRemote := getRandomName(maxNameLength)
+	insecure := "true"
+	templateOutput := getRandomName(maxNameLength)
+	registryURL := getRandomName(maxNameLength)
+	registryCredSelector := getRandomName(maxNameLength)
+	secScannerConfig := getRandomName(maxNameLength)
 
 	os.Args = []string{
 		"module",
 		"--module-config-file", moduleConfigFile,
+		"--credentials", credentials,
+		"--git-remote", gitRemote,
+		"--insecure", insecure,
+		"--output", templateOutput,
+		"--registry", registryURL,
+		"--registry-cred-selector", registryCredSelector,
+		"--sec-scanners-config", secScannerConfig,
 	}
 
 	svc := &moduleServiceStub{}
 	cmd, _ := modulecmd.NewCmd(svc)
 
-	cmd.Execute()
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	insecureFlagSet, err := strconv.ParseBool(insecure)
+	require.NoError(t, err)
 
 	assert.Equal(t, moduleConfigFile, svc.opts.ModuleConfigFile)
+	assert.Equal(t, credentials, svc.opts.Credentials)
+	assert.Equal(t, gitRemote, svc.opts.GitRemote)
+	assert.Equal(t, insecureFlagSet, svc.opts.Insecure)
+	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
+	assert.Equal(t, registryURL, svc.opts.RegistryURL)
+	assert.Equal(t, registryCredSelector, svc.opts.RegistryCredSelector)
+	assert.Equal(t, secScannerConfig, svc.opts.SecScannerConfig)
+}
+
+func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
+	const maxNameLength int = 10
+
+	credentials := getRandomName(maxNameLength)
+	templateOutput := getRandomName(maxNameLength)
+
+	os.Args = []string{
+		"module",
+		"-c", credentials,
+		"-o", templateOutput,
+	}
+
+	svc := &moduleServiceStub{}
+	cmd, _ := modulecmd.NewCmd(svc)
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, credentials, svc.opts.Credentials)
+	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
 }
 
 // ***************
@@ -79,4 +130,18 @@ var errSomeTestError = errors.New("some test error")
 
 func (s *moduleServiceErrorStub) CreateModule(_ modulesvc.Options) error {
 	return errSomeTestError
+}
+
+// ***************
+// Test Helpers
+// ***************
+
+const charset = "abcdefghijklmnopqrstuvwxyz"
+
+func getRandomName(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }
