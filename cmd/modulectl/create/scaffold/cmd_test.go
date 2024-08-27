@@ -129,7 +129,8 @@ func Test_Execute_ParsesNoOptDefaults(t *testing.T) {
 	svc := &scaffoldServiceStub{}
 	cmd, _ := scaffoldcmd.NewCmd(svc)
 
-	_ = cmd.Execute()
+	err := cmd.Execute()
+	require.NoError(t, err)
 
 	assert.Equal(t, scaffoldcmd.DefaultCRFlagNoOptDefault, svc.opts.DefaultCRFileName)
 	assert.Equal(t, scaffoldcmd.SecurityConfigFileFlagNoOptDefault, svc.opts.SecurityConfigFileName)

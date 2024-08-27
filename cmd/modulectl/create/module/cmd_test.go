@@ -109,6 +109,27 @@ func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
 }
 
+func Test_Execute_ModuleParsesDefaults(t *testing.T) {
+	os.Args = []string{
+		"module",
+	}
+
+	svc := &moduleServiceStub{}
+	cmd, _ := modulecmd.NewCmd(svc)
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	assert.Equal(t, modulecmd.ModuleConfigFileFlagDefault, svc.opts.ModuleConfigFile)
+	assert.Equal(t, modulecmd.CredentialsFlagDefault, svc.opts.Credentials)
+	assert.Equal(t, modulecmd.GitRemoteFlagDefault, svc.opts.GitRemote)
+	assert.Equal(t, modulecmd.InsecureFlagDefault, svc.opts.Insecure)
+	assert.Equal(t, modulecmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
+	assert.Equal(t, modulecmd.RegistryURLFlagDefault, svc.opts.RegistryURL)
+	assert.Equal(t, modulecmd.RegistryCredSelectorFlagDefault, svc.opts.RegistryCredSelector)
+	assert.Equal(t, modulecmd.SecScannersConfigFlagDefault, svc.opts.SecScannerConfig)
+}
+
 // ***************
 // Test Stubs
 // ***************
