@@ -25,14 +25,14 @@ const (
 	InsecureFlagDefault = false
 	insecureFlagUsage   = "Uses an insecure connection to access the registry"
 
-	OutputFlagName    = "output"
-	outputFlagShort   = "o"
-	OutputFlagDefault = "template.yaml"
-	outputFlagUsage   = `File to write the module template if the module is uploaded to a registry. (default "template.yaml")`
+	TemplateOutputFlagName    = "output"
+	templateOutputFlagShort   = "o"
+	TemplateOutputFlagDefault = "template.yaml"
+	templateOutputFlagUsage   = `File to write the module template if the module is uploaded to a registry. (default "template.yaml")`
 
-	RegistryFlagName    = "registry"
-	RegistryFlagDefault = ""
-	registryFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
+	RegistryURLFlagName    = "registry"
+	RegistryURLFlagDefault = ""
+	registryURLFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
 
 	RegistryCredSelectorFlagName    = "registry-cred-selector"
 	RegistryCredSelectorFlagDefault = ""
@@ -50,8 +50,8 @@ func parseFlags(flags *pflag.FlagSet, opts *module.Options) {
 	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault, credentialsFlagUsage)
 	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
-	flags.StringVarP(&opts.TemplateOutput, OutputFlagName, outputFlagShort, OutputFlagDefault, outputFlagUsage)
-	flags.StringVar(&opts.RegistryURL, RegistryFlagName, RegistryFlagDefault, registryFlagUsage)
+	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault, templateOutputFlagUsage)
+	flags.StringVar(&opts.RegistryURL, RegistryURLFlagName, RegistryURLFlagDefault, registryURLFlagUsage)
 	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault, registryCredSelectorFlagUsage)
 	flags.StringVar(&opts.SecurityScanConfig, SecScannersConfigFlagName, SecScannersConfigFlagDefault, secScannersConfigFlagUsage)
 

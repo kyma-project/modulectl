@@ -18,8 +18,8 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 		{name: module.CredentialsFlagName, value: module.CredentialsFlagDefault, expected: ""},
 		{name: module.GitRemoteFlagName, value: module.GitRemoteFlagDefault, expected: "origin"},
 		{name: module.InsecureFlagName, value: strconv.FormatBool(module.InsecureFlagDefault), expected: "false"},
-		{name: module.OutputFlagName, value: module.OutputFlagDefault, expected: "template.yaml"},
-		{name: module.RegistryFlagName, value: module.RegistryFlagDefault, expected: ""},
+		{name: module.TemplateOutputFlagName, value: module.TemplateOutputFlagDefault, expected: "template.yaml"},
+		{name: module.RegistryURLFlagName, value: module.RegistryURLFlagDefault, expected: ""},
 		{name: module.RegistryCredSelectorFlagName, value: module.RegistryCredSelectorFlagDefault, expected: ""},
 		{name: module.SecScannersConfigFlagName, value: module.SecScannersConfigFlagDefault, expected: "sec-scanners-config.yaml"},
 	}
