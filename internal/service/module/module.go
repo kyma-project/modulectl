@@ -1,7 +1,6 @@
 package module
 
-type ModuleConfigService interface {
-}
+type ModuleConfigService interface{}
 
 type Service struct {
 	moduleConfigService ModuleConfigService

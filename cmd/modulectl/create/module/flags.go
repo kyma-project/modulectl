@@ -1,8 +1,9 @@
 package module
 
 import (
-	"github.com/kyma-project/modulectl/internal/service/module"
 	"github.com/spf13/pflag"
+
+	"github.com/kyma-project/modulectl/internal/service/module"
 )
 
 const (
@@ -34,9 +35,11 @@ const (
 	RegistryURLFlagDefault = ""
 	registryURLFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
 
+	//nolint:gosec // Not hardcoded credentials, rather just flag name
 	RegistryCredSelectorFlagName    = "registry-cred-selector"
 	RegistryCredSelectorFlagDefault = ""
-	registryCredSelectorFlagUsage   = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
+	//nolint:gosec // Not hardcoded credentials, rather just flag name
+	registryCredSelectorFlagUsage = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
 
 	// TODO: Extract one level above
 	SecScannersConfigFlagName    = "sec-scanners-config"

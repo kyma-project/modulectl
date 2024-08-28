@@ -2,15 +2,16 @@ package module_test
 
 import (
 	"errors"
-	"math/rand"
 	"os"
 	"strconv"
 	"testing"
 
-	modulecmd "github.com/kyma-project/modulectl/cmd/modulectl/create/module"
-	modulesvc "github.com/kyma-project/modulectl/internal/service/module"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	modulecmd "github.com/kyma-project/modulectl/cmd/modulectl/create/module"
+	"github.com/kyma-project/modulectl/internal/common/utils"
+	"github.com/kyma-project/modulectl/internal/service/module"
 )
 
 func Test_NewCmd_ReturnsError_WhenModuleServiceIsNil(t *testing.T) {
@@ -45,16 +46,14 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
-	const maxNameLength int = 10
-
-	moduleConfigFile := getRandomName(maxNameLength)
-	credentials := getRandomName(maxNameLength)
-	gitRemote := getRandomName(maxNameLength)
+	moduleConfigFile := utils.GetRandomName()
+	credentials := utils.GetRandomName()
+	gitRemote := utils.GetRandomName()
 	insecure := "true"
-	templateOutput := getRandomName(maxNameLength)
-	registryURL := getRandomName(maxNameLength)
-	registryCredSelector := getRandomName(maxNameLength)
-	secScannerConfig := getRandomName(maxNameLength)
+	templateOutput := utils.GetRandomName()
+	registryURL := utils.GetRandomName()
+	registryCredSelector := utils.GetRandomName()
+	secScannerConfig := utils.GetRandomName()
 
 	os.Args = []string{
 		"module",
@@ -88,10 +87,8 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
-	const maxNameLength int = 10
-
-	credentials := getRandomName(maxNameLength)
-	templateOutput := getRandomName(maxNameLength)
+	credentials := utils.GetRandomName()
+	templateOutput := utils.GetRandomName()
 
 	os.Args = []string{
 		"module",
@@ -136,10 +133,10 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 
 type moduleServiceStub struct {
 	called bool
-	opts   modulesvc.Options
+	opts   module.Options
 }
 
-func (m *moduleServiceStub) CreateModule(opts modulesvc.Options) error {
+func (m *moduleServiceStub) CreateModule(opts module.Options) error {
 	m.called = true
 	m.opts = opts
 	return nil
@@ -149,20 +146,6 @@ type moduleServiceErrorStub struct{}
 
 var errSomeTestError = errors.New("some test error")
 
-func (s *moduleServiceErrorStub) CreateModule(_ modulesvc.Options) error {
+func (s *moduleServiceErrorStub) CreateModule(_ module.Options) error {
 	return errSomeTestError
-}
-
-// ***************
-// Test Helpers
-// ***************
-
-const charset = "abcdefghijklmnopqrstuvwxyz"
-
-func getRandomName(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
 }

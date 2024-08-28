@@ -1,14 +1,15 @@
 package module
 
 import (
-	_ "embed"
 	"fmt"
 
 	"github.com/spf13/cobra"
 
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/module"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
+
+	_ "embed"
 )
 
 //go:embed use.txt
@@ -29,7 +30,7 @@ type ModuleService interface {
 
 func NewCmd(moduleService ModuleService) (*cobra.Command, error) {
 	if moduleService == nil {
-		return nil, fmt.Errorf("%w: moduleService must not be nil", errors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: moduleService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	opts := module.Options{}
@@ -45,7 +46,7 @@ func NewCmd(moduleService ModuleService) (*cobra.Command, error) {
 		},
 	}
 
-	opts.Out = io.NewDefaultOut(cmd.OutOrStdout())
+	opts.Out = iotools.NewDefaultOut(cmd.OutOrStdout())
 	parseFlags(cmd.Flags(), &opts)
 
 	return cmd, nil

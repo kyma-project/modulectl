@@ -2,7 +2,6 @@ package scaffold_test
 
 import (
 	"errors"
-	"math/rand"
 	"os"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
+	"github.com/kyma-project/modulectl/internal/common/utils"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 )
 
@@ -45,14 +45,14 @@ func Test_Execute_ReturnsError_WhenServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesOptions(t *testing.T) {
-	directory := getRandomName()
-	moduleConfigFile := getRandomName()
-	manifestFile := getRandomName()
-	defaultCRFile := getRandomName()
-	securityConfigFile := getRandomName()
-	moduleName := getRandomName()
+	directory := utils.GetRandomName()
+	moduleConfigFile := utils.GetRandomName()
+	manifestFile := utils.GetRandomName()
+	defaultCRFile := utils.GetRandomName()
+	securityConfigFile := utils.GetRandomName()
+	moduleName := utils.GetRandomName()
 	moduleVersion := "1.1.1"
-	moduleChannel := getRandomName()
+	moduleChannel := utils.GetRandomName()
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
@@ -83,7 +83,7 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesShortOptions(t *testing.T) {
-	directory := getRandomName()
+	directory := utils.GetRandomName()
 	os.Args = []string{
 		"scaffold",
 		"-d", directory,
@@ -157,21 +157,4 @@ var errSomeTestError = errors.New("some test error")
 
 func (s *scaffoldServiceErrorStub) CreateScaffold(_ scaffold.Options) error {
 	return errSomeTestError
-}
-
-// ***************
-// Test Helpers
-// ***************
-
-const (
-	charset = "abcdefghijklmnopqrstuvwxyz"
-	length  = 10
-)
-
-func getRandomName() string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))] //nolint:gosec // this is not a security-sensitive context
-	}
-	return string(b)
 }

@@ -5,12 +5,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 // Options defines available options for the create module command
 type Options struct {
-	Out                  io.Out // TODO: Can be extracted one level above
+	Out                  iotools.Out // TODO: Can be extracted one level above
 	ModuleConfigFile     string
 	Credentials          string
 	GitRemote            string
