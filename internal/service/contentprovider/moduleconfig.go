@@ -3,8 +3,6 @@ package contentprovider
 import (
 	"fmt"
 
-	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
-
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
@@ -71,18 +69,17 @@ func (s *ModuleConfig) validateArgs(args types.KeyValueArgs) error {
 }
 
 type moduleConfig struct {
-	Name              string                     `yaml:"name" comment:"required, the name of the Module"`
-	Version           string                     `yaml:"version" comment:"required, the version of the Module"`
-	Channel           string                     `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
-	ManifestPath      string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	Mandatory         bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath     string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName      string                     `yaml:"resourceName" comment:"optional, default={NAME}-{CHANNEL}, the name for the ModuleTemplate that will be created"`
-	Namespace         string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security          string                     `yaml:"security" comment:"optional, name of the security scanners config file"`
-	Internal          bool                       `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
-	Beta              bool                       `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
-	Labels            map[string]string          `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations       map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	CustomStateChecks []v1beta2.CustomStateCheck `yaml:"customStateCheck" comment:"optional, specifies custom state check for module"`
+	Name          string            `yaml:"name" comment:"required, the name of the Module"`
+	Version       string            `yaml:"version" comment:"required, the version of the Module"`
+	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
+	ManifestPath  string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
+	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	ResourceName  string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
+	Namespace     string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Security      string            `yaml:"security" comment:"optional, name of the security scanners config file"`
+	Internal      bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
+	Beta          bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
+	Labels        map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
+	Annotations   map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
 }
