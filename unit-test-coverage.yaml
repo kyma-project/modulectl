@@ -1,5 +1,5 @@
 packages:
-  cmd/modulectl/create/scaffold: 100
+  cmd/modulectl/scaffold: 100
   internal/service/scaffold: 92
   internal/service/contentprovider: 100
   internal/service/filegenerator: 100
