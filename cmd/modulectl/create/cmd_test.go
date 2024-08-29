@@ -1,4 +1,4 @@
-package module_test
+package create_test
 
 import (
 	"errors"
@@ -9,27 +9,27 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	modulecmd "github.com/kyma-project/modulectl/cmd/modulectl/create/module"
+	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
-	"github.com/kyma-project/modulectl/internal/service/module"
+	"github.com/kyma-project/modulectl/internal/service/create"
 )
 
 func Test_NewCmd_ReturnsError_WhenModuleServiceIsNil(t *testing.T) {
-	_, err := modulecmd.NewCmd(nil)
+	_, err := createcmd.NewCmd(nil)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "moduleService")
+	assert.Contains(t, err.Error(), "createService")
 }
 
 func Test_NewCmd_Succeeds(t *testing.T) {
-	_, err := modulecmd.NewCmd(&moduleServiceStub{})
+	_, err := createcmd.NewCmd(&moduleServiceStub{})
 
 	require.NoError(t, err)
 }
 
 func Test_Execute_CallsModuleService(t *testing.T) {
 	svc := &moduleServiceStub{}
-	cmd, _ := modulecmd.NewCmd(svc)
+	cmd, _ := createcmd.NewCmd(svc)
 
 	err := cmd.Execute()
 
@@ -38,7 +38,7 @@ func Test_Execute_CallsModuleService(t *testing.T) {
 }
 
 func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
-	cmd, _ := modulecmd.NewCmd(&moduleServiceErrorStub{})
+	cmd, _ := createcmd.NewCmd(&moduleServiceErrorStub{})
 
 	err := cmd.Execute()
 
@@ -56,7 +56,7 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	secScannerConfig := testutils.GetRandomName(10)
 
 	os.Args = []string{
-		"module",
+		"create",
 		"--module-config-file", moduleConfigFile,
 		"--credentials", credentials,
 		"--git-remote", gitRemote,
@@ -68,7 +68,7 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	}
 
 	svc := &moduleServiceStub{}
-	cmd, _ := modulecmd.NewCmd(svc)
+	cmd, _ := createcmd.NewCmd(svc)
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -91,13 +91,13 @@ func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 	templateOutput := testutils.GetRandomName(10)
 
 	os.Args = []string{
-		"module",
+		"create",
 		"-c", credentials,
 		"-o", templateOutput,
 	}
 
 	svc := &moduleServiceStub{}
-	cmd, _ := modulecmd.NewCmd(svc)
+	cmd, _ := createcmd.NewCmd(svc)
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -108,33 +108,33 @@ func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 
 func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 	os.Args = []string{
-		"module",
+		"create",
 	}
 
 	svc := &moduleServiceStub{}
-	cmd, _ := modulecmd.NewCmd(svc)
+	cmd, _ := createcmd.NewCmd(svc)
 
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, modulecmd.ModuleConfigFileFlagDefault, svc.opts.ModuleConfigFile)
-	assert.Equal(t, modulecmd.CredentialsFlagDefault, svc.opts.Credentials)
-	assert.Equal(t, modulecmd.GitRemoteFlagDefault, svc.opts.GitRemote)
-	assert.Equal(t, modulecmd.InsecureFlagDefault, svc.opts.Insecure)
-	assert.Equal(t, modulecmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
-	assert.Equal(t, modulecmd.RegistryURLFlagDefault, svc.opts.RegistryURL)
-	assert.Equal(t, modulecmd.RegistryCredSelectorFlagDefault, svc.opts.RegistryCredSelector)
-	assert.Equal(t, modulecmd.SecScannersConfigFlagDefault, svc.opts.SecScannerConfig)
+	assert.Equal(t, createcmd.ModuleConfigFileFlagDefault, svc.opts.ModuleConfigFile)
+	assert.Equal(t, createcmd.CredentialsFlagDefault, svc.opts.Credentials)
+	assert.Equal(t, createcmd.GitRemoteFlagDefault, svc.opts.GitRemote)
+	assert.Equal(t, createcmd.InsecureFlagDefault, svc.opts.Insecure)
+	assert.Equal(t, createcmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
+	assert.Equal(t, createcmd.RegistryURLFlagDefault, svc.opts.RegistryURL)
+	assert.Equal(t, createcmd.RegistryCredSelectorFlagDefault, svc.opts.RegistryCredSelector)
+	assert.Equal(t, createcmd.SecScannersConfigFlagDefault, svc.opts.SecScannerConfig)
 }
 
 // Test Stubs
 
 type moduleServiceStub struct {
 	called bool
-	opts   module.Options
+	opts   create.Options
 }
 
-func (m *moduleServiceStub) CreateModule(opts module.Options) error {
+func (m *moduleServiceStub) CreateModule(opts create.Options) error {
 	m.called = true
 	m.opts = opts
 	return nil
@@ -144,6 +144,6 @@ type moduleServiceErrorStub struct{}
 
 var errSomeTestError = errors.New("some test error")
 
-func (s *moduleServiceErrorStub) CreateModule(_ module.Options) error {
+func (s *moduleServiceErrorStub) CreateModule(_ create.Options) error {
 	return errSomeTestError
 }

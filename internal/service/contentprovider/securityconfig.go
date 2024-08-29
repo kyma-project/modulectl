@@ -60,7 +60,7 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) securityScanConfig
 }
 
 type securityScanConfig struct {
-	ModuleName  string               `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
+	ModuleName  string               `json:"create-name" yaml:"create-name" comment:"string, name of your create"`
 	Protecode   []string             `json:"protecode" yaml:"protecode" comment:"list, includes the images which must be scanned by the Protecode scanner (aka. Black Duck Binary Analysis)"`
 	WhiteSource whiteSourceSecConfig `json:"whitesource" yaml:"whitesource" comment:"whitesource (aka. Mend) security scanner specific configuration"`
 	DevBranch   string               `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`

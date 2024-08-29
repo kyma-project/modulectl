@@ -1,9 +1,9 @@
-package module
+package create
 
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/kyma-project/modulectl/internal/service/module"
+	"github.com/kyma-project/modulectl/internal/service/create"
 )
 
 const (
@@ -44,7 +44,7 @@ const (
 	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration. (default "sec-scanners-config.yaml")`
 )
 
-func parseFlags(flags *pflag.FlagSet, opts *module.Options) {
+func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 	flags.StringVar(&opts.ModuleConfigFile, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
 	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault, credentialsFlagUsage)
 	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
+	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 )
 
 func Test_ScaffoldFlagsDefaults(t *testing.T) {

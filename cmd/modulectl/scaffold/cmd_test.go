@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
+	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 )

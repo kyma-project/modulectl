@@ -1,4 +1,4 @@
-package module
+package create
 
 type ModuleConfigService interface{}
 

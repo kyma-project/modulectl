@@ -54,10 +54,10 @@ linters-settings:
      alias: iotools
    - pkg: github.com/kyma-project/modulectl/internal/common/errors
      alias: commonerrors
-   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold
+   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/scaffold
      alias: scaffoldcmd
-   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create/module
-     alias: modulecmd
+   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
+     alias: createcmd
    - pkg: github.com/kyma-project/modulectl/internal/common/utils/test
      alias: testutils
  ireturn:

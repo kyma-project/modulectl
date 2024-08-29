@@ -51,7 +51,7 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenModuleNameArgIsEmpty
 func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 	svc, _ := contentprovider.NewSecurityConfig(&objectToYAMLConverterStub{})
 
-	result, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: "module-name"})
+	result, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: "create-name"})
 
 	require.NoError(t, err)
 	assert.Equal(t, convertedContent, result)

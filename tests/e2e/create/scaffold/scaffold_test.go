@@ -56,20 +56,20 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 			By("And the manifest file is generated")
 			Expect(filesIn(workDir)).Should(ContainElement("manifest.yaml"))
 
-			By("And the module config file is generated")
-			Expect(filesIn(workDir)).Should(ContainElement("scaffold-module-config.yaml"))
+			By("And the create config file is generated")
+			Expect(filesIn(workDir)).Should(ContainElement("scaffold-create-config.yaml"))
 
-			By("And the module config contains expected entries")
-			actualModConf := moduleConfigFromFile(workDir, "scaffold-module-config.yaml")
+			By("And the create config contains expected entries")
+			actualModConf := moduleConfigFromFile(workDir, "scaffold-create-config.yaml")
 			expectedModConf := (&moduleConfigBuilder{}).defaults().get()
 			Expect(actualModConf).To(BeEquivalentTo(expectedModConf))
 		})
 	})
 
-	Context("Given a directory with an existing module configuration file", func() {
+	Context("Given a directory with an existing create configuration file", func() {
 		BeforeAll(func() {
 			setup()
-			Expect(createMarkerFile("scaffold-module-config.yaml")).To(Succeed())
+			Expect(createMarkerFile("scaffold-create-config.yaml")).To(Succeed())
 		})
 		AfterAll(func() { teardown() })
 
@@ -80,19 +80,19 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("module config file already exists"))
+			Expect(err.Error()).Should(ContainSubstring("create config file already exists"))
 
 			By("And no files should be generated")
 			Expect(filesIn(workDir)).Should(HaveLen(1))
-			Expect(filesIn(workDir)).Should(ContainElement("scaffold-module-config.yaml"))
-			Expect(getMarkerFileData("scaffold-module-config.yaml")).Should(Equal(markerFileData))
+			Expect(filesIn(workDir)).Should(ContainElement("scaffold-create-config.yaml"))
+			Expect(getMarkerFileData("scaffold-create-config.yaml")).Should(Equal(markerFileData))
 		})
 	})
 
-	Context("Given a directory with an existing module configuration file", func() {
+	Context("Given a directory with an existing create configuration file", func() {
 		BeforeAll(func() {
 			setup()
-			Expect(createMarkerFile("scaffold-module-config.yaml")).To(Succeed())
+			Expect(createMarkerFile("scaffold-create-config.yaml")).To(Succeed())
 		})
 		AfterAll(func() { teardown() })
 
@@ -112,11 +112,11 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 			By("And the manifest file is generated")
 			Expect(filesIn(workDir)).Should(ContainElement("manifest.yaml"))
 
-			By("And the module config file is generated")
-			Expect(filesIn(workDir)).Should(ContainElement("scaffold-module-config.yaml"))
+			By("And the create config file is generated")
+			Expect(filesIn(workDir)).Should(ContainElement("scaffold-create-config.yaml"))
 
-			By("And the module config contains expected entries")
-			actualModConf := moduleConfigFromFile(workDir, "scaffold-module-config.yaml")
+			By("And the create config contains expected entries")
+			actualModConf := moduleConfigFromFile(workDir, "scaffold-create-config.yaml")
 			expectedModConf := (&moduleConfigBuilder{}).defaults().get()
 			Expect(actualModConf).To(BeEquivalentTo(expectedModConf))
 		})
@@ -129,10 +129,10 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 		var cmd createScaffoldCmd
 		It("When `modulectl create scaffold` command args override defaults", func() {
 			cmd = createScaffoldCmd{
-				moduleName:                    "github.com/custom/module",
+				moduleName:                    "github.com/custom/create",
 				moduleVersion:                 "3.2.1",
 				moduleChannel:                 "custom",
-				moduleConfigFileFlag:          "custom-module-config.yaml",
+				moduleConfigFileFlag:          "custom-create-config.yaml",
 				genManifestFlag:               "custom-manifest.yaml",
 				genDefaultCRFlag:              "custom-default-cr.yaml",
 				genSecurityScannersConfigFlag: "custom-security-scanners-config.yaml",
@@ -153,11 +153,11 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 			By("And the security-scanners-config file is generated")
 			Expect(filesIn(workDir)).Should(ContainElement("custom-security-scanners-config.yaml"))
 
-			By("And the module config file is generated")
-			Expect(filesIn(workDir)).Should(ContainElement("custom-module-config.yaml"))
+			By("And the create config file is generated")
+			Expect(filesIn(workDir)).Should(ContainElement("custom-create-config.yaml"))
 
-			By("And the module config contains expected entries")
-			actualModConf := moduleConfigFromFile(workDir, "custom-module-config.yaml")
+			By("And the create config contains expected entries")
+			actualModConf := moduleConfigFromFile(workDir, "custom-create-config.yaml")
 			expectedModConf := cmd.toConfigBuilder().get()
 			Expect(actualModConf).To(BeEquivalentTo(expectedModConf))
 		})
@@ -195,11 +195,11 @@ var _ = Describe("Create Scaffold Command", Ordered, func() {
 			By("And the security-scanners-config file is reused (not generated)")
 			Expect(getMarkerFileData("custom-security-scanners-config.yaml")).Should(Equal(markerFileData))
 
-			By("And the module config file is generated")
-			Expect(filesIn(workDir)).Should(ContainElement("scaffold-module-config.yaml"))
+			By("And the create config file is generated")
+			Expect(filesIn(workDir)).Should(ContainElement("scaffold-create-config.yaml"))
 
-			By("And module config contains expected entries")
-			actualModConf := moduleConfigFromFile(workDir, "scaffold-module-config.yaml")
+			By("And create config contains expected entries")
+			actualModConf := moduleConfigFromFile(workDir, "scaffold-create-config.yaml")
 			expectedModConf := cmd.toConfigBuilder().get()
 			Expect(actualModConf).To(BeEquivalentTo(expectedModConf))
 		})
@@ -282,19 +282,19 @@ func (cmd *createScaffoldCmd) execute() error {
 	args := []string{"create", "scaffold"}
 
 	if cmd.moduleName != "" {
-		args = append(args, "--module-name="+cmd.moduleName)
+		args = append(args, "--create-name="+cmd.moduleName)
 	}
 
 	if cmd.moduleVersion != "" {
-		args = append(args, "--module-version="+cmd.moduleVersion)
+		args = append(args, "--create-version="+cmd.moduleVersion)
 	}
 
 	if cmd.moduleChannel != "" {
-		args = append(args, "--module-channel="+cmd.moduleChannel)
+		args = append(args, "--create-channel="+cmd.moduleChannel)
 	}
 
 	if cmd.moduleConfigFileFlag != "" {
-		args = append(args, "--module-config="+cmd.moduleConfigFileFlag)
+		args = append(args, "--create-config="+cmd.moduleConfigFileFlag)
 	}
 
 	if cmd.genDefaultCRFlag != "" {
@@ -345,7 +345,7 @@ func (cmd *createScaffoldCmd) toConfigBuilder() *moduleConfigBuilder {
 	return res
 }
 
-// moduleConfigBuilder is used to simplify module.Config creation for testing purposes
+// moduleConfigBuilder is used to simplify create.Config creation for testing purposes
 type moduleConfigBuilder struct {
 	moduleConfig
 }
@@ -387,7 +387,7 @@ func (mcb *moduleConfigBuilder) withSecurityScannersPath(val string) *moduleConf
 
 func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 	return mcb.
-		withName("kyma-project.io/module/mymodule").
+		withName("kyma-project.io/create/mymodule").
 		withVersion("0.0.1").
 		withChannel("regular").
 		withManifestPath("manifest.yaml")
@@ -402,8 +402,8 @@ type moduleConfig struct {
 	Version       string            `yaml:"version" comment:"required, the version of the Module"`
 	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
 	ManifestPath  string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the create is mandatory to be installed on all clusters"`
+	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the create"`
 	ResourceName  string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
 	Namespace     string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
 	Security      string            `yaml:"security" comment:"optional, name of the security scanners config file"`

@@ -1,1 +1,1 @@
-Creates artifacts related to module development
+Creates a module bundled as an OCI artifact
