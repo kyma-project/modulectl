@@ -10,7 +10,7 @@ import (
 
 // Options defines available options for the create module command
 type Options struct {
-	Out                  iotools.Out // TODO: Can be extracted one level above
+	Out                  iotools.Out
 	ModuleConfigFile     string
 	Credentials          string
 	GitRemote            string

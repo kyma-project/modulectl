@@ -8,7 +8,6 @@ linters:
         - exportloopref # deprecated (since v1.60.2), replaced by copyloopvar
         - forbidigo # temparily disabled
         - godot # not needed
-        - godox # disabled for this project
         - gomnd # deprecated (since v1.58.0), renamed to mnd
         - lll
         - nlreturn # too strict and mostly code is not more readable
@@ -71,6 +70,7 @@ linters-settings:
         ignore-type-assert-ok: true
         ignore-map-index-ok: true
         ignore-chan-recv-ok: true
+    godox: # `TODO`, `BUG`, `FIXME` are the default, no need to mention again
 issues:
     exclude-rules:
         - path: "_test\\.go"
