@@ -104,9 +104,7 @@ func Test_GenerateFile_Succeeds(t *testing.T) {
 	require.NoError(t, result)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type fileExistsStub struct{}
 

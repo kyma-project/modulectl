@@ -65,9 +65,7 @@ func Test_GenerateFile_Succeeds_WhenFileIsGenerated(t *testing.T) {
 	assert.Contains(t, out.sink[0], "Generated a blank test-kind file:")
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type fgTestOut struct {
 	sink []string

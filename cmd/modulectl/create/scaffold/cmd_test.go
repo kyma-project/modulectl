@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/create/scaffold"
-	"github.com/kyma-project/modulectl/internal/common/utils"
+	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 )
 
@@ -45,14 +45,14 @@ func Test_Execute_ReturnsError_WhenServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesOptions(t *testing.T) {
-	directory := utils.GetRandomName()
-	moduleConfigFile := utils.GetRandomName()
-	manifestFile := utils.GetRandomName()
-	defaultCRFile := utils.GetRandomName()
-	securityConfigFile := utils.GetRandomName()
-	moduleName := utils.GetRandomName()
+	directory := testutils.GetRandomName(10)
+	moduleConfigFile := testutils.GetRandomName(10)
+	manifestFile := testutils.GetRandomName(10)
+	defaultCRFile := testutils.GetRandomName(10)
+	securityConfigFile := testutils.GetRandomName(10)
+	moduleName := testutils.GetRandomName(10)
 	moduleVersion := "1.1.1"
-	moduleChannel := utils.GetRandomName()
+	moduleChannel := testutils.GetRandomName(10)
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
@@ -83,7 +83,7 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesShortOptions(t *testing.T) {
-	directory := utils.GetRandomName()
+	directory := testutils.GetRandomName(10)
 	os.Args = []string{
 		"scaffold",
 		"-d", directory,
@@ -136,9 +136,7 @@ func Test_Execute_ParsesNoOptDefaults(t *testing.T) {
 	assert.Equal(t, scaffoldcmd.SecurityConfigFileFlagNoOptDefault, svc.opts.SecurityConfigFileName)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type scaffoldServiceStub struct {
 	called bool

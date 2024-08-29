@@ -70,9 +70,7 @@ func Test_GenerateFile_Succeeds_WhenFileIsGenerated(t *testing.T) {
 	require.NoError(t, result)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type rfgTestOut struct {
 	sink []string

@@ -134,9 +134,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 	assert.Equal(t, mcConvertedContent, result)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type mcObjectToYAMLConverterStub struct{}
 

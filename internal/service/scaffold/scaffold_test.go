@@ -3,7 +3,6 @@ package scaffold_test
 import (
 	"errors"
 	"io"
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,6 +10,7 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
+	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
@@ -69,7 +69,7 @@ func Test_CreateScaffold_ReturnsError_WhenOutIsNil(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.Out")
 }
 
@@ -83,7 +83,7 @@ func Test_CreateScaffold_ReturnsError_WhenDirectoryIsEmpty(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.Directory")
 }
 
@@ -97,7 +97,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) 
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleConfigFileName")
 }
 
@@ -111,7 +111,7 @@ func Test_CreateScaffold_ReturnsError_WhenManifestFileIsEmpty(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ManifestFileName")
 }
 
@@ -125,7 +125,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleNameIsEmpty(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleName")
 }
 
@@ -135,11 +135,11 @@ func Test_CreateScaffold_ReturnsError_WhenModuleNameIsExceedingLength(t *testing
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleName(getRandomName(256)).build()
+	opts := newScaffoldOptionsBuilder().withModuleName(testutils.GetRandomName(256)).build()
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleName")
 	assert.Contains(t, result.Error(), "length")
 }
@@ -150,11 +150,11 @@ func Test_CreateScaffold_ReturnsError_WhenModuleNameIsNotMatchingPattern(t *test
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleName(getRandomName(10)).build()
+	opts := newScaffoldOptionsBuilder().withModuleName(testutils.GetRandomName(10)).build()
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleName")
 	assert.Contains(t, result.Error(), "pattern")
 }
@@ -169,7 +169,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleVersionIsEmpty(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleVersion")
 }
 
@@ -179,11 +179,11 @@ func Test_CreateScaffold_ReturnsError_WhenModuleVersionIsInvalid(t *testing.T) {
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleVersion(getRandomName(10)).build()
+	opts := newScaffoldOptionsBuilder().withModuleVersion(testutils.GetRandomName(10)).build()
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleVersion")
 	assert.Contains(t, result.Error(), "failed to parse")
 }
@@ -198,7 +198,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelIsEmpty(t *testing.T) {
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleChannel")
 }
 
@@ -208,11 +208,11 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelIsExceedingLength(t *test
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleChannel(getRandomName(33)).build()
+	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.GetRandomName(33)).build()
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleChannel")
 	assert.Contains(t, result.Error(), "length")
 }
@@ -223,11 +223,11 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelFallsBelowLength(t *testi
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleChannel(getRandomName(2)).build()
+	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.GetRandomName(2)).build()
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleChannel")
 	assert.Contains(t, result.Error(), "length")
 }
@@ -242,7 +242,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelNotMatchingCharset(t *tes
 
 	result := svc.CreateScaffold(opts)
 
-	require.ErrorIs(t, result, scaffold.ErrInvalidOption)
+	require.ErrorIs(t, result, commonerrors.ErrInvalidOption)
 	assert.Contains(t, result.Error(), "opts.ModuleChannel")
 	assert.Contains(t, result.Error(), "pattern")
 }
@@ -387,9 +387,8 @@ func Test_CreateScaffold_Succeeds(t *testing.T) {
 	require.NoError(t, result)
 }
 
-// ***************
 // Test Stubs
-// ***************
+
 var (
 	errSomeFileGeneratorError = errors.New("some file generator error")
 	errSomeUnexpectedError    = errors.New("if you see this error, something went wrong in the test setup")
@@ -439,9 +438,7 @@ func (*fileGeneratorStub) GenerateFile(_ iotools.Out, _ string, _ types.KeyValue
 	return nil
 }
 
-// ***************
 // Test Options Builder
-// ***************
 
 type scaffoldOptionsBuilder struct {
 	options scaffold.Options
@@ -517,18 +514,4 @@ func (b *scaffoldOptionsBuilder) withModuleVersion(moduleVersion string) *scaffo
 func (b *scaffoldOptionsBuilder) withModuleChannel(moduleChannel string) *scaffoldOptionsBuilder {
 	b.options.ModuleChannel = moduleChannel
 	return b
-}
-
-// ***************
-// Test Helpers
-// ***************
-
-const charset = "abcdefghijklmnopqrstuvwxyz"
-
-func getRandomName(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))] //nolint:gosec // no need for cryptographically secure random number in tests
-	}
-	return string(b)
 }

@@ -57,9 +57,7 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T)
 	assert.Equal(t, convertedContent, result)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type objectToYAMLConverterStub struct{}
 

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	modulecmd "github.com/kyma-project/modulectl/cmd/modulectl/create/module"
-	"github.com/kyma-project/modulectl/internal/common/utils"
+	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/module"
 )
 
@@ -46,14 +46,14 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
-	moduleConfigFile := utils.GetRandomName()
-	credentials := utils.GetRandomName()
-	gitRemote := utils.GetRandomName()
+	moduleConfigFile := testutils.GetRandomName(10)
+	credentials := testutils.GetRandomName(10)
+	gitRemote := testutils.GetRandomName(10)
 	insecure := "true"
-	templateOutput := utils.GetRandomName()
-	registryURL := utils.GetRandomName()
-	registryCredSelector := utils.GetRandomName()
-	secScannerConfig := utils.GetRandomName()
+	templateOutput := testutils.GetRandomName(10)
+	registryURL := testutils.GetRandomName(10)
+	registryCredSelector := testutils.GetRandomName(10)
+	secScannerConfig := testutils.GetRandomName(10)
 
 	os.Args = []string{
 		"module",
@@ -87,8 +87,8 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
-	credentials := utils.GetRandomName()
-	templateOutput := utils.GetRandomName()
+	credentials := testutils.GetRandomName(10)
+	templateOutput := testutils.GetRandomName(10)
 
 	os.Args = []string{
 		"module",
@@ -127,9 +127,7 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 	assert.Equal(t, modulecmd.SecScannersConfigFlagDefault, svc.opts.SecScannerConfig)
 }
 
-// ***************
 // Test Stubs
-// ***************
 
 type moduleServiceStub struct {
 	called bool
