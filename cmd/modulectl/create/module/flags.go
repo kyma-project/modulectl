@@ -7,11 +7,9 @@ import (
 )
 
 const (
-	// TODO: Can be extracted to one higher level
 	ModuleConfigFileFlagName    = "module-config-file"
 	ModuleConfigFileFlagDefault = "module-config.yaml"
 	moduleConfigFileFlagUsage   = "Specifies the module configuration file"
-	// ====================================
 
 	CredentialsFlagName    = "credentials"
 	credentialsFlagShort   = "c"
@@ -41,11 +39,9 @@ const (
 	//nolint:gosec // Not hardcoded credentials, rather just flag name
 	registryCredSelectorFlagUsage = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
 
-	// TODO: Extract one level above
 	SecScannersConfigFlagName    = "sec-scanners-config"
 	SecScannersConfigFlagDefault = "sec-scanners-config.yaml"
 	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration. (default "sec-scanners-config.yaml")`
-	// =============================
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *module.Options) {
