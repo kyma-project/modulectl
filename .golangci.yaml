@@ -77,7 +77,6 @@ linters-settings:
       - TODO
       - FIXME
       - BUG
-      - NOTE
       - OPTIMIZE  # marks code that should be optimized before merging
       - HACK      # marks hack-around that should be removed before merging
 issues:
