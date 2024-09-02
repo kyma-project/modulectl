@@ -21,7 +21,7 @@ type Options struct {
 	SecScannerConfig     string
 }
 
-func (opts Options) validate() error {
+func (opts Options) Validate() error {
 	if opts.Out == nil {
 		return fmt.Errorf("%w: opts.Out must not be nil", commonerrors.ErrInvalidOption)
 	}
@@ -30,7 +30,7 @@ func (opts Options) validate() error {
 		return fmt.Errorf("%w:  opts.ModuleConfigFile must not be empty", commonerrors.ErrInvalidOption)
 	}
 
-	matched, err := regexp.MatchString("/(.+):(.+)/g", opts.Credentials)
+	matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
 	if err != nil {
 		return fmt.Errorf("%w: opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
 	} else if !matched {

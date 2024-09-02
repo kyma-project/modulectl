@@ -13,7 +13,7 @@ func NewService(moduleConfigService ModuleConfigService) (*Service, error) {
 }
 
 func (s *Service) CreateModule(opts Options) error {
-	if err := opts.validate(); err != nil {
+	if err := opts.Validate(); err != nil {
 		return err
 	}
 	return nil
