@@ -2,6 +2,7 @@ package create_test
 
 import (
 	"errors"
+	"github.com/kyma-project/modulectl/internal/testutils"
 	"os"
 	"strconv"
 	"testing"
@@ -10,7 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
-	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/create"
 )
 
@@ -46,14 +46,14 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
-	moduleConfigFile := testutils.GetRandomName(10)
-	credentials := testutils.GetRandomName(10)
-	gitRemote := testutils.GetRandomName(10)
+	moduleConfigFile := testutils.RandomName(10)
+	credentials := testutils.RandomName(10)
+	gitRemote := testutils.RandomName(10)
 	insecure := "true"
-	templateOutput := testutils.GetRandomName(10)
-	registryURL := testutils.GetRandomName(10)
-	registryCredSelector := testutils.GetRandomName(10)
-	secScannerConfig := testutils.GetRandomName(10)
+	templateOutput := testutils.RandomName(10)
+	registryURL := testutils.RandomName(10)
+	registryCredSelector := testutils.RandomName(10)
+	secScannerConfig := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
@@ -87,8 +87,8 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
-	credentials := testutils.GetRandomName(10)
-	templateOutput := testutils.GetRandomName(10)
+	credentials := testutils.RandomName(10)
+	templateOutput := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",

@@ -2,6 +2,7 @@ package scaffold_test
 
 import (
 	"errors"
+	"github.com/kyma-project/modulectl/internal/testutils"
 	"os"
 	"testing"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
-	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 )
 
@@ -45,14 +45,14 @@ func Test_Execute_ReturnsError_WhenServiceReturnsError(t *testing.T) {
 }
 
 func Test_Execute_ParsesOptions(t *testing.T) {
-	directory := testutils.GetRandomName(10)
-	moduleConfigFile := testutils.GetRandomName(10)
-	manifestFile := testutils.GetRandomName(10)
-	defaultCRFile := testutils.GetRandomName(10)
-	securityConfigFile := testutils.GetRandomName(10)
-	moduleName := testutils.GetRandomName(10)
+	directory := testutils.RandomName(10)
+	moduleConfigFile := testutils.RandomName(10)
+	manifestFile := testutils.RandomName(10)
+	defaultCRFile := testutils.RandomName(10)
+	securityConfigFile := testutils.RandomName(10)
+	moduleName := testutils.RandomName(10)
 	moduleVersion := "1.1.1"
-	moduleChannel := testutils.GetRandomName(10)
+	moduleChannel := testutils.RandomName(10)
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
@@ -83,7 +83,7 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesShortOptions(t *testing.T) {
-	directory := testutils.GetRandomName(10)
+	directory := testutils.RandomName(10)
 	os.Args = []string{
 		"scaffold",
 		"-d", directory,

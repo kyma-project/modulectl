@@ -2,6 +2,7 @@ package scaffold_test
 
 import (
 	"errors"
+	"github.com/kyma-project/modulectl/internal/testutils"
 	"io"
 	"testing"
 
@@ -10,7 +11,6 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	testutils "github.com/kyma-project/modulectl/internal/common/utils/test"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
@@ -135,7 +135,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleNameIsExceedingLength(t *testing
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleName(testutils.GetRandomName(256)).build()
+	opts := newScaffoldOptionsBuilder().withModuleName(testutils.RandomName(256)).build()
 
 	result := svc.CreateScaffold(opts)
 
@@ -150,7 +150,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleNameIsNotMatchingPattern(t *test
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleName(testutils.GetRandomName(10)).build()
+	opts := newScaffoldOptionsBuilder().withModuleName(testutils.RandomName(10)).build()
 
 	result := svc.CreateScaffold(opts)
 
@@ -179,7 +179,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleVersionIsInvalid(t *testing.T) {
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleVersion(testutils.GetRandomName(10)).build()
+	opts := newScaffoldOptionsBuilder().withModuleVersion(testutils.RandomName(10)).build()
 
 	result := svc.CreateScaffold(opts)
 
@@ -208,7 +208,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelIsExceedingLength(t *test
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.GetRandomName(33)).build()
+	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.RandomName(33)).build()
 
 	result := svc.CreateScaffold(opts)
 
@@ -223,7 +223,7 @@ func Test_CreateScaffold_ReturnsError_WhenModuleChannelFallsBelowLength(t *testi
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{},
 		&fileGeneratorErrorStub{})
-	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.GetRandomName(2)).build()
+	opts := newScaffoldOptionsBuilder().withModuleChannel(testutils.RandomName(2)).build()
 
 	result := svc.CreateScaffold(opts)
 

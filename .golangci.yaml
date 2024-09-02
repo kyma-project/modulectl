@@ -58,8 +58,6 @@ linters-settings:
         alias: scaffoldcmd
       - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
         alias: createcmd
-      - pkg: github.com/kyma-project/modulectl/internal/common/utils/test
-        alias: testutils
   ireturn:
     allow:
       - anon
@@ -72,13 +70,7 @@ linters-settings:
     ignore-type-assert-ok: true
     ignore-map-index-ok: true
     ignore-chan-recv-ok: true
-  godox:
-    keywords:
-      - TODO
-      - FIXME
-      - BUG
-      - OPTIMIZE  # marks code that should be optimized before merging
-      - HACK      # marks hack-around that should be removed before merging
+  godox:  # `TODO`, `BUG`, `FIXME` are the default, no need to mention again
 issues:
   exclude-rules:
     - path: "_test\\.go"
