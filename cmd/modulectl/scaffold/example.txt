@@ -1,8 +1,8 @@
 Generate a minimal scaffold for a module - only a blank manifest file and module config file is generated using defaults
-                modulectl create scaffold
+                modulectl scaffold
 Generate a scaffold providing required values explicitly
-				modulectl create scaffold --module-name="kyma-project.io/module/testmodule" --module-version="0.1.1" --module-channel=fast
+				modulectl scaffold --module-name="kyma-project.io/module/testmodule" --module-version="0.1.1" --module-channel=fast
 Generate a scaffold with a manifest file, default CR and security-scanners config for a module
-				modulectl create scaffold --gen-default-cr --gen-security-config
+				modulectl scaffold --gen-default-cr --gen-security-config
 Generate a scaffold with a manifest file, default CR and security-scanners config for a module, overriding default values
-				modulectl create scaffold --gen-manifest="my-manifest.yaml" --gen-default-cr="my-cr.yaml" --gen-security-config="my-seccfg.yaml"
+				modulectl scaffold --gen-manifest="my-manifest.yaml" --gen-default-cr="my-cr.yaml" --gen-security-config="my-seccfg.yaml"

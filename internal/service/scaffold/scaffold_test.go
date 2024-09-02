@@ -372,7 +372,7 @@ func Test_CreateScaffold_ReturnsError_WhenGeneratingModuleConfigReturnsError(t *
 
 	require.ErrorIs(t, result, scaffold.ErrGeneratingFile)
 	require.ErrorIs(t, result, errSomeFileGeneratorError)
-	assert.Contains(t, result.Error(), "create-config.yaml")
+	assert.Contains(t, result.Error(), "module-config.yaml")
 }
 
 func Test_CreateScaffold_Succeeds(t *testing.T) {
@@ -452,7 +452,7 @@ func newScaffoldOptionsBuilder() *scaffoldOptionsBuilder {
 	return builder.
 		withOut(iotools.NewDefaultOut(io.Discard)).
 		withDirectory("./").
-		withModuleConfigFileName("scaffold-create-config.yaml").
+		withModuleConfigFileName("scaffold-module-config.yaml").
 		withManifestFileName("manifest.yaml").
 		withDefaultCRFileName("default-cr.yaml").
 		withModuleConfigFileOverwrite(false).

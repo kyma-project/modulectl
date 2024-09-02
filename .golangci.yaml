@@ -1,98 +1,105 @@
 linters:
- enable-all: true
- disable:
-  - contextcheck # too many false positives
-  - depguard # checks if package imports are whitelisted
-  - exhaustruct # too subjective and harms code readability
-  - execinquery # deprecated (since v1.58.0)
-  - exportloopref # deprecated (since v1.60.2), replaced by copyloopvar
-  - forbidigo # temparily disabled
-  - godot # not needed
-  - gomnd # deprecated (since v1.58.0), renamed to mnd
-  - lll
-  - nlreturn # too strict and mostly code is not more readable
-  - sqlclosecheck # not needed for this project
-  - tagalign # TODO enable this and fix tags
-  - tagliatelle # TODO enable this and fix tags
-  - paralleltest # should be enabled consciously for long running tests
-  - wsl # too strict and mostly code is not more readable
+  enable-all: true
+  disable:
+    - contextcheck  # too many false positives
+    - depguard      # checks if package imports are whitelisted
+    - exhaustruct   # too subjective and harms code readability
+    - execinquery   # deprecated (since v1.58.0)
+    - exportloopref # deprecated (since v1.60.2), replaced by copyloopvar
+    - forbidigo     # temparily disabled
+    - godot         # not needed
+    - gomnd         # deprecated (since v1.58.0), renamed to mnd
+    - lll
+    - nlreturn      # too strict and mostly code is not more readable
+    - sqlclosecheck # not needed for this project
+    - tagalign      # TODO enable this and fix tags
+    - tagliatelle   # TODO enable this and fix tags
+    - paralleltest  # should be enabled consciously for long running tests
+    - wsl           # too strict and mostly code is not more readable
 linters-settings:
- revive:
-  severity: error
-  rules:
-   - name: comment-spacings
-     disabled: true
-   - name: dot-imports
-     severity: warning
-     disabled: true
-   - name: line-length-limit
-     severity: warning
-     disabled: true
-     arguments: [ 120 ]
- funlen:
-  lines: 80
- cyclop:
-  max-complexity: 20
- nestif:
-  min-complexity: 6
- gci:
-  sections:
-   - standard # Standard packages.
-   - default # Imports that could not be matched to another section type.
-   - prefix(github.com/kyma-project/modulectl) # Imports with the specified prefix.
-   - blank # Blank imports.
-   - dot # Dot imports.
-  custom-order: true
-  skip-generated: true
- nolintlint:
-  require-explanation: true
- importas:
-  no-unaliased: true
-  no-extra-aliases: true
-  alias:
-   - pkg: github.com/kyma-project/modulectl/tools/io
-     alias: iotools
-   - pkg: github.com/kyma-project/modulectl/internal/common/errors
-     alias: commonerrors
-   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/scaffold
-     alias: scaffoldcmd
-   - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
-     alias: createcmd
-   - pkg: github.com/kyma-project/modulectl/internal/common/utils/test
-     alias: testutils
- ireturn:
-  allow:
-   - anon
-   - error
-   - empty
-   - stdlib
- varnamelen:
-  ignore-names:
-   - ok
-  ignore-type-assert-ok: true
-  ignore-map-index-ok: true
-  ignore-chan-recv-ok: true
- godox: # `TODO`, `BUG`, `FIXME` are the default, no need to mention again
+  revive:
+    severity: error
+    rules:
+      - name: comment-spacings
+        disabled: true
+      - name: dot-imports
+        severity: warning
+        disabled: true
+      - name: line-length-limit
+        severity: warning
+        disabled: true
+        arguments: [ 120 ]
+  funlen:
+    lines: 80
+  cyclop:
+    max-complexity: 20
+  nestif:
+    min-complexity: 6
+  gci:
+    sections:
+      - standard                                    # Standard packages.
+      - default                                     # Imports that could not be matched to another section type.
+      - prefix(github.com/kyma-project/modulectl)   # Imports with the specified prefix.
+      - blank                                       # Blank imports.
+      - dot                                         # Dot imports.
+    custom-order: true
+    skip-generated: true
+  nolintlint:
+    require-explanation: true
+  importas:
+    no-unaliased: true
+    no-extra-aliases: true
+    alias:
+      - pkg: github.com/kyma-project/modulectl/tools/io
+        alias: iotools
+      - pkg: github.com/kyma-project/modulectl/internal/common/errors
+        alias: commonerrors
+      - pkg: github.com/kyma-project/modulectl/cmd/modulectl/scaffold
+        alias: scaffoldcmd
+      - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
+        alias: createcmd
+      - pkg: github.com/kyma-project/modulectl/internal/common/utils/test
+        alias: testutils
+  ireturn:
+    allow:
+      - anon
+      - error
+      - empty
+      - stdlib
+  varnamelen:
+    ignore-names:
+      - ok
+    ignore-type-assert-ok: true
+    ignore-map-index-ok: true
+    ignore-chan-recv-ok: true
+  godox:
+    keywords:
+      - TODO
+      - FIXME
+      - BUG
+      - NOTE
+      - OPTIMIZE  # marks code that should be optimized before merging
+      - HACK      # marks hack-around that should be removed before merging
 issues:
- exclude-rules:
-  - path: "_test\\.go"
-    linters:
-     - wrapcheck # Errors do not need to be wrapped in unit and integration tests
-     - err113 # Dynamic error creation in unit and integration tests is ok
-     - gochecknoglobals # Does not apply to unit and integration tests
-     - funlen # Table driven unit and integration tests exceed function length by design
-     - maintidx # Table driven unit and integration tests exceed maintainability index by design
-  - path: tests/e2e/
-    linters: [ gci ] # Disable gci due to the test utilities dot import.
-  - linters:
-     - importas
-    text: has alias "" which is not part of config # Ignore false positives that emerged due to https://github.com/julz/importas/issues/15.
-  - linters:
-     - lll # long lines starting with an url
-    source: "^// http "
- max-issues-per-linter: 0
- max-same-issues: 0
+  exclude-rules:
+    - path: "_test\\.go"
+      linters:
+        - wrapcheck # Errors do not need to be wrapped in unit and integration tests
+        - err113 # Dynamic error creation in unit and integration tests is ok
+        - gochecknoglobals # Does not apply to unit and integration tests
+        - funlen # Table driven unit and integration tests exceed function length by design
+        - maintidx # Table driven unit and integration tests exceed maintainability index by design
+    - path: tests/e2e/
+      linters: [ gci ] # Disable gci due to the test utilities dot import.
+    - linters:
+        - importas
+      text: has alias "" which is not part of config # Ignore false positives that emerged due to https://github.com/julz/importas/issues/15.
+    - linters:
+        - lll # long lines starting with an url
+      source: "^// http "
+  max-issues-per-linter: 0
+  max-same-issues: 0
 output:
- sort-results: true
+  sort-results: true
 run:
- timeout: 15m
+  timeout: 15m

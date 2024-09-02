@@ -44,14 +44,14 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgsMissing(t 
 		{
 			argName: contentprovider.ArgModuleVersion,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "create-name",
+				contentprovider.ArgModuleName:    "module-name",
 				contentprovider.ArgModuleChannel: "experimental",
 			},
 		},
 		{
 			argName: contentprovider.ArgModuleChannel,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "create-name",
+				contentprovider.ArgModuleName:    "module-name",
 				contentprovider.ArgModuleVersion: "0.0.1",
 			},
 		},
@@ -90,7 +90,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 		{
 			argName: contentprovider.ArgModuleVersion,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "create-name",
+				contentprovider.ArgModuleName:    "module-name",
 				contentprovider.ArgModuleChannel: "experimental",
 				contentprovider.ArgModuleVersion: "",
 			},
@@ -98,7 +98,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 		{
 			argName: contentprovider.ArgModuleChannel,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "create-name",
+				contentprovider.ArgModuleName:    "module-name",
 				contentprovider.ArgModuleChannel: "",
 				contentprovider.ArgModuleVersion: "0.0.1",
 			},
@@ -125,7 +125,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
 
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{
-		contentprovider.ArgModuleName:    "create-name",
+		contentprovider.ArgModuleName:    "module-name",
 		contentprovider.ArgModuleChannel: "regular",
 		contentprovider.ArgModuleVersion: "0.0.1",
 	})
