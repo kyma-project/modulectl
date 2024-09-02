@@ -2,7 +2,6 @@ package scaffold_test
 
 import (
 	"errors"
-	"github.com/kyma-project/modulectl/internal/testutils"
 	"io"
 	"testing"
 
@@ -12,6 +11,7 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
+	"github.com/kyma-project/modulectl/internal/testutils"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 

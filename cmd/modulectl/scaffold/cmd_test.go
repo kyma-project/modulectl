@@ -2,7 +2,6 @@ package scaffold_test
 
 import (
 	"errors"
-	"github.com/kyma-project/modulectl/internal/testutils"
 	"os"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
+	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
 func Test_NewCmd_ReturnsError_WhenScaffoldServiceIsNil(t *testing.T) {

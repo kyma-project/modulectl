@@ -2,7 +2,6 @@ package create_test
 
 import (
 	"errors"
-	"github.com/kyma-project/modulectl/internal/testutils"
 	"os"
 	"strconv"
 	"testing"
@@ -12,6 +11,7 @@ import (
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 	"github.com/kyma-project/modulectl/internal/service/create"
+	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
 func Test_NewCmd_ReturnsError_WhenModuleServiceIsNil(t *testing.T) {

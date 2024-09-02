@@ -1,11 +1,13 @@
 package create_test
 
 import (
-	"github.com/kyma-project/modulectl/internal/service/create"
-	iotools "github.com/kyma-project/modulectl/tools/io"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/modulectl/internal/service/create"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 func Test_Validate_Options(t *testing.T) {
@@ -109,10 +111,10 @@ func Test_Validate_Options(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.options.Validate()
 			if tt.wantErr {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errMsg)
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.errMsg)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
