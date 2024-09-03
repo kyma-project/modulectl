@@ -136,7 +136,8 @@ func printFlagsWithOnlyUsage(buf *bytes.Buffer, cmd *cobra.Command) {
 	// Calculate the maximum length of the flag names (shorthand + long name)
 	maxLength := 0
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
-		flagLength := len(flag.Shorthand) + len(flag.Name) + 6 // 5 accounts for the formatting "-s, --"
+		uniformSpacingFactor := 6
+		flagLength := len(flag.Shorthand) + len(flag.Name) + uniformSpacingFactor // 6 accounts for the formatting "-s, --"
 		if flagLength > maxLength {
 			maxLength = flagLength
 		}
@@ -144,8 +145,9 @@ func printFlagsWithOnlyUsage(buf *bytes.Buffer, cmd *cobra.Command) {
 
 	// Print the flags with uniform spacing
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		numberOfSpacesAfterShort := 4
 		// Format the flag name
-		flagShort := strings.Repeat(" ", 4)
+		flagShort := strings.Repeat(" ", numberOfSpacesAfterShort)
 		if flag.Shorthand != "" {
 			flagShort = fmt.Sprintf("-%s, ", flag.Shorthand)
 		}
@@ -156,7 +158,8 @@ func printFlagsWithOnlyUsage(buf *bytes.Buffer, cmd *cobra.Command) {
 		flagName := fmt.Sprintf("%s--%s %s ", flagShort, flag.Name, flagType)
 
 		// Calculate padding to align descriptions
-		padding := strings.Repeat(" ", maxLength-len(flagName)+10)
+		paddingFactor := 10
+		padding := strings.Repeat(" ", maxLength-len(flagName)+paddingFactor)
 
 		// Print the flag name with its usage
 		customString := fmt.Sprintf("%s%s%s\n", flagName, padding, flag.Usage)
