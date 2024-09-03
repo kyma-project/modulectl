@@ -2,16 +2,16 @@
 title: modulectl create
 ---
 
-Creates a module bundled as an OCI artifact
+Creates a module bundled as an OCI artifact.
 
 ## Synopsis
 
-Use this command to create a Kyma module, bundle it as an OCI artifact and optionally push it to the OCI registry.
+Use this command to create a Kyma module, bundle it as an OCI artifact, and push it to the OCI registry optionally.
 
 ### Detailed description
 
 This command allows you to create a Kyma module as an OCI artifact and optionally push it to the OCI registry of your choice.
-For more information about Kyma modules see the [documentation](https://github.com/kyma-project/lifecycle-manager).
+For more information about Kyma modules see the [documentation](https://kyma-project.io/#/06-modules/README).
 
 This command creates a module from an existing directory containing the module's source files.
 The directory must be a valid git project that is publicly available.
@@ -21,9 +21,10 @@ Such projects require providing an explicit path to the module's project directo
 
 ### Simple mode configuration
 
-To configure the simple mode, provide the "--module-config-file" flag with a config file path.
+To configure the simple mode, provide the `--module-config-file` flag with a config file path.
 The module config file is a YAML file used to configure the following attributes for the module:
 
+```yaml
 - name:             a string, required, the name of the module
 - version:          a string, required, the version of the module
 - channel:          a string, required, channel that should be used in the ModuleTemplate CR
@@ -36,6 +37,7 @@ The module config file is a YAML file used to configure the following attributes
 - beta:             a boolean, optional, default=false, determines whether the ModuleTemplate CR should have the beta flag or not
 - labels:           a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
 - annotations:      a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
+```
 
 The **manifest** and **defaultCR** paths are resolved against the module's directory, as configured with the "--path" flag.
 The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated.
@@ -69,19 +71,17 @@ Build a simple module and push it to a remote registry
 ## Flags
 
 ```bash
-  -c, --credentials string              Basic authentication credentials for the given repository in the <user:password> format
-      --git-remote string               Specifies the remote name of the wanted GitHub repository. For Example "origin" or "upstream" (default "origin") (default "origin")
-  -h, --help                            help for create
-      --insecure                        Uses an insecure connection to access the registry
-      --module-config-file string       Specifies the module configuration file (default "module-config.yaml")
-  -o, --output string                   File to write the module template if the module is uploaded to a registry. (default "template.yaml") (default "template.yaml")
+  -c, --credentials string              Basic authentication credentials for the given repository in the <user:password> format.
+      --git-remote string               Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream" (default "origin") (default "origin").
+  -h, --help                            Provides command help.
+      --insecure                        Uses an insecure connection to access the registry.
+      --module-config-file string       Specifies the module configuration file (default "module-config.yaml").
+  -o, --output string                   File to write the module template if the module is uploaded to a registry (default "template.yaml").
       --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
       --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
-      --sec-scanners-config string      Path to the file holding the security scan configuration. (default "sec-scanners-config.yaml") (default "sec-scanners-config.yaml")
+      --sec-scanners-config string      Path to the file holding the security scan configuration (default "sec-scanners-config.yaml").
 ```
 
 ## See also
 
 * [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI
-
-

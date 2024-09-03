@@ -2,7 +2,7 @@
 title: modulectl
 ---
 
-This is the Kyma Module Controller CLI
+This is the Kyma Module Controller CLI.
 
 
 ## Synopsis
@@ -13,7 +13,7 @@ A CLI from the Kyma Module Controller. Wonderful to use.
 ## Flags
 
 ```bash
-  -h, --help   help for modulectl
+  -h, --help   Provides help for modulectl.
 ```
 
 ## See also

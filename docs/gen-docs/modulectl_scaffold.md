@@ -69,16 +69,16 @@ Generate a scaffold with a manifest file, default CR and security-scanners confi
 ## Flags
 
 ```bash
-  -d, --directory string                                          Specifies the target directory where the scaffolding shall be generated (default "./")
-      --gen-default-cr string[="default-cr.yaml"]                 Specifies the default CR in the generated module config. A blank default CR file is generated if it doesn't exist
-      --gen-manifest string                                       Specifies the manifest in the generated module config. A blank manifest file is generated if it doesn't exist (default "manifest.yaml")
-      --gen-security-config string[="sec-scanners-config.yaml"]   Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist
-  -h, --help                                                      help for scaffold
-      --module-channel string                                     Specifies the module channel in the generated module config file (default "regular")
-      --module-config string                                      Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml")
-      --module-name string                                        Specifies the module name in the generated config file (default "kyma-project.io/module/mymodule")
-      --module-version string                                     Specifies the module version in the generated module config file (default "0.0.1")
-  -o, --overwrite                                                 Specifies if the command overwrites an existing module configuration file
+  -d, --directory string                                          Specifies the target directory where the scaffolding shall be generated (default "./").
+      --gen-default-cr string[="default-cr.yaml"]                 Specifies the default CR in the generated module config. A blank default CR file is generated if it doesn't exist.
+      --gen-manifest string                                       Specifies the manifest in the generated module config. A blank manifest file is generated if it doesn't exist (default "manifest.yaml").
+      --gen-security-config string[="sec-scanners-config.yaml"]   Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist.
+  -h, --help                                                      Provides command help.
+      --module-channel string                                     Specifies the module channel in the generated module config file (default "regular").
+      --module-config string                                      Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml").
+      --module-name string                                        Specifies the module name in the generated config file (default "kyma-project.io/module/mymodule").
+      --module-version string                                     Specifies the module version in the generated module config file (default "0.0.1").
+  -o, --overwrite                                                 Specifies if the command overwrites an existing module configuration file.
 ```
 
 ## See also
