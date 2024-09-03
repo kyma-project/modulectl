@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/kyma-project/modulectl/cmd/modulectl"
 )
@@ -116,7 +117,7 @@ func printOptions(buf *bytes.Buffer, cmd *cobra.Command) error {
 	flags.SetOutput(buf)
 	if flags.HasAvailableFlags() {
 		buf.WriteString("## Flags\n\n```bash\n")
-		flags.PrintDefaults()
+		printFlagsWithOnlyUsage(buf, cmd)
 		buf.WriteString("```\n\n")
 	}
 
@@ -124,11 +125,43 @@ func printOptions(buf *bytes.Buffer, cmd *cobra.Command) error {
 	parentFlags.SetOutput(buf)
 	if parentFlags.HasAvailableFlags() {
 		buf.WriteString("## Flags inherited from parent commands\n\n```bash\n")
-		parentFlags.PrintDefaults()
+		printFlagsWithOnlyUsage(buf, cmd)
 		buf.WriteString("```\n\n")
 	}
 
 	return nil
+}
+
+func printFlagsWithOnlyUsage(buf *bytes.Buffer, cmd *cobra.Command) {
+	// Calculate the maximum length of the flag names (shorthand + long name)
+	maxLength := 0
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		flagLength := len(flag.Shorthand) + len(flag.Name) + 6 // 5 accounts for the formatting "-s, --"
+		if flagLength > maxLength {
+			maxLength = flagLength
+		}
+	})
+
+	// Print the flags with uniform spacing
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		// Format the flag name
+		flagShort := strings.Repeat(" ", 4)
+		if flag.Shorthand != "" {
+			flagShort = fmt.Sprintf("-%s, ", flag.Shorthand)
+		}
+		flagType := flag.Value.Type()
+		if flagType == "bool" {
+			flagType = ""
+		}
+		flagName := fmt.Sprintf("%s--%s %s ", flagShort, flag.Name, flagType)
+
+		// Calculate padding to align descriptions
+		padding := strings.Repeat(" ", maxLength-len(flagName)+10)
+
+		// Print the flag name with its usage
+		customString := fmt.Sprintf("%s%s%s\n", flagName, padding, flag.Usage)
+		buf.WriteString(customString)
+	})
 }
 
 func printSeeAlso(buf *bytes.Buffer, cmd *cobra.Command) {
@@ -189,7 +222,7 @@ func hasSeeAlso(cmd *cobra.Command) bool {
 
 func initCustomHelpFlag(cmd *cobra.Command) {
 	if cmd.Flags().Lookup("help") == nil {
-		usage := "Provides help for "
+		usage := "Provides help for the "
 		name := cmd.Name()
 		if name == "" {
 			usage += "this command"

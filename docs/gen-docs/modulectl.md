@@ -13,7 +13,7 @@ A CLI from the Kyma Module Controller. Wonderful to use.
 ## Flags
 
 ```bash
-  -h, --help   Provides help for modulectl command.
+-h, --help           Provides help for the modulectl command.
 ```
 
 ## See also

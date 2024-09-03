@@ -18,7 +18,7 @@ const (
 
 	GitRemoteFlagName    = "git-remote"
 	GitRemoteFlagDefault = "origin"
-	gitRemoteFlagUsage   = `Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream".`
+	gitRemoteFlagUsage   = `Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream" (default "origin").`
 
 	InsecureFlagName    = "insecure"
 	InsecureFlagDefault = false
@@ -27,7 +27,7 @@ const (
 	TemplateOutputFlagName    = "output"
 	templateOutputFlagShort   = "o"
 	TemplateOutputFlagDefault = "template.yaml"
-	templateOutputFlagUsage   = `File to write the module template if the module is uploaded to a registry.`
+	templateOutputFlagUsage   = `File to write the module template if the module is uploaded to a registry (default "template.yaml").`
 
 	RegistryURLFlagName    = "registry"
 	RegistryURLFlagDefault = ""
@@ -41,7 +41,7 @@ const (
 
 	SecScannersConfigFlagName    = "sec-scanners-config"
 	SecScannersConfigFlagDefault = "sec-scanners-config.yaml"
-	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration.`
+	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration (default "sec-scanners-config.yaml").`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
