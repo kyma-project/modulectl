@@ -1,1 +1,1 @@
-This is the Kyma Module Controller CLI
+This is the Kyma Module Controller CLI.

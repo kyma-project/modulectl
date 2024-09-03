@@ -10,42 +10,42 @@ const (
 	DirectoryFlagName    = "directory"
 	directoryFlagShort   = "d"
 	DirectoryFlagDefault = "./"
-	directoryFlagUsage   = "Specifies the target directory where the scaffolding shall be generated"
+	directoryFlagUsage   = "Specifies the target directory where the scaffolding shall be generated."
 
 	ModuleConfigFileFlagName    = "module-config"
 	ModuleConfigFileFlagDefault = "scaffold-module-config.yaml"
-	moduleConfigFileFlagUsage   = "Specifies the name of the generated module configuration file"
+	moduleConfigFileFlagUsage   = "Specifies the name of the generated module configuration file."
 
 	ModuleConfigFileOverwriteFlagName    = "overwrite"
 	moduleConfigFileOverwriteFlagShort   = "o"
 	ModuleConfigFileOverwriteFlagDefault = false
-	moduleConfigFileOverwriteFlagUsage   = "Specifies if the command overwrites an existing module configuration file"
+	moduleConfigFileOverwriteFlagUsage   = "Specifies if the command overwrites an existing module configuration file."
 
 	ManifestFileFlagName    = "gen-manifest"
 	ManifestFileFlagDefault = "manifest.yaml"
-	manifestFileFlagUsage   = "Specifies the manifest in the generated module config. A blank manifest file is generated if it doesn't exist"
+	manifestFileFlagUsage   = "Specifies the manifest in the generated module config. A blank manifest file is generated if it doesn't exist."
 
 	DefaultCRFlagName         = "gen-default-cr"
 	DefaultCRFlagDefault      = ""
 	DefaultCRFlagNoOptDefault = "default-cr.yaml"
-	defaultCRFlagUsage        = "Specifies the default CR in the generated module config. A blank default CR file is generated if it doesn't exist"
+	defaultCRFlagUsage        = "Specifies the default CR in the generated module config. A blank default CR file is generated if it doesn't exist."
 
 	SecurityConfigFileFlagName         = "gen-security-config"
 	SecurityConfigFileFlagDefault      = ""
 	SecurityConfigFileFlagNoOptDefault = "sec-scanners-config.yaml"
-	securityConfigFileFlagUsage        = "Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist"
+	securityConfigFileFlagUsage        = "Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist."
 
 	ModuleNameFlagName    = "module-name"
 	ModuleNameFlagDefault = "kyma-project.io/module/mymodule"
-	moduleNameFlagUsage   = "Specifies the module name in the generated config file"
+	moduleNameFlagUsage   = "Specifies the module name in the generated config file."
 
 	ModuleVersionFlagName    = "module-version"
 	ModuleVersionFlagDefault = "0.0.1"
-	moduleVersionFlagUsage   = "Specifies the module version in the generated module config file"
+	moduleVersionFlagUsage   = "Specifies the module version in the generated module config file."
 
 	ModuleChannelFlagName    = "module-channel"
 	ModuleChannelFlagDefault = "regular"
-	moduleChannelFlagUsage   = "Specifies the module channel in the generated module config file"
+	moduleChannelFlagUsage   = "Specifies the module channel in the generated module config file."
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {

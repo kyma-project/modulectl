@@ -72,16 +72,18 @@ Build a simple module and push it to a remote registry
 
 ```bash
   -c, --credentials string              Basic authentication credentials for the given repository in the <user:password> format.
-      --git-remote string               Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream" (default "origin") (default "origin").
-  -h, --help                            Provides command help.
+      --git-remote string               Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream". (default "origin")
+  -h, --help                            Provides help for create command.
       --insecure                        Uses an insecure connection to access the registry.
-      --module-config-file string       Specifies the module configuration file (default "module-config.yaml").
-  -o, --output string                   File to write the module template if the module is uploaded to a registry (default "template.yaml").
+      --module-config-file string       Specifies the module configuration file. (default "module-config.yaml")
+  -o, --output string                   File to write the module template if the module is uploaded to a registry. (default "template.yaml")
       --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
       --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
-      --sec-scanners-config string      Path to the file holding the security scan configuration (default "sec-scanners-config.yaml").
+      --sec-scanners-config string      Path to the file holding the security scan configuration. (default "sec-scanners-config.yaml")
 ```
 
 ## See also
 
-* [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI
+* [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI.
+
+

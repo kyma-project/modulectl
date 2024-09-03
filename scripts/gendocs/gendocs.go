@@ -66,7 +66,7 @@ func genMarkdownTree(cmd *cobra.Command, dir string) error {
 
 func genMarkdown(cmd *cobra.Command, writer io.Writer) error {
 	cmd.InitDefaultHelpCmd()
-	cmd.InitDefaultHelpFlag()
+	initCustomHelpFlag(cmd)
 
 	buf := new(bytes.Buffer)
 
@@ -185,6 +185,19 @@ func hasSeeAlso(cmd *cobra.Command) bool {
 		return true
 	}
 	return false
+}
+
+func initCustomHelpFlag(cmd *cobra.Command) {
+	if cmd.Flags().Lookup("help") == nil {
+		usage := "Provides help for "
+		name := cmd.Name()
+		if name == "" {
+			usage += "this command"
+		} else {
+			usage += name
+		}
+		cmd.Flags().BoolP("help", "h", false, usage+" command.")
+	}
 }
 
 type byName []*cobra.Command
