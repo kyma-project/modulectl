@@ -1,6 +1,6 @@
 module github.com/kyma-project/modulectl
 
-go 1.22.4
+go 1.22.7
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.0

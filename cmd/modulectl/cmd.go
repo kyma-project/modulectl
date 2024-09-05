@@ -11,7 +11,8 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/create"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
-	"github.com/kyma-project/modulectl/internal/service/moduleconfig"
+	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
+	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	"github.com/kyma-project/modulectl/tools/filesystem"
 	"github.com/kyma-project/modulectl/tools/yaml"
@@ -69,7 +70,14 @@ func NewCmd() (*cobra.Command, error) {
 }
 
 func buildModuleService() (*create.Service, error) {
-	moduleService, err := create.NewService(&create.Service{})
+	fileSystemUtil := &filesystem.Util{}
+
+	moduleConfigService, err := moduleconfigreader.NewService(fileSystemUtil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create module config service: %w", err)
+	}
+
+	moduleService, err := create.NewService(moduleConfigService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}
@@ -80,17 +88,18 @@ func buildScaffoldService() (*scaffold.Service, error) {
 	fileSystemUtil := &filesystem.Util{}
 	yamlConverter := &yaml.ObjectToYAMLConverter{}
 
-	moduleConfigContentProvider, err := contentprovider.NewModuleConfig(yamlConverter)
+	moduleConfigContentProvider, err := contentprovider.NewModuleConfigProvider(yamlConverter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config content provider: %w", err)
 	}
 
-	moduleConfigFileGenerator, err := filegenerator.NewService(moduleConfigKind, fileSystemUtil, moduleConfigContentProvider)
+	moduleConfigFileGenerator, err := filegenerator.NewService(moduleConfigKind, fileSystemUtil,
+		moduleConfigContentProvider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config file generator: %w", err)
 	}
 
-	moduleConfigService, err := moduleconfig.NewService(fileSystemUtil, moduleConfigFileGenerator)
+	moduleConfigService, err := moduleconfiggenerator.NewService(fileSystemUtil, moduleConfigFileGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
@@ -100,17 +109,20 @@ func buildScaffoldService() (*scaffold.Service, error) {
 		return nil, fmt.Errorf("failed to create manifest file generator: %w", err)
 	}
 
-	manifestReuseFileGenerator, err := reusefilegenerator.NewService(manifestKind, fileSystemUtil, manifestFileGenerator)
+	manifestReuseFileGenerator, err := reusefilegenerator.NewService(manifestKind, fileSystemUtil,
+		manifestFileGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create manifest reuse file generator: %w", err)
 	}
 
-	defaultCRFileGenerator, err := filegenerator.NewService(defaultCRKind, fileSystemUtil, contentprovider.NewDefaultCR())
+	defaultCRFileGenerator, err := filegenerator.NewService(defaultCRKind, fileSystemUtil,
+		contentprovider.NewDefaultCR())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create default CR file generator: %w", err)
 	}
 
-	defaultCRReuseFileGenerator, err := reusefilegenerator.NewService(defaultCRKind, fileSystemUtil, defaultCRFileGenerator)
+	defaultCRReuseFileGenerator, err := reusefilegenerator.NewService(defaultCRKind, fileSystemUtil,
+		defaultCRFileGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create default CR reuse file generator: %w", err)
 	}
@@ -120,12 +132,14 @@ func buildScaffoldService() (*scaffold.Service, error) {
 		return nil, fmt.Errorf("failed to create security config content provider: %w", err)
 	}
 
-	securityConfigFileGenerator, err := filegenerator.NewService(securityConfigKind, fileSystemUtil, securityConfigContentProvider)
+	securityConfigFileGenerator, err := filegenerator.NewService(securityConfigKind, fileSystemUtil,
+		securityConfigContentProvider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config file generator: %w", err)
 	}
 
-	securityConfigReuseFileGenerator, err := reusefilegenerator.NewService(securityConfigKind, fileSystemUtil, securityConfigFileGenerator)
+	securityConfigReuseFileGenerator, err := reusefilegenerator.NewService(securityConfigKind, fileSystemUtil,
+		securityConfigFileGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config reuse file generator: %w", err)
 	}

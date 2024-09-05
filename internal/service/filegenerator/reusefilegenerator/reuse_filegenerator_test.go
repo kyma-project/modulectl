@@ -102,14 +102,26 @@ func (*fileExistsErrorStub) FileExists(_ string) (bool, error) {
 	return false, errSomeFileExistsOSError
 }
 
+func (*fileExistsErrorStub) ReadFile(_ string) ([]byte, error) {
+	return nil, nil
+}
+
 type fileExistsStub struct{}
 
 func (*fileExistsStub) FileExists(_ string) (bool, error) {
 	return true, nil
 }
 
+func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
+	return nil, nil
+}
+
 type fileDoesNotExistStub struct{}
 
 func (*fileDoesNotExistStub) FileExists(_ string) (bool, error) {
 	return false, nil
+}
+
+func (*fileDoesNotExistStub) ReadFile(_ string) ([]byte, error) {
+	return nil, nil
 }

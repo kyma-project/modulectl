@@ -58,6 +58,10 @@ linters-settings:
         alias: scaffoldcmd
       - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
         alias: createcmd
+      - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/generator
+        alias: moduleconfiggenerator
+      - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
+        alias: moduleconfigreader
   ireturn:
     allow:
       - anon

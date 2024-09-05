@@ -27,3 +27,11 @@ func (u *Util) WriteFile(path, content string) error {
 
 	return nil
 }
+
+func (u *Util) ReadFile(path string) ([]byte, error) {
+	fileContent, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+	return fileContent, nil
+}

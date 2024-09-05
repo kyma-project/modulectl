@@ -10,6 +10,7 @@ import (
 
 type FileReader interface {
 	FileExists(path string) (bool, error)
+	ReadFile(path string) ([]byte, error)
 }
 
 type FileGenerator interface {

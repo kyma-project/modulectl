@@ -12,14 +12,14 @@ import (
 )
 
 func Test_ModuleConfig_NewModuleConfig_ReturnsError_WhenYamlConverterIsNil(t *testing.T) {
-	_, err := contentprovider.NewModuleConfig(nil)
+	_, err := contentprovider.NewModuleConfigProvider(nil)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "yamlConverter")
 }
 
 func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenArgsIsNil(t *testing.T) {
-	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
+	svc, _ := contentprovider.NewModuleConfigProvider(&mcObjectToYAMLConverterStub{})
 
 	result, err := svc.GetDefaultContent(nil)
 
@@ -57,7 +57,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgsMissing(t 
 		},
 	}
 
-	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
+	svc, _ := contentprovider.NewModuleConfigProvider(&mcObjectToYAMLConverterStub{})
 
 	for _, testcase := range tests {
 		testName := "TestArgumentRequired_" + testcase.argName
@@ -105,7 +105,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 		},
 	}
 
-	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
+	svc, _ := contentprovider.NewModuleConfigProvider(&mcObjectToYAMLConverterStub{})
 
 	for _, testcase := range tests {
 		testName := "TestArgumentRequired_" + testcase.argName
@@ -122,7 +122,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 }
 
 func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
-	svc, _ := contentprovider.NewModuleConfig(&mcObjectToYAMLConverterStub{})
+	svc, _ := contentprovider.NewModuleConfigProvider(&mcObjectToYAMLConverterStub{})
 
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{
 		contentprovider.ArgModuleName:    "module-name",

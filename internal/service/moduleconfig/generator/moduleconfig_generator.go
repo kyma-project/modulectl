@@ -1,4 +1,4 @@
-package moduleconfig
+package moduleconfiggenerator
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/service/moduleconfig"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
@@ -44,7 +45,7 @@ func (s *Service) ForceExplicitOverwrite(directory, fileName string, overwrite b
 	}
 
 	if exists && !overwrite {
-		return ErrFileExists
+		return moduleconfig.ErrFileExists
 	}
 
 	return nil

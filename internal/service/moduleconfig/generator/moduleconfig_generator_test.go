@@ -1,4 +1,4 @@
-package moduleconfig_test
+package moduleconfiggenerator_test
 
 import (
 	"errors"
@@ -6,10 +6,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/moduleconfig"
+	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
@@ -19,7 +22,7 @@ const (
 )
 
 func Test_NewService_ReturnsError_WhenFileSystemIsNil(t *testing.T) {
-	_, err := moduleconfig.NewService(
+	_, err := moduleconfiggenerator.NewService(
 		nil,
 		&fileGeneratorErrorStub{},
 	)
@@ -29,7 +32,7 @@ func Test_NewService_ReturnsError_WhenFileSystemIsNil(t *testing.T) {
 }
 
 func Test_NewService_ReturnsError_WhenFileGeneratorIsNil(t *testing.T) {
-	_, err := moduleconfig.NewService(
+	_, err := moduleconfiggenerator.NewService(
 		&errorStub{},
 		nil,
 	)
@@ -39,7 +42,7 @@ func Test_NewService_ReturnsError_WhenFileGeneratorIsNil(t *testing.T) {
 }
 
 func Test_ForceExplicitOverwrite_ReturnsError_WhenFilesystemReturnsError(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&errorStub{},
 		&fileGeneratorErrorStub{},
 	)
@@ -50,7 +53,7 @@ func Test_ForceExplicitOverwrite_ReturnsError_WhenFilesystemReturnsError(t *test
 }
 
 func Test_ForceExplicitOverwrite_ReturnsError_WhenFileExistsAndNoOverwrite(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&fileExistsStub{},
 		&fileGeneratorErrorStub{},
 	)
@@ -61,7 +64,7 @@ func Test_ForceExplicitOverwrite_ReturnsError_WhenFileExistsAndNoOverwrite(t *te
 }
 
 func Test_ForceExplicitOverwrite_ReturnsNil_WhenFileExistsAndOverwrite(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&fileExistsStub{},
 		&fileGeneratorErrorStub{},
 	)
@@ -72,7 +75,7 @@ func Test_ForceExplicitOverwrite_ReturnsNil_WhenFileExistsAndOverwrite(t *testin
 }
 
 func Test_ForceExplicitOverwrite_ReturnsNil_WhenFileDoesNotExist(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&fileDoesNotExistStub{},
 		&fileGeneratorErrorStub{},
 	)
@@ -83,7 +86,7 @@ func Test_ForceExplicitOverwrite_ReturnsNil_WhenFileDoesNotExist(t *testing.T) {
 }
 
 func Test_GenerateFile_ReturnsError_WhenFileGeneratorReturnsError(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&errorStub{},
 		&fileGeneratorErrorStub{},
 	)
@@ -94,7 +97,7 @@ func Test_GenerateFile_ReturnsError_WhenFileGeneratorReturnsError(t *testing.T) 
 }
 
 func Test_GenerateFile_Succeeds(t *testing.T) {
-	svc, _ := moduleconfig.NewService(
+	svc, _ := moduleconfiggenerator.NewService(
 		&errorStub{},
 		&fileGeneratorStub{},
 	)
@@ -112,10 +115,36 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 	return true, nil
 }
 
+func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
+	moduleConfig := contentprovider.ModuleConfig{
+		Name:          "module-name",
+		Version:       "0.0.1",
+		Channel:       "regular",
+		ManifestPath:  "path/to/manifests",
+		Mandatory:     false,
+		DefaultCRPath: "path/to/defaultCR",
+		ResourceName:  "module-name-0.0.1",
+		Namespace:     "kcp-system",
+		Security:      "path/to/securityConfig",
+		Internal:      false,
+		Beta:          false,
+		Labels:        map[string]string{"label1": "value1"},
+		Annotations:   map[string]string{"annotation1": "value1"},
+	}
+
+	return yaml.Marshal(moduleConfig)
+}
+
 type fileDoesNotExistStub struct{}
 
 func (*fileDoesNotExistStub) FileExists(_ string) (bool, error) {
 	return false, nil
+}
+
+var errReadingFile = errors.New("some error reading file")
+
+func (*fileDoesNotExistStub) ReadFile(_ string) ([]byte, error) {
+	return nil, errReadingFile
 }
 
 var errSomeOSError = errors.New("some OS error")
@@ -124,6 +153,10 @@ type errorStub struct{}
 
 func (*errorStub) FileExists(_ string) (bool, error) {
 	return false, errSomeOSError
+}
+
+func (*errorStub) ReadFile(_ string) ([]byte, error) {
+	return nil, nil
 }
 
 type fileGeneratorStub struct{}
@@ -136,6 +169,6 @@ type fileGeneratorErrorStub struct{}
 
 var errSomeFileGeneratorError = errors.New("some file generator error")
 
-func (*fileGeneratorErrorStub) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
+func (*fileGeneratorErrorStub) GenerateFile(_ iotools.Out, _ string, _ types.KeyValueArgs) error {
 	return errSomeFileGeneratorError
 }

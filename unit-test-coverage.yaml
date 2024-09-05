@@ -1,6 +1,9 @@
 packages:
   cmd/modulectl/scaffold: 100
+  internal/common/validations: 87
   internal/service/scaffold: 92
   internal/service/contentprovider: 100
   internal/service/filegenerator: 100
-  internal/service/moduleconfig: 100
+  internal/service/moduleconfig/generator: 100
+  internal/service/moduleconfig/reader: 42
+  internal/service/create: 65

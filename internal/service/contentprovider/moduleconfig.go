@@ -7,21 +7,21 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
-type ModuleConfig struct {
+type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter
 }
 
-func NewModuleConfig(yamlConverter ObjectToYAMLConverter) (*ModuleConfig, error) {
+func NewModuleConfigProvider(yamlConverter ObjectToYAMLConverter) (*ModuleConfigProvider, error) {
 	if yamlConverter == nil {
 		return nil, fmt.Errorf("%w: yamlConverter must not be nil", commonerrors.ErrInvalidArg)
 	}
 
-	return &ModuleConfig{
+	return &ModuleConfigProvider{
 		yamlConverter: yamlConverter,
 	}, nil
 }
 
-func (s *ModuleConfig) GetDefaultContent(args types.KeyValueArgs) (string, error) {
+func (s *ModuleConfigProvider) GetDefaultContent(args types.KeyValueArgs) (string, error) {
 	if err := s.validateArgs(args); err != nil {
 		return "", err
 	}
@@ -31,8 +31,8 @@ func (s *ModuleConfig) GetDefaultContent(args types.KeyValueArgs) (string, error
 	return s.yamlConverter.ConvertToYaml(moduleConfig), nil
 }
 
-func (s *ModuleConfig) getModuleConfig(args types.KeyValueArgs) moduleConfig {
-	return moduleConfig{
+func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleConfig {
+	return ModuleConfig{
 		Name:          args[ArgModuleName],
 		Version:       args[ArgModuleVersion],
 		Channel:       args[ArgModuleChannel],
@@ -42,7 +42,7 @@ func (s *ModuleConfig) getModuleConfig(args types.KeyValueArgs) moduleConfig {
 	}
 }
 
-func (s *ModuleConfig) validateArgs(args types.KeyValueArgs) error {
+func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 	if args == nil {
 		return fmt.Errorf("%w: args must not be nil", ErrInvalidArg)
 	}
@@ -68,7 +68,7 @@ func (s *ModuleConfig) validateArgs(args types.KeyValueArgs) error {
 	return nil
 }
 
-type moduleConfig struct {
+type ModuleConfig struct {
 	Name          string            `yaml:"name" comment:"required, the name of the Module"`
 	Version       string            `yaml:"version" comment:"required, the version of the Module"`
 	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
