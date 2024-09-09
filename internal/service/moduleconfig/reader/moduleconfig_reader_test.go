@@ -2,6 +2,7 @@ package moduleconfigreader_test
 
 import (
 	"errors"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,7 @@ const (
 func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T) {
 	svc, _ := moduleconfigreader.NewService(
 		&fileDoesNotExistStub{},
+		&tmpfileSystemStub{},
 	)
 
 	result, err := svc.ParseModuleConfig(moduleConfigFile)
@@ -30,6 +32,7 @@ func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T
 func Test_ParseModuleConfig_ReturnsCorrect_ModuleConfig(t *testing.T) {
 	svc, _ := moduleconfigreader.NewService(
 		&fileExistsStub{},
+		&tmpfileSystemStub{},
 	)
 
 	result, err := svc.ParseModuleConfig(moduleConfigFile)
@@ -76,6 +79,16 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 	}
 
 	return yaml.Marshal(moduleConfig)
+}
+
+type tmpfileSystemStub struct{}
+
+func (*tmpfileSystemStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
+	return "test", nil
+}
+
+func (*tmpfileSystemStub) RemoveTempFiles() []error {
+	return nil
 }
 
 type fileDoesNotExistStub struct{}

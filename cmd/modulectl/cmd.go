@@ -71,8 +71,10 @@ func NewCmd() (*cobra.Command, error) {
 
 func buildModuleService() (*create.Service, error) {
 	fileSystemUtil := &filesystem.Util{}
+	tmpFileSystem := filesystem.NewTempFileSystem()
+	defer tmpFileSystem.RemoveTempFiles()
 
-	moduleConfigService, err := moduleconfigreader.NewService(fileSystemUtil)
+	moduleConfigService, err := moduleconfigreader.NewService(fileSystemUtil, tmpFileSystem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}

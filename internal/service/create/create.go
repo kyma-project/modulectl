@@ -10,6 +10,8 @@ import (
 type ModuleConfigService interface {
 	ParseModuleConfig(configFilePath string) (*contentprovider.ModuleConfig, error)
 	ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error
+	GetDefaultCRPath(defaultCRPath string) (string, error)
+	GetManifestPath(manifestPath string) (string, error)
 }
 
 type Service struct {
@@ -38,6 +40,16 @@ func (s *Service) CreateModule(opts Options) error {
 
 	if err := s.moduleConfigService.ValidateModuleConfig(moduleConfig); err != nil {
 		return fmt.Errorf("%w: failed to value module config", err)
+	}
+
+	moduleConfig.DefaultCRPath, err = s.moduleConfigService.GetDefaultCRPath(moduleConfig.DefaultCRPath)
+	if err != nil {
+		return fmt.Errorf("%w: failed to get default CR path", err)
+	}
+
+	moduleConfig.ManifestPath, err = s.moduleConfigService.GetManifestPath(moduleConfig.ManifestPath)
+	if err != nil {
+		return fmt.Errorf("%w: failed to get manifest path", err)
 	}
 
 	return nil
