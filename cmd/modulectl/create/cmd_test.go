@@ -53,7 +53,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	templateOutput := testutils.RandomName(10)
 	registryURL := testutils.RandomName(10)
 	registryCredSelector := testutils.RandomName(10)
-	secScannerConfig := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
@@ -64,7 +63,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 		"--output", templateOutput,
 		"--registry", registryURL,
 		"--registry-cred-selector", registryCredSelector,
-		"--sec-scanners-config", secScannerConfig,
 	}
 
 	svc := &moduleServiceStub{}

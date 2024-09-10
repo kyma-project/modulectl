@@ -12,6 +12,7 @@ type ModuleConfigService interface {
 	ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error
 	GetDefaultCRPath(defaultCRPath string) (string, error)
 	GetManifestPath(manifestPath string) (string, error)
+	CleanupTempFiles() []error
 }
 
 type Service struct {
@@ -32,6 +33,8 @@ func (s *Service) CreateModule(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
+
+	defer s.moduleConfigService.CleanupTempFiles()
 
 	moduleConfig, err := s.moduleConfigService.ParseModuleConfig(opts.ModuleConfigFile)
 	if err != nil {

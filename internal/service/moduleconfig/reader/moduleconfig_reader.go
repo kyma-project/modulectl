@@ -80,7 +80,7 @@ func (s *Service) GetManifestPath(manifestPath string) (string, error) {
 	if parsedURL, err := s.ParseURL(manifestPath); err == nil {
 		path, err = s.tmpFileSystem.DownloadTempFile("", defaultManifestFilePattern, parsedURL)
 		if err != nil {
-			return "", fmt.Errorf("failed to download default CR file: %w", err)
+			return "", fmt.Errorf("failed to download Manifest file: %w", err)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (s *Service) GetManifestPath(manifestPath string) (string, error) {
 
 func (s *Service) ParseURL(urlString string) (*url.URL, error) {
 	urlParsed, err := url.Parse(urlString)
-	if err != nil && urlParsed.Scheme != "" && urlParsed.Host != "" {
+	if err == nil && urlParsed.Scheme != "" && urlParsed.Host != "" {
 		return urlParsed, nil
 	}
 	return nil, fmt.Errorf("%w: parsing url failed for %s", commonerrors.ErrInvalidArg, urlString)
@@ -117,4 +117,8 @@ func (*Service) ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig)
 	}
 
 	return nil
+}
+
+func (s *Service) CleanupTempFiles() []error {
+	return s.tmpFileSystem.RemoveTempFiles()
 }

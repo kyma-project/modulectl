@@ -13,14 +13,17 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 		value    string
 		expected string
 	}{
-		{name: createcmd.ModuleConfigFileFlagName, value: createcmd.ModuleConfigFileFlagDefault, expected: "module-config.yaml"},
+		{
+			name:     createcmd.ModuleConfigFileFlagName,
+			value:    createcmd.ModuleConfigFileFlagDefault,
+			expected: "module-config.yaml",
+		},
 		{name: createcmd.CredentialsFlagName, value: createcmd.CredentialsFlagDefault, expected: ""},
 		{name: createcmd.GitRemoteFlagName, value: createcmd.GitRemoteFlagDefault, expected: "origin"},
 		{name: createcmd.InsecureFlagName, value: strconv.FormatBool(createcmd.InsecureFlagDefault), expected: "false"},
 		{name: createcmd.TemplateOutputFlagName, value: createcmd.TemplateOutputFlagDefault, expected: "template.yaml"},
 		{name: createcmd.RegistryURLFlagName, value: createcmd.RegistryURLFlagDefault, expected: ""},
 		{name: createcmd.RegistryCredSelectorFlagName, value: createcmd.RegistryCredSelectorFlagDefault, expected: ""},
-		{name: createcmd.SecScannersConfigFlagName, value: createcmd.SecScannersConfigFlagDefault, expected: "sec-scanners-config.yaml"},
 	}
 
 	for _, testcase := range tests {
