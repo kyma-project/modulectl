@@ -79,20 +79,6 @@ func Test_Validate_Options(t *testing.T) {
 			errMsg:  "opts.RegistryURL does not start with http(s)",
 		},
 		{
-			name: "SecScannerConfig is empty",
-			options: create.Options{
-				Out:              iotools.NewDefaultOut(io.Discard),
-				ModuleConfigFile: "config.yaml",
-				Credentials:      "username:password",
-				GitRemote:        "origin",
-				TemplateOutput:   "output",
-				RegistryURL:      "http://registry.example.com",
-				SecScannerConfig: "",
-			},
-			wantErr: true,
-			errMsg:  "opts.SecurityScanConfig must not be empty",
-		},
-		{
 			name: "All fields valid",
 			options: create.Options{
 				Out:              iotools.NewDefaultOut(io.Discard),
@@ -101,7 +87,6 @@ func Test_Validate_Options(t *testing.T) {
 				GitRemote:        "origin",
 				TemplateOutput:   "output",
 				RegistryURL:      "http://registry.example.com",
-				SecScannerConfig: "scanner.yaml",
 			},
 			wantErr: false,
 		},

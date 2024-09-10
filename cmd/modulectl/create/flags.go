@@ -38,19 +38,18 @@ const (
 	RegistryCredSelectorFlagDefault = ""
 	//nolint:gosec // Not hardcoded credentials, rather just flag name
 	registryCredSelectorFlagUsage = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
-
-	SecScannersConfigFlagName    = "sec-scanners-config"
-	SecScannersConfigFlagDefault = "sec-scanners-config.yaml"
-	secScannersConfigFlagUsage   = `Path to the file holding the security scan configuration (default "sec-scanners-config.yaml").`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
-	flags.StringVar(&opts.ModuleConfigFile, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
-	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault, credentialsFlagUsage)
+	flags.StringVar(&opts.ModuleConfigFile, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault,
+		moduleConfigFileFlagUsage)
+	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault,
+		credentialsFlagUsage)
 	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
-	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault, templateOutputFlagUsage)
+	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault,
+		templateOutputFlagUsage)
 	flags.StringVar(&opts.RegistryURL, RegistryURLFlagName, RegistryURLFlagDefault, registryURLFlagUsage)
-	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault, registryCredSelectorFlagUsage)
-	flags.StringVar(&opts.SecScannerConfig, SecScannersConfigFlagName, SecScannersConfigFlagDefault, secScannersConfigFlagUsage)
+	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault,
+		registryCredSelectorFlagUsage)
 }
