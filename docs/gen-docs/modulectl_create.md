@@ -79,7 +79,6 @@ Build a simple module and push it to a remote registry
 -o, --output string                   File to write the module template if the module is uploaded to a registry (default "template.yaml").
     --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
     --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
-    --sec-scanners-config string      Path to the file holding the security scan configuration (default "sec-scanners-config.yaml").
 ```
 
 ## See also
