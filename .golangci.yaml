@@ -62,6 +62,8 @@ linters-settings:
         alias: moduleconfiggenerator
       - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
         alias: moduleconfigreader
+      - pkg: ocm.software/ocm/api/ocm/compdesc/versions/v2
+        alias: ocm
   ireturn:
     allow:
       - anon
