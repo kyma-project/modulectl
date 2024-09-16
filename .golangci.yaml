@@ -64,6 +64,8 @@ linters-settings:
         alias: moduleconfigreader
       - pkg: ocm.software/ocm/api/ocm/compdesc/versions/v2
         alias: ocm
+      - pkg: ocm.software/ocm/api/ocm/compdesc/meta/v1
+        alias: ocmv1
   ireturn:
     allow:
       - anon

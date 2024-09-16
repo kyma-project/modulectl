@@ -13,12 +13,19 @@ const (
 	providerName = "kyma-project.io"
 )
 
+func NewService() *Service {
+	return &Service{
+		ComponentDescriptor: ocm.ComponentDescriptor{},
+	}
+}
+
 func (s *Service) PopulateComponentDescriptorMetadata(moduleName string,
 	moduleVersion string) {
 	s.ComponentDescriptor.SetName(moduleName)
 	s.ComponentDescriptor.SetVersion(moduleVersion)
 
 	s.ComponentDescriptor.Provider = providerName
+
 	ocm.DefaultResources(&s.ComponentDescriptor)
 }
 

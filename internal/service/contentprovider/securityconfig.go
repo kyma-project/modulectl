@@ -46,8 +46,8 @@ func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 	return nil
 }
 
-func (s *SecurityConfig) getSecurityConfig(moduleName string) securityScanConfig {
-	return securityScanConfig{
+func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig {
+	return SecurityScanConfig{
 		ModuleName: moduleName,
 		Protecode: []string{
 			"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
@@ -59,7 +59,7 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) securityScanConfig
 	}
 }
 
-type securityScanConfig struct {
+type SecurityScanConfig struct {
 	ModuleName  string               `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
 	Protecode   []string             `json:"protecode" yaml:"protecode" comment:"list, includes the images which must be scanned by the Protecode scanner (aka. Black Duck Binary Analysis)"`
 	WhiteSource whiteSourceSecConfig `json:"whitesource" yaml:"whitesource" comment:"whitesource (aka. Mend) security scanner specific configuration"`
