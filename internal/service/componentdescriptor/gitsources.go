@@ -3,13 +3,11 @@ package componentdescriptor
 import (
 	"fmt"
 
+	"github.com/kyma-project/modulectl/internal/service/git"
+	ocm "ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	ocm "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
-	"ocm.software/ocm/api/utils/runtime"
-
-	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
 type GitService interface {
@@ -48,14 +46,10 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *ocm.ComponentDesc
 		return fmt.Errorf("failed to get latest commit: %w", err)
 	}
 	access := github.New(gitRepoURL, "", latestCommit)
-	accessUnstructured, err := runtime.ToUnstructuredTypedObject(access)
-	if err != nil {
-		return fmt.Errorf("failed to convert access to unstructured object: %w", err)
-	}
 
 	componentDescriptor.Sources = append(componentDescriptor.Sources, ocm.Source{
 		SourceMeta: sourceMeta,
-		Access:     accessUnstructured,
+		Access:     access,
 	})
 
 	return nil

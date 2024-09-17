@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	ocm "ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	ocm "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
-	"ocm.software/ocm/api/utils/runtime"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -146,24 +145,25 @@ func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
 
 		access := ociartifact.New(img)
 		access.SetType(ociartifact.LegacyType)
-		accessUnstructured, err := runtime.ToUnstructuredTypedObject(access)
 		if err != nil {
 			return fmt.Errorf("failed to convert access to unstructured object: %w", err)
 		}
 		proteccodeImageLayer := ocm.Resource{
-			ElementMeta: ocm.ElementMeta{
-				Name:    imgName,
-				Labels:  []ocmv1.Label{*imageTypeLabel},
-				Version: imgTag,
+			ResourceMeta: ocm.ResourceMeta{
+				Type:     ociartifacttypes.LEGACY_TYPE,
+				Relation: ocmv1.ExternalRelation,
+				ElementMeta: ocm.ElementMeta{
+					Name:    imgName,
+					Labels:  []ocmv1.Label{*imageTypeLabel},
+					Version: imgTag,
+				},
 			},
-			Type:     ociartifacttypes.LEGACY_TYPE,
-			Relation: ocmv1.ExternalRelation,
-			Access:   accessUnstructured,
+			Access: access,
 		}
 		componentDescriptor.Resources = append(componentDescriptor.Resources, proteccodeImageLayer)
 	}
 	ocm.DefaultResources(componentDescriptor)
-	if err := componentDescriptor.Validate(); err != nil {
+	if err := ocm.Validate(componentDescriptor); err != nil {
 		return fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 

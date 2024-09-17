@@ -6,7 +6,7 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	ocm "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	ocm "ocm.software/ocm/api/ocm/compdesc"
 )
 
 type ModuleConfigService interface {

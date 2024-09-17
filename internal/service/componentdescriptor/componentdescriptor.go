@@ -3,11 +3,13 @@ package componentdescriptor
 import (
 	"fmt"
 
-	ocm "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	ocm "ocm.software/ocm/api/ocm/compdesc"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
 
 const (
-	providerName = "kyma-project.io"
+	providerName  = "kyma-project.io"
+	schemaVersion = "v2"
 )
 
 func InitializeComponentDescriptor(moduleName string,
@@ -16,12 +18,16 @@ func InitializeComponentDescriptor(moduleName string,
 	componentDescriptor := &ocm.ComponentDescriptor{}
 	componentDescriptor.SetName(moduleName)
 	componentDescriptor.SetVersion(moduleVersion)
-	componentDescriptor.Metadata.Version = ocm.SchemaVersion
+	componentDescriptor.Metadata.ConfiguredVersion = schemaVersion
 
-	componentDescriptor.Provider = providerName
+	builtByModulectl, err := ocmv1.NewLabel("kyma-project.io/built-by", "modulectl")
+	if err != nil {
+		return nil, err
+	}
+	componentDescriptor.Provider = ocmv1.Provider{Name: providerName, Labels: ocmv1.Labels{*builtByModulectl}}
 
 	ocm.DefaultResources(componentDescriptor)
-	if err := componentDescriptor.Validate(); err != nil {
+	if err := ocm.Validate(componentDescriptor); err != nil {
 		return nil, fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 

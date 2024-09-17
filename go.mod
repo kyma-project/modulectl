@@ -5,6 +5,7 @@ go 1.22.7
 require (
 	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/go-git/go-git/v5 v5.12.0
+	github.com/mandelsoft/vfs v0.4.3
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/spf13/cobra v1.8.1
@@ -192,7 +193,6 @@ require (
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 // indirect
 	github.com/mandelsoft/goutils v0.0.0-20240910114310-fc2a9de4c494 // indirect
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a // indirect
-	github.com/mandelsoft/vfs v0.4.3 // indirect
 	github.com/marstr/guid v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
