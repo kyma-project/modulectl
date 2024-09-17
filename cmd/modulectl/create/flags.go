@@ -17,8 +17,8 @@ const (
 	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
 
 	GitRemoteFlagName    = "git-remote"
-	GitRemoteFlagDefault = "origin"
-	gitRemoteFlagUsage   = `Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream" (default "origin").`
+	GitRemoteFlagDefault = ""
+	gitRemoteFlagUsage   = `Specifies the URL of the wanted GitHub repository.`
 
 	InsecureFlagName    = "insecure"
 	InsecureFlagDefault = false

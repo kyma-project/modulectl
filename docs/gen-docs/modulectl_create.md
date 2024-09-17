@@ -72,7 +72,7 @@ Build a simple module and push it to a remote registry
 
 ```bash
 -c, --credentials string              Basic authentication credentials for the given repository in the <user:password> format.
-    --git-remote string               Specifies the remote name of the wanted GitHub repository. For example "origin" or "upstream" (default "origin").
+    --git-remote string               Specifies the URL of the wanted GitHub repository.
 -h, --help                            Provides help for the create command.
     --insecure                        Uses an insecure connection to access the registry.
     --module-config-file string       Specifies the module configuration file.

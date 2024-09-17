@@ -66,6 +66,8 @@ linters-settings:
         alias: ocm
       - pkg: ocm.software/ocm/api/ocm/compdesc/meta/v1
         alias: ocmv1
+      - pkg: ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact
+        alias: ociartifacttypes
   ireturn:
     allow:
       - anon

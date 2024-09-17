@@ -18,6 +18,8 @@ import (
 	"github.com/kyma-project/modulectl/tools/yaml"
 
 	_ "embed"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
 const (
@@ -78,7 +80,12 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
 
-	moduleService, err := create.NewService(moduleConfigService)
+	gitService := git.NewService()
+	gitSourcesService := componentdescriptor.NewGitSourcesService(gitService)
+	securityConfigService := componentdescriptor.NewSecurityConfigService(gitService)
+
+	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
+		securityConfigService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}

@@ -142,7 +142,7 @@ func newCreateOptionsBuilder() *createOptionsBuilder {
 		withOut(iotools.NewDefaultOut(io.Discard)).
 		withModuleConfigFile("create-module-config.yaml").
 		withRegistryURL("https://registry.kyma.cx").
-		withGitRemote("origin").
+		withGitRemote("http://github.com/kyma-project").
 		withTemplateOutput("test").
 		withCredentials("user:password")
 }

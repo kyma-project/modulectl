@@ -18,8 +18,10 @@ func Test_Validate_Options(t *testing.T) {
 		errMsg  string
 	}{
 		{
-			name:    "Out is nil",
-			options: create.Options{Out: nil},
+			name: "Out is nil",
+			options: create.Options{
+				Out: nil,
+			},
 			wantErr: true,
 			errMsg:  "opts.Out must not be nil",
 		},
@@ -59,7 +61,7 @@ func Test_Validate_Options(t *testing.T) {
 				Out:              iotools.NewDefaultOut(io.Discard),
 				ModuleConfigFile: "config.yaml",
 				Credentials:      "username:password",
-				GitRemote:        "origin",
+				GitRemote:        "github.com/kyma-project/modulectl",
 				TemplateOutput:   "",
 			},
 			wantErr: true,
@@ -71,7 +73,7 @@ func Test_Validate_Options(t *testing.T) {
 				Out:              iotools.NewDefaultOut(io.Discard),
 				ModuleConfigFile: "config.yaml",
 				Credentials:      "username:password",
-				GitRemote:        "origin",
+				GitRemote:        "github.com/kyma-project/modulectl",
 				TemplateOutput:   "output",
 				RegistryURL:      "ftp://registry.example.com",
 			},
@@ -84,7 +86,7 @@ func Test_Validate_Options(t *testing.T) {
 				Out:              iotools.NewDefaultOut(io.Discard),
 				ModuleConfigFile: "config.yaml",
 				Credentials:      "username:password",
-				GitRemote:        "origin",
+				GitRemote:        "github.com/kyma-project/modulectl",
 				TemplateOutput:   "output",
 				RegistryURL:      "http://registry.example.com",
 			},
