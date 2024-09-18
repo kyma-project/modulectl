@@ -1,18 +1,29 @@
 package filesystem
 
 import (
+	"archive/tar"
+	"bytes"
 	"fmt"
-	"github.com/mandelsoft/vfs/pkg/vfs"
+	"io"
 	"os"
+	"time"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/utils/blobaccess"
 )
+
+const tarMediaType = "application/x-tar"
 
 type ArchiveFileSystem struct {
 	MemoryFileSystem vfs.FileSystem
+	OsFileSystem     vfs.FileSystem
 }
 
-func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem) *ArchiveFileSystem {
+func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) *ArchiveFileSystem {
 	return &ArchiveFileSystem{
 		MemoryFileSystem: memoryFileSystem,
+		OsFileSystem:     osFileSystem,
 	}
 }
 
@@ -37,6 +48,42 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 	}
 
 	return nil
+}
+
+func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
+	fileInfo, err := s.OsFileSystem.Stat(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
+	}
+
+	inputBlob, err := s.OsFileSystem.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
+	}
+
+	data := bytes.Buffer{}
+	tarWriter := tar.NewWriter(&data)
+	defer tarWriter.Close()
+
+	header, err := tar.FileInfoHeader(fileInfo, "")
+	if err != nil {
+		return nil, fmt.Errorf("unable to create file info header: %w", err)
+	}
+	header.Name = filePath
+
+	header.AccessTime = time.Time{}
+	header.ChangeTime = time.Time{}
+	header.ModTime = time.Time{}
+
+	if err := tarWriter.WriteHeader(header); err != nil {
+		return nil, fmt.Errorf("unable to write header: %w", err)
+	}
+
+	if _, err := io.Copy(tarWriter, inputBlob); err != nil {
+		return nil, fmt.Errorf("unable to copy file: %w", err)
+	}
+
+	return blobaccess.ForData(tarMediaType, data.Bytes()), nil
 }
 
 func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {

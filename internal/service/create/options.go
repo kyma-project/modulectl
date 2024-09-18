@@ -3,7 +3,6 @@ package create
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	iotools "github.com/kyma-project/modulectl/tools/io"
@@ -29,11 +28,13 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("%w:  opts.ModuleConfigFile must not be empty", commonerrors.ErrInvalidOption)
 	}
 
-	matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
-	if err != nil {
-		return fmt.Errorf("%w: opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
-	} else if !matched {
-		return fmt.Errorf("%w: opts.Credentials is in invalid format", commonerrors.ErrInvalidOption)
+	if opts.Credentials != "" {
+		matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
+		if err != nil {
+			return fmt.Errorf("%w: opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
+		} else if !matched {
+			return fmt.Errorf("%w: opts.Credentials is in invalid format", commonerrors.ErrInvalidOption)
+		}
 	}
 
 	if opts.GitRemote == "" {
@@ -42,10 +43,6 @@ func (opts Options) Validate() error {
 
 	if opts.TemplateOutput == "" {
 		return fmt.Errorf("%w:  opts.TemplateOutput must not be empty", commonerrors.ErrInvalidOption)
-	}
-
-	if !strings.HasPrefix(opts.RegistryURL, "http") {
-		return fmt.Errorf("%w:  opts.RegistryURL does not start with http(s)", commonerrors.ErrInvalidOption)
 	}
 
 	return nil

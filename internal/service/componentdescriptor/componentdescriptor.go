@@ -20,9 +20,9 @@ func InitializeComponentDescriptor(moduleName string,
 	componentDescriptor.SetVersion(moduleVersion)
 	componentDescriptor.Metadata.ConfiguredVersion = schemaVersion
 
-	builtByModulectl, err := ocmv1.NewLabel("kyma-project.io/built-by", "modulectl")
+	builtByModulectl, err := ocmv1.NewLabel("kyma-project.io/built-by", "modulectl", ocmv1.WithVersion("v1"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create label: %w", err)
 	}
 	componentDescriptor.Provider = ocmv1.Provider{Name: providerName, Labels: ocmv1.Labels{*builtByModulectl}}
 

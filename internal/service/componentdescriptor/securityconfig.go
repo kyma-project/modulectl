@@ -5,18 +5,16 @@ import (
 	"fmt"
 	"strings"
 
+	"gopkg.in/yaml.v3"
 	ocm "ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"gopkg.in/yaml.v3"
 )
 
-var (
-	errInvalidURL = errors.New("invalid image URL")
-)
+var errInvalidURL = errors.New("invalid image URL")
 
 const (
 	secBaseLabelKey           = "security.kyma-project.io"
@@ -48,7 +46,8 @@ func NewSecurityConfigService(gitService GitService) *SecurityConfigService {
 
 func (s *SecurityConfigService) ParseSecurityConfigData(gitRepoURL, securityConfigFile string) (
 	*contentprovider.SecurityScanConfig,
-	error) {
+	error,
+) {
 	latestCommit, err := s.gitService.GetLatestCommit(gitRepoURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get latest commit: %w", err)
@@ -68,8 +67,9 @@ func (s *SecurityConfigService) ParseSecurityConfigData(gitRepoURL, securityConf
 }
 
 func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *ocm.ComponentDescriptor,
-	securityConfig contentprovider.SecurityScanConfig) error {
-	if err := appendSecurityLabelToDescriptor(descriptor); err != nil {
+	securityConfig contentprovider.SecurityScanConfig,
+) error {
+	if err := appendLabelToAccessor(descriptor, scanLabelKey, secScanEnabled, secBaseLabelKey); err != nil {
 		return fmt.Errorf("failed to append security label to descriptor: %w", err)
 	}
 
@@ -84,43 +84,34 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *ocm.Compone
 	return nil
 }
 
-func appendSecurityLabelToDescriptor(descriptor *ocm.ComponentDescriptor) error {
-	labels := descriptor.GetLabels()
-	securityLabelKey := fmt.Sprintf("%s/%s", secBaseLabelKey, scanLabelKey)
-	securityLabel, err := ocmv1.NewLabel(securityLabelKey, secScanEnabled)
-	if err != nil {
-		return fmt.Errorf("failed to create security label: %w", err)
-	}
-
-	labels = append(labels, *securityLabel)
-	descriptor.SetLabels(labels)
-	return nil
-}
-
 func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecurityScanConfig,
-	sources ocm.Sources) error {
-	for _, src := range sources {
-		if err := appendLabelToSource(&src, rcTagLabelKey, securityScanConfig.RcTag); err != nil {
+	sources ocm.Sources,
+) error {
+	for srcIndex := range sources {
+		src := &sources[srcIndex]
+		if err := appendLabelToAccessor(src, rcTagLabelKey, securityScanConfig.RcTag,
+			secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToSource(&src, languageLabelKey,
-			securityScanConfig.WhiteSource.Language); err != nil {
+		if err := appendLabelToAccessor(src, languageLabelKey,
+			securityScanConfig.WhiteSource.Language, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToSource(&src, devBranchLabelKey, securityScanConfig.DevBranch); err != nil {
+		if err := appendLabelToAccessor(src, devBranchLabelKey, securityScanConfig.DevBranch,
+			secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToSource(&src, subProjectsLabelKey,
-			securityScanConfig.WhiteSource.SubProjects); err != nil {
+		if err := appendLabelToAccessor(src, subProjectsLabelKey,
+			securityScanConfig.WhiteSource.SubProjects, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
 		excludeWhiteSourceProjects := strings.Join(securityScanConfig.WhiteSource.Exclude, ",")
-		if err := appendLabelToSource(&src, excludeLabelKey,
-			excludeWhiteSourceProjects); err != nil {
+		if err := appendLabelToAccessor(src, excludeLabelKey,
+			excludeWhiteSourceProjects, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 	}
@@ -129,7 +120,8 @@ func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 }
 
 func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
-	securityScanConfig contentprovider.SecurityScanConfig) error {
+	securityScanConfig contentprovider.SecurityScanConfig,
+) error {
 	protecodeImages := securityScanConfig.Protecode
 	for _, img := range protecodeImages {
 		imgName, imgTag, err := getImageNameAndTag(img)
@@ -138,19 +130,20 @@ func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
 		}
 
 		imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-		imageTypeLabel, err := ocmv1.NewLabel(imageTypeLabelKey, thirdPartyImageLabelValue)
+		imageTypeLabel, err := ocmv1.NewLabel(imageTypeLabelKey, thirdPartyImageLabelValue,
+			ocmv1.WithVersion(ocmVersion))
 		if err != nil {
 			return fmt.Errorf("failed to create security label: %w", err)
 		}
 
 		access := ociartifact.New(img)
-		access.SetType(ociartifact.LegacyType)
+		access.SetType(ociartifact.Type)
 		if err != nil {
 			return fmt.Errorf("failed to convert access to unstructured object: %w", err)
 		}
 		proteccodeImageLayer := ocm.Resource{
 			ResourceMeta: ocm.ResourceMeta{
-				Type:     ociartifacttypes.LEGACY_TYPE,
+				Type:     ociartifacttypes.TYPE,
 				Relation: ocmv1.ExternalRelation,
 				ElementMeta: ocm.ElementMeta{
 					Name:    imgName,
@@ -170,15 +163,15 @@ func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
 	return nil
 }
 
-func appendLabelToSource(source *ocm.Source, labelKey, labelValue string) error {
-	labels := source.GetLabels()
-	securityLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, labelKey)
-	securityLabel, err := ocmv1.NewLabel(securityLabelKey, labelValue)
+func appendLabelToAccessor(labeled ocm.LabelsAccessor, key, value, baseKey string) error {
+	labels := labeled.GetLabels()
+	securityLabelKey := fmt.Sprintf("%s/%s", baseKey, key)
+	labelValue, err := ocmv1.NewLabel(securityLabelKey, value, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
 		return fmt.Errorf("failed to create security label: %w", err)
 	}
-	labels = append(labels, *securityLabel)
-	source.SetLabels(labels)
+	labels = append(labels, *labelValue)
+	labeled.SetLabels(labels)
 	return nil
 }
 

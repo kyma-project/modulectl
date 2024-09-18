@@ -56,6 +56,10 @@ func (s *Service) ParseModuleConfig(configFilePath string) (*contentprovider.Mod
 		return nil, fmt.Errorf("failed to parse module config file: %w", err)
 	}
 
+	if moduleConfig.Namespace == "" {
+		moduleConfig.Namespace = "kcp-system"
+	}
+
 	return moduleConfig, nil
 }
 

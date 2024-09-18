@@ -68,19 +68,6 @@ func Test_Validate_Options(t *testing.T) {
 			errMsg:  "opts.TemplateOutput must not be empty",
 		},
 		{
-			name: "RegistryURL does not start with http",
-			options: create.Options{
-				Out:              iotools.NewDefaultOut(io.Discard),
-				ModuleConfigFile: "config.yaml",
-				Credentials:      "username:password",
-				GitRemote:        "github.com/kyma-project/modulectl",
-				TemplateOutput:   "output",
-				RegistryURL:      "ftp://registry.example.com",
-			},
-			wantErr: true,
-			errMsg:  "opts.RegistryURL does not start with http(s)",
-		},
-		{
 			name: "All fields valid",
 			options: create.Options{
 				Out:              iotools.NewDefaultOut(io.Discard),

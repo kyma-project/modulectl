@@ -3,11 +3,12 @@ package componentdescriptor
 import (
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/service/git"
 	ocm "ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
+
+	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
 type GitService interface {
@@ -26,7 +27,8 @@ func NewGitSourcesService(gitService GitService) *GitSourcesService {
 }
 
 func (s *GitSourcesService) AddGitSources(componentDescriptor *ocm.ComponentDescriptor,
-	gitRepoURL, moduleVersion string) error {
+	gitRepoURL, moduleVersion string,
+) error {
 	label, err := ocmv1.NewLabel(refLabel, git.HeadRef, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
 		return fmt.Errorf("failed to create label: %w", err)

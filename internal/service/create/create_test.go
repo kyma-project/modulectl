@@ -7,23 +7,27 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	ocm "ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
-	ocm "ocm.software/ocm/api/ocm/compdesc"
 )
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
-	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "moduleConfigService")
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
@@ -35,7 +39,8 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
@@ -47,7 +52,8 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withGitRemote("").build()
@@ -59,7 +65,8 @@ func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
@@ -71,7 +78,8 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 }
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
@@ -82,21 +90,9 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	assert.Contains(t, err.Error(), "opts.TemplateOutput")
 }
 
-func Test_CreateModule_ReturnsError_WhenRegistryURLIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().withRegistryURL("test").build()
-
-	err = svc.CreateModule(opts)
-
-	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.RegistryURL")
-}
-
 func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -109,7 +105,7 @@ func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing
 
 func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceDefaultCRErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -122,7 +118,7 @@ func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.
 
 func Test_CreateModule_ReturnsError_WhenGetManifestPathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceManifestErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -281,16 +277,33 @@ func (*moduleConfigServiceManifestErrorStub) CleanupTempFiles() []error {
 type gitSourcesServiceStub struct{}
 
 func (*gitSourcesServiceStub) AddGitSources(_ *ocm.ComponentDescriptor,
-	_, _ string) error {
+	_, _ string,
+) error {
 	return nil
 }
 
 type securityConfigServiceStub struct{}
 
 func (*securityConfigServiceStub) ParseSecurityConfigData(_, _ string) (*contentprovider.SecurityScanConfig, error) {
-	return nil, nil
+	return &contentprovider.SecurityScanConfig{}, nil
 }
+
 func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *ocm.ComponentDescriptor,
-	_ contentprovider.SecurityScanConfig) error {
+	_ contentprovider.SecurityScanConfig,
+) error {
+	return nil
+}
+
+type componentArchiveServiceStub struct{}
+
+func (*componentArchiveServiceStub) CreateComponentArchive(_ *ocm.ComponentDescriptor) (*comparch.ComponentArchive,
+	error,
+) {
+	return &comparch.ComponentArchive{}, nil
+}
+
+func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ *comparch.ComponentArchive,
+	_ []componentdescriptor.Resource,
+) error {
 	return nil
 }

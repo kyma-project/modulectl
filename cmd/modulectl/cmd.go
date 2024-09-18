@@ -3,14 +3,19 @@ package modulectl
 import (
 	"fmt"
 
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/spf13/cobra"
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
+	"github.com/kyma-project/modulectl/internal/service/componentarchive"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
+	"github.com/kyma-project/modulectl/internal/service/git"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
@@ -18,8 +23,6 @@ import (
 	"github.com/kyma-project/modulectl/tools/yaml"
 
 	_ "embed"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
 const (
@@ -84,8 +87,13 @@ func buildModuleService() (*create.Service, error) {
 	gitSourcesService := componentdescriptor.NewGitSourcesService(gitService)
 	securityConfigService := componentdescriptor.NewSecurityConfigService(gitService)
 
+	memoryFileSystem := memoryfs.New()
+	osFileSystem := osfs.New()
+	archiveFileSystemService := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
+	componentArchiveService := componentarchive.NewService(archiveFileSystemService)
+
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		securityConfigService)
+		securityConfigService, componentArchiveService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}

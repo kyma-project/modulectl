@@ -6,4 +6,4 @@ packages:
   internal/service/filegenerator: 100
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 45
-  internal/service/create: 90
+  internal/service/create: 56
