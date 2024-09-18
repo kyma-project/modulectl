@@ -12,17 +12,18 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
+	ocm "ocm.software/ocm/api/ocm/compdesc"
 )
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
-	_, err := create.NewService(nil)
+	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "moduleConfigService")
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
@@ -34,7 +35,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
@@ -46,7 +47,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withGitRemote("").build()
@@ -58,7 +59,7 @@ func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
@@ -70,7 +71,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 }
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
@@ -82,7 +83,7 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenRegistryURLIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withRegistryURL("test").build()
@@ -94,7 +95,8 @@ func Test_CreateModule_ReturnsError_WhenRegistryURLIsInInvalidFormat(t *testing.
 }
 
 func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{})
+	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
+		&securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -106,7 +108,8 @@ func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing
 }
 
 func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceDefaultCRErrorStub{})
+	svc, err := create.NewService(&moduleConfigServiceDefaultCRErrorStub{}, &gitSourcesServiceStub{},
+		&securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -118,7 +121,8 @@ func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.
 }
 
 func Test_CreateModule_ReturnsError_WhenGetManifestPathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceManifestErrorStub{})
+	svc, err := create.NewService(&moduleConfigServiceManifestErrorStub{}, &gitSourcesServiceStub{},
+		&securityConfigServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -271,5 +275,22 @@ func (*moduleConfigServiceManifestErrorStub) GetManifestPath(_ string) (string, 
 }
 
 func (*moduleConfigServiceManifestErrorStub) CleanupTempFiles() []error {
+	return nil
+}
+
+type gitSourcesServiceStub struct{}
+
+func (*gitSourcesServiceStub) AddGitSources(_ *ocm.ComponentDescriptor,
+	_, _ string) error {
+	return nil
+}
+
+type securityConfigServiceStub struct{}
+
+func (*securityConfigServiceStub) ParseSecurityConfigData(_, _ string) (*contentprovider.SecurityScanConfig, error) {
+	return nil, nil
+}
+func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *ocm.ComponentDescriptor,
+	_ contentprovider.SecurityScanConfig) error {
 	return nil
 }
