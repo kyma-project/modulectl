@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	ocm "ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
@@ -15,11 +14,13 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
+	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/cpi"
 )
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "moduleConfigService")
@@ -27,7 +28,7 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
@@ -40,7 +41,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
@@ -53,7 +54,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withGitRemote("").build()
@@ -66,7 +67,7 @@ func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
@@ -79,7 +80,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
@@ -92,7 +93,8 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -105,7 +107,8 @@ func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing
 
 func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceDefaultCRErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -118,7 +121,8 @@ func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.
 
 func Test_CreateModule_ReturnsError_WhenGetManifestPathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceManifestErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{})
+		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -276,7 +280,7 @@ func (*moduleConfigServiceManifestErrorStub) CleanupTempFiles() []error {
 
 type gitSourcesServiceStub struct{}
 
-func (*gitSourcesServiceStub) AddGitSources(_ *ocm.ComponentDescriptor,
+func (*gitSourcesServiceStub) AddGitSources(_ *compdesc.ComponentDescriptor,
 	_, _ string,
 ) error {
 	return nil
@@ -288,7 +292,7 @@ func (*securityConfigServiceStub) ParseSecurityConfigData(_, _ string) (*content
 	return &contentprovider.SecurityScanConfig{}, nil
 }
 
-func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *ocm.ComponentDescriptor,
+func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *compdesc.ComponentDescriptor,
 	_ contentprovider.SecurityScanConfig,
 ) error {
 	return nil
@@ -296,7 +300,7 @@ func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *ocm.ComponentDescr
 
 type componentArchiveServiceStub struct{}
 
-func (*componentArchiveServiceStub) CreateComponentArchive(_ *ocm.ComponentDescriptor) (*comparch.ComponentArchive,
+func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
 	error,
 ) {
 	return &comparch.ComponentArchive{}, nil
@@ -306,4 +310,30 @@ func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ *comparch.Comp
 	_ []componentdescriptor.Resource,
 ) error {
 	return nil
+}
+
+type registryServiceStub struct{}
+
+func (*registryServiceStub) PushComponentVersion(_ *comparch.ComponentArchive, _ bool,
+	_, _ string) error {
+	return nil
+}
+
+func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ bool,
+	_, _ string) (cpi.ComponentVersionAccess, error) {
+	return nil, nil
+}
+
+type ModuleTemplateServiceStub struct{}
+
+func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ cpi.ComponentVersionAccess, _ *contentprovider.ModuleConfig,
+	_ string, _ bool,
+) error {
+	return nil
+}
+
+type CRDParserServiceStub struct{}
+
+func (*CRDParserServiceStub) IsCRDClusterScoped(_, _ string) (bool, error) {
+	return false, nil
 }

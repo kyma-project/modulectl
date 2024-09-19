@@ -79,6 +79,19 @@ func Test_Validate_Options(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "RegistryURL does not start with http",
+			options: create.Options{
+				Out:              iotools.NewDefaultOut(io.Discard),
+				ModuleConfigFile: "config.yaml",
+				Credentials:      "username:password",
+				GitRemote:        "origin",
+				TemplateOutput:   "output",
+				RegistryURL:      "ftp://registry.example.com",
+			},
+			wantErr: true,
+			errMsg:  "opts.RegistryURL does not start with http(s)",
+		},
 	}
 
 	for _, tt := range tests {

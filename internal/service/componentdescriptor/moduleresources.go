@@ -5,7 +5,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ocm "ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
 
@@ -19,7 +19,7 @@ const (
 )
 
 type Resource struct {
-	ocm.Resource
+	compdesc.Resource
 	Path string
 }
 
@@ -27,9 +27,9 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 	error,
 ) {
 	moduleImageResource := Resource{
-		Resource: ocm.Resource{
-			ResourceMeta: ocm.ResourceMeta{
-				ElementMeta: ocm.ElementMeta{
+		Resource: compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
 					Name: moduleImageResourceName,
 				},
 				Type:     ociArtifactType,
@@ -39,9 +39,9 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 	}
 
 	rawManifestResource := Resource{
-		Resource: ocm.Resource{
-			ResourceMeta: ocm.ResourceMeta{
-				ElementMeta: ocm.ElementMeta{
+		Resource: compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
 					Name: rawManifestResourceName,
 				},
 				Type:     directoryType,
@@ -54,9 +54,9 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 
 	if defaultCRPath != "" {
 		defaultCRResource := Resource{
-			Resource: ocm.Resource{
-				ResourceMeta: ocm.ResourceMeta{
-					ElementMeta: ocm.ElementMeta{
+			Resource: compdesc.Resource{
+				ResourceMeta: compdesc.ResourceMeta{
+					ElementMeta: compdesc.ElementMeta{
 						Name: defaultCRResourceName,
 					},
 					Type:     directoryType,

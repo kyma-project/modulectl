@@ -23,6 +23,10 @@ import (
 	"github.com/kyma-project/modulectl/tools/yaml"
 
 	_ "embed"
+	"github.com/kyma-project/modulectl/internal/service/crdparser"
+	"github.com/kyma-project/modulectl/internal/service/registry"
+	"github.com/kyma-project/modulectl/internal/service/templategenerator"
+	"github.com/kyma-project/modulectl/tools/ocirepo"
 )
 
 const (
@@ -91,9 +95,13 @@ func buildModuleService() (*create.Service, error) {
 	osFileSystem := osfs.New()
 	archiveFileSystemService := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
 	componentArchiveService := componentarchive.NewService(archiveFileSystemService)
+	ociRepo := &ocirepo.OCIRepo{}
+	registryService := registry.NewService(ociRepo)
+	moduleTemplateService := templategenerator.NewService(fileSystemUtil)
+	crdParserService := crdparser.NewService(fileSystemUtil)
 
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		securityConfigService, componentArchiveService)
+		securityConfigService, componentArchiveService, registryService, moduleTemplateService, crdParserService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}

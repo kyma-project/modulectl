@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	ocm "ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/accessobj"
@@ -36,17 +36,17 @@ func NewService(fileSystem ArchiveFileSystem) *Service {
 }
 
 func (s *Service) CreateComponentArchive(
-	componentDescriptor *ocm.ComponentDescriptor) (*comparch.ComponentArchive,
+	componentDescriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
 	error,
 ) {
 	if err := s.fileSystem.CreateArchiveFileSystem(componentDescriptorPath); err != nil {
 		return nil, fmt.Errorf("failed to create archive file system, %w", err)
 	}
 
-	encodeOptions := &ocm.EncodeOptions{
+	encodeOptions := &compdesc.EncodeOptions{
 		SchemaVersion: componentDescriptor.SchemaVersion(),
 	}
-	versionedDescriptor, err := ocm.Convert(componentDescriptor, encodeOptions)
+	versionedDescriptor, err := compdesc.Convert(componentDescriptor, encodeOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert component descriptor, %w", err)
 	}

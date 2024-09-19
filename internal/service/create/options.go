@@ -2,10 +2,10 @@ package create
 
 import (
 	"fmt"
-	"regexp"
-
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	iotools "github.com/kyma-project/modulectl/tools/io"
+	"regexp"
+	"strings"
 )
 
 type Options struct {
@@ -43,6 +43,10 @@ func (opts Options) Validate() error {
 
 	if opts.TemplateOutput == "" {
 		return fmt.Errorf("%w:  opts.TemplateOutput must not be empty", commonerrors.ErrInvalidOption)
+	}
+
+	if !strings.HasPrefix(opts.RegistryURL, "http") {
+		return fmt.Errorf("%w:  opts.RegistryURL does not start with http(s)", commonerrors.ErrInvalidOption)
 	}
 
 	return nil

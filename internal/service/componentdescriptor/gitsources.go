@@ -3,7 +3,7 @@ package componentdescriptor
 import (
 	"fmt"
 
-	ocm "ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
@@ -26,7 +26,7 @@ func NewGitSourcesService(gitService GitService) *GitSourcesService {
 	}
 }
 
-func (s *GitSourcesService) AddGitSources(componentDescriptor *ocm.ComponentDescriptor,
+func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
 	gitRepoURL, moduleVersion string,
 ) error {
 	label, err := ocmv1.NewLabel(refLabel, git.HeadRef, ocmv1.WithVersion(ocmVersion))
@@ -34,9 +34,9 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *ocm.ComponentDesc
 		return fmt.Errorf("failed to create label: %w", err)
 	}
 
-	sourceMeta := ocm.SourceMeta{
+	sourceMeta := compdesc.SourceMeta{
 		Type: identity.CONSUMER_TYPE,
-		ElementMeta: ocm.ElementMeta{
+		ElementMeta: compdesc.ElementMeta{
 			Name:    ocmIdentityName,
 			Version: moduleVersion,
 			Labels:  ocmv1.Labels{*label},
@@ -49,7 +49,7 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *ocm.ComponentDesc
 	}
 	access := github.New(gitRepoURL, "", latestCommit)
 
-	componentDescriptor.Sources = append(componentDescriptor.Sources, ocm.Source{
+	componentDescriptor.Sources = append(componentDescriptor.Sources, compdesc.Source{
 		SourceMeta: sourceMeta,
 		Access:     access,
 	})

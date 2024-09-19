@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
-	ocm "ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"ocm.software/ocm/api/ocm/compdesc"
 )
 
 var errInvalidURL = errors.New("invalid image URL")
@@ -66,7 +66,7 @@ func (s *SecurityConfigService) ParseSecurityConfigData(gitRepoURL, securityConf
 	return securityConfig, nil
 }
 
-func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *ocm.ComponentDescriptor,
+func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
 	securityConfig contentprovider.SecurityScanConfig,
 ) error {
 	if err := appendLabelToAccessor(descriptor, scanLabelKey, secScanEnabled, secBaseLabelKey); err != nil {
@@ -85,7 +85,7 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *ocm.Compone
 }
 
 func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecurityScanConfig,
-	sources ocm.Sources,
+	sources compdesc.Sources,
 ) error {
 	for srcIndex := range sources {
 		src := &sources[srcIndex]
@@ -119,7 +119,7 @@ func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 	return nil
 }
 
-func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
+func appendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
 	securityScanConfig contentprovider.SecurityScanConfig,
 ) error {
 	protecodeImages := securityScanConfig.Protecode
@@ -141,11 +141,11 @@ func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
 		if err != nil {
 			return fmt.Errorf("failed to convert access to unstructured object: %w", err)
 		}
-		proteccodeImageLayer := ocm.Resource{
-			ResourceMeta: ocm.ResourceMeta{
+		proteccodeImageLayer := compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
 				Type:     ociartifacttypes.TYPE,
 				Relation: ocmv1.ExternalRelation,
-				ElementMeta: ocm.ElementMeta{
+				ElementMeta: compdesc.ElementMeta{
 					Name:    imgName,
 					Labels:  []ocmv1.Label{*imageTypeLabel},
 					Version: imgTag,
@@ -155,15 +155,15 @@ func appendProtecodeImagesLayers(componentDescriptor *ocm.ComponentDescriptor,
 		}
 		componentDescriptor.Resources = append(componentDescriptor.Resources, proteccodeImageLayer)
 	}
-	ocm.DefaultResources(componentDescriptor)
-	if err := ocm.Validate(componentDescriptor); err != nil {
+	compdesc.DefaultResources(componentDescriptor)
+	if err := compdesc.Validate(componentDescriptor); err != nil {
 		return fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 
 	return nil
 }
 
-func appendLabelToAccessor(labeled ocm.LabelsAccessor, key, value, baseKey string) error {
+func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey string) error {
 	labels := labeled.GetLabels()
 	securityLabelKey := fmt.Sprintf("%s/%s", baseKey, key)
 	labelValue, err := ocmv1.NewLabel(securityLabelKey, value, ocmv1.WithVersion(ocmVersion))
