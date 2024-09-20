@@ -20,24 +20,14 @@ const (
 )
 
 func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileDoesNotExistStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.ParseModuleConfig(moduleConfigFile)
+	result, err := moduleconfigreader.ParseModuleConfig(moduleConfigFile, &fileDoesNotExistStub{})
 
 	require.ErrorIs(t, err, errReadingFile)
 	assert.Nil(t, result)
 }
 
 func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileExistsStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.ParseModuleConfig(moduleConfigFile)
+	result, err := moduleconfigreader.ParseModuleConfig(moduleConfigFile, &fileExistsStub{})
 
 	require.NoError(t, err)
 	assert.Equal(t, "module-name", result.Name)
@@ -56,51 +46,31 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 }
 
 func Test_GetDefaultCRPath_Returns_CorrectPath(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileExistsStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.GetDefaultCRPath("https://example.com/path")
+	result, err := moduleconfigreader.GetDefaultCRPath("https://example.com/path", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
 	assert.Equal(t, "file.yaml", result)
 }
 
 func Test_GetDefaultCRPath_Returns_CorrectPath_When_NotUrl(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileExistsStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.GetDefaultCRPath("path/to/defaultcr.yaml")
+	result, err := moduleconfigreader.GetDefaultCRPath("/path/to/defaultcr.yaml", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "path/to/defaultcr.yaml", result)
+	assert.Equal(t, "/path/to/defaultcr.yaml", result)
 }
 
 func Test_GetManifestPath_Returns_CorrectPath(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileExistsStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.GetDefaultCRPath("https://example.com/path")
+	result, err := moduleconfigreader.GetDefaultCRPath("https://example.com/path", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
 	assert.Equal(t, "file.yaml", result)
 }
 
 func Test_GetManifestPath_Returns_CorrectPath_When_NotUrl(t *testing.T) {
-	svc, _ := moduleconfigreader.NewService(
-		&fileExistsStub{},
-		&tmpfileSystemStub{},
-	)
-
-	result, err := svc.GetDefaultCRPath("path/to/manifest.yaml")
+	result, err := moduleconfigreader.GetDefaultCRPath("/path/to/manifest.yaml", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "path/to/manifest.yaml", result)
+	assert.Equal(t, "/path/to/manifest.yaml", result)
 }
 
 func TestService_ParseURL(t *testing.T) {
@@ -147,13 +117,7 @@ func TestService_ParseURL(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			tmpFileSystem := tmpfileSystemStub{}
-			fileSystem := fileExistsStub{}
-
-			s, err := moduleconfigreader.NewService(&fileSystem, &tmpFileSystem)
-			require.NoError(t, err)
-
-			got, err := s.ParseURL(test.urlString)
+			got, err := moduleconfigreader.ParseURL(test.urlString)
 
 			if test.expectedError != nil {
 				require.EqualError(t, err, test.expectedError.Error())

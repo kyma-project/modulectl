@@ -29,7 +29,8 @@ func (o *OCIRepo) GetComponentVersion(archive *comparch.ComponentArchive,
 func (o *OCIRepo) PushComponentVersionIfNotExist(archive *comparch.ComponentArchive, repo cpi.Repository) error {
 	if exists, _ := repo.ExistsComponentVersion(archive.GetName(),
 		archive.GetVersion()); exists {
-		return fmt.Errorf("%w: cannot push component version", errComponentVersionAlreadyExists)
+		return fmt.Errorf("%w: cannot push component version %s",
+			errComponentVersionAlreadyExists, archive.GetVersion())
 	}
 
 	transferHandler, err := standard.New()

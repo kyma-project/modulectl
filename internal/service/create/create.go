@@ -13,10 +13,8 @@ import (
 )
 
 type ModuleConfigService interface {
-	ParseModuleConfig(configFilePath string) (*contentprovider.ModuleConfig, error)
-	ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error
-	GetDefaultCRPath(defaultCRPath string) (string, error)
-	GetManifestPath(manifestPath string) (string, error)
+	ParseAndValidateModuleConfig(moduleConfigFile string) (*contentprovider.ModuleConfig, error)
+	GetDefaultCRData(defaultCRPath string) ([]byte, error)
 	CleanupTempFiles() []error
 }
 
@@ -45,7 +43,7 @@ type RegistryService interface {
 
 type ModuleTemplateService interface {
 	GenerateModuleTemplate(componentVersionAccess cpi.ComponentVersionAccess,
-		moduleConfig *contentprovider.ModuleConfig, templateOutput string, isCrdClusterScoped bool) error
+		moduleConfig *contentprovider.ModuleConfig, templateOutput string, data []byte, isCrdClusterScoped bool) error
 }
 
 type CRDParserService interface {
@@ -115,9 +113,10 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 	defer s.moduleConfigService.CleanupTempFiles()
 
-	moduleConfig, err := populateAndValidateModuleConfig(s.moduleConfigService, opts.ModuleConfigFile)
+	opts.Out.Write("Creating module...\n")
+	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
 	if err != nil {
-		return fmt.Errorf("%w: failed to populate module config", err)
+		return fmt.Errorf("%w: failed to parse module config", err)
 	}
 
 	componentDescriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name,
@@ -147,6 +146,12 @@ func (s *Service) CreateModule(opts Options) error {
 		}
 	}
 
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath,
+		moduleConfig.ManifestPath)
+	if err != nil {
+		return fmt.Errorf("%w: failed to determine if CRD is cluster scoped", err)
+	}
+
 	componentArchive, err := s.componentArchiveService.CreateComponentArchive(componentDescriptor)
 	if err != nil {
 		return fmt.Errorf("%w: failed to create component archive", err)
@@ -168,41 +173,15 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to get component version", err)
 	}
 
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath,
-		moduleConfig.ManifestPath)
+	crData, err := s.moduleConfigService.GetDefaultCRData(moduleConfig.DefaultCRPath)
 	if err != nil {
-		return fmt.Errorf("%w: failed to determine if CRD is cluster scoped", err)
+		return fmt.Errorf("%w: failed to get default CR data", err)
 	}
 
 	if err := s.moduleTemplateService.GenerateModuleTemplate(componentVersionAccess, moduleConfig, opts.TemplateOutput,
-		isCRDClusterScoped); err != nil {
+		crData, isCRDClusterScoped); err != nil {
 		return fmt.Errorf("%w: failed to generate module template", err)
 	}
 
 	return nil
-}
-
-func populateAndValidateModuleConfig(moduleConfigService ModuleConfigService,
-	moduleConfigFile string,
-) (*contentprovider.ModuleConfig, error) {
-	moduleConfig, err := moduleConfigService.ParseModuleConfig(moduleConfigFile)
-	if err != nil {
-		return nil, fmt.Errorf("%w: failed to parse module config file", err)
-	}
-
-	if err := moduleConfigService.ValidateModuleConfig(moduleConfig); err != nil {
-		return nil, fmt.Errorf("%w: failed to value module config", err)
-	}
-
-	moduleConfig.DefaultCRPath, err = moduleConfigService.GetDefaultCRPath(moduleConfig.DefaultCRPath)
-	if err != nil {
-		return nil, fmt.Errorf("%w: failed to get default CR path", err)
-	}
-
-	moduleConfig.ManifestPath, err = moduleConfigService.GetManifestPath(moduleConfig.ManifestPath)
-	if err != nil {
-		return nil, fmt.Errorf("%w: failed to get manifest path", err)
-	}
-
-	return moduleConfig, nil
 }

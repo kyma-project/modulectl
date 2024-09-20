@@ -7,10 +7,10 @@ import (
 	"text/template"
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
+	"sigs.k8s.io/yaml"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
@@ -50,6 +50,10 @@ metadata:
 spec:
   channel: {{.Channel}}
   mandatory: {{.Mandatory}}
+  data:
+{{- with .Data}}
+{{. | indent 4}}
+{{- end}}
   descriptor:
 {{yaml .Descriptor | printf "%s" | indent 4}}
 `
@@ -63,10 +67,11 @@ type moduleTemplateData struct {
 	Labels       map[string]string
 	Annotations  map[string]string
 	Mandatory    bool
+	Data         string
 }
 
 func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVersionAccess,
-	moduleConfig *contentprovider.ModuleConfig, templateOutput string, isCrdClusterScoped bool,
+	moduleConfig *contentprovider.ModuleConfig, templateOutput string, data []byte, isCrdClusterScoped bool,
 ) error {
 	descriptor := componentVersionAccess.GetDescriptor()
 	ref, err := oci.ParseRef(descriptor.Name)
@@ -104,6 +109,7 @@ func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVer
 		Labels:       labels,
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
+		Data:         string(data),
 	}
 
 	w := &bytes.Buffer{}
@@ -111,7 +117,7 @@ func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVer
 		return fmt.Errorf("failed to execute template, %w", err)
 	}
 
-	if err := s.fileSystem.WriteFile(w.String(), templateOutput); err != nil {
+	if err := s.fileSystem.WriteFile(templateOutput, w.String()); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 

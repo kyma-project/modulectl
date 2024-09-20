@@ -24,17 +24,15 @@ func NewService(fileSystem FileSystem) *Service {
 }
 
 type resource struct {
-	Kind       string      `yaml:"kind"`
-	APIVersion string      `yaml:"apiVersion"`
-	Spec       interface{} `yaml:"spec"`
-}
-
-type spec struct {
-	Group string `yaml:"group"`
-	Names struct {
-		Kind string `yaml:"kind"`
-	} `yaml:"names"`
-	Scope apiextensions.ResourceScope `yaml:"scope"`
+	Kind       string `yaml:"kind"`
+	APIVersion string `yaml:"apiVersion"`
+	Spec       struct {
+		Group string `yaml:"group"`
+		Names struct {
+			Kind string `yaml:"kind"`
+		} `yaml:"names"`
+		Scope apiextensions.ResourceScope `yaml:"scope"`
+	} `yaml:"spec"`
 }
 
 func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) {
@@ -80,16 +78,8 @@ func getCrdScopeFromManifest(manifestData []byte, group, kind string) (apiextens
 			return "", fmt.Errorf("failed to parse YAML document: %w", err)
 		}
 
-		if res.Kind == "CustomResourceDefinition" {
-			var resSpec spec
-			specBytes := fmt.Sprintf("%v", res.Spec)
-			if err = yaml.Unmarshal([]byte(specBytes), &resSpec); err != nil {
-				return "", fmt.Errorf("error parsing resource: %w", err)
-			}
-
-			if resSpec.Group == group && resSpec.Names.Kind == kind {
-				return resSpec.Scope, nil
-			}
+		if res.Kind == "CustomResourceDefinition" && res.Spec.Group == group && res.Spec.Names.Kind == kind {
+			return res.Spec.Scope, nil
 		}
 	}
 

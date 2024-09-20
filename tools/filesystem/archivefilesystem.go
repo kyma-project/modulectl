@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -56,30 +55,31 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
 	}
 
-	inputBlob, err := s.OsFileSystem.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
+	inputFile, err := s.OsFileSystem.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
 	}
+	defer inputFile.Close()
 
+	header, err := tar.FileInfoHeader(fileInfo, "")
+	if err != nil {
+		return nil, fmt.Errorf("unable to create header for file %q: %w", filePath, err)
+	}
+	header.Name = fileInfo.Name()
 	data := bytes.Buffer{}
 	tarWriter := tar.NewWriter(&data)
 	defer tarWriter.Close()
 
-	header, err := tar.FileInfoHeader(fileInfo, "")
-	if err != nil {
-		return nil, fmt.Errorf("unable to create file info header: %w", err)
-	}
-	header.Name = filePath
-
-	header.AccessTime = time.Time{}
-	header.ChangeTime = time.Time{}
-	header.ModTime = time.Time{}
-
+	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
-		return nil, fmt.Errorf("unable to write header: %w", err)
+		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
 	}
 
-	if _, err := io.Copy(tarWriter, inputBlob); err != nil {
+	if _, err := inputFile.Seek(0, io.SeekStart); err != nil {
+		return nil, fmt.Errorf("unable to reset input file: %w", err)
+	}
+
+	if _, err := io.Copy(tarWriter, inputFile); err != nil {
 		return nil, fmt.Errorf("unable to copy file: %w", err)
 	}
 

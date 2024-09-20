@@ -91,7 +91,7 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	assert.Contains(t, err.Error(), "opts.TemplateOutput")
 }
 
-func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing.T) {
+func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
 		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
 		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
@@ -102,35 +102,7 @@ func Test_CreateModule_ReturnsError_WhenParseModuleConfigReturnsError(t *testing
 	err = svc.CreateModule(opts)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse module config file")
-}
-
-func Test_CreateModule_ReturnsError_WhenGetDefaultCRPathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceDefaultCRErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
-		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().build()
-
-	err = svc.CreateModule(opts)
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to download default CR file")
-}
-
-func Test_CreateModule_ReturnsError_WhenGetManifestPathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceManifestErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
-		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().build()
-
-	err = svc.CreateModule(opts)
-
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to download Manifest file")
+	assert.Contains(t, err.Error(), "failed to read module config file")
 }
 
 type createOptionsBuilder struct {
@@ -188,20 +160,12 @@ func (b *createOptionsBuilder) withCredentials(credentials string) *createOption
 // Test Stubs
 type moduleConfigServiceStub struct{}
 
-func (*moduleConfigServiceStub) ParseModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
+func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
 	return &contentprovider.ModuleConfig{}, nil
 }
 
-func (*moduleConfigServiceStub) ValidateModuleConfig(_ *contentprovider.ModuleConfig) error {
-	return nil
-}
-
-func (*moduleConfigServiceStub) GetDefaultCRPath(_ string) (string, error) {
-	return "", nil
-}
-
-func (*moduleConfigServiceStub) GetManifestPath(_ string) (string, error) {
-	return "", nil
+func (*moduleConfigServiceStub) GetDefaultCRData(_ string) ([]byte, error) {
+	return []byte{}, nil
 }
 
 func (*moduleConfigServiceStub) CleanupTempFiles() []error {
@@ -210,71 +174,17 @@ func (*moduleConfigServiceStub) CleanupTempFiles() []error {
 
 type moduleConfigServiceParseErrorStub struct{}
 
-func (*moduleConfigServiceParseErrorStub) ParseModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
+func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig,
+	error,
+) {
 	return nil, errors.New("failed to read module config file")
 }
 
-func (*moduleConfigServiceParseErrorStub) ValidateModuleConfig(_ *contentprovider.ModuleConfig) error {
-	return nil
-}
-
-func (*moduleConfigServiceParseErrorStub) GetDefaultCRPath(_ string) (string, error) {
-	return "", nil
-}
-
-func (*moduleConfigServiceParseErrorStub) GetManifestPath(_ string) (string, error) {
-	return "", nil
+func (*moduleConfigServiceParseErrorStub) GetDefaultCRData(_ string) ([]byte, error) {
+	return []byte{}, nil
 }
 
 func (*moduleConfigServiceParseErrorStub) CleanupTempFiles() []error {
-	return nil
-}
-
-type moduleConfigServiceDefaultCRErrorStub struct{}
-
-func (*moduleConfigServiceDefaultCRErrorStub) ParseModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
-	return &contentprovider.ModuleConfig{
-		DefaultCRPath: "test",
-	}, nil
-}
-
-func (*moduleConfigServiceDefaultCRErrorStub) ValidateModuleConfig(_ *contentprovider.ModuleConfig) error {
-	return nil
-}
-
-func (*moduleConfigServiceDefaultCRErrorStub) GetDefaultCRPath(_ string) (string, error) {
-	return "", errors.New("failed to download default CR file")
-}
-
-func (*moduleConfigServiceDefaultCRErrorStub) GetManifestPath(_ string) (string, error) {
-	return "", nil
-}
-
-func (*moduleConfigServiceDefaultCRErrorStub) CleanupTempFiles() []error {
-	return nil
-}
-
-type moduleConfigServiceManifestErrorStub struct{}
-
-func (*moduleConfigServiceManifestErrorStub) ParseModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
-	return &contentprovider.ModuleConfig{
-		ManifestPath: "test",
-	}, nil
-}
-
-func (*moduleConfigServiceManifestErrorStub) ValidateModuleConfig(_ *contentprovider.ModuleConfig) error {
-	return nil
-}
-
-func (*moduleConfigServiceManifestErrorStub) GetDefaultCRPath(_ string) (string, error) {
-	return "", nil
-}
-
-func (*moduleConfigServiceManifestErrorStub) GetManifestPath(_ string) (string, error) {
-	return "", errors.New("failed to download Manifest file")
-}
-
-func (*moduleConfigServiceManifestErrorStub) CleanupTempFiles() []error {
 	return nil
 }
 
@@ -330,7 +240,7 @@ func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ 
 type ModuleTemplateServiceStub struct{}
 
 func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ cpi.ComponentVersionAccess, _ *contentprovider.ModuleConfig,
-	_ string, _ bool,
+	_ string, _ []byte, _ bool,
 ) error {
 	return nil
 }
