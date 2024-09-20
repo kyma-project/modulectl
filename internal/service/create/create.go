@@ -113,7 +113,6 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 	defer s.moduleConfigService.CleanupTempFiles()
 
-	opts.Out.Write("Creating module...\n")
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
 	if err != nil {
 		return fmt.Errorf("%w: failed to parse module config", err)
@@ -135,6 +134,7 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to add git sources", err)
 	}
 
+	opts.Out.Write("- Configuring security scanners config\n")
 	if moduleConfig.Security != "" {
 		securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
 		if err != nil {
@@ -152,6 +152,7 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to determine if CRD is cluster scoped", err)
 	}
 
+	opts.Out.Write("- Creating component archive\n")
 	componentArchive, err := s.componentArchiveService.CreateComponentArchive(componentDescriptor)
 	if err != nil {
 		return fmt.Errorf("%w: failed to create component archive", err)
@@ -162,6 +163,7 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to add module resources to component archive", err)
 	}
 
+	opts.Out.Write("- Pushing component version\n")
 	if err := s.registryService.PushComponentVersion(componentArchive, opts.Insecure, opts.Credentials,
 		opts.RegistryURL); err != nil {
 		return fmt.Errorf("%w: failed to push component archive", err)
@@ -178,6 +180,7 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to get default CR data", err)
 	}
 
+	opts.Out.Write("- Generating ModuleTemplate\n")
 	if err := s.moduleTemplateService.GenerateModuleTemplate(componentVersionAccess, moduleConfig, opts.TemplateOutput,
 		crData, isCRDClusterScoped); err != nil {
 		return fmt.Errorf("%w: failed to generate module template", err)
