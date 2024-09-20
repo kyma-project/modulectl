@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"ocm.software/ocm/api/ocm/compdesc"
 )
 
 var errInvalidURL = errors.New("invalid image URL")

@@ -12,21 +12,21 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
+	"github.com/kyma-project/modulectl/internal/service/registry"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
+	"github.com/kyma-project/modulectl/internal/service/templategenerator"
 	"github.com/kyma-project/modulectl/tools/filesystem"
+	"github.com/kyma-project/modulectl/tools/ocirepo"
 	"github.com/kyma-project/modulectl/tools/yaml"
 
 	_ "embed"
-	"github.com/kyma-project/modulectl/internal/service/crdparser"
-	"github.com/kyma-project/modulectl/internal/service/registry"
-	"github.com/kyma-project/modulectl/internal/service/templategenerator"
-	"github.com/kyma-project/modulectl/tools/ocirepo"
 )
 
 const (

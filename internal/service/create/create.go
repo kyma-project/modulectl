@@ -3,13 +3,13 @@ package create
 import (
 	"fmt"
 
+	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/ocm/cpi"
 )
 
 type ModuleConfigService interface {
@@ -68,7 +68,8 @@ func NewService(moduleConfigService ModuleConfigService,
 	componentArchiveService ComponentArchiveService,
 	registryService RegistryService,
 	moduleTemplateService ModuleTemplateService,
-	crdParserService CRDParserService) (*Service, error) {
+	crdParserService CRDParserService,
+) (*Service, error) {
 	if moduleConfigService == nil {
 		return nil, fmt.Errorf("%w: moduleConfigService must not be nil", commonerrors.ErrInvalidArg)
 	}
@@ -112,26 +113,11 @@ func (s *Service) CreateModule(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
-
 	defer s.moduleConfigService.CleanupTempFiles()
 
-	moduleConfig, err := s.moduleConfigService.ParseModuleConfig(opts.ModuleConfigFile)
+	moduleConfig, err := populateAndValidateModuleConfig(s.moduleConfigService, opts.ModuleConfigFile)
 	if err != nil {
-		return fmt.Errorf("%w: failed to parse module config file", err)
-	}
-
-	if err := s.moduleConfigService.ValidateModuleConfig(moduleConfig); err != nil {
-		return fmt.Errorf("%w: failed to value module config", err)
-	}
-
-	moduleConfig.DefaultCRPath, err = s.moduleConfigService.GetDefaultCRPath(moduleConfig.DefaultCRPath)
-	if err != nil {
-		return fmt.Errorf("%w: failed to get default CR path", err)
-	}
-
-	moduleConfig.ManifestPath, err = s.moduleConfigService.GetManifestPath(moduleConfig.ManifestPath)
-	if err != nil {
-		return fmt.Errorf("%w: failed to get manifest path", err)
+		return fmt.Errorf("%w: failed to populate module config", err)
 	}
 
 	componentDescriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name,
@@ -194,4 +180,29 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 
 	return nil
+}
+
+func populateAndValidateModuleConfig(moduleConfigService ModuleConfigService,
+	moduleConfigFile string,
+) (*contentprovider.ModuleConfig, error) {
+	moduleConfig, err := moduleConfigService.ParseModuleConfig(moduleConfigFile)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to parse module config file", err)
+	}
+
+	if err := moduleConfigService.ValidateModuleConfig(moduleConfig); err != nil {
+		return nil, fmt.Errorf("%w: failed to value module config", err)
+	}
+
+	moduleConfig.DefaultCRPath, err = moduleConfigService.GetDefaultCRPath(moduleConfig.DefaultCRPath)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to get default CR path", err)
+	}
+
+	moduleConfig.ManifestPath, err = moduleConfigService.GetManifestPath(moduleConfig.ManifestPath)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to get manifest path", err)
+	}
+
+	return moduleConfig, nil
 }

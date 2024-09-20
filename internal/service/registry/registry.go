@@ -1,12 +1,12 @@
 package registry
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"fmt"
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
@@ -32,23 +32,34 @@ func NewService(ociRepository OCIRepository) *Service {
 }
 
 func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure bool,
-	credentials, registryURL string) error {
+	credentials, registryURL string,
+) error {
 	repo, err := s.getRepository(insecure, credentials, registryURL)
 	if err != nil {
 		return fmt.Errorf("could not get repository: %w", err)
 	}
 
-	return s.ociRepository.PushComponentVersionIfNotExist(archive, repo)
+	if err = s.ociRepository.PushComponentVersionIfNotExist(archive, repo); err != nil {
+		return fmt.Errorf("could not push component version: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Service) GetComponentVersion(archive *comparch.ComponentArchive, insecure bool,
-	userPasswordCreds, registryURL string) (cpi.ComponentVersionAccess, error) {
+	userPasswordCreds, registryURL string,
+) (cpi.ComponentVersionAccess, error) {
 	repo, err := s.getRepository(insecure, userPasswordCreds, registryURL)
 	if err != nil {
 		return nil, fmt.Errorf("could not get repository: %w", err)
 	}
 
-	return s.ociRepository.GetComponentVersion(archive, repo)
+	componentVersion, err := s.ociRepository.GetComponentVersion(archive, repo)
+	if err != nil {
+		return nil, fmt.Errorf("could not get component version: %w", err)
+	}
+
+	return componentVersion, nil
 }
 
 func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL string) (cpi.Repository, error) {
@@ -75,6 +86,10 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	}
 
 	repo, err := ctx.RepositoryForSpec(ociRepo, creds)
+	if err != nil {
+		return nil, fmt.Errorf("could not create repository from spec: %w", err)
+	}
+
 	s.repo = repo
 
 	return repo, nil
@@ -122,6 +137,7 @@ func isEmptyAuth(creds credentials.Credentials) bool {
 
 	return true
 }
+
 func userPass(credentials string) (string, string) {
 	u, p, found := strings.Cut(credentials, ":")
 	if !found {

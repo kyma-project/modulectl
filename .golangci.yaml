@@ -76,6 +76,9 @@ linters-settings:
       - stdlib
       - vfs.FileSystem
       - internal.BlobAccess
+      - internal.ComponentVersionAccess
+      - internal.Credentials
+      - internal.Repository
   varnamelen:
     ignore-names:
       - ok

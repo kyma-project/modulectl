@@ -1,17 +1,18 @@
 package templategenerator
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
-	"bytes"
 	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
-	"strings"
+
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 type FileSystem interface {
@@ -65,7 +66,8 @@ type moduleTemplateData struct {
 }
 
 func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVersionAccess,
-	moduleConfig *contentprovider.ModuleConfig, templateOutput string, isCrdClusterScoped bool) error {
+	moduleConfig *contentprovider.ModuleConfig, templateOutput string, isCrdClusterScoped bool,
+) error {
 	descriptor := componentVersionAccess.GetDescriptor()
 	ref, err := oci.ParseRef(descriptor.Name)
 	if err != nil {
@@ -147,10 +149,10 @@ func generateAnnotations(config *contentprovider.ModuleConfig, isCrdClusterScope
 	return config.Annotations
 }
 
-func indent(n int, in string) string {
+func indent(spaces int, input string) string {
 	out := strings.Builder{}
 
-	lines := strings.Split(in, "\n")
+	lines := strings.Split(input, "\n")
 
 	// remove empty line at the end of the file if any
 	if len(strings.TrimSpace(lines[len(lines)-1])) == 0 {
@@ -158,7 +160,7 @@ func indent(n int, in string) string {
 	}
 
 	for i, line := range lines {
-		out.WriteString(strings.Repeat(" ", n))
+		out.WriteString(strings.Repeat(" ", spaces))
 		out.WriteString(line)
 		if i < len(lines)-1 {
 			out.WriteString("\n")

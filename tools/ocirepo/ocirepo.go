@@ -11,13 +11,13 @@ import (
 	"ocm.software/ocm/api/utils/misc"
 )
 
-type OCIRepo struct {
-}
+type OCIRepo struct{}
 
 var errComponentVersionAlreadyExists = errors.New("component version already exists, cannot push the new version")
 
 func (o *OCIRepo) GetComponentVersion(archive *comparch.ComponentArchive,
-	repo cpi.Repository) (cpi.ComponentVersionAccess, error) {
+	repo cpi.Repository,
+) (cpi.ComponentVersionAccess, error) {
 	version, err := repo.LookupComponentVersion(archive.GetName(), archive.GetVersion())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get component version: %w", err)
@@ -27,7 +27,8 @@ func (o *OCIRepo) GetComponentVersion(archive *comparch.ComponentArchive,
 }
 
 func (o *OCIRepo) PushComponentVersionIfNotExist(archive *comparch.ComponentArchive, repo cpi.Repository) error {
-	if exists, _ := repo.ExistsComponentVersion(archive.GetName(), archive.GetVersion()); exists {
+	if exists, _ := repo.ExistsComponentVersion(archive.GetName(),
+		archive.GetVersion()); exists {
 		return fmt.Errorf("%w: cannot push component version", errComponentVersionAlreadyExists)
 	}
 

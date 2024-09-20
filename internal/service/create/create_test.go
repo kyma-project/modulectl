@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"ocm.software/ocm/api/ocm/compdesc"
+	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
@@ -14,8 +16,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
-	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/ocm/cpi"
 )
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
@@ -315,13 +315,16 @@ func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ *comparch.Comp
 type registryServiceStub struct{}
 
 func (*registryServiceStub) PushComponentVersion(_ *comparch.ComponentArchive, _ bool,
-	_, _ string) error {
+	_, _ string,
+) error {
 	return nil
 }
 
 func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ bool,
-	_, _ string) (cpi.ComponentVersionAccess, error) {
-	return nil, nil
+	_, _ string,
+) (cpi.ComponentVersionAccess, error) {
+	var componentVersion cpi.ComponentVersionAccess
+	return componentVersion, nil
 }
 
 type ModuleTemplateServiceStub struct{}

@@ -2,10 +2,11 @@ package create
 
 import (
 	"fmt"
-	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	iotools "github.com/kyma-project/modulectl/tools/io"
 	"regexp"
 	"strings"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type Options struct {

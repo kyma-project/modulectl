@@ -1,10 +1,10 @@
 package crdparser
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
-	"bytes"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
@@ -24,15 +24,17 @@ func NewService(fileSystem FileSystem) *Service {
 }
 
 type resource struct {
-	Kind       string `yaml:"kind"`
-	ApiVersion string `yaml:"apiVersion"`
-	Spec       struct {
-		Group string `yaml:"group"`
-		Names struct {
-			Kind string `yaml:"kind"`
-		}
-		Scope apiextensions.ResourceScope `yaml:"scope"`
-	} `yaml:"spec"`
+	Kind       string      `yaml:"kind"`
+	APIVersion string      `yaml:"apiVersion"`
+	Spec       interface{} `yaml:"spec"`
+}
+
+type spec struct {
+	Group string `yaml:"group"`
+	Names struct {
+		Kind string `yaml:"kind"`
+	} `yaml:"names"`
+	Scope apiextensions.ResourceScope `yaml:"scope"`
 }
 
 func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) {
@@ -45,19 +47,19 @@ func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) 
 		return false, fmt.Errorf("error reading CRD file: %w", err)
 	}
 
-	var cr resource
-	if err := yaml.Unmarshal(crData, &cr); err != nil {
+	var customResource resource
+	if err := yaml.Unmarshal(crData, &customResource); err != nil {
 		return false, fmt.Errorf("error parsing default CR: %w", err)
 	}
 
-	group := strings.Split(cr.ApiVersion, "/")[0]
+	group := strings.Split(customResource.APIVersion, "/")[0]
 
 	manifestData, err := s.fileSystem.ReadFile(manifestPath)
 	if err != nil {
 		return false, fmt.Errorf("error reading manifest file: %w", err)
 	}
 
-	crdScope, err := getCrdScopeFromManifest(manifestData, group, cr.Kind)
+	crdScope, err := getCrdScopeFromManifest(manifestData, group, customResource.Kind)
 	if err != nil {
 		return false, fmt.Errorf("error finding CRD file in the %q file: %w", manifestPath, err)
 	}
@@ -70,18 +72,24 @@ func getCrdScopeFromManifest(manifestData []byte, group, kind string) (apiextens
 
 	for {
 		var res resource
-
-		// Decode each document in the YAML stream
 		err := decoder.Decode(&res)
 		if err != nil {
 			if err.Error() == "EOF" {
 				break
 			}
-			return "", fmt.Errorf("failed to parse YAML document: %v", err)
+			return "", fmt.Errorf("failed to parse YAML document: %w", err)
 		}
 
-		if res.Kind == "CustomResourceDefinition" && res.Spec.Group == group && res.Spec.Names.Kind == kind {
-			return res.Spec.Scope, nil
+		if res.Kind == "CustomResourceDefinition" {
+			var resSpec spec
+			specBytes := fmt.Sprintf("%v", res.Spec)
+			if err = yaml.Unmarshal([]byte(specBytes), &resSpec); err != nil {
+				return "", fmt.Errorf("error parsing resource: %w", err)
+			}
+
+			if resSpec.Group == group && resSpec.Names.Kind == kind {
+				return resSpec.Scope, nil
+			}
 		}
 	}
 
