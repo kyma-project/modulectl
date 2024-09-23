@@ -3,11 +3,11 @@ package templategenerator_test
 import (
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/templategenerator"
-	"github.com/kyma-project/modulectl/internal/testutils"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/stretchr/testify/require"
+	"github.com/kyma-project/modulectl/internal/service/templategenerator"
+	"github.com/kyma-project/modulectl/internal/testutils"
 
 	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
@@ -18,7 +18,7 @@ func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.
 	err := svc.GenerateModuleTemplate(nil, nil, nil, false, "")
 
 	require.Error(t, err)
-	require.ErrorIs(t, err, templategenerator.ErrorEmptyModuleConfig)
+	require.ErrorIs(t, err, templategenerator.ErrEmptyModuleConfig)
 }
 
 func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *testing.T) {
@@ -27,7 +27,7 @@ func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *test
 	err := svc.GenerateModuleTemplate(&contentprovider.ModuleConfig{}, nil, nil, false, "")
 
 	require.Error(t, err)
-	require.ErrorIs(t, err, templategenerator.ErrorEmptyDescriptor)
+	require.ErrorIs(t, err, templategenerator.ErrEmptyDescriptor)
 }
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {

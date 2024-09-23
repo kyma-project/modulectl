@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	ErrorEmptyModuleConfig = errors.New("can not generate module template from empty module config")
-	ErrorEmptyDescriptor   = errors.New("can not generate module template from empty descriptor")
-	ErrorEmptyData         = errors.New("can not generate module template from empty data")
+	ErrEmptyModuleConfig = errors.New("can not generate module template from empty module config")
+	ErrEmptyDescriptor   = errors.New("can not generate module template from empty descriptor")
+	ErrEmptyData         = errors.New("can not generate module template from empty data")
 )
 
 type FileSystem interface {
@@ -84,13 +84,13 @@ func (s *Service) GenerateModuleTemplate(
 	templateOutput string,
 ) error {
 	if moduleConfig == nil {
-		return ErrorEmptyModuleConfig
+		return ErrEmptyModuleConfig
 	}
 	if descriptor == nil {
-		return ErrorEmptyDescriptor
+		return ErrEmptyDescriptor
 	}
 	if len(data) == 0 {
-		return ErrorEmptyData
+		return ErrEmptyData
 	}
 
 	labels := generateLabels(moduleConfig)

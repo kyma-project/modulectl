@@ -5,28 +5,28 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-
 	"github.com/stretchr/testify/require"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 )
 
 func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
-	cd, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion)
 	expectedProviderLabel := json.RawMessage(`"modulectl"`)
 
 	require.NoError(t, err)
-	require.Equal(t, moduleName, cd.GetName())
-	require.Equal(t, moduleVersion, cd.GetVersion())
-	require.Equal(t, "v2", cd.Metadata.ConfiguredVersion)
-	require.Equal(t, v1.ProviderName("kyma-project.io"), cd.Provider.Name)
-	require.Len(t, cd.Provider.Labels, 1)
-	require.Equal(t, "kyma-project.io/built-by", cd.Provider.Labels[0].Name)
-	require.Equal(t, expectedProviderLabel, cd.Provider.Labels[0].Value)
-	require.Equal(t, "v1", cd.Provider.Labels[0].Version)
-	require.Len(t, cd.Resources, 0)
+	require.Equal(t, moduleName, descriptor.GetName())
+	require.Equal(t, moduleVersion, descriptor.GetVersion())
+	require.Equal(t, "v2", descriptor.Metadata.ConfiguredVersion)
+	require.Equal(t, v1.ProviderName("kyma-project.io"), descriptor.Provider.Name)
+	require.Len(t, descriptor.Provider.Labels, 1)
+	require.Equal(t, "kyma-project.io/built-by", descriptor.Provider.Labels[0].Name)
+	require.Equal(t, expectedProviderLabel, descriptor.Provider.Labels[0].Value)
+	require.Equal(t, "v1", descriptor.Provider.Labels[0].Version)
+	require.Empty(t, descriptor.Resources)
 }
 
 func Test_InitializeComponentDescriptor_ReturnsErrWhenInvalidName(t *testing.T) {

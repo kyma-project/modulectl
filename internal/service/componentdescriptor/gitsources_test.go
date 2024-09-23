@@ -2,7 +2,7 @@ package componentdescriptor_test
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -14,16 +14,16 @@ import (
 func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 	gitSourcesService := componentdescriptor.NewGitSourcesService(&gitServiceStub{})
 
-	cd := &compdesc.ComponentDescriptor{}
-	cd.SetName("test.io/module/test")
+	descriptor := &compdesc.ComponentDescriptor{}
+	descriptor.SetName("test.io/module/test")
 	moduleVersion := "1.0.0"
-	cd.SetVersion(moduleVersion)
+	descriptor.SetVersion(moduleVersion)
 
-	err := gitSourcesService.AddGitSources(cd, "repoUrl", moduleVersion)
+	err := gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
 	require.NoError(t, err)
-	require.Len(t, cd.Sources, 1)
+	require.Len(t, descriptor.Sources, 1)
 
-	source := cd.Sources[0]
+	source := descriptor.Sources[0]
 	require.Equal(t, "Github", source.Type)
 	require.Equal(t, "module-sources", source.Name)
 	require.Equal(t, moduleVersion, source.Version)
@@ -60,9 +60,9 @@ func (*gitServiceStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
 type gitServiceErrorStub struct{}
 
 func (*gitServiceErrorStub) GetLatestCommit(_ string) (string, error) {
-	return "", fmt.Errorf("failed to get commit")
+	return "", errors.New("failed to get commit")
 }
 
 func (*gitServiceErrorStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "", fmt.Errorf("failed to get file content")
+	return "", errors.New("failed to get file content")
 }
