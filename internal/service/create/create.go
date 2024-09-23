@@ -42,8 +42,11 @@ type RegistryService interface {
 }
 
 type ModuleTemplateService interface {
-	GenerateModuleTemplate(componentVersionAccess cpi.ComponentVersionAccess,
-		moduleConfig *contentprovider.ModuleConfig, templateOutput string, data []byte, isCrdClusterScoped bool) error
+	GenerateModuleTemplate(moduleConfig *contentprovider.ModuleConfig,
+		descriptor *compdesc.ComponentDescriptor,
+		data []byte,
+		isCrdClusterScoped bool,
+		templateOutput string) error
 }
 
 type CRDParserService interface {
@@ -181,8 +184,9 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 
 	opts.Out.Write("- Generating ModuleTemplate\n")
-	if err := s.moduleTemplateService.GenerateModuleTemplate(componentVersionAccess, moduleConfig, opts.TemplateOutput,
-		crData, isCRDClusterScoped); err != nil {
+	descriptor := componentVersionAccess.GetDescriptor()
+	if err = s.moduleTemplateService.GenerateModuleTemplate(moduleConfig, descriptor,
+		crData, isCRDClusterScoped, opts.TemplateOutput); err != nil {
 		return fmt.Errorf("%w: failed to generate module template", err)
 	}
 

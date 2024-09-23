@@ -238,8 +238,8 @@ func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ 
 
 type ModuleTemplateServiceStub struct{}
 
-func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ cpi.ComponentVersionAccess, _ *contentprovider.ModuleConfig,
-	_ string, _ []byte, _ bool,
+func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.ModuleConfig, _ *compdesc.ComponentDescriptor,
+	_ []byte, _ bool, _ string,
 ) error {
 	return nil
 }

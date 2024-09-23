@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/require"
 	"ocm.software/ocm/api/ocm/compdesc"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 )
 
 func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
@@ -46,8 +47,7 @@ func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *t
 	require.ErrorContains(t, err, "failed to get latest commit")
 }
 
-type gitServiceStub struct {
-}
+type gitServiceStub struct{}
 
 func (*gitServiceStub) GetLatestCommit(_ string) (string, error) {
 	return "latest", nil
@@ -57,8 +57,7 @@ func (*gitServiceStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
 	return "test", nil
 }
 
-type gitServiceErrorStub struct {
-}
+type gitServiceErrorStub struct{}
 
 func (*gitServiceErrorStub) GetLatestCommit(_ string) (string, error) {
 	return "", fmt.Errorf("failed to get commit")

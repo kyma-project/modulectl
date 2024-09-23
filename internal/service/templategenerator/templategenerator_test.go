@@ -1,0 +1,67 @@
+package templategenerator_test
+
+import (
+	"testing"
+
+	"github.com/kyma-project/modulectl/internal/service/templategenerator"
+	"github.com/kyma-project/modulectl/internal/testutils"
+
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/stretchr/testify/require"
+
+	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
+)
+
+func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.T) {
+	svc := templategenerator.NewService(nil)
+
+	err := svc.GenerateModuleTemplate(nil, nil, nil, false, "")
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, templategenerator.ErrorEmptyModuleConfig)
+}
+
+func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *testing.T) {
+	svc := templategenerator.NewService(nil)
+
+	err := svc.GenerateModuleTemplate(&contentprovider.ModuleConfig{}, nil, nil, false, "")
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, templategenerator.ErrorEmptyDescriptor)
+}
+
+func TestGenerateModuleTemplate_Success(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		ResourceName: "test-resource",
+		Namespace:    "default",
+		Channel:      "stable",
+		Labels:       map[string]string{"key": "value"},
+		Annotations:  map[string]string{"annotation": "value"},
+		Mandatory:    true,
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "test-resource")
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "stable")
+	require.Contains(t, mockFS.writtenTemplate, "test-data")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+}
+
+type mockFileSystem struct {
+	path, writtenTemplate string
+}
+
+func (m *mockFileSystem) WriteFile(path, content string) error {
+	m.path = path
+	m.writtenTemplate = content
+	return nil
+}

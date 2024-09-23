@@ -2,17 +2,23 @@ package templategenerator
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 	"text/template"
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"ocm.software/ocm/api/oci"
-	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"sigs.k8s.io/yaml"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+)
+
+var (
+	ErrorEmptyModuleConfig = errors.New("can not generate module template from empty module config")
+	ErrorEmptyDescriptor   = errors.New("can not generate module template from empty descriptor")
+	ErrorEmptyData         = errors.New("can not generate module template from empty data")
 )
 
 type FileSystem interface {
@@ -70,24 +76,31 @@ type moduleTemplateData struct {
 	Data         string
 }
 
-func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVersionAccess,
-	moduleConfig *contentprovider.ModuleConfig, templateOutput string, data []byte, isCrdClusterScoped bool,
+func (s *Service) GenerateModuleTemplate(
+	moduleConfig *contentprovider.ModuleConfig,
+	descriptor *compdesc.ComponentDescriptor,
+	data []byte,
+	isCrdClusterScoped bool,
+	templateOutput string,
 ) error {
-	descriptor := componentVersionAccess.GetDescriptor()
-	ref, err := oci.ParseRef(descriptor.Name)
-	if err != nil {
-		return fmt.Errorf("failed to parse ref: %w", err)
+	if moduleConfig == nil {
+		return ErrorEmptyModuleConfig
 	}
-
-	cva, err := compdesc.Convert(descriptor)
-	if err != nil {
-		return fmt.Errorf("failed to convert descriptor: %w", err)
+	if descriptor == nil {
+		return ErrorEmptyDescriptor
+	}
+	if len(data) == 0 {
+		return ErrorEmptyData
 	}
 
 	labels := generateLabels(moduleConfig)
 	annotations := generateAnnotations(moduleConfig, isCrdClusterScoped)
 
-	shortName := shortName(ref)
+	ref, err := oci.ParseRef(descriptor.Name)
+	if err != nil {
+		return fmt.Errorf("failed to parse ref: %w", err)
+	}
+	shortName := trimShortNameFromRef(ref)
 	labels[shared.ModuleName] = shortName
 	if moduleConfig.ResourceName == "" {
 		moduleConfig.ResourceName = shortName + "-" + moduleConfig.Channel
@@ -99,6 +112,11 @@ func (s *Service) GenerateModuleTemplate(componentVersionAccess ocm.ComponentVer
 	}).Parse(modTemplate)
 	if err != nil {
 		return fmt.Errorf("failed to parse module template: %w", err)
+	}
+
+	cva, err := compdesc.Convert(descriptor)
+	if err != nil {
+		return fmt.Errorf("failed to convert descriptor: %w", err)
 	}
 
 	mtData := moduleTemplateData{
@@ -175,7 +193,7 @@ func indent(spaces int, input string) string {
 	return out.String()
 }
 
-func shortName(ref oci.RefSpec) string {
+func trimShortNameFromRef(ref oci.RefSpec) string {
 	t := strings.Split(ref.Repository, "/")
 	if len(t) == 0 {
 		return ""

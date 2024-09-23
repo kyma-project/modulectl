@@ -27,7 +27,7 @@ func InitializeComponentDescriptor(moduleName string,
 	componentDescriptor.Provider = ocmv1.Provider{Name: providerName, Labels: ocmv1.Labels{*builtByModulectl}}
 
 	compdesc.DefaultResources(componentDescriptor)
-	if err := compdesc.Validate(componentDescriptor); err != nil {
+	if err = compdesc.Validate(componentDescriptor); err != nil {
 		return nil, fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 
