@@ -23,7 +23,7 @@ func NewService(fileSystem FileSystem) *Service {
 	}
 }
 
-type resource struct {
+type Resource struct {
 	Kind       string `yaml:"kind"`
 	APIVersion string `yaml:"apiVersion"`
 	Spec       struct {
@@ -45,7 +45,7 @@ func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) 
 		return false, fmt.Errorf("error reading CRD file: %w", err)
 	}
 
-	var customResource resource
+	var customResource Resource
 	if err := yaml.Unmarshal(crData, &customResource); err != nil {
 		return false, fmt.Errorf("error parsing default CR: %w", err)
 	}
@@ -69,7 +69,7 @@ func getCrdScopeFromManifest(manifestData []byte, group, kind string) (apiextens
 	decoder := yaml.NewDecoder(bytes.NewReader(manifestData))
 
 	for {
-		var res resource
+		var res Resource
 		err := decoder.Decode(&res)
 		if err != nil {
 			if err.Error() == "EOF" {
