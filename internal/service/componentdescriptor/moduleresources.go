@@ -15,7 +15,7 @@ const (
 	defaultCRResourceName   = "default-cr"
 	ociArtifactType         = "ociArtifact"
 	directoryType           = "directory"
-	OCIRegistryCredLabel    = "oci-registry-cred" //nolint:gosec // it's a label
+	ociRegistryCredLabel    = "oci-registry-cred" //nolint:gosec // it's a label
 )
 
 type Resource struct {
@@ -75,12 +75,14 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 
 	for idx := range resources {
 		resources[idx].Version = moduleVersion
-		resources[idx].SetLabels([]ocmv1.Label{
-			{
-				Name:  OCIRegistryCredLabel,
-				Value: credentialsLabel,
-			},
-		})
+		if len(credentialsLabel) > 0 {
+			resources[idx].SetLabels([]ocmv1.Label{
+				{
+					Name:  ociRegistryCredLabel,
+					Value: credentialsLabel,
+				},
+			})
+		}
 	}
 	return resources, nil
 }

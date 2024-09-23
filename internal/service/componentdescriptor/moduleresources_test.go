@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
 
 func TestCreateCredMatchLabels_ReturnCorrectLabels(t *testing.T) {
@@ -55,12 +56,93 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 		registryCredSelector)
 	require.NoError(t, err)
 	require.Len(t, resources, 3)
+
+	require.Equal(t, "module-image", resources[0].Name)
+	require.Equal(t, "ociArtifact", resources[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
+	require.Equal(t, "", resources[0].Path)
+
+	require.Equal(t, "raw-manifest", resources[1].Name)
+	require.Equal(t, "directory", resources[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, resources[1].Relation)
+	require.Equal(t, "path/to/manifest", resources[1].Path)
+
+	require.Equal(t, "default-cr", resources[2].Name)
+	require.Equal(t, "directory", resources[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, resources[2].Relation)
+	require.Equal(t, "path/to/defaultCR", resources[2].Path)
+
+	for _, resource := range resources {
+		require.Equal(t, moduleVersion, resource.Version)
+		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
+		var returnedLabel map[string]string
+		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
+		expectedLabel := map[string]string{
+			"operator.kyma-project.io/oci-registry-cred": "test-operator",
+		}
+		require.Equal(t, expectedLabel, returnedLabel)
+	}
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *testing.T) {
+	moduleVersion := "1.0.0"
+	manifestPath := "path/to/manifest"
+	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
 
+	resources, err := componentdescriptor.GenerateModuleResources(moduleVersion, manifestPath, "",
+		registryCredSelector)
+	require.NoError(t, err)
+	require.Len(t, resources, 2)
+
+	require.Equal(t, "module-image", resources[0].Name)
+	require.Equal(t, "ociArtifact", resources[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
+	require.Equal(t, "", resources[0].Path)
+
+	require.Equal(t, "raw-manifest", resources[1].Name)
+	require.Equal(t, "directory", resources[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, resources[1].Relation)
+	require.Equal(t, "path/to/manifest", resources[1].Path)
+
+	for _, resource := range resources {
+		require.Equal(t, moduleVersion, resource.Version)
+		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
+		var returnedLabel map[string]string
+		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
+		expectedLabel := map[string]string{
+			"operator.kyma-project.io/oci-registry-cred": "test-operator",
+		}
+		require.Equal(t, expectedLabel, returnedLabel)
+	}
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing.T) {
+	moduleVersion := "1.0.0"
+	manifestPath := "path/to/manifest"
+	defaultCRPath := "path/to/defaultCR"
 
+	resources, err := componentdescriptor.GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath,
+		"")
+	require.NoError(t, err)
+	require.Len(t, resources, 3)
+
+	require.Equal(t, "module-image", resources[0].Name)
+	require.Equal(t, "ociArtifact", resources[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
+	require.Equal(t, "", resources[0].Path)
+
+	require.Equal(t, "raw-manifest", resources[1].Name)
+	require.Equal(t, "directory", resources[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, resources[1].Relation)
+	require.Equal(t, "path/to/manifest", resources[1].Path)
+
+	require.Equal(t, "default-cr", resources[2].Name)
+	require.Equal(t, "directory", resources[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, resources[2].Relation)
+	require.Equal(t, "path/to/defaultCR", resources[2].Path)
+
+	for _, resource := range resources {
+		require.Equal(t, moduleVersion, resource.Version)
+		require.Len(t, resource.Labels, 0)
+	}
 }
