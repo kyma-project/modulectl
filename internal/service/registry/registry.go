@@ -101,6 +101,15 @@ func getCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryU
 	}
 
 	var creds credentials.Credentials
+	user, pass := userPass(userPasswordCreds)
+
+	if user != "" && pass != "" {
+		creds = credentials.DirectCredentials{
+			"username": user,
+			"password": pass,
+		}
+	}
+
 	if home, err := os.UserHomeDir(); err == nil {
 		path := filepath.Join(home, ".docker", "config.json")
 		if repo, err := dockerconfig.NewRepository(ctx.CredentialsContext(), path, nil, true); err == nil {
@@ -111,31 +120,12 @@ func getCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryU
 		}
 	}
 
-	if creds == nil || isEmptyAuth(creds) {
-		user, pass := userPass(userPasswordCreds)
-		creds = credentials.DirectCredentials{
-			"username": user,
-			"password": pass,
-		}
-	}
-
 	return creds
 }
 
 func noSchemeURL(url string) string {
 	regex := regexp.MustCompile(`^https?://`)
 	return regex.ReplaceAllString(url, "")
-}
-
-func isEmptyAuth(creds credentials.Credentials) bool {
-	if len(creds.GetProperty("auth")) != 0 {
-		return false
-	}
-	if len(creds.GetProperty("username")) != 0 {
-		return false
-	}
-
-	return true
 }
 
 func userPass(credentials string) (string, string) {

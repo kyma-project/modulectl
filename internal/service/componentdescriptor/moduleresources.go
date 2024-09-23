@@ -3,8 +3,8 @@ package componentdescriptor
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/json"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
@@ -72,9 +72,10 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 	if err != nil {
 		return nil, fmt.Errorf("failed to create credentials label: %w", err)
 	}
-	for _, r := range resources {
-		r.Version = moduleVersion
-		r.SetLabels([]ocmv1.Label{
+
+	for idx := range resources {
+		resources[idx].Version = moduleVersion
+		resources[idx].SetLabels([]ocmv1.Label{
 			{
 				Name:  OCIRegistryCredLabel,
 				Value: credentialsLabel,
@@ -91,7 +92,7 @@ func createCredMatchLabels(registryCredSelector string) ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse label selector: %w", err)
 		}
-		matchLabels, err = yaml.Marshal(selector.MatchLabels)
+		matchLabels, err = json.Marshal(selector.MatchLabels)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal match labels: %w", err)
 		}
