@@ -60,14 +60,19 @@ func getBytesFromURL(url *url.URL) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("http GET request failed for %s: %w", url, err)
 	}
-	defer req.Body.Close()
 
-	if req.Response.StatusCode != http.StatusOK {
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("http GET request failed for %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("%w: bad status for GET request to %s: %q", errBadHTTPStatus, url,
-			req.Response.StatusCode)
+			resp.StatusCode)
 	}
 
-	data, err := io.ReadAll(req.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body from %s: %w", url, err)
 	}

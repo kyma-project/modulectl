@@ -108,6 +108,8 @@ func getCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryU
 			"username": user,
 			"password": pass,
 		}
+
+		return creds
 	}
 
 	if home, err := os.UserHomeDir(); err == nil {
