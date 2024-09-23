@@ -3,26 +3,22 @@ package componentdescriptor_test
 import (
 	"encoding/json"
 	"errors"
+	"github.com/kyma-project/modulectl/internal/testutils"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	"ocm.software/ocm/api/ocm/compdesc"
-
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 	gitSourcesService := componentdescriptor.NewGitSourcesService(&gitServiceStub{})
-
-	descriptor := &compdesc.ComponentDescriptor{}
-	descriptor.SetName("test.io/module/test")
 	moduleVersion := "1.0.0"
-	descriptor.SetVersion(moduleVersion)
+	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
 	err := gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
+
 	require.NoError(t, err)
 	require.Len(t, descriptor.Sources, 1)
-
 	source := descriptor.Sources[0]
 	require.Equal(t, "Github", source.Type)
 	require.Equal(t, "module-sources", source.Name)
@@ -37,12 +33,10 @@ func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
 	gitSourcesService := componentdescriptor.NewGitSourcesService(&gitServiceErrorStub{})
 
-	cd := &compdesc.ComponentDescriptor{}
-	cd.SetName("test.io/module/test")
 	moduleVersion := "1.0.0"
-	cd.SetVersion(moduleVersion)
+	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
-	err := gitSourcesService.AddGitSources(cd, "repoUrl", moduleVersion)
+	err := gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to get latest commit")
 }
