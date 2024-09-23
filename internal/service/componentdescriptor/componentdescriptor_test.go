@@ -1,10 +1,10 @@
 package componentdescriptor_test
 
 import (
-	"testing"
-
 	"encoding/json"
 	"errors"
+	"testing"
+
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/require"
 	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"

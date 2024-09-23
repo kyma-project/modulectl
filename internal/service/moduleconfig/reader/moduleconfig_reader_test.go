@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -23,26 +22,26 @@ func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T
 	result, err := moduleconfigreader.ParseModuleConfig(moduleConfigFile, &fileDoesNotExistStub{})
 
 	require.ErrorIs(t, err, errReadingFile)
-	assert.Nil(t, result)
+	require.Nil(t, result)
 }
 
 func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	result, err := moduleconfigreader.ParseModuleConfig(moduleConfigFile, &fileExistsStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "github.com/module-name", result.Name)
-	assert.Equal(t, "0.0.1", result.Version)
-	assert.Equal(t, "regular", result.Channel)
-	assert.Equal(t, "path/to/manifests", result.ManifestPath)
-	assert.Equal(t, "path/to/defaultCR", result.DefaultCRPath)
-	assert.Equal(t, "module-name-0.0.1", result.ResourceName)
-	assert.False(t, result.Mandatory)
-	assert.Equal(t, "kcp-system", result.Namespace)
-	assert.Equal(t, "path/to/securityConfig", result.Security)
-	assert.False(t, result.Internal)
-	assert.False(t, result.Beta)
-	assert.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
-	assert.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
+	require.Equal(t, "github.com/module-name", result.Name)
+	require.Equal(t, "0.0.1", result.Version)
+	require.Equal(t, "regular", result.Channel)
+	require.Equal(t, "path/to/manifests", result.ManifestPath)
+	require.Equal(t, "path/to/defaultCR", result.DefaultCRPath)
+	require.Equal(t, "module-name-0.0.1", result.ResourceName)
+	require.False(t, result.Mandatory)
+	require.Equal(t, "kcp-system", result.Namespace)
+	require.Equal(t, "path/to/securityConfig", result.Security)
+	require.False(t, result.Internal)
+	require.False(t, result.Beta)
+	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
+	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
 }
 
 func Test_GetDefaultCRData_Returns_CorrectData(t *testing.T) {
@@ -56,35 +55,35 @@ func Test_GetDefaultCRData_Returns_CorrectData(t *testing.T) {
 
 	expected, err := yaml.Marshal(expectedReturnedModuleConfig)
 	require.NoError(t, err)
-	assert.Equal(t, expected, result)
+	require.Equal(t, expected, result)
 }
 
 func Test_GetDefaultCRPath_Returns_CorrectPath(t *testing.T) {
 	result, err := moduleconfigreader.GetDefaultCRPath("https://example.com/path", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "file.yaml", result)
+	require.Equal(t, "file.yaml", result)
 }
 
 func Test_GetDefaultCRPath_Returns_CorrectPath_When_NotUrl(t *testing.T) {
 	result, err := moduleconfigreader.GetDefaultCRPath("/path/to/defaultcr.yaml", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "/path/to/defaultcr.yaml", result)
+	require.Equal(t, "/path/to/defaultcr.yaml", result)
 }
 
 func Test_GetManifestPath_Returns_CorrectPath(t *testing.T) {
 	result, err := moduleconfigreader.GetDefaultCRPath("https://example.com/path", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "file.yaml", result)
+	require.Equal(t, "file.yaml", result)
 }
 
 func Test_GetManifestPath_Returns_CorrectPath_When_NotUrl(t *testing.T) {
 	result, err := moduleconfigreader.GetDefaultCRPath("/path/to/manifest.yaml", &tmpfileSystemStub{})
 
 	require.NoError(t, err)
-	assert.Equal(t, "/path/to/manifest.yaml", result)
+	require.Equal(t, "/path/to/manifest.yaml", result)
 }
 
 func TestService_ParseURL(t *testing.T) {
@@ -137,7 +136,7 @@ func TestService_ParseURL(t *testing.T) {
 				require.EqualError(t, err, test.expectedError.Error())
 				return
 			}
-			assert.Equalf(t, test.want, got, "ParseURL(%v)", test.urlString)
+			require.Equalf(t, test.want, got, "ParseURL(%v)", test.urlString)
 		})
 	}
 }

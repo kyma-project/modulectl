@@ -5,7 +5,6 @@ import (
 	"io"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -23,7 +22,7 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
-	assert.Contains(t, err.Error(), "moduleConfigService")
+	require.Contains(t, err.Error(), "moduleConfigService")
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
@@ -36,7 +35,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	err = svc.CreateModule(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.ModuleConfigFile")
+	require.Contains(t, err.Error(), "opts.ModuleConfigFile")
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
@@ -49,7 +48,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	err = svc.CreateModule(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.Out")
+	require.Contains(t, err.Error(), "opts.Out")
 }
 
 func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
@@ -62,7 +61,7 @@ func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
 	err = svc.CreateModule(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.GitRemote")
+	require.Contains(t, err.Error(), "opts.GitRemote")
 }
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
@@ -75,7 +74,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 	err = svc.CreateModule(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.Credentials")
+	require.Contains(t, err.Error(), "opts.Credentials")
 }
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
@@ -88,7 +87,7 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	err = svc.CreateModule(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	assert.Contains(t, err.Error(), "opts.TemplateOutput")
+	require.Contains(t, err.Error(), "opts.TemplateOutput")
 }
 
 func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
@@ -102,7 +101,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 	err = svc.CreateModule(opts)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to read module config file")
+	require.Contains(t, err.Error(), "failed to read module config file")
 }
 
 type createOptionsBuilder struct {

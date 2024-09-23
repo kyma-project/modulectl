@@ -68,7 +68,7 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 		resources = append(resources, defaultCRResource)
 	}
 
-	credentialsLabel, err := createCredMatchLabels(registryCredSelector)
+	credentialsLabel, err := CreateCredMatchLabels(registryCredSelector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create credentials label: %w", err)
 	}
@@ -85,7 +85,7 @@ func GenerateModuleResources(moduleVersion, manifestPath, defaultCRPath, registr
 	return resources, nil
 }
 
-func createCredMatchLabels(registryCredSelector string) ([]byte, error) {
+func CreateCredMatchLabels(registryCredSelector string) ([]byte, error) {
 	var matchLabels []byte
 	if registryCredSelector != "" {
 		selector, err := metav1.ParseToLabelSelector(registryCredSelector)
