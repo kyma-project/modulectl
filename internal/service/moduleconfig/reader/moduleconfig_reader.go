@@ -139,7 +139,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	}
 
 	if moduleConfig.ManifestPath == "" {
-		return fmt.Errorf("%w: manifest path must not be empty", commonerrors.ErrInvalidArg)
+		return fmt.Errorf("%w: manifest path must not be empty", commonerrors.ErrInvalidOption)
 	}
 
 	return nil
