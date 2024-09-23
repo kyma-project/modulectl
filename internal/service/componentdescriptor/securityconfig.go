@@ -73,18 +73,18 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.Co
 		return fmt.Errorf("failed to append security label to descriptor: %w", err)
 	}
 
-	if err := appendSecurityLabelsToSources(securityConfig, descriptor.Sources); err != nil {
+	if err := AppendSecurityLabelsToSources(securityConfig, descriptor.Sources); err != nil {
 		return fmt.Errorf("failed to append security labels to sources: %w", err)
 	}
 
-	if err := appendProtecodeImagesLayers(descriptor, securityConfig); err != nil {
+	if err := AppendProtecodeImagesLayers(descriptor, securityConfig); err != nil {
 		return fmt.Errorf("failed to append protecode images layers: %w", err)
 	}
 
 	return nil
 }
 
-func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecurityScanConfig,
+func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecurityScanConfig,
 	sources compdesc.Sources,
 ) error {
 	for srcIndex := range sources {
@@ -119,12 +119,12 @@ func appendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 	return nil
 }
 
-func appendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
+func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
 	securityScanConfig contentprovider.SecurityScanConfig,
 ) error {
 	protecodeImages := securityScanConfig.Protecode
 	for _, img := range protecodeImages {
-		imgName, imgTag, err := getImageNameAndTag(img)
+		imgName, imgTag, err := GetImageNameAndTag(img)
 		if err != nil {
 			return fmt.Errorf("failed to get image name and tag: %w", err)
 		}
@@ -175,7 +175,7 @@ func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey 
 	return nil
 }
 
-func getImageNameAndTag(imageURL string) (string, string, error) {
+func GetImageNameAndTag(imageURL string) (string, string, error) {
 	imageTag := strings.Split(imageURL, ":")
 	if len(imageTag) != imageTagSlicesLength {
 		return "", "", fmt.Errorf("%w: , image URL: %s", errInvalidURL, imageURL)
