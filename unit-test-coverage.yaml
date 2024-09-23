@@ -7,3 +7,4 @@ packages:
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 45
   internal/service/create: 56
+  internal/service/componentdescriptor: 100
