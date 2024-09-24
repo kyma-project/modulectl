@@ -1,6 +1,6 @@
 packages:
   cmd/modulectl/scaffold: 100
-  internal/common/validations: 87
+  internal/common/validation: 87
   internal/service/scaffold: 93
   internal/service/contentprovider: 100
   internal/service/filegenerator: 100
