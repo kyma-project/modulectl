@@ -72,6 +72,9 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 }
 
 func (s *Service) GetDefaultCRData(defaultCRPath string) ([]byte, error) {
+	if defaultCRPath == "" {
+		return nil, nil
+	}
 	defaultCRData, err := s.fileSystem.ReadFile(defaultCRPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read default CR file: %w", err)
