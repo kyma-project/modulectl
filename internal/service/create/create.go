@@ -118,65 +118,62 @@ func (s *Service) CreateModule(opts Options) error {
 	defer s.moduleConfigService.CleanupTempFiles()
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
 	if err != nil {
-		return fmt.Errorf("%w: failed to parse module config", err)
+		return fmt.Errorf("failed to parse module config: %w", err)
 	}
 
-	componentDescriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name,
-		moduleConfig.Version)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version)
 	if err != nil {
-		return fmt.Errorf("%w: failed to populate component descriptor metadata", err)
+		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
 	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, moduleConfig.ManifestPath,
 		moduleConfig.DefaultCRPath, opts.RegistryCredSelector)
 	if err != nil {
-		return fmt.Errorf("%w: failed to generate module resources", err)
+		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
 
 	if opts.GitRemote != "" {
-		if err := s.gitSourcesService.AddGitSources(componentDescriptor, opts.GitRemote,
+		if err = s.gitSourcesService.AddGitSources(descriptor, opts.GitRemote,
 			moduleConfig.Version); err != nil {
-			return fmt.Errorf("%w: failed to add git sources", err)
+			return fmt.Errorf("failed to add git sources: %w", err)
 		}
 	}
-	opts.Out.Write("- Configuring security scanners config\n")
 	if moduleConfig.Security != "" && opts.GitRemote != "" {
-		securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
+		err = s.configureSecScannerConf(opts, moduleConfig, descriptor)
 		if err != nil {
-			return fmt.Errorf("%w: failed to parse security config data", err)
+			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
-
-		if err := s.securityConfigService.AppendSecurityScanConfig(componentDescriptor, *securityConfig); err != nil {
-			return fmt.Errorf("%w: failed to append security scan config", err)
-		}
-	}
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath,
-		moduleConfig.ManifestPath)
-	if err != nil {
-		return fmt.Errorf("%w: failed to determine if CRD is cluster scoped", err)
 	}
 
 	opts.Out.Write("- Creating component archive\n")
-	componentArchive, err := s.componentArchiveService.CreateComponentArchive(componentDescriptor)
+	archive, err := s.componentArchiveService.CreateComponentArchive(descriptor)
 	if err != nil {
-		return fmt.Errorf("%w: failed to create component archive", err)
+		return fmt.Errorf("failed to create component archive: %w", err)
 	}
-	if err = s.componentArchiveService.AddModuleResourcesToArchive(componentArchive,
+	if err = s.componentArchiveService.AddModuleResourcesToArchive(archive,
 		moduleResources); err != nil {
-		return fmt.Errorf("%w: failed to add module resources to component archive", err)
+		return fmt.Errorf("failed to add module resources to component archive: %w", err)
 	}
 
-	if opts.RegistryURL == "" {
-		return nil
+	if opts.RegistryURL != "" {
+		return s.pushImgAndCreateTemplate(opts, archive, moduleConfig)
 	}
+	return nil
+}
+
+func (s *Service) pushImgAndCreateTemplate(opts Options, archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig) error {
 	opts.Out.Write("- Pushing component version\n")
-	if err = s.registryService.PushComponentVersion(componentArchive, opts.Insecure, opts.Credentials,
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath, moduleConfig.ManifestPath)
+	if err != nil {
+		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
+	}
+
+	if err := s.registryService.PushComponentVersion(archive, opts.Insecure, opts.Credentials,
 		opts.RegistryURL); err != nil {
 		return fmt.Errorf("%w: failed to push component archive", err)
 	}
 
-	componentVersionAccess, err := s.registryService.GetComponentVersion(componentArchive, opts.Insecure,
-		opts.Credentials, opts.RegistryURL)
+	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials, opts.RegistryURL)
 	if err != nil {
 		return fmt.Errorf("%w: failed to get component version", err)
 	}
@@ -192,6 +189,18 @@ func (s *Service) CreateModule(opts Options) error {
 		crData, isCRDClusterScoped, opts.TemplateOutput); err != nil {
 		return fmt.Errorf("%w: failed to generate module template", err)
 	}
+	return nil
+}
 
+func (s *Service) configureSecScannerConf(opts Options, moduleConfig *contentprovider.ModuleConfig, componentDescriptor *compdesc.ComponentDescriptor) error {
+	opts.Out.Write("- Configuring security scanners config\n")
+	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
+	if err != nil {
+		return fmt.Errorf("%w: failed to parse security config data", err)
+	}
+
+	if err := s.securityConfigService.AppendSecurityScanConfig(componentDescriptor, *securityConfig); err != nil {
+		return fmt.Errorf("%w: failed to append security scan config", err)
+	}
 	return nil
 }
