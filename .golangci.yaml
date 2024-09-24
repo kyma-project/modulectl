@@ -30,7 +30,9 @@ linters-settings:
         disabled: true
         arguments: [ 120 ]
   funlen:
+    statements: 50
     lines: 80
+    ignore-comments: true
   cyclop:
     max-complexity: 20
   nestif:
@@ -91,6 +93,7 @@ issues:
     - path: "_test\\.go"
       linters:
         - dupl # Table driven unit and integration tests are expected to have duplicate code
+        - goconst # To be descriptive in tests we sometimes don't extract constants
         - varnamelen # Table driven unit and integration tests are expected to have short variable names
         - wrapcheck # Errors do not need to be wrapped in unit and integration tests
         - err113 # Dynamic error creation in unit and integration tests is ok

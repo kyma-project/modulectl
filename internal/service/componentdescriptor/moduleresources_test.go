@@ -1,13 +1,15 @@
+//nolint:gosec // some registry var names are used in tests
 package componentdescriptor_test
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 )
 
 func TestCreateCredMatchLabels_ReturnCorrectLabels(t *testing.T) {
@@ -76,6 +78,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
 		var returnedLabel map[string]string
 		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
+		require.NoError(t, err)
 		expectedLabel := map[string]string{
 			"operator.kyma-project.io/oci-registry-cred": "test-operator",
 		}
@@ -111,6 +114,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 		expectedLabel := map[string]string{
 			"operator.kyma-project.io/oci-registry-cred": "test-operator",
 		}
+		require.NoError(t, err)
 		require.Equal(t, expectedLabel, returnedLabel)
 	}
 }
@@ -142,6 +146,6 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing
 
 	for _, resource := range resources {
 		require.Equal(t, moduleVersion, resource.Version)
-		require.Len(t, resource.Labels, 0)
+		require.Empty(t, resource.Labels)
 	}
 }

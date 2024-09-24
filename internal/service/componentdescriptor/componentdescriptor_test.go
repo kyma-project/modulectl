@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	v1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 )
@@ -21,7 +21,7 @@ func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 	require.Equal(t, moduleName, descriptor.GetName())
 	require.Equal(t, moduleVersion, descriptor.GetVersion())
 	require.Equal(t, "v2", descriptor.Metadata.ConfiguredVersion)
-	require.Equal(t, v1.ProviderName("kyma-project.io"), descriptor.Provider.Name)
+	require.Equal(t, ocmv1.ProviderName("kyma-project.io"), descriptor.Provider.Name)
 	require.Len(t, descriptor.Provider.Labels, 1)
 	require.Equal(t, "kyma-project.io/built-by", descriptor.Provider.Labels[0].Name)
 	require.Equal(t, expectedProviderLabel, descriptor.Provider.Labels[0].Value)

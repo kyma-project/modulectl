@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/testutils"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/stretchr/testify/require"
+	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
 func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {

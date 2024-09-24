@@ -7,10 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+
+	"github.com/kyma-project/modulectl/internal/service/crdparser"
 )
 
 func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
@@ -18,7 +19,7 @@ func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
 
 	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
 	require.NoError(t, err)
-	require.Equal(t, isClusterScoped, true)
+	require.True(t, isClusterScoped)
 }
 
 func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T) {
@@ -26,7 +27,7 @@ func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T
 
 	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
 	require.NoError(t, err)
-	require.Equal(t, isClusterScoped, false)
+	require.False(t, isClusterScoped)
 }
 
 func TestService_IsCRDClusterScoped_ReturnsErrorWhenFileReadingRetrievalError(t *testing.T) {
