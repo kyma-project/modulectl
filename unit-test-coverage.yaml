@@ -9,3 +9,4 @@ packages:
   internal/service/create: 56
   internal/service/componentdescriptor: 100
   internal/service/templategenerator: 100
+  internal/service/crdparser: 80
