@@ -11,7 +11,7 @@ const (
 	ModuleConfigFileFlagDefault = "module-config.yaml"
 	moduleConfigFileFlagUsage   = "Specifies the path to the module configuration file."
 
-	CredentialsFlagName    = "registry-credentials"
+	CredentialsFlagName    = "registry-credentials" //nolint:gosec // Not hardcoded credentials, rather just flag name
 	credentialsFlagShort   = "c"
 	CredentialsFlagDefault = ""
 	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
