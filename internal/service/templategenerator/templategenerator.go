@@ -55,8 +55,8 @@ metadata:
 spec:
   channel: {{.Channel}}
   mandatory: {{.Mandatory}}
-  data:
 {{- with .Data}}
+  data:
 {{. | indent 4}}
 {{- end}}
   descriptor:
@@ -169,7 +169,7 @@ func generateAnnotations(config *contentprovider.ModuleConfig, isCrdClusterScope
 	} else {
 		annotations[shared.IsClusterScopedAnnotation] = shared.DisableLabelValue
 	}
-	return config.Annotations
+	return annotations
 }
 
 func indent(spaces int, input string) string {
