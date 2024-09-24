@@ -6,7 +6,7 @@ import (
 	"os"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/common/validations"
+	"github.com/kyma-project/modulectl/internal/common/validation"
 	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
@@ -76,7 +76,7 @@ func (opts Options) validateDirectory() error {
 }
 
 func (opts Options) validateModuleName() error {
-	if err := validations.ValidateModuleName(opts.ModuleName); err != nil {
+	if err := validation.ValidateModuleName(opts.ModuleName); err != nil {
 		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
@@ -84,7 +84,7 @@ func (opts Options) validateModuleName() error {
 }
 
 func (opts Options) validateVersion() error {
-	if err := validations.ValidateModuleVersion(opts.ModuleVersion); err != nil {
+	if err := validation.ValidateModuleVersion(opts.ModuleVersion); err != nil {
 		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
@@ -92,7 +92,7 @@ func (opts Options) validateVersion() error {
 }
 
 func (opts Options) validateChannel() error {
-	if err := validations.ValidateModuleChannel(opts.ModuleChannel); err != nil {
+	if err := validation.ValidateModuleChannel(opts.ModuleChannel); err != nil {
 		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
 	}
 

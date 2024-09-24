@@ -1,9 +1,9 @@
-package validations_test
+package validation_test
 
 import (
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/validations"
+	"github.com/kyma-project/modulectl/internal/common/validation"
 )
 
 func TestValidateModuleName(t *testing.T) {
@@ -45,7 +45,7 @@ func TestValidateModuleName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validations.ValidateModuleName(tt.moduleName); (err != nil) != tt.wantErr {
+			if err := validation.ValidateModuleName(tt.moduleName); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleName() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -86,7 +86,7 @@ func TestValidateModuleVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validations.ValidateModuleVersion(tt.moduleVersion); (err != nil) != tt.wantErr {
+			if err := validation.ValidateModuleVersion(tt.moduleVersion); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleVersion() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -127,7 +127,7 @@ func TestValidateModuleChannel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validations.ValidateModuleChannel(tt.moduleChannel); (err != nil) != tt.wantErr {
+			if err := validation.ValidateModuleChannel(tt.moduleChannel); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateChannel() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -173,7 +173,7 @@ func TestValidateModuleNamespace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validations.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
+			if err := validation.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleNamespace() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

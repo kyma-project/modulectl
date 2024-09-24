@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/common/validations"
+	"github.com/kyma-project/modulectl/internal/common/validation"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
@@ -122,19 +122,19 @@ func ParseURL(urlString string) (*url.URL, error) {
 }
 
 func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
-	if err := validations.ValidateModuleName(moduleConfig.Name); err != nil {
+	if err := validation.ValidateModuleName(moduleConfig.Name); err != nil {
 		return fmt.Errorf("failed to validate module name: %w", err)
 	}
 
-	if err := validations.ValidateModuleVersion(moduleConfig.Version); err != nil {
+	if err := validation.ValidateModuleVersion(moduleConfig.Version); err != nil {
 		return fmt.Errorf("failed to validate module version: %w", err)
 	}
 
-	if err := validations.ValidateModuleChannel(moduleConfig.Channel); err != nil {
+	if err := validation.ValidateModuleChannel(moduleConfig.Channel); err != nil {
 		return fmt.Errorf("failed to validate module channel: %w", err)
 	}
 
-	if err := validations.ValidateModuleNamespace(moduleConfig.Namespace); err != nil {
+	if err := validation.ValidateModuleNamespace(moduleConfig.Namespace); err != nil {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
 	}
 
