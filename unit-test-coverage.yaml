@@ -11,3 +11,4 @@ packages:
   internal/service/templategenerator: 100
   internal/service/crdparser: 100
   internal/service/registry: 100
+  internal/service/componentarchive: 100
