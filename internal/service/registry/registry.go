@@ -25,9 +25,10 @@ type Service struct {
 	repo          cpi.Repository
 }
 
-func NewService(ociRepository OCIRepository) *Service {
+func NewService(ociRepository OCIRepository, repo cpi.Repository) *Service {
 	return &Service{
 		ociRepository: ociRepository,
+		repo:          repo,
 	}
 }
 
@@ -69,11 +70,11 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 
 	ctx := cpi.DefaultContext()
 	repoType := ocireg.Type
-	registryURL = noSchemeURL(registryURL)
+	registryURL = NoSchemeURL(registryURL)
 	if insecure {
 		registryURL = "http://" + registryURL
 	}
-	creds := getCredentials(ctx, insecure, userPasswordCreds, registryURL)
+	creds := GetCredentials(ctx, insecure, userPasswordCreds, registryURL)
 
 	ociRepoSpec := &ocireg.RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(repoType),
@@ -95,13 +96,13 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	return repo, nil
 }
 
-func getCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryURL string) credentials.Credentials {
+func GetCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryURL string) credentials.Credentials {
 	if insecure {
 		return credentials.NewCredentials(nil)
 	}
 
 	var creds credentials.Credentials
-	user, pass := userPass(userPasswordCreds)
+	user, pass := UserPass(userPasswordCreds)
 
 	if user != "" && pass != "" {
 		creds = credentials.DirectCredentials{
@@ -125,12 +126,12 @@ func getCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryU
 	return creds
 }
 
-func noSchemeURL(url string) string {
+func NoSchemeURL(url string) string {
 	regex := regexp.MustCompile(`^https?://`)
 	return regex.ReplaceAllString(url, "")
 }
 
-func userPass(credentials string) (string, string) {
+func UserPass(credentials string) (string, string) {
 	u, p, found := strings.Cut(credentials, ":")
 	if !found {
 		return "", ""

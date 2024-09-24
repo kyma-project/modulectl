@@ -139,7 +139,7 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 
 	opts.Out.Write("- Configuring security scanners config\n")
-	if moduleConfig.Security != "" {
+	if moduleConfig.Security != "" && opts.GitRemote != "" {
 		securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
 		if err != nil {
 			return fmt.Errorf("%w: failed to parse security config data", err)
@@ -165,6 +165,10 @@ func (s *Service) CreateModule(opts Options) error {
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(componentArchive,
 		moduleResources); err != nil {
 		return fmt.Errorf("%w: failed to add module resources to component archive", err)
+	}
+
+	if opts.RegistryURL == "" {
+		return nil
 	}
 
 	opts.Out.Write("- Pushing component version\n")

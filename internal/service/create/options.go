@@ -38,10 +38,6 @@ func (opts Options) Validate() error {
 		}
 	}
 
-	if opts.GitRemote == "" {
-		return fmt.Errorf("%w:  opts.GitRemote must not be empty", commonerrors.ErrInvalidOption)
-	}
-
 	if opts.TemplateOutput == "" {
 		return fmt.Errorf("%w:  opts.TemplateOutput must not be empty", commonerrors.ErrInvalidOption)
 	}

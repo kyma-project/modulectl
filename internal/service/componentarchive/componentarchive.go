@@ -62,7 +62,6 @@ func (s *Service) CreateComponentArchive(descriptor *compdesc.ComponentDescripto
 	if err != nil {
 		return nil, fmt.Errorf("failed to create component archive, %w", err)
 	}
-
 	return componentArchive, nil
 }
 

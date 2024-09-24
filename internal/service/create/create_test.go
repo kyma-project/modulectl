@@ -52,19 +52,6 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	require.Contains(t, err.Error(), "opts.Out")
 }
 
-func Test_CreateModule_ReturnsError_WhenGitRemoteIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().withGitRemote("").build()
-
-	err = svc.CreateModule(opts)
-
-	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	require.Contains(t, err.Error(), "opts.GitRemote")
-}
-
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
@@ -239,7 +226,8 @@ func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ 
 
 type ModuleTemplateServiceStub struct{}
 
-func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.ModuleConfig, _ *compdesc.ComponentDescriptor,
+func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.ModuleConfig,
+	_ *compdesc.ComponentDescriptor,
 	_ []byte, _ bool, _ string,
 ) error {
 	return nil

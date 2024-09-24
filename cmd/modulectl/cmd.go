@@ -96,7 +96,7 @@ func buildModuleService() (*create.Service, error) {
 	archiveFileSystemService := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
 	componentArchiveService := componentarchive.NewService(archiveFileSystemService)
 	ociRepo := &ocirepo.OCIRepo{}
-	registryService := registry.NewService(ociRepo)
+	registryService := registry.NewService(ociRepo, nil)
 	moduleTemplateService := templategenerator.NewService(fileSystemUtil)
 	crdParserService := crdparser.NewService(fileSystemUtil)
 
