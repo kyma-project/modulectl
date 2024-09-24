@@ -90,6 +90,8 @@ issues:
   exclude-rules:
     - path: "_test\\.go"
       linters:
+        - dupl # Table driven unit and integration tests are expected to have duplicate code
+        - varnamelen # Table driven unit and integration tests are expected to have short variable names
         - wrapcheck # Errors do not need to be wrapped in unit and integration tests
         - err113 # Dynamic error creation in unit and integration tests is ok
         - gochecknoglobals # Does not apply to unit and integration tests

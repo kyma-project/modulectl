@@ -3,8 +3,9 @@ package componentdescriptor_test
 import (
 	"encoding/json"
 	"errors"
-	"github.com/kyma-project/modulectl/internal/testutils"
 	"testing"
+
+	"github.com/kyma-project/modulectl/internal/testutils"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/require"

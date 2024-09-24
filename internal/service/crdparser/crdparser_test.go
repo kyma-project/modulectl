@@ -1,16 +1,16 @@
 package crdparser_test
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
-	"bytes"
-	"fmt"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
-	"strings"
 )
 
 func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
@@ -36,8 +36,7 @@ func TestService_IsCRDClusterScoped_ReturnsErrorWhenFileReadingRetrievalError(t 
 	require.ErrorContains(t, err, "error reading CRD file")
 }
 
-type fileSystemClusterScopedExistsStub struct {
-}
+type fileSystemClusterScopedExistsStub struct{}
 
 func (*fileSystemClusterScopedExistsStub) ReadFile(path string) ([]byte, error) {
 	var fileContent []byte
@@ -111,8 +110,7 @@ func (*fileSystemClusterScopedExistsStub) ReadFile(path string) ([]byte, error) 
 	return fileContent, nil
 }
 
-type fileSystemNamespacedScopedExistsStub struct {
-}
+type fileSystemNamespacedScopedExistsStub struct{}
 
 func (*fileSystemNamespacedScopedExistsStub) ReadFile(path string) ([]byte, error) {
 	var fileContent []byte
@@ -185,8 +183,7 @@ func (*fileSystemNamespacedScopedExistsStub) ReadFile(path string) ([]byte, erro
 	return fileContent, nil
 }
 
-type fileSystemNotExistStub struct {
-}
+type fileSystemNotExistStub struct{}
 
 func (*fileSystemNotExistStub) ReadFile(_ string) ([]byte, error) {
 	return nil, errors.New("failed to read file")

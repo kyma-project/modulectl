@@ -192,8 +192,7 @@ func (g *gitServiceSecurityConfigStub) GetRemoteGitFileContent(_, _, _ string) (
 	return string(securityConfigBytes), nil
 }
 
-type gitServiceNoRemoteFile struct {
-}
+type gitServiceNoRemoteFile struct{}
 
 func (*gitServiceNoRemoteFile) GetLatestCommit(_ string) (string, error) {
 	return "latestCommit", nil

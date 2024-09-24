@@ -24,7 +24,6 @@ func TestCreateCredMatchLabels_ReturnCorrectLabels(t *testing.T) {
 	err = json.Unmarshal(label, &returnedLabel)
 	require.NoError(t, err)
 	assert.Equal(t, expectedLabel, returnedLabel)
-
 }
 
 func TestCreateCredMatchLabels_ReturnErrorOnInvalidSelector(t *testing.T) {
