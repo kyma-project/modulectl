@@ -35,18 +35,15 @@ func NewService(fileSystem ArchiveFileSystem) *Service {
 	}
 }
 
-func (s *Service) CreateComponentArchive(
-	componentDescriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
-	error,
-) {
+func (s *Service) CreateComponentArchive(descriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive, error) {
 	if err := s.fileSystem.CreateArchiveFileSystem(componentDescriptorPath); err != nil {
 		return nil, fmt.Errorf("failed to create archive file system, %w", err)
 	}
 
 	encodeOptions := &compdesc.EncodeOptions{
-		SchemaVersion: componentDescriptor.SchemaVersion(),
+		SchemaVersion: descriptor.SchemaVersion(),
 	}
-	versionedDescriptor, err := compdesc.Convert(componentDescriptor, encodeOptions)
+	versionedDescriptor, err := compdesc.Convert(descriptor, encodeOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert component descriptor, %w", err)
 	}
@@ -69,9 +66,13 @@ func (s *Service) CreateComponentArchive(
 	return componentArchive, nil
 }
 
-func (s *Service) AddModuleResourcesToArchive(componentArchive *comparch.ComponentArchive,
-	moduleResources []componentdescriptor.Resource,
-) error {
+type ComponentArchive interface {
+	AddBlob(blob cpi.BlobAccess, artType string, refName string, global cpi.AccessSpec, opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error)
+	SetResource(meta *cpi.ResourceMeta, access compdesc.AccessSpec, opts ...cpi.ModificationOption) error
+	Close() error
+}
+
+func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive, moduleResources []componentdescriptor.Resource) error {
 	for _, resource := range moduleResources {
 		if resource.Path != "" {
 			access, err := s.fileSystem.GenerateTarFileSystemAccess(resource.Path)
@@ -79,12 +80,12 @@ func (s *Service) AddModuleResourcesToArchive(componentArchive *comparch.Compone
 				return fmt.Errorf("failed to generate tar file access, %w", err)
 			}
 
-			blobAccess, err := componentArchive.AddBlob(access, access.MimeType(), resource.Name, nil)
+			blobAccess, err := archive.AddBlob(access, access.MimeType(), resource.Name, nil)
 			if err != nil {
 				return fmt.Errorf("failed to add blob, %w", err)
 			}
 
-			if err := componentArchive.SetResource(&resource.ResourceMeta, blobAccess,
+			if err = archive.SetResource(&resource.ResourceMeta, blobAccess,
 				cpi.ModifyResource(true)); err != nil {
 				return fmt.Errorf("failed to set resource, %w", err)
 			}

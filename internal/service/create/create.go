@@ -8,6 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
@@ -31,7 +32,7 @@ type GitSourcesService interface {
 type ComponentArchiveService interface {
 	CreateComponentArchive(componentDescriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
 		error)
-	AddModuleResourcesToArchive(componentArchive *comparch.ComponentArchive,
+	AddModuleResourcesToArchive(componentArchive componentarchive.ComponentArchive,
 		moduleResources []componentdescriptor.Resource) error
 }
 
@@ -161,13 +162,13 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to create component archive", err)
 	}
 
-	if err := s.componentArchiveService.AddModuleResourcesToArchive(componentArchive,
+	if err = s.componentArchiveService.AddModuleResourcesToArchive(componentArchive,
 		moduleResources); err != nil {
 		return fmt.Errorf("%w: failed to add module resources to component archive", err)
 	}
 
 	opts.Out.Write("- Pushing component version\n")
-	if err := s.registryService.PushComponentVersion(componentArchive, opts.Insecure, opts.Credentials,
+	if err = s.registryService.PushComponentVersion(componentArchive, opts.Insecure, opts.Credentials,
 		opts.RegistryURL); err != nil {
 		return fmt.Errorf("%w: failed to push component archive", err)
 	}

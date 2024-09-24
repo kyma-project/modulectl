@@ -11,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
@@ -215,7 +216,7 @@ func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.Component
 	return &comparch.ComponentArchive{}, nil
 }
 
-func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ *comparch.ComponentArchive,
+func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ componentarchive.ComponentArchive,
 	_ []componentdescriptor.Resource,
 ) error {
 	return nil
