@@ -90,59 +90,62 @@ func Test_NoSchemeURL_ReturnsCorrectWithNoScheme(t *testing.T) {
 
 func Test_UserPass_ReturnsCorrectUsernameAndPassword(t *testing.T) {
 	user, pass := registry.UserPass("user1:pass1")
-	require.Equal(t, user, "user1")
-	require.Equal(t, pass, "pass1")
+	require.Equal(t, "user1", user)
+	require.Equal(t, "pass1", pass)
 }
 
 func Test_UserPass_ReturnsCorrectUsername(t *testing.T) {
 	user, pass := registry.UserPass("user1:")
-	require.Equal(t, user, "user1")
-	require.Equal(t, pass, "")
+	require.Equal(t, "user1", user)
+	require.Equal(t, "", pass)
 }
 
 func Test_UserPass_ReturnsCorrectPassword(t *testing.T) {
 	user, pass := registry.UserPass(":pass1")
-	require.Equal(t, user, "")
-	require.Equal(t, pass, "pass1")
+	require.Equal(t, "", user)
+	require.Equal(t, "pass1", pass)
 }
 
-type ociRepositoryVersionExistsStub struct {
-}
+type ociRepositoryVersionExistsStub struct{}
 
 func (*ociRepositoryVersionExistsStub) GetComponentVersion(_ *comparch.ComponentArchive,
-	_ cpi.Repository) (cpi.ComponentVersionAccess, error) {
+	_ cpi.Repository,
+) (cpi.ComponentVersionAccess, error) {
 	componentVersion := &comparch.ComponentArchive{}
 	return componentVersion, nil
 }
 
 func (*ociRepositoryVersionExistsStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository) error {
+	_ cpi.Repository,
+) error {
 	return errors.New("component version already exists")
 }
 
-type ociRepositoryStub struct {
-}
+type ociRepositoryStub struct{}
 
 func (*ociRepositoryStub) GetComponentVersion(_ *comparch.ComponentArchive,
-	_ cpi.Repository) (cpi.ComponentVersionAccess, error) {
+	_ cpi.Repository,
+) (cpi.ComponentVersionAccess, error) {
 	componentVersion := &comparch.ComponentArchive{}
 	return componentVersion, nil
 }
 
 func (*ociRepositoryStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository) error {
+	_ cpi.Repository,
+) error {
 	return nil
 }
 
-type ociRepositoryNotExistStub struct {
-}
+type ociRepositoryNotExistStub struct{}
 
 func (*ociRepositoryNotExistStub) GetComponentVersion(_ *comparch.ComponentArchive,
-	_ cpi.Repository) (cpi.ComponentVersionAccess, error) {
+	_ cpi.Repository,
+) (cpi.ComponentVersionAccess, error) {
 	return nil, errors.New("failed to get component version")
 }
 
 func (*ociRepositoryNotExistStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository) error {
+	_ cpi.Repository,
+) error {
 	return nil
 }

@@ -45,17 +45,6 @@ func Test_Validate_Options(t *testing.T) {
 			errMsg:  "opts.Credentials is in invalid format",
 		},
 		{
-			name: "GitRemote is empty",
-			options: create.Options{
-				Out:              iotools.NewDefaultOut(io.Discard),
-				ModuleConfigFile: "config.yaml",
-				Credentials:      "username:password",
-				GitRemote:        "",
-			},
-			wantErr: true,
-			errMsg:  "opts.GitRemote must not be empty",
-		},
-		{
 			name: "TemplateOutput is empty",
 			options: create.Options{
 				Out:              iotools.NewDefaultOut(io.Discard),

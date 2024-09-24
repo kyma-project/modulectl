@@ -116,7 +116,6 @@ func (s *Service) CreateModule(opts Options) error {
 		return err
 	}
 	defer s.moduleConfigService.CleanupTempFiles()
-
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
 	if err != nil {
 		return fmt.Errorf("%w: failed to parse module config", err)
@@ -149,7 +148,6 @@ func (s *Service) CreateModule(opts Options) error {
 			return fmt.Errorf("%w: failed to append security scan config", err)
 		}
 	}
-
 	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath,
 		moduleConfig.ManifestPath)
 	if err != nil {
@@ -161,7 +159,6 @@ func (s *Service) CreateModule(opts Options) error {
 	if err != nil {
 		return fmt.Errorf("%w: failed to create component archive", err)
 	}
-
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(componentArchive,
 		moduleResources); err != nil {
 		return fmt.Errorf("%w: failed to add module resources to component archive", err)
@@ -170,7 +167,6 @@ func (s *Service) CreateModule(opts Options) error {
 	if opts.RegistryURL == "" {
 		return nil
 	}
-
 	opts.Out.Write("- Pushing component version\n")
 	if err = s.registryService.PushComponentVersion(componentArchive, opts.Insecure, opts.Credentials,
 		opts.RegistryURL); err != nil {
