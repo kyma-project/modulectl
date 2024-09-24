@@ -9,16 +9,16 @@ import (
 const (
 	ModuleConfigFileFlagName    = "module-config-file"
 	ModuleConfigFileFlagDefault = "module-config.yaml"
-	moduleConfigFileFlagUsage   = "Specifies the module configuration file."
+	moduleConfigFileFlagUsage   = "Specifies the path to the module configuration file."
 
-	CredentialsFlagName    = "credentials"
+	CredentialsFlagName    = "registry-credentials"
 	credentialsFlagShort   = "c"
 	CredentialsFlagDefault = ""
 	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
 
 	GitRemoteFlagName    = "git-remote"
 	GitRemoteFlagDefault = ""
-	gitRemoteFlagUsage   = `Specifies the URL of the wanted GitHub repository.`
+	gitRemoteFlagUsage   = "Specifies the URL of the module's GitHub repository. "
 
 	InsecureFlagName    = "insecure"
 	InsecureFlagDefault = false
@@ -27,9 +27,10 @@ const (
 	TemplateOutputFlagName    = "output"
 	templateOutputFlagShort   = "o"
 	TemplateOutputFlagDefault = "template.yaml"
-	templateOutputFlagUsage   = `File to write the module template if the module is uploaded to a registry (default "template.yaml").`
+	templateOutputFlagUsage   = `Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").`
 
 	RegistryURLFlagName    = "registry"
+	registryFlagShort      = "r"
 	RegistryURLFlagDefault = ""
 	registryURLFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
 
@@ -49,7 +50,7 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
 	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault,
 		templateOutputFlagUsage)
-	flags.StringVar(&opts.RegistryURL, RegistryURLFlagName, RegistryURLFlagDefault, registryURLFlagUsage)
+	flags.StringVarP(&opts.RegistryURL, RegistryURLFlagName, registryFlagShort, RegistryURLFlagDefault, registryURLFlagUsage)
 	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault,
 		registryCredSelectorFlagUsage)
 }
