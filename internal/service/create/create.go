@@ -133,10 +133,12 @@ func (s *Service) CreateModule(opts Options) error {
 		return fmt.Errorf("%w: failed to generate module resources", err)
 	}
 
-	if err := s.gitSourcesService.AddGitSources(componentDescriptor, opts.GitRemote, moduleConfig.Version); err != nil {
-		return fmt.Errorf("%w: failed to add git sources", err)
+	if opts.GitRemote != "" {
+		if err := s.gitSourcesService.AddGitSources(componentDescriptor, opts.GitRemote,
+			moduleConfig.Version); err != nil {
+			return fmt.Errorf("%w: failed to add git sources", err)
+		}
 	}
-
 	opts.Out.Write("- Configuring security scanners config\n")
 	if moduleConfig.Security != "" && opts.GitRemote != "" {
 		securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
