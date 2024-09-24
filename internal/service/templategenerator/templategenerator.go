@@ -130,11 +130,11 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	w := &bytes.Buffer{}
-	if err := moduleTemplate.Execute(w, mtData); err != nil {
+	if err = moduleTemplate.Execute(w, mtData); err != nil {
 		return fmt.Errorf("failed to execute template, %w", err)
 	}
 
-	if err := s.fileSystem.WriteFile(templateOutput, w.String()); err != nil {
+	if err = s.fileSystem.WriteFile(templateOutput, w.String()); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 
