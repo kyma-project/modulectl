@@ -14,12 +14,12 @@ import (
 )
 
 func TestServiceNew_WhenCalledWithNilDependency_ReturnsErr(t *testing.T) {
-	_, err := registry.NewService(&ociRepositoryVersionExistsStub{}, nil)
+	repo, _ := ocireg.NewRepository(cpi.DefaultContext(), "URL")
+	_, err := registry.NewService(nil, repo)
 	require.Error(t, err)
 
-	repo, _ := ocireg.NewRepository(cpi.DefaultContext(), "URL")
-	_, err = registry.NewService(nil, repo)
-	require.Error(t, err)
+	_, err = registry.NewService(&ociRepositoryVersionExistsStub{}, nil)
+	require.NoError(t, err)
 }
 
 func TestService_PushComponentVersion_ReturnErrorWhenSameComponentVersionExists(t *testing.T) {
