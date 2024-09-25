@@ -100,12 +100,7 @@ func ValidateModuleNamespace(namespace string) error {
 }
 
 func validateSemanticVersion(version string) error {
-	val := strings.TrimSpace(version)
-
-	// strip the leading "v", if any, because it's not part of a proper semver
-	val = strings.TrimPrefix(val, "v")
-
-	_, err := semver.StrictNewVersion(val)
+	_, err := semver.StrictNewVersion(strings.TrimSpace(version))
 	if err != nil {
 		return fmt.Errorf("%w: opts.ModuleVersion failed to parse as semantic version: %w",
 			commonerrors.ErrInvalidOption, err)

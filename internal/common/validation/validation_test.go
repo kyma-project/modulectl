@@ -64,9 +64,9 @@ func TestValidateModuleVersion(t *testing.T) {
 			wantErr:       false,
 		},
 		{
-			name:          "valid module version with 'v' prefix",
+			name:          "invalid module version with 'v' prefix",
 			moduleVersion: "v0.0.1",
-			wantErr:       false,
+			wantErr:       true,
 		},
 		{
 			name:          "empty module version",
