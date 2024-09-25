@@ -12,8 +12,14 @@ import (
 	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
 
+func TestNew_WhenCalledWithNilDependencies_ReturnsError(t *testing.T) {
+	_, err := templategenerator.NewService(nil)
+
+	require.Error(t, err)
+}
+
 func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.T) {
-	svc := templategenerator.NewService(nil)
+	svc, _ := templategenerator.NewService(&mockFileSystem{})
 
 	err := svc.GenerateModuleTemplate(nil, nil, nil, false, "")
 
@@ -22,7 +28,7 @@ func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.
 }
 
 func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *testing.T) {
-	svc := templategenerator.NewService(nil)
+	svc, _ := templategenerator.NewService(&mockFileSystem{})
 
 	err := svc.GenerateModuleTemplate(&contentprovider.ModuleConfig{}, nil, nil, false, "")
 
@@ -32,7 +38,7 @@ func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *test
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {
 	mockFS := &mockFileSystem{}
-	svc := templategenerator.NewService(mockFS)
+	svc, _ := templategenerator.NewService(mockFS)
 
 	moduleConfig := &contentprovider.ModuleConfig{
 		ResourceName: "test-resource",

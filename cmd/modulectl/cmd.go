@@ -111,7 +111,10 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registry service: %w", err)
 	}
-	moduleTemplateService := templategenerator.NewService(fileSystemUtil)
+	moduleTemplateService, err := templategenerator.NewService(fileSystemUtil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create module template service: %w", err)
+	}
 	crdParserService, err := crdparser.NewService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
