@@ -178,9 +178,12 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 		return fmt.Errorf("%w: failed to get component version", err)
 	}
 
-	crData, err := s.moduleConfigService.GetDefaultCRData(moduleConfig.DefaultCRPath)
-	if err != nil {
-		return fmt.Errorf("%w: failed to get default CR data", err)
+	var crData []byte
+	if moduleConfig.DefaultCRPath != "" {
+		crData, err = s.moduleConfigService.GetDefaultCRData(moduleConfig.DefaultCRPath)
+		if err != nil {
+			return fmt.Errorf("%w: failed to get default CR data", err)
+		}
 	}
 
 	opts.Out.Write("- Generating ModuleTemplate\n")

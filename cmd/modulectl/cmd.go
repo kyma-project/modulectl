@@ -107,7 +107,10 @@ func buildModuleService() (*create.Service, error) {
 	}
 
 	ociRepo := &ocirepo.OCIRepo{}
-	registryService := registry.NewService(ociRepo, nil)
+	registryService, err := registry.NewService(ociRepo, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create registry service: %w", err)
+	}
 	moduleTemplateService := templategenerator.NewService(fileSystemUtil)
 	crdParserService, err := crdparser.NewService(fileSystemUtil)
 	if err != nil {

@@ -1,6 +1,7 @@
 package moduleconfigreader
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -12,6 +13,8 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/validation"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
+
+var ErrNoPathForDefaultCR = errors.New("no path for default CR given")
 
 const (
 	defaultCRFilePattern       = "kyma-module-default-cr-*.yaml"
@@ -28,8 +31,8 @@ type TempFileSystem interface {
 }
 
 type Service struct {
-	fileSystem    FileSystem
-	tmpFileSystem TempFileSystem
+	fileSystem     FileSystem
+	tempFileSystem TempFileSystem
 }
 
 func NewService(fileSystem FileSystem, tmpFileSystem TempFileSystem) (*Service, error) {
@@ -38,12 +41,12 @@ func NewService(fileSystem FileSystem, tmpFileSystem TempFileSystem) (*Service, 
 	}
 
 	if tmpFileSystem == nil {
-		return nil, fmt.Errorf("%w: tmpFileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("%w: tempFileSystem must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
-		fileSystem:    fileSystem,
-		tmpFileSystem: tmpFileSystem,
+		fileSystem:     fileSystem,
+		tempFileSystem: tmpFileSystem,
 	}, nil
 }
 
@@ -51,21 +54,21 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 ) (*contentprovider.ModuleConfig, error) {
 	moduleConfig, err := ParseModuleConfig(moduleConfigFile, s.fileSystem)
 	if err != nil {
-		return nil, fmt.Errorf("%w: failed to parse module config file", err)
+		return nil, fmt.Errorf("failed to parse module config file: %w", err)
 	}
 
-	if err := ValidateModuleConfig(moduleConfig); err != nil {
-		return nil, fmt.Errorf("%w: failed to value module config", err)
+	if err = ValidateModuleConfig(moduleConfig); err != nil {
+		return nil, fmt.Errorf("failed to value module config: %w", err)
 	}
 
-	moduleConfig.DefaultCRPath, err = GetDefaultCRPath(moduleConfig.DefaultCRPath, s.tmpFileSystem)
+	moduleConfig.DefaultCRPath, err = GetDefaultCRPath(moduleConfig.DefaultCRPath, s.tempFileSystem)
 	if err != nil {
-		return nil, fmt.Errorf("%w: failed to get default CR path", err)
+		return nil, fmt.Errorf("failed to get default CR path: %w", err)
 	}
 
-	moduleConfig.ManifestPath, err = GetManifestPath(moduleConfig.ManifestPath, s.tmpFileSystem)
+	moduleConfig.ManifestPath, err = GetManifestPath(moduleConfig.ManifestPath, s.tempFileSystem)
 	if err != nil {
-		return nil, fmt.Errorf("%w: failed to get manifest path", err)
+		return nil, fmt.Errorf("failed to get manifest path: %w", err)
 	}
 
 	return moduleConfig, nil
@@ -73,7 +76,7 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 
 func (s *Service) GetDefaultCRData(defaultCRPath string) ([]byte, error) {
 	if defaultCRPath == "" {
-		return nil, nil
+		return nil, ErrNoPathForDefaultCR
 	}
 	defaultCRData, err := s.fileSystem.ReadFile(defaultCRPath)
 	if err != nil {
@@ -84,7 +87,7 @@ func (s *Service) GetDefaultCRData(defaultCRPath string) ([]byte, error) {
 }
 
 func (s *Service) CleanupTempFiles() []error {
-	return s.tmpFileSystem.RemoveTempFiles()
+	return s.tempFileSystem.RemoveTempFiles()
 }
 
 func GetManifestPath(manifestPath string, tempFileSystem TempFileSystem) (string, error) {
@@ -121,7 +124,7 @@ func ParseURL(urlString string) (*url.URL, error) {
 	if err == nil && urlParsed.Scheme != "" && urlParsed.Host != "" {
 		return urlParsed, nil
 	}
-	return nil, fmt.Errorf("%w: parsing url failed for %s", commonerrors.ErrInvalidArg, urlString)
+	return nil, fmt.Errorf("failed to parse url %s: %w", urlString, commonerrors.ErrInvalidArg)
 }
 
 func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
@@ -142,7 +145,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	}
 
 	if moduleConfig.ManifestPath == "" {
-		return fmt.Errorf("%w: manifest path must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	return nil

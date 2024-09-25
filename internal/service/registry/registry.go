@@ -13,6 +13,8 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/runtime"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
 type OCIRepository interface {
@@ -25,11 +27,18 @@ type Service struct {
 	repo          cpi.Repository
 }
 
-func NewService(ociRepository OCIRepository, repo cpi.Repository) *Service {
+func NewService(ociRepository OCIRepository, repo cpi.Repository) (*Service, error) {
+	if ociRepository == nil {
+		return nil, fmt.Errorf("%w: ociRepository must not be nil", commonerrors.ErrInvalidArg)
+	}
+	if repo == nil {
+		return nil, fmt.Errorf("%w: repo must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &Service{
 		ociRepository: ociRepository,
 		repo:          repo,
-	}
+	}, nil
 }
 
 func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure bool,
@@ -102,7 +111,7 @@ func GetCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryU
 	}
 
 	var creds credentials.Credentials
-	user, pass := UserPass(userPasswordCreds)
+	user, pass := ParseUserPass(userPasswordCreds)
 
 	if user != "" && pass != "" {
 		creds = credentials.DirectCredentials{
@@ -131,7 +140,7 @@ func NoSchemeURL(url string) string {
 	return regex.ReplaceAllString(url, "")
 }
 
-func UserPass(credentials string) (string, string) {
+func ParseUserPass(credentials string) (string, string) {
 	u, p, found := strings.Cut(credentials, ":")
 	if !found {
 		return "", ""

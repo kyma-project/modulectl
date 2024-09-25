@@ -44,6 +44,30 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
 }
 
+func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
+	_, err := moduleconfigreader.NewService(
+		nil,
+		&tmpfileSystemStub{})
+	require.Error(t, err)
+
+	_, err = moduleconfigreader.NewService(
+		&fileExistsStub{},
+		nil)
+	require.Error(t, err)
+}
+
+func Test_GetDefaultCRData_CalledWithEmptyPath_ReturnsErr(t *testing.T) {
+	moduleConfigService, err := moduleconfigreader.NewService(
+		&fileExistsStub{},
+		&tmpfileSystemStub{})
+	require.NoError(t, err)
+
+	_, err = moduleConfigService.GetDefaultCRData("")
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, moduleconfigreader.ErrNoPathForDefaultCR)
+}
+
 func Test_GetDefaultCRData_Returns_CorrectData(t *testing.T) {
 	moduleConfigService, err := moduleconfigreader.NewService(
 		&fileExistsStub{},
@@ -107,25 +131,25 @@ func TestService_ParseURL(t *testing.T) {
 			name:          "invalid URL",
 			urlString:     "invalid-url",
 			want:          nil,
-			expectedError: fmt.Errorf("%w: parsing url failed for invalid-url", commonerrors.ErrInvalidArg),
+			expectedError: fmt.Errorf("failed to parse url invalid-url: %w", commonerrors.ErrInvalidArg),
 		},
 		{
 			name:          "URL without Scheme",
 			urlString:     "example.com/path",
 			want:          nil,
-			expectedError: fmt.Errorf("%w: parsing url failed for example.com/path", commonerrors.ErrInvalidArg),
+			expectedError: fmt.Errorf("failed to parse url example.com/path: %w", commonerrors.ErrInvalidArg),
 		},
 		{
 			name:          "URL without Host",
 			urlString:     "https://",
 			want:          nil,
-			expectedError: fmt.Errorf("%w: parsing url failed for https://", commonerrors.ErrInvalidArg),
+			expectedError: fmt.Errorf("failed to parse url https://: %w", commonerrors.ErrInvalidArg),
 		},
 		{
 			name:          "Empty URL",
 			urlString:     "",
 			want:          nil,
-			expectedError: fmt.Errorf("%w: parsing url failed for ", commonerrors.ErrInvalidArg),
+			expectedError: fmt.Errorf("failed to parse url : %w", commonerrors.ErrInvalidArg),
 		},
 	}
 	for _, test := range tests {
@@ -205,7 +229,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Namespace:    "kcp-system",
 				ManifestPath: "",
 			},
-			expectedError: fmt.Errorf("%w: manifest path must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
