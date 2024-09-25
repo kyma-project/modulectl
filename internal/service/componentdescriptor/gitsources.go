@@ -8,6 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
 
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
@@ -20,10 +21,14 @@ type GitSourcesService struct {
 	gitService GitService
 }
 
-func NewGitSourcesService(gitService GitService) *GitSourcesService {
+func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
+	if gitService == nil {
+		return nil, fmt.Errorf("%w: gitService must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &GitSourcesService{
 		gitService: gitService,
-	}
+	}, nil
 }
 
 func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,

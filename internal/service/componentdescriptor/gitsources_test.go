@@ -12,11 +12,12 @@ import (
 )
 
 func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
-	gitSourcesService := componentdescriptor.NewGitSourcesService(&gitServiceStub{})
+	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceStub{})
+	require.NoError(t, err)
 	moduleVersion := "1.0.0"
 	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
-	err := gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
+	err = gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Sources, 1)
@@ -32,12 +33,13 @@ func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 }
 
 func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
-	gitSourcesService := componentdescriptor.NewGitSourcesService(&gitServiceErrorStub{})
+	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceErrorStub{})
+	require.NoError(t, err)
 
 	moduleVersion := "1.0.0"
 	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
-	err := gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
+	err = gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to get latest commit")
 }

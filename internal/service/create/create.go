@@ -137,11 +137,11 @@ func (s *Service) CreateModule(opts Options) error {
 			moduleConfig.Version); err != nil {
 			return fmt.Errorf("failed to add git sources: %w", err)
 		}
-	}
-	if moduleConfig.Security != "" && opts.GitRemote != "" {
-		err = s.configureSecScannerConf(opts, moduleConfig, descriptor)
-		if err != nil {
-			return fmt.Errorf("failed to configure security scanners: %w", err)
+		if moduleConfig.Security != "" {
+			err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+			if err != nil {
+				return fmt.Errorf("failed to configure security scanners: %w", err)
+			}
 		}
 	}
 
@@ -156,12 +156,12 @@ func (s *Service) CreateModule(opts Options) error {
 	}
 
 	if opts.RegistryURL != "" {
-		return s.pushImgAndCreateTemplate(opts, archive, moduleConfig)
+		return s.pushImgAndCreateTemplate(archive, moduleConfig, opts)
 	}
 	return nil
 }
 
-func (s *Service) pushImgAndCreateTemplate(opts Options, archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig) error {
+func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
 	opts.Out.Write("- Pushing component version\n")
 	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath, moduleConfig.ManifestPath)
 	if err != nil {
@@ -192,14 +192,14 @@ func (s *Service) pushImgAndCreateTemplate(opts Options, archive *comparch.Compo
 	return nil
 }
 
-func (s *Service) configureSecScannerConf(opts Options, moduleConfig *contentprovider.ModuleConfig, componentDescriptor *compdesc.ComponentDescriptor) error {
+func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
 	if err != nil {
 		return fmt.Errorf("%w: failed to parse security config data", err)
 	}
 
-	if err := s.securityConfigService.AppendSecurityScanConfig(componentDescriptor, *securityConfig); err != nil {
+	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
 		return fmt.Errorf("%w: failed to append security scan config", err)
 	}
 	return nil

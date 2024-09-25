@@ -152,9 +152,10 @@ func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *testing.T) {
-	securityConfigSerivce := componentdescriptor.NewSecurityConfigService(&gitServiceSecurityConfigStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&gitServiceSecurityConfigStub{})
+	require.NoError(t, err)
 
-	returned, err := securityConfigSerivce.ParseSecurityConfigData("https://github.com/kyma-project/template-operator",
+	returned, err := securityConfigService.ParseSecurityConfigData("https://github.com/kyma-project/template-operator",
 		"sec-scanners-config.yaml")
 	require.NoError(t, err)
 
@@ -166,9 +167,10 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *tes
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnRemoteFileReadingError(t *testing.T) {
-	securityConfigSerivce := componentdescriptor.NewSecurityConfigService(&gitServiceNoRemoteFile{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&gitServiceNoRemoteFile{})
+	require.NoError(t, err)
 
-	_, err := securityConfigSerivce.ParseSecurityConfigData("testUrl", "testFile")
+	_, err = securityConfigService.ParseSecurityConfigData("testUrl", "testFile")
 	require.ErrorContains(t, err, "failed to get security config content")
 }
 

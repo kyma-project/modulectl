@@ -12,13 +12,19 @@ import (
 	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
+func TestNew_WhenCalledWithNil_ReturnsError(t *testing.T) {
+	_, err := componentarchive.NewService(nil)
+
+	require.Error(t, err)
+}
+
 func TestCreateComponentArchive_IfArchiveFileSystemReturnsError_ReturnsWrappedError(t *testing.T) {
 	mockFS := &mockArchiveFileSystem{
 		CreateArchiveFileSystemFunc: func(path string) error {
 			return errors.New("some fs error")
 		},
 	}
-	service := componentarchive.NewService(mockFS)
+	service, _ := componentarchive.NewService(mockFS)
 	descriptor := testutils.CreateComponentDescriptor("test-module", "0.0.1")
 
 	_, err := service.CreateComponentArchive(descriptor)
@@ -36,7 +42,7 @@ func TestCreateComponentArchive_WriteFileError(t *testing.T) {
 			return errors.New("some write error")
 		},
 	}
-	service := componentarchive.NewService(mockFS)
+	service, _ := componentarchive.NewService(mockFS)
 	descriptor := testutils.CreateComponentDescriptor("test-module", "0.0.1")
 
 	archive, err := service.CreateComponentArchive(descriptor)

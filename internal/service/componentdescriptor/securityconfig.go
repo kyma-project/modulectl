@@ -11,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
@@ -38,10 +39,14 @@ type SecurityConfigService struct {
 	gitService GitService
 }
 
-func NewSecurityConfigService(gitService GitService) *SecurityConfigService {
+func NewSecurityConfigService(gitService GitService) (*SecurityConfigService, error) {
+	if gitService == nil {
+		return nil, fmt.Errorf("%w: gitService must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &SecurityConfigService{
 		gitService: gitService,
-	}
+	}, nil
 }
 
 func (s *SecurityConfigService) ParseSecurityConfigData(gitRepoURL, securityConfigFile string) (

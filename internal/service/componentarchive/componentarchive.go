@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/utils/accessobj"
 	"sigs.k8s.io/yaml"
 
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 )
 
@@ -29,10 +30,14 @@ type Service struct {
 	fileSystem ArchiveFileSystem
 }
 
-func NewService(fileSystem ArchiveFileSystem) *Service {
+func NewService(fileSystem ArchiveFileSystem) (*Service, error) {
+	if fileSystem == nil {
+		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &Service{
 		fileSystem: fileSystem,
-	}
+	}, nil
 }
 
 func (s *Service) CreateComponentArchive(descriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive, error) {

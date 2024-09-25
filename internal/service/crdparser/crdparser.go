@@ -7,6 +7,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
 type FileSystem interface {
@@ -17,10 +19,14 @@ type Service struct {
 	fileSystem FileSystem
 }
 
-func NewService(fileSystem FileSystem) *Service {
+func NewService(fileSystem FileSystem) (*Service, error) {
+	if fileSystem == nil {
+		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &Service{
 		fileSystem: fileSystem,
-	}
+	}, nil
 }
 
 type Resource struct {

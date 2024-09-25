@@ -14,8 +14,14 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 )
 
+func TestService_NewService_ReturnsErrorWhenCalledWithNil(t *testing.T) {
+	_, err := crdparser.NewService(nil)
+
+	require.Error(t, err)
+}
+
 func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
-	crdParserService := crdparser.NewService(&fileSystemClusterScopedExistsStub{})
+	crdParserService, _ := crdparser.NewService(&fileSystemClusterScopedExistsStub{})
 
 	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
 	require.NoError(t, err)
@@ -23,7 +29,7 @@ func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
 }
 
 func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T) {
-	crdParserService := crdparser.NewService(&fileSystemNamespacedScopedExistsStub{})
+	crdParserService, _ := crdparser.NewService(&fileSystemNamespacedScopedExistsStub{})
 
 	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
 	require.NoError(t, err)
@@ -31,7 +37,7 @@ func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T
 }
 
 func TestService_IsCRDClusterScoped_ReturnsErrorWhenFileReadingRetrievalError(t *testing.T) {
-	crdParserService := crdparser.NewService(&fileSystemNotExistStub{})
+	crdParserService, _ := crdparser.NewService(&fileSystemNotExistStub{})
 
 	_, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
 	require.ErrorContains(t, err, "error reading CRD file")

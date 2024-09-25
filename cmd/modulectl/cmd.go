@@ -86,20 +86,33 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
-
 	gitService := git.NewService()
-	gitSourcesService := componentdescriptor.NewGitSourcesService(gitService)
-	securityConfigService := componentdescriptor.NewSecurityConfigService(gitService)
-
+	gitSourcesService, err := componentdescriptor.NewGitSourcesService(gitService)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create git sources service: %w", err)
+	}
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(gitService)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create security config service: %w", err)
+	}
 	memoryFileSystem := memoryfs.New()
 	osFileSystem := osfs.New()
-	archiveFileSystemService := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
-	componentArchiveService := componentarchive.NewService(archiveFileSystemService)
+	archiveFileSystemService, err := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create archive file system service: %w", err)
+	}
+	componentArchiveService, err := componentarchive.NewService(archiveFileSystemService)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create component archive service: %w", err)
+	}
+
 	ociRepo := &ocirepo.OCIRepo{}
 	registryService := registry.NewService(ociRepo, nil)
 	moduleTemplateService := templategenerator.NewService(fileSystemUtil)
-	crdParserService := crdparser.NewService(fileSystemUtil)
-
+	crdParserService, err := crdparser.NewService(fileSystemUtil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
+	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
 		securityConfigService, componentArchiveService, registryService, moduleTemplateService, crdParserService)
 	if err != nil {

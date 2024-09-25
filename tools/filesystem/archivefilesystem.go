@@ -10,6 +10,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/utils/blobaccess"
+
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
 const tarMediaType = "application/x-tar"
@@ -19,11 +21,19 @@ type ArchiveFileSystem struct {
 	OsFileSystem     vfs.FileSystem
 }
 
-func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) *ArchiveFileSystem {
+func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) (*ArchiveFileSystem, error) {
+	if memoryFileSystem == nil {
+		return nil, fmt.Errorf("%w: memoryFileSystem must not be nil", commonerrors.ErrInvalidArg)
+	}
+
+	if osFileSystem == nil {
+		return nil, fmt.Errorf("%w: osFileSystem must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &ArchiveFileSystem{
 		MemoryFileSystem: memoryFileSystem,
 		OsFileSystem:     osFileSystem,
-	}
+	}, nil
 }
 
 func (s *ArchiveFileSystem) CreateArchiveFileSystem(path string) error {
