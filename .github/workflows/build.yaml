@@ -1,4 +1,4 @@
-name: Build modulectl
+name: Build
 on:
   pull_request:
     branches:
@@ -6,16 +6,15 @@ on:
       - 'release-**'
   workflow_dispatch:
 jobs:
-  build:
-    name: Build modulectl
+  build-modulectl:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout modulectl
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Go
+      - name: Go setup
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
-      - name: Run CLI Build
+      - name: "Run 'make build'"
         run: make build

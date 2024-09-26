@@ -33,7 +33,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
 
-	err = svc.CreateModule(opts)
+	err = svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.ModuleConfigFile")
@@ -46,7 +46,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
 
-	err = svc.CreateModule(opts)
+	err = svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.Out")
@@ -59,7 +59,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
 
-	err = svc.CreateModule(opts)
+	err = svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.Credentials")
@@ -72,7 +72,7 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
 
-	err = svc.CreateModule(opts)
+	err = svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.TemplateOutput")
@@ -86,7 +86,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 
 	opts := newCreateOptionsBuilder().build()
 
-	err = svc.CreateModule(opts)
+	err = svc.Run(opts)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to read module config file")

@@ -23,7 +23,7 @@ type Options struct {
 	ModuleChannel             string
 }
 
-func (opts Options) validate() error {
+func (opts Options) Validate() error {
 	if opts.Out == nil {
 		return fmt.Errorf("%w: opts.Out must not be nil", commonerrors.ErrInvalidOption)
 	}

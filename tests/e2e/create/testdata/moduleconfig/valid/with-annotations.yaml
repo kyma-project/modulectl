@@ -1,0 +1,6 @@
+name: kyma-project.io/module/template-operator
+channel: regular
+version: 1.0.1
+manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
+annotations:
+  operator.kyma-project.io/doc-url: https://kyma-project.io

@@ -111,7 +111,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-func (s *Service) CreateModule(opts Options) error {
+func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}

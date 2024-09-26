@@ -55,8 +55,8 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-func (s *Service) CreateScaffold(opts Options) error {
-	if err := opts.validate(); err != nil {
+func (s *Service) Run(opts Options) error {
+	if err := opts.Validate(); err != nil {
 		return err
 	}
 

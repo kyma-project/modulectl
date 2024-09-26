@@ -1,29 +1,28 @@
-name: E2E Test - Create Scaffold
+name: E2E test - scaffold command
 on:
   pull_request:
     branches:
       - main
       - 'release-**'
 jobs:
-  e2e-test:
-    name: E2E Test - Create Scaffold
+  test-scaffold-cmd:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout modulectl
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Go
+      - name: Go setup
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
-      - name: Build modulectl
+      - name: Build
         run: |
           make build-linux
           chmod +x ./bin/modulectl-linux
           ls -la ./bin
           mv ./bin/modulectl-linux /usr/local/bin/modulectl
-        timeout-minutes: 10
-      - name: Run E2E Test - Create Scaffold
+        timeout-minutes: 5
+      - name: Run tests
         run: |
-          make -C tests/e2e test-create-scaffold
+          make -C tests/e2e test-scaffold-cmd
         timeout-minutes: 3

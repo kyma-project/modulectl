@@ -18,7 +18,7 @@ func Test_NewCmd_ReturnsError_WhenModuleServiceIsNil(t *testing.T) {
 	_, err := createcmd.NewCmd(nil)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "createService")
+	assert.Contains(t, err.Error(), "service must not be nil")
 }
 
 func Test_NewCmd_Succeeds(t *testing.T) {
@@ -130,7 +130,7 @@ type moduleServiceStub struct {
 	opts   create.Options
 }
 
-func (m *moduleServiceStub) CreateModule(opts create.Options) error {
+func (m *moduleServiceStub) Run(opts create.Options) error {
 	m.called = true
 	m.opts = opts
 	return nil
@@ -140,6 +140,6 @@ type moduleServiceErrorStub struct{}
 
 var errSomeTestError = errors.New("some test error")
 
-func (s *moduleServiceErrorStub) CreateModule(_ create.Options) error {
+func (s *moduleServiceErrorStub) Run(_ create.Options) error {
 	return errSomeTestError
 }

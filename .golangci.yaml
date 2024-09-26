@@ -6,7 +6,7 @@ linters:
     - exhaustruct   # too subjective and harms code readability
     - execinquery   # deprecated (since v1.58.0)
     - exportloopref # deprecated (since v1.60.2), replaced by copyloopvar
-    - forbidigo     # temparily disabled
+    - forbidigo     # temporarily disabled
     - godot         # not needed
     - gomnd         # deprecated (since v1.58.0), renamed to mnd
     - lll
@@ -60,6 +60,12 @@ linters-settings:
         alias: scaffoldcmd
       - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
         alias: createcmd
+      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1
+        alias: ocmmetav1
+      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2
+        alias: compdescv2
+      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg
+        alias: ocmocireg
       - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/generator
         alias: moduleconfiggenerator
       - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
@@ -87,7 +93,6 @@ linters-settings:
     ignore-type-assert-ok: true
     ignore-map-index-ok: true
     ignore-chan-recv-ok: true
-  godox:  # `TODO`, `BUG`, `FIXME` are the default, no need to mention again
 issues:
   exclude-rules:
     - path: "_test\\.go"

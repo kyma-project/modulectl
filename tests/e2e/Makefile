@@ -13,5 +13,8 @@ SHELL = /usr/bin/env bash -o pipefail
 
 ##@ E2E Tests
 
-test-create-scaffold:
-	go test ./scaffold -ginkgo.v -ginkgo.focus "Create Scaffold Command"
+test-scaffold-cmd:
+	go test -tags=e2e ./scaffold -ginkgo.v -ginkgo.focus "Test 'scaffold' command"
+
+test-create-cmd:
+	go test -tags=e2e ./create -ginkgo.v -ginkgo.focus "Test 'create' command"

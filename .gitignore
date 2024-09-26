@@ -99,3 +99,6 @@ bin
 
 # rendered manifest
 **/manifest.yaml
+
+# copied template-operator repo
+tests/e2e/create/testdata/template-operator

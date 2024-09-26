@@ -24,13 +24,13 @@ var long string
 //go:embed example.txt
 var example string
 
-type ModuleService interface {
-	CreateModule(opts create.Options) error
+type Service interface {
+	Run(opts create.Options) error
 }
 
-func NewCmd(moduleService ModuleService) (*cobra.Command, error) {
-	if moduleService == nil {
-		return nil, fmt.Errorf("%w: createService must not be nil", commonerrors.ErrInvalidArg)
+func NewCmd(service Service) (*cobra.Command, error) {
+	if service == nil {
+		return nil, fmt.Errorf("%w: service must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	opts := create.Options{}
@@ -41,7 +41,7 @@ func NewCmd(moduleService ModuleService) (*cobra.Command, error) {
 		Long:    long,
 		Example: example,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return moduleService.CreateModule(opts)
+			return service.Run(opts)
 		},
 	}
 
