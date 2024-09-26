@@ -115,7 +115,13 @@ func (s *Service) CreateModule(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
 	}
-	defer s.moduleConfigService.CleanupTempFiles()
+
+	defer func() {
+		if err := s.moduleConfigService.CleanupTempFiles(); err != nil {
+			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary files: %v\n", err))
+		}
+	}()
+
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
 	if err != nil {
 		return fmt.Errorf("failed to parse module config: %w", err)
