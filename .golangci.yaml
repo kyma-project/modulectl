@@ -60,12 +60,6 @@ linters-settings:
         alias: scaffoldcmd
       - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
         alias: createcmd
-      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1
-        alias: ocmmetav1
-      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2
-        alias: compdescv2
-      - pkg: github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg
-        alias: ocmocireg
       - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/generator
         alias: moduleconfiggenerator
       - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
@@ -74,6 +68,8 @@ linters-settings:
         alias: ocmv1
       - pkg: ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact
         alias: ociartifacttypes
+      - pkg: ocm.software/ocm/api/oci/extensions/repositories/ocireg
+        alias: ocirepo
       - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
         alias: metav1
   ireturn:

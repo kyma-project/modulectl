@@ -5,11 +5,10 @@ go 1.23.2
 require (
 	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/go-git/go-git/v5 v5.12.0
-	github.com/kyma-project/lifecycle-manager/api v0.0.0-20240918085249-66f3802ce0ae
+	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241011105939-73146fa998d9
 	github.com/mandelsoft/vfs v0.4.3
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
-	github.com/open-component-model/ocm v0.13.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0

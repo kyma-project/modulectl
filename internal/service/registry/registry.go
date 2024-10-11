@@ -9,7 +9,7 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
-	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
+	ocirepo "ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/runtime"
@@ -75,14 +75,14 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	}
 
 	ctx := cpi.DefaultContext()
-	repoType := ocireg.Type
+	repoType := ocirepo.Type
 	registryURL = NoSchemeURL(registryURL)
 	if insecure {
 		registryURL = "http://" + registryURL
 	}
 	creds := GetCredentials(ctx, insecure, userPasswordCreds, registryURL)
 
-	ociRepoSpec := &ocireg.RepositorySpec{
+	ociRepoSpec := &ocirepo.RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(repoType),
 		BaseURL:             registryURL,
 	}

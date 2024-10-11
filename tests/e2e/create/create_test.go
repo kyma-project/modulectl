@@ -6,17 +6,15 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	ocmmetav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	ocmocireg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"ocm.software/ocm/api/ocm"
+	"ocm.software/ocm/api/ocm/compdesc"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
@@ -148,7 +146,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
-			Expect(descriptor.SchemaVersion()).To(Equal(compdescv2.SchemaVersion))
+			Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
@@ -159,14 +157,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(descriptor.RepositoryContexts).To(HaveLen(1))
 			repo := descriptor.GetEffectiveRepositoryContext()
 			Expect(repo.Object["baseUrl"]).To(Equal(ociRegistry))
-			Expect(repo.Object["componentNameMapping"]).To(Equal(string(ocmocireg.OCIRegistryURLPathMapping)))
+			Expect(repo.Object["componentNameMapping"]).To(Equal(string(ocireg.OCIRegistryURLPathMapping)))
 			Expect(repo.Object["type"]).To(Equal(ocireg.Type))
 
 			By("And descriptor.component.resources should be correct")
 			Expect(descriptor.Resources).To(HaveLen(1))
 			resource := descriptor.Resources[0]
 			Expect(resource.Name).To(Equal("raw-manifest"))
-			Expect(resource.Relation).To(Equal(ocmmetav1.LocalRelation))
+			Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 			Expect(resource.Type).To(Equal("directory"))
 			Expect(resource.Version).To(Equal("1.0.0"))
 
@@ -266,7 +264,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(descriptor.Resources).To(HaveLen(2))
 			resource := descriptor.Resources[1]
 			Expect(resource.Name).To(Equal("default-cr"))
-			Expect(resource.Relation).To(Equal(ocmmetav1.LocalRelation))
+			Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 			Expect(resource.Type).To(Equal("directory"))
 			Expect(resource.Version).To(Equal("1.0.2"))
 
@@ -283,15 +281,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing security-scanner-config and different version, and the git-remote flag", func() {
-			cmd = createCmd{
-				moduleConfigFile: withSecurityConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-				gitRemote:        gitRemote,
-			}
-		})
+		It("When invoked with valid module-config containing security-scanner-config and different version, and the git-remote flag",
+			func() {
+				cmd = createCmd{
+					moduleConfigFile: withSecurityConfig,
+					registry:         ociRegistry,
+					insecure:         true,
+					output:           templateOutputPath,
+					gitRemote:        gitRemote,
+				}
+			})
 		It("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
@@ -308,7 +307,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(descriptor.Resources).To(HaveLen(2))
 			resource := descriptor.Resources[0]
 			Expect(resource.Name).To(Equal("template-operator"))
-			Expect(resource.Relation).To(Equal(ocmmetav1.ExternalRelation))
+			Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 			Expect(resource.Type).To(Equal("ociArtifact"))
 			Expect(resource.Version).To(Equal("1.0.0"))
 			resource = descriptor.Resources[1]
@@ -427,7 +426,7 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *v1beta2.Descriptor {
 	return desc
 }
 
-func flatten(labels ocmmetav1.Labels) map[string]string {
+func flatten(labels ocmv1.Labels) map[string]string {
 	labelsMap := make(map[string]string)
 	for _, l := range labels {
 		var value string
