@@ -21,5 +21,5 @@ A CLI from the Kyma Module Controller. Wonderful to use.
 * [modulectl create](modulectl_create.md)	 - Creates a module bundled as an OCI artifact.
 * [modulectl scaffold](modulectl_scaffold.md)	 - Generates necessary files required for module creation.
 
-* [modulectl version](modulectl_version.md)	 - Print current modulectl version
+* [modulectl version](modulectl_version.md)	 - Prints the current modulectl version.
 

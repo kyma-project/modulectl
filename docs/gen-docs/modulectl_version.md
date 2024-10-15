@@ -2,11 +2,11 @@
 title: modulectl version
 ---
 
-Print current modulectl version
+Prints the current modulectl version.
 
 ## Synopsis
 
-Prints the current semantic version of the modulectl binary set at build time
+This command prints the current semantic version of the modulectl binary set at build time.
 
 ```bash
 modulectl version [flags]

@@ -6,8 +6,8 @@ import (
 
 const (
 	use   = "version"
-	short = "Print current modulectl version"
-	long  = "Prints the current semantic version of the modulectl binary set at build time"
+	short = "Prints the current modulectl version."
+	long  = "This command prints the current semantic version of the modulectl binary set at build time."
 )
 
 // Version will contain the binary version injected by make build target

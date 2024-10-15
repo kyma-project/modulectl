@@ -25,13 +25,13 @@ func TestNewCmd_WhenCalled_CmdContainsUseDescription(t *testing.T) {
 func TestNewCmd_WhenCalled_CmdContainsShortDescription(t *testing.T) {
 	cmd, _ := version.NewCmd()
 
-	assert.Equal(t, "Print current modulectl version", cmd.Short)
+	assert.Equal(t, "Prints the current modulectl version.", cmd.Short)
 }
 
 func TestNewCmd_WhenCalled_CmdContainsLongDescription(t *testing.T) {
 	cmd, _ := version.NewCmd()
 
-	assert.Equal(t, "Prints the current semantic version of the modulectl binary set at build time", cmd.Long)
+	assert.Equal(t, "This command prints the current semantic version of the modulectl binary set at build time.", cmd.Long)
 }
 
 func TestNewCmd_WhenCalled_CmdRunNotNil(t *testing.T) {
