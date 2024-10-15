@@ -3,13 +3,6 @@ on:
   pull_request:
     branches:
       - main
-#    workflow_call:
-#      inputs:
-#        version:
-#          description: 'Version used for release builds'
-#          required: false
-#          type: string
-#          default: ""
   workflow_dispatch:
 jobs:
   build-modulectl:
@@ -24,9 +17,3 @@ jobs:
           cache-dependency-path: 'go.sum'
       - name: "Run 'make build'"
         run: make build
-#        run: |
-#          if [[ "${{ inputs.version }}" != "" ]]; then
-#            make build VERSION=${{ inputs.version }}
-#          else
-#            make build
-#          fi
