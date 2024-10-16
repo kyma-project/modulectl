@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241011105939-73146fa998d9
-	github.com/mandelsoft/vfs v0.4.3
+	github.com/mandelsoft/vfs v0.4.4
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/spf13/cobra v1.8.1
