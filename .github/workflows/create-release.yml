@@ -24,8 +24,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set executable permissions for scripts
-        run: chmod +x ./.github/scripts/validate_release_tag.sh
  #     - name: Validate the release tag
     #    run: ./.github/scripts/validate_version.sh ${{ github.event.inputs.version }}
       - name: validate release tag # TODO debug
