@@ -56,12 +56,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_ID=$(./.github/scripts/draft_release.sh ${{ github.event.inputs.tag }})
+          RELEASE_ID=$(./.github/scripts/draft_release.sh "0.0.1")
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
       - name: Create tag
         run: |
-          git tag ${{ github.event.inputs.tag }}
-          git push origin ${{ github.event.inputs.tag }} --tags
+          git tag "0.0.1"
+          git push origin "0.0.1" --tags
     outputs:
       release_id: ${{ steps.draft-release.outputs.release_id }}
   artifacts:
@@ -76,11 +76,13 @@ jobs:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
       - name: "Run 'make build' with version"
-        run: make build VERSION=${{ inputs.tag }}
+#        run: make build VERSION=${{ inputs.tag }}
+        run: make build VERSION=0.0.1
       - name: Add binaries to draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_BASE_REF: ${{ github.event.inputs.tag }}
+          #PULL_BASE_REF: ${{ github.event.inputs.tag }}
+          PULL_BASE_REF: 0.0.1
         run: ./.github/scripts/upload_artifacts.sh
   publish-release:
     runs-on: ubuntu-latest

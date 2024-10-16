@@ -55,4 +55,5 @@ UPLOAD_URL="https://uploads.github.com/repos/kyma-project/modulectl/releases/${R
 echo "$UPLOAD_URL"
 pwd
 ls -la
-uploadFile "modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
+echo "modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
+#uploadFile "modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
