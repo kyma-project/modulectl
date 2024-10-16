@@ -6,8 +6,7 @@ set -E
 set -o pipefail
 
 CURRENT_RELEASE_TAG=$1
-DOCKER_IMAGE_URL=$2
-LAST_RELEASE_TAG=$3
+LAST_RELEASE_TAG=$2
 
 if [ "${LAST_RELEASE_TAG}"  == "" ]
 then
@@ -28,8 +27,6 @@ done
 {
     echo -e "\n**Full changelog**: $GITHUB_URL/compare/$LAST_RELEASE_TAG...$CURRENT_RELEASE_TAG"
     echo -e "\n"
-    echo "## Docker image URL"
-    echo "$DOCKER_IMAGE_URL"
 } >> $CHANGELOG_FILE
 
 cat $CHANGELOG_FILE

@@ -43,10 +43,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+#      - name: Create changelog
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.tag }} ${{ env.IMAGE_REPO }}:${{ github.event.inputs.tag }} ${{ github.event.inputs.since }}
       - name: Create changelog
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.tag }} ${{ env.IMAGE_REPO }}:${{ github.event.inputs.tag }} ${{ github.event.inputs.since }}
+        run: ./.github/scripts/create_changelog.sh "0.0.1" ${{ github.event.inputs.since }}
       - name: Draft release
         id: draft-release
         env:
