@@ -9,6 +9,7 @@ import (
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
+	"github.com/kyma-project/modulectl/cmd/modulectl/version"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -72,8 +73,14 @@ func NewCmd() (*cobra.Command, error) {
 		return nil, fmt.Errorf("failed to build create command: %w", err)
 	}
 
+	versionCmd, err := version.NewCmd()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build version command: %w", err)
+	}
+
 	rootCmd.AddCommand(scaffoldCmd)
 	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	return rootCmd, nil
 }

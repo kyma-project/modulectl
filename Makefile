@@ -23,20 +23,13 @@ FLAGS = -ldflags '-s -w -X github.com/kyma-project/modulectl/cmd/modulectl/versi
 validate-docs:
 	./hack/verify-generated-docs.sh
 
-build: build-windows build-linux build-darwin build-windows-arm build-linux-arm build-darwin-arm
-
-build-windows:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./bin/modulectl.exe $(FLAGS) ./cmd
+build: build-linux build-darwin build-linux-arm build-darwin-arm
 
 build-darwin:
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ./bin/modulectl-darwin $(FLAGS) ./cmd
 
 build-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/modulectl-linux $(FLAGS) ./cmd
-
-# ARM based chipsets
-build-windows-arm:
-	CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o ./bin/modulectl-arm.exe $(FLAGS) ./cmd
 
 build-darwin-arm:
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ./bin/modulectl-darwin-arm $(FLAGS) ./cmd
