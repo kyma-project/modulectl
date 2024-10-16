@@ -66,6 +66,12 @@ spec:
 {{- end}}
   descriptor:
 {{yaml .Descriptor | printf "%s" | indent 4}}
+{{- with .Resources}}
+  resources:
+		{{- range $key, $value := . }}
+    {{ printf "%q" $key }}: {{ printf "%q" $value }}
+    {{- end}}
+{{- end}}
 `
 )
 
@@ -78,6 +84,7 @@ type moduleTemplateData struct {
 	Annotations  map[string]string
 	Mandatory    bool
 	Data         string
+	Resources    contentprovider.ResourcesMap
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -128,10 +135,17 @@ func (s *Service) GenerateModuleTemplate(
 		Labels:       labels,
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
+		Resources: contentprovider.ResourcesMap{
+			"rawManifest": moduleConfig.ManifestPath, // defaults rawManifest to ManifestPath; may be overwritten by explicitly provided entries
+		},
 	}
 
 	if len(data) > 0 {
 		mtData.Data = string(data)
+	}
+
+	for name, link := range moduleConfig.Resources {
+		mtData.Resources[name] = link
 	}
 
 	w := &bytes.Buffer{}

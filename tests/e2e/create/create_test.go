@@ -89,7 +89,49 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to value module config: manifest path must not be empty: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: manifest path must not be empty: invalid Option"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with duplicate entry in resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: duplicateResources,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: list contains duplicate entries"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with empty resource name", func() {
+			cmd = createCmd{
+				moduleConfigFile: emptyResourceName,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource name: invalid Option: name must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with non https resource", func() {
+			cmd = createCmd{
+				moduleConfigFile: nonHttpsResource,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to validate resource link: invalid Option: http://some.other/location/template-operator.yaml is not using https scheme"))
 		})
 	})
 
@@ -391,53 +433,59 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Mandatory).To(BeTrue())
 		})
 	})
-})
 
-Context("Given 'modulectl create' command", func() {
-	var cmd createCmd
-	It("When invoked with minimal valid module-config containing resources", func() {
-		cmd = createCmd{
-			moduleConfigFile: withResources,
-			registry:         ociRegistry,
-			insecure:         true,
-			output:           templateOutputPath,
-		}
-	})
-	It("Then the command should succeed", func() {
-		Expect(cmd.execute()).To(Succeed())
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with minimal valid module-config containing resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: withResources,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
 
-		By("And module template file should be generated")
-		Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
-	})
-	It("Then module template should contain merged .spec.resources", func() {
-		Expect(template.Spec.Resources).To(HaveLen(2))
-		Expect(template.Spec.Resources[0].Name).To(Equal("notRawManifest"))
-		Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
-		Expect(template.Spec.Resources[1].Name).To(Equal("rawManifest"))
-		Expect(template.Spec.Resources[1].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
-	})
-})
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain merged .spec.resources", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
 
-Context("Given 'modulectl create' command", func() {
-	var cmd createCmd
-	It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
-		cmd = createCmd{
-			moduleConfigFile: withResources,
-			registry:         ociRegistry,
-			insecure:         true,
-			output:           templateOutputPath,
-		}
+			Expect(template.Spec.Resources).To(HaveLen(2))
+			Expect(template.Spec.Resources[0].Name).To(Equal("someResource"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+			Expect(template.Spec.Resources[1].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[1].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+		})
 	})
-	It("Then the command should succeed", func() {
-		Expect(cmd.execute()).To(Succeed())
 
-		By("And module template file should be generated")
-		Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
-	})
-	It("Then module template should contain rawManifest value from module-config", func() {
-		Expect(template.Spec.Resources).To(HaveLen(1))
-		Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-		Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: withResources,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain rawManifest value from module-config", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(template.Spec.Resources).To(HaveLen(1))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+		})
 	})
 })
 

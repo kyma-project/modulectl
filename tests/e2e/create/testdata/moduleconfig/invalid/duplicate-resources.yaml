@@ -5,3 +5,5 @@ manifest: https://github.com/kyma-project/template-operator/releases/download/1.
 resources:
 - name: someResource
   link: https://some.other/location/template-operator.yaml
+- name: someResource
+  link: https://some.other/location/template-operator.yaml

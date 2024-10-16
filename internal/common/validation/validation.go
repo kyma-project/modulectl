@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -94,6 +95,19 @@ func ValidateModuleNamespace(namespace string) error {
 	} else if !matched {
 		return fmt.Errorf("%w: namespace must match the required pattern, only small alphanumeric characters and hyphens",
 			commonerrors.ErrInvalidOption)
+	}
+
+	return nil
+}
+
+func ValidateIsValidHttpsUrl(input string) error {
+	_url, err := url.Parse(input)
+	if err != nil {
+		return fmt.Errorf("%w: %s is not a valid URL", commonerrors.ErrInvalidOption, input)
+	}
+
+	if _url.Scheme != "https" {
+		return fmt.Errorf("%w: %s is not using https scheme", commonerrors.ErrInvalidOption, input)
 	}
 
 	return nil

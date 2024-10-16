@@ -42,6 +42,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
+	require.Equal(t, contentprovider.ResourcesMap{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	}, result.Resources)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
@@ -231,6 +234,20 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			},
 			expectedError: fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
+		{
+			name: "invalid module resources - duplicate key",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:         "github.com/module-name",
+				Version:      "0.0.1",
+				Channel:      "regular",
+				Namespace:    "kcp-system",
+				ManifestPath: "test",
+				Resources: contentprovider.ResourcesMap{
+					"key": "%% not a URL",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resource link: invalid Option: %%%% not a URL is not a valid URL"),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -266,6 +283,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Beta:          false,
 	Labels:        map[string]string{"label1": "value1"},
 	Annotations:   map[string]string{"annotation1": "value1"},
+	Resources: contentprovider.ResourcesMap{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	},
 }
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {

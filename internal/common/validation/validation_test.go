@@ -1,6 +1,7 @@
 package validation_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/kyma-project/modulectl/internal/common/validation"
@@ -175,6 +176,53 @@ func TestValidateModuleNamespace(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleNamespace() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateIsValidHttpsUrl(t *testing.T) {
+	tests := []struct {
+		name    string
+		url     string
+		wantErr bool
+	}{
+		{
+			name:    "valid url",
+			url:     "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+			wantErr: false,
+		},
+		{
+			name:    "invalid url - not using https",
+			url:     "http://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+			wantErr: true,
+		},
+		{
+			name:    "invalid url - usig file scheme",
+			url:     "file:///Users/User/template-operator/releases/download/1.0.1/template-operator.yaml",
+			wantErr: true,
+		},
+		{
+			name:    "invalid url - local path",
+			url:     "./1.0.1/template-operator.yaml",
+			wantErr: true,
+		},
+		{
+			name:    "invalid url",
+			url:     "%% not a valid url",
+			wantErr: true,
+		},
+		{
+			name:    "empty url",
+			url:     "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validation.ValidateIsValidHttpsUrl(tt.url); (err != nil) != tt.wantErr {
+				fmt.Println(err.Error())
+				t.Errorf("ValidateIsValidUrl() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -58,7 +58,7 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 	}
 
 	if err = ValidateModuleConfig(moduleConfig); err != nil {
-		return nil, fmt.Errorf("failed to value module config: %w", err)
+		return nil, fmt.Errorf("failed to validate module config: %w", err)
 	}
 
 	moduleConfig.DefaultCRPath, err = GetDefaultCRPath(moduleConfig.DefaultCRPath, s.tempFileSystem)
@@ -142,6 +142,16 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 
 	if err := validation.ValidateModuleNamespace(moduleConfig.Namespace); err != nil {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
+	}
+
+	for name, link := range moduleConfig.Resources {
+		if name == "" {
+			return fmt.Errorf("failed to validate resource name: %w: name must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if err := validation.ValidateIsValidHttpsUrl(link); err != nil {
+			return fmt.Errorf("failed to validate resource link: %w", err)
+		}
 	}
 
 	if moduleConfig.ManifestPath == "" {

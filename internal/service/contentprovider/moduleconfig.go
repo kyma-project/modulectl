@@ -82,4 +82,38 @@ type ModuleConfig struct {
 	Beta          bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
 	Labels        map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
 	Annotations   map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	Resources     ResourcesMap      `yaml:"resources" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+}
+
+type resource struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
+}
+
+type ResourcesMap map[string]string
+
+func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var resources []resource
+	if err := unmarshal(&resources); err != nil {
+		return err
+	}
+
+	*rm = make(map[string]string)
+	for _, resource := range resources {
+		(*rm)[resource.Name] = resource.Link
+	}
+
+	if len(resources) > len(*rm) {
+		return fmt.Errorf("list contains duplicate entries")
+	}
+
+	return nil
+}
+
+func (rm ResourcesMap) MarshalYAML() (interface{}, error) {
+	var resources []resource
+	for name, link := range rm {
+		resources = append(resources, resource{Name: name, Link: link})
+	}
+	return resources, nil
 }

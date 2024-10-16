@@ -3,5 +3,5 @@ channel: regular
 version: 1.0.0
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
 resources:
-- name: someResource
-  link: https://some.other/location/template-operator.yaml
+- name: ""
+  link: http://some.other/location/template-operator.yaml
