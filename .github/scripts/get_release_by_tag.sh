@@ -6,7 +6,6 @@ set -o pipefail
 RELEASE_TAG=$1
 GITHUB_TOKEN=$2
 
-GITHUB_URL=https://api.github.com/repos/$CODE_REPOSITORY
 GITHUB_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
 
 curl -L \

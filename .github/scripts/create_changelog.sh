@@ -14,7 +14,6 @@ then
   LAST_RELEASE_TAG=$(git describe --tags --abbrev=0)
 fi
 
-GITHUB_URL=https://api.github.com/repos/$CODE_REPOSITORY
 GITHUB_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
 CHANGELOG_FILE="CHANGELOG.md"
 
