@@ -64,6 +64,14 @@ spec:
   data:
 {{. | indent 4}}
 {{- end}}
+{{- with .Manager}}
+  manager:
+    name: {{.Name}}
+    namespace: {{.Namespace}}
+    group: {{.GroupVersionKind.Group}}
+    version: {{.GroupVersionKind.Version}}
+    kind: {{.GroupVersionKind.Kind}}
+{{- end}}
   descriptor:
 {{yaml .Descriptor | printf "%s" | indent 4}}
 `
@@ -78,6 +86,7 @@ type moduleTemplateData struct {
 	Annotations  map[string]string
 	Mandatory    bool
 	Data         string
+	Manager      *contentprovider.Manager
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -128,6 +137,7 @@ func (s *Service) GenerateModuleTemplate(
 		Labels:       labels,
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
+		Manager:      moduleConfig.Manager,
 	}
 
 	if len(data) > 0 {

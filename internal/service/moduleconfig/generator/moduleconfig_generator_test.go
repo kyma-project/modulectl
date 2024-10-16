@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -130,6 +131,15 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Beta:          false,
 		Labels:        map[string]string{"label1": "value1"},
 		Annotations:   map[string]string{"annotation1": "value1"},
+		Manager: &contentprovider.Manager{
+			Name:      "manager-name",
+			Namespace: "manager-namespace",
+			GroupVersionKind: v1.GroupVersionKind{
+				Group:   "operator.kyma-project.io",
+				Version: "v1beta2",
+				Kind:    "manager-deployment",
+			},
+		},
 	}
 
 	return yaml.Marshal(moduleConfig)
