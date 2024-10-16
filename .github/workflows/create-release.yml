@@ -4,10 +4,6 @@ env:
   GITHUB_URL: https://api.github.com/repos/kyma-project/modulectl
 
 on:
-  pull_request: # TODO debug
-    types: [opened, synchronize] # TODO debug
-    branches: # TODO debug
-      - main # TODO debug
   workflow_dispatch:
     inputs:
       tag:
