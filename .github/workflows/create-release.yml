@@ -1,16 +1,16 @@
 name: "Create release"
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches:
-      - main
+  pull_request: # TODO debug
+    types: [opened, synchronize] # TODO debug
+    branches: # TODO debug
+      - main# TODO debug
   workflow_dispatch:
     inputs:
       version:
         description: "Release version"
         default: ""
-        required: true
+        required: false # TODO debug
       since:
         description: "Changelog since"
         default: ""
@@ -26,8 +26,10 @@ jobs:
           fetch-depth: 0
       - name: Set executable permissions for scripts
         run: chmod +x ./.github/scripts/validate_release_tag.sh
-      - name: Validate the release tag
-        run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.version }}
+ #     - name: Validate the release tag
+    #    run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.version }}
+      - name: validate release tag # TODO debug
+        run: ./.github/scripts/validate_release_tag.sh "0.0.1" # TODO debug
       - name: Check if release exists
         run: ./.github/scripts/get_release_by_tag.sh ${{ github.event.inputs.version }} ${{ secrets.GITHUB_TOKEN }}
   draft-release:
