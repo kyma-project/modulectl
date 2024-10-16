@@ -11,7 +11,7 @@ import (
 
 type Options struct {
 	Out                  iotools.Out
-	ModuleConfigFile     string
+	ConfigFile           string
 	Credentials          string
 	GitRemote            string
 	Insecure             bool
@@ -25,8 +25,8 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("%w: opts.Out must not be nil", commonerrors.ErrInvalidOption)
 	}
 
-	if opts.ModuleConfigFile == "" {
-		return fmt.Errorf("%w:  opts.ModuleConfigFile must not be empty", commonerrors.ErrInvalidOption)
+	if opts.ConfigFile == "" {
+		return fmt.Errorf("%w:  opts.ConfigFile must not be empty", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.Credentials != "" {

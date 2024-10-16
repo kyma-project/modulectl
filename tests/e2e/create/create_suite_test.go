@@ -54,7 +54,7 @@ func (cmd *createCmd) execute() error {
 	args := []string{"create"}
 
 	if cmd.moduleConfigFile != "" {
-		args = append(args, "--module-config-file="+cmd.moduleConfigFile)
+		args = append(args, "--config-file="+cmd.moduleConfigFile)
 	}
 
 	if cmd.registry != "" {

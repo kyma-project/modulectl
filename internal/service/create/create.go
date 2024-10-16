@@ -122,7 +122,7 @@ func (s *Service) Run(opts Options) error {
 		}
 	}()
 
-	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ModuleConfigFile)
+	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ConfigFile)
 	if err != nil {
 		return fmt.Errorf("failed to parse module config: %w", err)
 	}

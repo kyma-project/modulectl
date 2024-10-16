@@ -56,7 +56,7 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 
 	os.Args = []string{
 		"create",
-		"--module-config-file", moduleConfigFile,
+		"--config-file", moduleConfigFile,
 		"--git-remote", gitRemote,
 		"--insecure", insecure,
 		"--output", templateOutput,
@@ -74,7 +74,7 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	insecureFlagSet, err := strconv.ParseBool(insecure)
 	require.NoError(t, err)
 
-	assert.Equal(t, moduleConfigFile, svc.opts.ModuleConfigFile)
+	assert.Equal(t, moduleConfigFile, svc.opts.ConfigFile)
 	assert.Equal(t, credentials, svc.opts.Credentials)
 	assert.Equal(t, gitRemote, svc.opts.GitRemote)
 	assert.Equal(t, insecureFlagSet, svc.opts.Insecure)
@@ -84,13 +84,15 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
-	credentials := testutils.RandomName(10)
+	configFile := testutils.RandomName(10)
 	templateOutput := testutils.RandomName(10)
+	registry := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
-		"-c", credentials,
+		"-c", configFile,
 		"-o", templateOutput,
+		"-r", registry,
 	}
 
 	svc := &moduleServiceStub{}
@@ -99,8 +101,9 @@ func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, credentials, svc.opts.Credentials)
+	assert.Equal(t, configFile, svc.opts.ConfigFile)
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
+	assert.Equal(t, registry, svc.opts.RegistryURL)
 }
 
 func Test_Execute_ModuleParsesDefaults(t *testing.T) {
@@ -114,7 +117,7 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	assert.Equal(t, createcmd.ModuleConfigFileFlagDefault, svc.opts.ModuleConfigFile)
+	assert.Equal(t, createcmd.ConfigFileFlagDefault, svc.opts.ConfigFile)
 	assert.Equal(t, createcmd.CredentialsFlagDefault, svc.opts.Credentials)
 	assert.Equal(t, createcmd.GitRemoteFlagDefault, svc.opts.GitRemote)
 	assert.Equal(t, createcmd.InsecureFlagDefault, svc.opts.Insecure)
