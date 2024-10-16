@@ -32,6 +32,7 @@ const (
 	withDefaultCrConfig   = validConfigs + "with-defaultcr.yaml"
 	withSecurityConfig    = validConfigs + "with-security.yaml"
 	withMandatoryConfig   = validConfigs + "with-mandatory.yaml"
+	withManagerConfig     = validConfigs + "with-manager.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"

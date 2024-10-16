@@ -45,9 +45,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
 	require.Equal(t, "manager-name", result.Manager.Name)
 	require.Equal(t, "manager-namespace", result.Manager.Namespace)
-	require.Equal(t, "operator.kyma-project.io", result.Manager.GroupVersionKind.Group)
-	require.Equal(t, "v1beta2", result.Manager.GroupVersionKind.Version)
-	require.Equal(t, "manager-deployment", result.Manager.GroupVersionKind.Kind)
+	require.Equal(t, "apps", result.Manager.GroupVersionKind.Group)
+	require.Equal(t, "v1", result.Manager.GroupVersionKind.Version)
+	require.Equal(t, "Deployment", result.Manager.GroupVersionKind.Kind)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
@@ -266,9 +266,9 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name: "manager-name",
 				GroupVersionKind: v1.GroupVersionKind{
-					Group:   "operator.kyma-project.io",
-					Version: "v1beta2",
-					Kind:    "manager-deployment",
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
 				},
 				Namespace: "manager-namespace",
 			},
@@ -279,9 +279,9 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name: "manager-name",
 				GroupVersionKind: v1.GroupVersionKind{
-					Group:   "operator.kyma-project.io",
-					Version: "v1beta2",
-					Kind:    "manager-deployment",
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
 				},
 			},
 			expectedError: nil,
@@ -292,9 +292,9 @@ func Test_ValidateManager(t *testing.T) {
 				Name:      "",
 				Namespace: "manager-namespace",
 				GroupVersionKind: v1.GroupVersionKind{
-					Group:   "operator.kyma-project.io",
-					Version: "v1beta2",
-					Kind:    "manager-deployment",
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
 				},
 			},
 			expectedError: fmt.Errorf("manager name must not be empty: %w", commonerrors.ErrInvalidOption),
@@ -305,8 +305,8 @@ func Test_ValidateManager(t *testing.T) {
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
 				GroupVersionKind: v1.GroupVersionKind{
-					Group:   "operator.kyma-project.io",
-					Version: "v1beta2",
+					Group:   "apps",
+					Version: "v1",
 				},
 			},
 			expectedError: fmt.Errorf("manager kind must not be empty: %w", commonerrors.ErrInvalidOption),
@@ -317,8 +317,8 @@ func Test_ValidateManager(t *testing.T) {
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
 				GroupVersionKind: v1.GroupVersionKind{
-					Version: "v1beta2",
-					Kind:    "manager-deployment",
+					Version: "v1",
+					Kind:    "Deployment",
 				},
 			},
 			expectedError: fmt.Errorf("manager group must not be empty: %w", commonerrors.ErrInvalidOption),
@@ -329,8 +329,8 @@ func Test_ValidateManager(t *testing.T) {
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
 				GroupVersionKind: v1.GroupVersionKind{
-					Kind:  "manager-deployment",
-					Group: "operator.kyma-project.io",
+					Kind:  "Deployment",
+					Group: "apps",
 				},
 			},
 			expectedError: fmt.Errorf("manager version must not be empty: %w", commonerrors.ErrInvalidOption),
@@ -374,9 +374,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 		Name:      "manager-name",
 		Namespace: "manager-namespace",
 		GroupVersionKind: v1.GroupVersionKind{
-			Group:   "operator.kyma-project.io",
-			Version: "v1beta2",
-			Kind:    "manager-deployment",
+			Group:   "apps",
+			Version: "v1",
+			Kind:    "Deployment",
 		},
 	},
 }

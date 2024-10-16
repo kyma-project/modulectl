@@ -135,9 +135,9 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
 			GroupVersionKind: v1.GroupVersionKind{
-				Group:   "operator.kyma-project.io",
-				Version: "v1beta2",
-				Kind:    "manager-deployment",
+				Group:   "apps",
+				Version: "v1",
+				Kind:    "Deployment",
 			},
 		},
 	}

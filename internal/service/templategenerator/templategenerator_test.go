@@ -78,9 +78,9 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
 			GroupVersionKind: v1.GroupVersionKind{
-				Group:   "operator.kyma-project.io",
-				Version: "v1beta2",
-				Kind:    "manager-deployment",
+				Group:   "apps",
+				Version: "v1",
+				Kind:    "Deployment",
 			},
 		},
 	}
@@ -98,9 +98,9 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "manager-name")
 	require.Contains(t, mockFS.writtenTemplate, "manager-namespace")
-	require.Contains(t, mockFS.writtenTemplate, "operator.kyma-project.io")
-	require.Contains(t, mockFS.writtenTemplate, "v1beta2")
-	require.Contains(t, mockFS.writtenTemplate, "manager-deployment")
+	require.Contains(t, mockFS.writtenTemplate, "apps")
+	require.Contains(t, mockFS.writtenTemplate, "v1")
+	require.Contains(t, mockFS.writtenTemplate, "Deployment")
 }
 
 type mockFileSystem struct {
