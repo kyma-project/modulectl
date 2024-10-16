@@ -2,7 +2,7 @@ module github.com/kyma-project/modulectl
 
 go 1.23.2
 
-// This replace is because the new ocm package version doesn't allow pushing to insecure registries.
+// This replace is because the new ocm package version doesn't allow pushing to insecure registries. https://github.com/open-component-model/ocm/issues/971
 replace ocm.software/ocm => ocm.software/ocm v0.15.0
 
 require (

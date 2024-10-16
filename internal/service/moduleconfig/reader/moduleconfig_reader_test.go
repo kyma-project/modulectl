@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -265,7 +265,7 @@ func Test_ValidateManager(t *testing.T) {
 			name: "valid manager",
 			manager: &contentprovider.Manager{
 				Name: "manager-name",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Group:   "apps",
 					Version: "v1",
 					Kind:    "Deployment",
@@ -278,7 +278,7 @@ func Test_ValidateManager(t *testing.T) {
 			name: "valid manager - empty namespace",
 			manager: &contentprovider.Manager{
 				Name: "manager-name",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Group:   "apps",
 					Version: "v1",
 					Kind:    "Deployment",
@@ -291,7 +291,7 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "",
 				Namespace: "manager-namespace",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Group:   "apps",
 					Version: "v1",
 					Kind:    "Deployment",
@@ -304,7 +304,7 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Group:   "apps",
 					Version: "v1",
 				},
@@ -316,7 +316,7 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Version: "v1",
 					Kind:    "Deployment",
 				},
@@ -328,7 +328,7 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: v1.GroupVersionKind{
+				GroupVersionKind: metav1.GroupVersionKind{
 					Kind:  "Deployment",
 					Group: "apps",
 				},
@@ -373,7 +373,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Manager: &contentprovider.Manager{
 		Name:      "manager-name",
 		Namespace: "manager-namespace",
-		GroupVersionKind: v1.GroupVersionKind{
+		GroupVersionKind: metav1.GroupVersionKind{
 			Group:   "apps",
 			Version: "v1",
 			Kind:    "Deployment",

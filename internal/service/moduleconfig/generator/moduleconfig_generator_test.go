@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -134,7 +134,7 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Manager: &contentprovider.Manager{
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
-			GroupVersionKind: v1.GroupVersionKind{
+			GroupVersionKind: metav1.GroupVersionKind{
 				Group:   "apps",
 				Version: "v1",
 				Kind:    "Deployment",

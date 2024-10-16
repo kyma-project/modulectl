@@ -134,12 +134,17 @@ func TestValidateModuleChannel(t *testing.T) {
 	}
 }
 
-func TestValidateNamespace(t *testing.T) {
+func TestValidateModuleNamespace(t *testing.T) {
 	tests := []struct {
 		name            string
 		moduleNamespace string
 		wantErr         bool
 	}{
+		{
+			name:            "empty module namespace",
+			moduleNamespace: "",
+			wantErr:         true,
+		},
 		{
 			name:            "valid module namespace",
 			moduleNamespace: "kyma-system",
@@ -168,14 +173,14 @@ func TestValidateNamespace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validation.ValidateNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
+			if err := validation.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleNamespace() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func TestValidateModuleNamespace(t *testing.T) {
+func TestValidateNamespace(t *testing.T) {
 	tests := []struct {
 		name            string
 		moduleNamespace string

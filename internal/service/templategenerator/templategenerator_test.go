@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
@@ -77,7 +77,7 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 		Manager: &contentprovider.Manager{
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
-			GroupVersionKind: v1.GroupVersionKind{
+			GroupVersionKind: metav1.GroupVersionKind{
 				Group:   "apps",
 				Version: "v1",
 				Kind:    "Deployment",

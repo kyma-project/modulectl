@@ -3,7 +3,7 @@ package contentprovider
 import (
 	"fmt"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -71,9 +71,9 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 }
 
 type Manager struct {
-	Name                string `yaml:"name" comment:"required, the name of the manager"`
-	Namespace           string `yaml:"namespace" comment:"optional, the path to the manager"`
-	v1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+	Name                    string `yaml:"name" comment:"required, the name of the manager"`
+	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
+	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
 }
 
 type ModuleConfig struct {
