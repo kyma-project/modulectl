@@ -49,11 +49,9 @@ then
   exit 1
 fi
 
-echo "Adding assets to Github release"
+echo "Adding artifacts to Github release"
 UPLOAD_URL="https://uploads.github.com/repos/kyma-project/modulectl/releases/${RELEASE_ID}/assets"
-
-echo "$UPLOAD_URL"
-pwd
-ls -la
-echo "modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
-#uploadFile "modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
+uploadFile "bin/modulectl-linux" "${UPLOAD_URL}?name=modulectl-linux"
+uploadFile "bin/modulectl-linux-arm" "${UPLOAD_URL}?name=modulectl-linux-arm"
+uploadFile "bin/modulectl-darwin" "${UPLOAD_URL}?name=modulectl-darwin"
+uploadFile "bin/modulectl-darwin-arm" "${UPLOAD_URL}?name=modulectl-darwin-arm"
