@@ -4,7 +4,7 @@ on:
   pull_request: # TODO debug
     types: [opened, synchronize] # TODO debug
     branches: # TODO debug
-      - main# TODO debug
+      - main # TODO debug
   workflow_dispatch:
     inputs:
       version:
