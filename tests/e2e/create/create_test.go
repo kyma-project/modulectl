@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -182,6 +182,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
+
+			By("And spec.resources should contain rawManifest")
+			Expect(template.Spec.Resources).To(HaveLen(1))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
 		})
 	})
 
@@ -385,6 +390,54 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And spec.mandatory should be true")
 			Expect(template.Spec.Mandatory).To(BeTrue())
 		})
+	})
+})
+
+Context("Given 'modulectl create' command", func() {
+	var cmd createCmd
+	It("When invoked with minimal valid module-config containing resources", func() {
+		cmd = createCmd{
+			moduleConfigFile: withResources,
+			registry:         ociRegistry,
+			insecure:         true,
+			output:           templateOutputPath,
+		}
+	})
+	It("Then the command should succeed", func() {
+		Expect(cmd.execute()).To(Succeed())
+
+		By("And module template file should be generated")
+		Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+	})
+	It("Then module template should contain merged .spec.resources", func() {
+		Expect(template.Spec.Resources).To(HaveLen(2))
+		Expect(template.Spec.Resources[0].Name).To(Equal("notRawManifest"))
+		Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+		Expect(template.Spec.Resources[1].Name).To(Equal("rawManifest"))
+		Expect(template.Spec.Resources[1].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+	})
+})
+
+Context("Given 'modulectl create' command", func() {
+	var cmd createCmd
+	It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
+		cmd = createCmd{
+			moduleConfigFile: withResources,
+			registry:         ociRegistry,
+			insecure:         true,
+			output:           templateOutputPath,
+		}
+	})
+	It("Then the command should succeed", func() {
+		Expect(cmd.execute()).To(Succeed())
+
+		By("And module template file should be generated")
+		Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+	})
+	It("Then module template should contain rawManifest value from module-config", func() {
+		Expect(template.Spec.Resources).To(HaveLen(1))
+		Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+		Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
 	})
 })
 
