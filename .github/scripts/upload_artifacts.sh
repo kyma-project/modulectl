@@ -25,7 +25,7 @@ uploadFile() {
   fi
 }
 
-echo "PULL_BASE_REF= ${PULL_BASE_REF}"
+RELEASE_TAG=$1
 
 echo "Fetching releases"
 CURL_RESPONSE=$(curl -w "%{http_code}" -sL \
@@ -39,13 +39,13 @@ if [[ "${HTTP_CODE}" != "200" ]]; then
   exit 1
 fi
 
-echo "Finding release id for: ${PULL_BASE_REF}"
-RELEASE_ID=$(jq <<< "${JSON_RESPONSE}" --arg tag "${PULL_BASE_REF}" '.[] | select(.tag_name == $ARGS.named.tag) | .id')
+echo "Finding release id for: ${RELEASE_TAG}"
+RELEASE_ID=$(jq <<< "${JSON_RESPONSE}" --arg tag "${RELEASE_TAG}" '.[] | select(.tag_name == $ARGS.named.tag) | .id')
 
 echo "Got '${RELEASE_ID}' release id"
 if [ -z "${RELEASE_ID}" ]
 then
-  echo "No release with tag = ${PULL_BASE_REF}"
+  echo "No release with tag = ${RELEASE_TAG}"
   exit 1
 fi
 

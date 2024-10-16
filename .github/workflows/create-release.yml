@@ -27,14 +27,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
- #     - name: Validate the release tag
-    #    run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.tag }}
-      - name: validate release tag # TODO debug
-        run: ./.github/scripts/validate_release_tag.sh "0.0.1" # TODO debug
-#      - name: Check if release exists
-     #   run: ./.github/scripts/get_release_by_tag.sh ${{ github.event.inputs.tag }} ${{ secrets.GITHUB_TOKEN }}
-      - name: Check if release exists # TODO debug
-        run: ./.github/scripts/get_release_by_tag.sh "0.0.1" ${{ secrets.GITHUB_TOKEN }} # TODO debug
+      - name: Validate the release tag
+        run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.tag }}
+      - name: Check if release exists
+        run: ./.github/scripts/get_release_by_tag.sh ${{ github.event.inputs.tag }} ${{ secrets.GITHUB_TOKEN }}
   draft-release:
     runs-on: ubuntu-latest
     needs: validate-release
@@ -43,25 +39,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-#      - name: Create changelog
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.tag }} ${{ env.IMAGE_REPO }}:${{ github.event.inputs.tag }} ${{ github.event.inputs.since }}
-#      - name: Create changelog
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: ./.github/scripts/create_changelog.sh "0.0.1" ${{ github.event.inputs.since }}
+      - name: Create changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.tag }} ${{ github.event.inputs.since }}
       - name: Draft release
         id: draft-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_ID=$(./.github/scripts/draft_release.sh "0.0.1")
+          RELEASE_ID=$(./.github/scripts/draft_release.sh ${{ github.event.inputs.tag }})
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
       - name: Create tag
         run: |
-          git tag 0.0.1
-          git push origin 0.0.1 --tags
+          git tag ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }} --tags
     outputs:
       release_id: ${{ steps.draft-release.outputs.release_id }}
   artifacts:
@@ -76,14 +68,11 @@ jobs:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
       - name: "Run 'make build' with version"
-#        run: make build VERSION=${{ inputs.tag }}
-        run: make build VERSION=0.0.1
+        run: make build VERSION=${{ github.event.inputs.tag }}
       - name: Add binaries to draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          #PULL_BASE_REF: ${{ github.event.inputs.tag }}
-          PULL_BASE_REF: 0.0.1
-        run: ./.github/scripts/upload_artifacts.sh
+        run: ./.github/scripts/upload_artifacts.sh ${{ github.event.inputs.tag }}
   publish-release:
     runs-on: ubuntu-latest
     needs: [ validate-release, draft-release, artifacts ]
