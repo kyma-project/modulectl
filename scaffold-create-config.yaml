@@ -11,3 +11,4 @@ manifest: "manifest.yaml" # required, relative path or remote URL to the manifes
 # beta: false # optional, default=false, determines whether the ModuleTemplate should have the beta flag or not
 # labels: map[] # optional, additional labels for the ModuleTemplate
 # annotations: map[] # optional, additional annotations for the ModuleTemplate
+# manager: "" # optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module.
