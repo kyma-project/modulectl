@@ -82,7 +82,7 @@ type ModuleConfig struct {
 	Beta          bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
 	Labels        map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
 	Annotations   map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	Resources     ResourcesMap      `yaml:"resources" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Resources     ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
 
 type resource struct {

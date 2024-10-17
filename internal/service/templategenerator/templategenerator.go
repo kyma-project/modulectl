@@ -68,8 +68,9 @@ spec:
 {{yaml .Descriptor | printf "%s" | indent 4}}
 {{- with .Resources}}
   resources:
-		{{- range $key, $value := . }}
-    {{ printf "%q" $key }}: {{ printf "%q" $value }}
+    {{- range $key, $value := . }}
+  - name: {{ $key }}
+    link: {{ $value }}
     {{- end}}
 {{- end}}
 `
