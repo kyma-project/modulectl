@@ -455,10 +455,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(template.Spec.Resources).To(HaveLen(2))
-			Expect(template.Spec.Resources[0].Name).To(Equal("someResource"))
-			Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
-			Expect(template.Spec.Resources[1].Name).To(Equal("rawManifest"))
-			Expect(template.Spec.Resources[1].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+			Expect(template.Spec.Resources[1].Name).To(Equal("someResource"))
+			Expect(template.Spec.Resources[1].Link).To(Equal("https://some.other/location/template-operator.yaml"))
 		})
 	})
 
@@ -466,7 +466,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
 			cmd = createCmd{
-				moduleConfigFile: withResources,
+				moduleConfigFile: withResourcesOverwrite,
 				registry:         ociRegistry,
 				insecure:         true,
 				output:           templateOutputPath,
