@@ -95,6 +95,20 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with '--config-file' using file with missing info", func() {
+			cmd = createCmd{
+				moduleConfigFile: missingInfoConfig,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleInfo must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with '--module-config-file' using valid file", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
