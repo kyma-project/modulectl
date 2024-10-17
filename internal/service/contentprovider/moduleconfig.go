@@ -1,11 +1,14 @@
 package contentprovider
 
 import (
+	"errors"
 	"fmt"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
+
+var ErrDuplicateResourceNames = errors.New("resources contain duplicate entries")
 
 type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter
@@ -36,7 +39,7 @@ func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleCo
 		Name:          args[ArgModuleName],
 		Version:       args[ArgModuleVersion],
 		Channel:       args[ArgModuleChannel],
-		ManifestPath:  args[ArgManifestFile],
+		Manifest:      args[ArgManifestFile],
 		Security:      args[ArgSecurityConfigFile],
 		DefaultCRPath: args[ArgDefaultCRFile],
 	}
@@ -69,17 +72,52 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 }
 
 type ModuleConfig struct {
-	Name          string            `yaml:"name" comment:"required, the name of the Module"`
-	Version       string            `yaml:"version" comment:"required, the version of the Module"`
-	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
-	ManifestPath  string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName  string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
-	Namespace     string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security      string            `yaml:"security" comment:"optional, name of the security scanners config file"`
-	Internal      bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
-	Beta          bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
-	Labels        map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations   map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	Name             string            `yaml:"name" comment:"required, the name of the Module"`
+	Version          string            `yaml:"version" comment:"required, the version of the Module"`
+	Channel          string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
+	Manifest         string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	ManifestFilePath string            `yaml:"-"` // ignore this field, will be filled programmatically
+	Mandatory        bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
+	DefaultCRPath    string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	ResourceName     string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
+	Namespace        string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Security         string            `yaml:"security" comment:"optional, name of the security scanners config file"`
+	Internal         bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
+	Beta             bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
+	Labels           map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
+	Annotations      map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	Resources        ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+}
+
+type resource struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
+}
+
+type ResourcesMap map[string]string
+
+func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	resources := []resource{}
+	if err := unmarshal(&resources); err != nil {
+		return err
+	}
+
+	*rm = make(map[string]string)
+	for _, resource := range resources {
+		(*rm)[resource.Name] = resource.Link
+	}
+
+	if len(resources) > len(*rm) {
+		return ErrDuplicateResourceNames
+	}
+
+	return nil
+}
+
+func (rm ResourcesMap) MarshalYAML() (interface{}, error) {
+	resources := []resource{}
+	for name, link := range rm {
+		resources = append(resources, resource{Name: name, Link: link})
+	}
+	return resources, nil
 }

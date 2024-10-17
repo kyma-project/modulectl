@@ -32,7 +32,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "github.com/module-name", result.Name)
 	require.Equal(t, "0.0.1", result.Version)
 	require.Equal(t, "regular", result.Channel)
-	require.Equal(t, "path/to/manifests", result.ManifestPath)
+	require.Equal(t, "path/to/manifests", result.Manifest)
 	require.Equal(t, "path/to/defaultCR", result.DefaultCRPath)
 	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
@@ -42,6 +42,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
+	require.Equal(t, contentprovider.ResourcesMap{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	}, result.Resources)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
@@ -179,57 +182,99 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		{
 			name: "invalid module name",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "invalid name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "invalid name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module name: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module version",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "invalid version",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "invalid version",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module channel",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "invalid channel",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "invalid channel",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module channel: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "invalid namespace",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "invalid namespace",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module namespace: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "empty manifest path",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "",
 			},
-			expectedError: fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid module resources - not a URL",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
+				Resources: contentprovider.ResourcesMap{
+					"key": "%% not a URL",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resources: %w: link %%%% not a URL is not a valid URL", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid module resources - empty name",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
+				Resources: contentprovider.ResourcesMap{
+					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid module resources - empty link",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
+				Resources: contentprovider.ResourcesMap{
+					"name": "",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty", commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
@@ -256,7 +301,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Name:          "github.com/module-name",
 	Version:       "0.0.1",
 	Channel:       "regular",
-	ManifestPath:  "path/to/manifests",
+	Manifest:      "path/to/manifests",
 	Mandatory:     false,
 	DefaultCRPath: "path/to/defaultCR",
 	ResourceName:  "module-name-0.0.1",
@@ -266,6 +311,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Beta:          false,
 	Labels:        map[string]string{"label1": "value1"},
 	Annotations:   map[string]string{"annotation1": "value1"},
+	Resources: contentprovider.ResourcesMap{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	},
 }
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {

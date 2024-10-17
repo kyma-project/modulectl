@@ -120,7 +120,7 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Name:          "module-name",
 		Version:       "0.0.1",
 		Channel:       "regular",
-		ManifestPath:  "path/to/manifests",
+		Manifest:      "path/to/manifests",
 		Mandatory:     false,
 		DefaultCRPath: "path/to/defaultCR",
 		ResourceName:  "module-name-0.0.1",
