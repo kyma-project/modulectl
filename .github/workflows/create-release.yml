@@ -1,9 +1,12 @@
 name: "Create release"
 
+env:
+  GITHUB_URL: https://api.github.com/repos/kyma-project/modulectl
+
 on:
   workflow_dispatch:
     inputs:
-      version:
+      tag:
         description: "Release version"
         default: ""
         required: true
@@ -21,9 +24,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Validate the release tag
-        run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.version }}
+        run: ./.github/scripts/validate_release_tag.sh ${{ github.event.inputs.tag }}
       - name: Check if release exists
-        run: ./.github/scripts/get_release_by_tag.sh ${{ github.event.inputs.version }} ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/scripts/get_release_by_tag.sh ${{ github.event.inputs.tag }} ${{ secrets.GITHUB_TOKEN }}
   draft-release:
     runs-on: ubuntu-latest
     needs: validate-release
@@ -35,23 +38,23 @@ jobs:
       - name: Create changelog
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.version }} ${{ env.IMAGE_REPO }}:${{ github.event.inputs.version }} ${{ github.event.inputs.since }}
+        run: ./.github/scripts/create_changelog.sh ${{ github.event.inputs.tag }} ${{ github.event.inputs.since }}
       - name: Draft release
         id: draft-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_ID=$(./.github/scripts/draft_release.sh ${{ github.event.inputs.version }})
+          RELEASE_ID=$(./.github/scripts/draft_release.sh ${{ github.event.inputs.tag }})
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
       - name: Create tag
         run: |
-          git tag ${{ github.event.inputs.version }}
-          git push origin ${{ github.event.inputs.version }} --tags
+          git tag ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }} --tags
     outputs:
       release_id: ${{ steps.draft-release.outputs.release_id }}
-  artifacts:
+  create-artifacts:
     runs-on: ubuntu-latest
-    needs: validate-release
+    needs: draft-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,15 +64,14 @@ jobs:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
       - name: "Run 'make build' with version"
-        run: make build VERSION=${{ inputs.version }}
-      - name: Add binaries to draft
+        run: make build VERSION=${{ github.event.inputs.tag }}
+      - name: Add binaries to draft release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_BASE_REF: ${{ github.event.inputs.version }}
-        run: ./.github/scripts/upload_assets.sh
+        run: ./.github/scripts/upload_artifacts.sh ${{ github.event.inputs.tag }}
   publish-release:
     runs-on: ubuntu-latest
-    needs: [ validate-release, draft-release, artifacts ]
+    needs: [ validate-release, draft-release, create-artifacts ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
