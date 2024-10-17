@@ -9,6 +9,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -100,14 +101,32 @@ func ValidateModuleNamespace(namespace string) error {
 	return nil
 }
 
+func ValidateResources(resources contentprovider.ResourcesMap) error {
+	for name, link := range resources {
+		if name == "" {
+			return fmt.Errorf("%w: name must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if link == "" {
+			return fmt.Errorf("%w: link must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if err := ValidateIsValidHttpsUrl(link); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func ValidateIsValidHttpsUrl(input string) error {
 	_url, err := url.Parse(input)
 	if err != nil {
-		return fmt.Errorf("%w: %s is not a valid URL", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("%w: link %s is not a valid URL", commonerrors.ErrInvalidOption, input)
 	}
 
 	if _url.Scheme != "https" {
-		return fmt.Errorf("%w: %s is not using https scheme", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("%w: link %s is not using https scheme", commonerrors.ErrInvalidOption, input)
 	}
 
 	return nil

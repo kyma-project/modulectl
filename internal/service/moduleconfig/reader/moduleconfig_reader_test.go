@@ -235,7 +235,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			expectedError: fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 		{
-			name: "invalid module resources - duplicate key",
+			name: "invalid module resources - not a URL",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
@@ -246,7 +246,35 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resource link: invalid Option: %%%% not a URL is not a valid URL"),
+			expectedError: fmt.Errorf("failed to validate resources: invalid Option: link %%%% not a URL is not a valid URL"),
+		},
+		{
+			name: "invalid module resources - empty name",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
+				Resources: contentprovider.ResourcesMap{
+					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resources: invalid Option: name must not be empty"),
+		},
+		{
+			name: "invalid module resources - empty link",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
+				Resources: contentprovider.ResourcesMap{
+					"name": "",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate resources: invalid Option: link must not be empty"),
 		},
 	}
 	for _, test := range tests {

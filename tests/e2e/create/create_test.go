@@ -117,7 +117,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource name: invalid Option: name must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
 		})
 	})
 
@@ -131,7 +131,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to validate resource link: invalid Option: http://some.other/location/template-operator.yaml is not using https scheme"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: link http://some.other/location/template-operator.yaml is not using https scheme"))
 		})
 	})
 
@@ -145,7 +145,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource link: invalid Option: link must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: link must not be empty"))
 		})
 	})
 
@@ -159,7 +159,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource name: invalid Option: name must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
 		})
 	})
 
