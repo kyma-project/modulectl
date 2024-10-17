@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -132,6 +133,67 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, mcConvertedContent, result)
+}
+
+func Test_ModuleConfig_Unmarshal_Resources_Success(t *testing.T) {
+	moduleConfigData := `
+resources:
+  - name: resource1
+    link: https://example.com/resource1
+  - name: resource2
+    link: https://example.com/resource2
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(moduleConfig.Resources))
+	assert.Equal(t, "https://example.com/resource1", moduleConfig.Resources["resource1"])
+	assert.Equal(t, "https://example.com/resource2", moduleConfig.Resources["resource2"])
+}
+
+func Test_ModuleConfig_Unmarshal_Resources_FailOnDuplicateNames(t *testing.T) {
+	moduleConfigData := `
+resources:
+  - name: resource1
+    link: https://example.com/resource1
+  - name: resource1
+    link: https://example.com/resource1
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	assert.Error(t, err)
+	assert.Equal(t, "list contains duplicate entries", err.Error())
+}
+
+func Test_ModuleConfig_Marshal_Resources_Success(t *testing.T) {
+	// parse the expected config
+	expectedModuleConfigData := `
+resources:
+  - name: resource1
+    link: https://example.com/resource1
+  - name: resource2
+    link: https://example.com/resource2
+`
+	expectedModuleConfig := &contentprovider.ModuleConfig{}
+	yaml.Unmarshal([]byte(expectedModuleConfigData), expectedModuleConfig)
+
+	// round trip a module config (marshal and unmarshal)
+	moduleConfig := &contentprovider.ModuleConfig{
+		Resources: contentprovider.ResourcesMap{
+			"resource1": "https://example.com/resource1",
+			"resource2": "https://example.com/resource2",
+		},
+	}
+	marshalledModuleConfigData, err := yaml.Marshal(moduleConfig)
+	roudTrippedModuleConfig := &contentprovider.ModuleConfig{}
+	yaml.Unmarshal([]byte(marshalledModuleConfigData), roudTrippedModuleConfig)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedModuleConfig.Resources, roudTrippedModuleConfig.Resources)
 }
 
 // Test Stubs
