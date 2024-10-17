@@ -137,6 +137,34 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with invalid resource - link missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: resourceWithoutLink,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource link: invalid Option: link must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with invalid resource - name missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: resourceWithoutName,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resource name: invalid Option: name must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with '--module-config-file' using valid file", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,

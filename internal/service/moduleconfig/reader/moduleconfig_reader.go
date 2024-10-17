@@ -149,6 +149,10 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 			return fmt.Errorf("failed to validate resource name: %w: name must not be empty", commonerrors.ErrInvalidOption)
 		}
 
+		if link == "" {
+			return fmt.Errorf("failed to validate resource link: %w: link must not be empty", commonerrors.ErrInvalidOption)
+		}
+
 		if err := validation.ValidateIsValidHttpsUrl(link); err != nil {
 			return fmt.Errorf("failed to validate resource link: %w", err)
 		}

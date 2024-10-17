@@ -28,6 +28,8 @@ const (
 	missingVersionConfig  = invalidConfigs + "missing-version.yaml"
 	missingManifestConfig = invalidConfigs + "missing-manifest.yaml"
 	nonHttpsResource      = invalidConfigs + "non-https-resource.yaml"
+	resourceWithoutLink   = invalidConfigs + "resource-without-link.yaml"
+	resourceWithoutName   = invalidConfigs + "resource-without-name.yaml"
 
 	validConfigs           = testdataDir + "valid/"
 	minimalConfig          = validConfigs + "minimal.yaml"
