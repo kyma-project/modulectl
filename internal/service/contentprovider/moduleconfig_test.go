@@ -135,7 +135,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 	assert.Equal(t, mcConvertedContent, result)
 }
 
-func Test_ModuleConfig_Unmarshal_Resources_Success(t *testing.T) {
+func Test_ModuleConfig_Unmarshall_Resources_Success(t *testing.T) {
 	moduleConfigData := `
 resources:
   - name: resource1
@@ -153,7 +153,23 @@ resources:
 	assert.Equal(t, "https://example.com/resource2", moduleConfig.Resources["resource2"])
 }
 
-func Test_ModuleConfig_Unmarshal_Resources_FailOnDuplicateNames(t *testing.T) {
+func Test_ModuleConfig_Unmarshall_Resources_Success_Ignoring_Unknown_Fields(t *testing.T) {
+	moduleConfigData := `
+resources:
+  - name: resource1
+    link: https://example.com/resource1
+    unknown: something
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	require.NoError(t, err)
+	assert.Len(t, moduleConfig.Resources, 1)
+	assert.Equal(t, "https://example.com/resource1", moduleConfig.Resources["resource1"])
+}
+
+func Test_ModuleConfig_Unmarshall_Resources_FailOnDuplicateNames(t *testing.T) {
 	moduleConfigData := `
 resources:
   - name: resource1
@@ -169,7 +185,7 @@ resources:
 	assert.Equal(t, "resources contain duplicate entries", err.Error())
 }
 
-func Test_ModuleConfig_Marshal_Resources_Success(t *testing.T) {
+func Test_ModuleConfig_Marshall_Resources_Success(t *testing.T) {
 	// parse the expected config
 	expectedModuleConfigData := `
 resources:
