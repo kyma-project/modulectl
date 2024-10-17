@@ -25,6 +25,7 @@ const (
 	missingChannelConfig  = invalidConfigs + "missing-channel.yaml"
 	missingVersionConfig  = invalidConfigs + "missing-version.yaml"
 	missingManifestConfig = invalidConfigs + "missing-manifest.yaml"
+	missingInfoConfig     = invalidConfigs + "missing-info.yaml"
 
 	validConfigs          = testdataDir + "valid/"
 	minimalConfig         = validConfigs + "minimal.yaml"

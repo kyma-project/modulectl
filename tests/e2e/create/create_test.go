@@ -182,6 +182,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
+
+			By("And spec.info should be correct")
+			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
+			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
+			Expect(template.Spec.Info.Icons).To(HaveLen(1))
+			Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
+			Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
 		})
 	})
 
