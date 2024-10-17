@@ -47,7 +47,7 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,
-		ManifestPath: "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Manifest:     "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 		Resources:    contentprovider.ResourcesMap{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
@@ -73,8 +73,8 @@ func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.
 	svc, _ := templategenerator.NewService(mockFS)
 
 	moduleConfig := &contentprovider.ModuleConfig{
-		ManifestPath: "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
-		Resources:    contentprovider.ResourcesMap{"rawManifest": "https://some.other/location/template-operator.yaml"},
+		Manifest:  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources: contentprovider.ResourcesMap{"rawManifest": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
 	data := []byte("test-data")

@@ -137,7 +137,7 @@ func (s *Service) GenerateModuleTemplate(
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
 		Resources: contentprovider.ResourcesMap{
-			"rawManifest": moduleConfig.ManifestPath, // defaults rawManifest to ManifestPath; may be overwritten by explicitly provided entries
+			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
 		},
 	}
 

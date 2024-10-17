@@ -89,7 +89,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: manifest path must not be empty: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: manifest must not be empty: invalid Option"))
 		})
 	})
 

@@ -32,7 +32,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "github.com/module-name", result.Name)
 	require.Equal(t, "0.0.1", result.Version)
 	require.Equal(t, "regular", result.Channel)
-	require.Equal(t, "path/to/manifests", result.ManifestPath)
+	require.Equal(t, "path/to/manifests", result.Manifest)
 	require.Equal(t, "path/to/defaultCR", result.DefaultCRPath)
 	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
@@ -182,66 +182,66 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		{
 			name: "invalid module name",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "invalid name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "invalid name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module name: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module version",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "invalid version",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "invalid version",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module channel",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "invalid channel",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "invalid channel",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module channel: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "invalid namespace",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "invalid namespace",
+				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module namespace: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "empty manifest path",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "",
 			},
-			expectedError: fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - duplicate key",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:         "github.com/module-name",
-				Version:      "0.0.1",
-				Channel:      "regular",
-				Namespace:    "kcp-system",
-				ManifestPath: "test",
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "test",
 				Resources: contentprovider.ResourcesMap{
 					"key": "%% not a URL",
 				},
@@ -273,7 +273,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Name:          "github.com/module-name",
 	Version:       "0.0.1",
 	Channel:       "regular",
-	ManifestPath:  "path/to/manifests",
+	Manifest:      "path/to/manifests",
 	Mandatory:     false,
 	DefaultCRPath: "path/to/defaultCR",
 	ResourceName:  "module-name-0.0.1",
