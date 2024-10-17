@@ -1,11 +1,14 @@
 package contentprovider
 
 import (
+	"errors"
 	"fmt"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
+
+var ErrDuplicateResourceNames = errors.New("list contains duplicate entries")
 
 type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter
@@ -94,7 +97,7 @@ type resource struct {
 type ResourcesMap map[string]string
 
 func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var resources []resource
+	resources := []resource{}
 	if err := unmarshal(&resources); err != nil {
 		return err
 	}
@@ -105,7 +108,7 @@ func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	if len(resources) > len(*rm) {
-		return fmt.Errorf("list contains duplicate entries")
+		return ErrDuplicateResourceNames
 	}
 
 	return nil

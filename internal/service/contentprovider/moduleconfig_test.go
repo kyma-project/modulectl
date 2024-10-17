@@ -147,8 +147,8 @@ resources:
 	moduleConfig := &contentprovider.ModuleConfig{}
 	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
 
-	assert.NoError(t, err)
-	assert.Equal(t, 2, len(moduleConfig.Resources))
+	require.NoError(t, err)
+	assert.Len(t, moduleConfig.Resources, 2)
 	assert.Equal(t, "https://example.com/resource1", moduleConfig.Resources["resource1"])
 	assert.Equal(t, "https://example.com/resource2", moduleConfig.Resources["resource2"])
 }
@@ -165,7 +165,7 @@ resources:
 	moduleConfig := &contentprovider.ModuleConfig{}
 	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "list contains duplicate entries", err.Error())
 }
 
@@ -179,7 +179,8 @@ resources:
     link: https://example.com/resource2
 `
 	expectedModuleConfig := &contentprovider.ModuleConfig{}
-	yaml.Unmarshal([]byte(expectedModuleConfigData), expectedModuleConfig)
+	err := yaml.Unmarshal([]byte(expectedModuleConfigData), expectedModuleConfig)
+	require.NoError(t, err)
 
 	// round trip a module config (marshal and unmarshal)
 	moduleConfig := &contentprovider.ModuleConfig{
@@ -189,10 +190,12 @@ resources:
 		},
 	}
 	marshalledModuleConfigData, err := yaml.Marshal(moduleConfig)
-	roudTrippedModuleConfig := &contentprovider.ModuleConfig{}
-	yaml.Unmarshal([]byte(marshalledModuleConfigData), roudTrippedModuleConfig)
+	require.NoError(t, err)
 
-	assert.NoError(t, err)
+	roudTrippedModuleConfig := &contentprovider.ModuleConfig{}
+	err = yaml.Unmarshal([]byte(marshalledModuleConfigData), roudTrippedModuleConfig)
+
+	require.NoError(t, err)
 	assert.Equal(t, expectedModuleConfig.Resources, roudTrippedModuleConfig.Resources)
 }
 

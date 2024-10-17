@@ -111,7 +111,7 @@ func ValidateResources(resources contentprovider.ResourcesMap) error {
 			return fmt.Errorf("%w: link must not be empty", commonerrors.ErrInvalidOption)
 		}
 
-		if err := ValidateIsValidHttpsUrl(link); err != nil {
+		if err := ValidateIsValidHTTPSURL(link); err != nil {
 			return err
 		}
 	}
@@ -119,7 +119,7 @@ func ValidateResources(resources contentprovider.ResourcesMap) error {
 	return nil
 }
 
-func ValidateIsValidHttpsUrl(input string) error {
+func ValidateIsValidHTTPSURL(input string) error {
 	_url, err := url.Parse(input)
 	if err != nil {
 		return fmt.Errorf("%w: link %s is not a valid URL", commonerrors.ErrInvalidOption, input)

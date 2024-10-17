@@ -246,7 +246,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: invalid Option: link %%%% not a URL is not a valid URL"),
+			expectedError: fmt.Errorf("failed to validate resources: %w: link %%%% not a URL is not a valid URL", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty name",
@@ -260,7 +260,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: invalid Option: name must not be empty"),
+			expectedError: fmt.Errorf("failed to validate resources: %s: name must not be empty", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty link",
@@ -274,7 +274,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"name": "",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: invalid Option: link must not be empty"),
+			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty", commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
