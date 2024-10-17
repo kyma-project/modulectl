@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
-var ErrDuplicateResourceNames = errors.New("list contains duplicate entries")
+var ErrDuplicateResourceNames = errors.New("resources contain duplicate entries")
 
 type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter

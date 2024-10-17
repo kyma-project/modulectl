@@ -103,7 +103,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: list contains duplicate entries"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: resources contain duplicate entries"))
 		})
 	})
 

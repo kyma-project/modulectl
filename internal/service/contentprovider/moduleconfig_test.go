@@ -166,7 +166,7 @@ resources:
 	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
 
 	require.Error(t, err)
-	assert.Equal(t, "list contains duplicate entries", err.Error())
+	assert.Equal(t, "resources contain duplicate entries", err.Error())
 }
 
 func Test_ModuleConfig_Marshal_Resources_Success(t *testing.T) {
