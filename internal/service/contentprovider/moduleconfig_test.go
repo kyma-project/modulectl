@@ -193,7 +193,7 @@ resources:
 	require.NoError(t, err)
 
 	roudTrippedModuleConfig := &contentprovider.ModuleConfig{}
-	err = yaml.Unmarshal([]byte(marshalledModuleConfigData), roudTrippedModuleConfig)
+	err = yaml.Unmarshal(marshalledModuleConfigData, roudTrippedModuleConfig)
 
 	require.NoError(t, err)
 	assert.Equal(t, expectedModuleConfig.Resources, roudTrippedModuleConfig.Resources)

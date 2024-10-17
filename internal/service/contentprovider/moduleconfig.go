@@ -115,7 +115,7 @@ func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (rm ResourcesMap) MarshalYAML() (interface{}, error) {
-	var resources []resource
+	resources := []resource{}
 	for name, link := range rm {
 		resources = append(resources, resource{Name: name, Link: link})
 	}

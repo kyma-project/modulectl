@@ -260,7 +260,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %s: name must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty link",
