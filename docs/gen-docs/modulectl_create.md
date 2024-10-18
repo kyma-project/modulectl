@@ -15,7 +15,7 @@ For more information about Kyma modules see the [documentation](https://kyma-pro
 
 ### Configuration
 
-Provide the `--module-config-file` flag with a config file path.
+Provide the `--config-file` flag with a config file path.
 The module config file is a YAML file used to configure the following attributes for the module:
 
 ```yaml
@@ -47,7 +47,7 @@ If you configured the "--registry" flag, the created module is validated and pus
 
 
 ```bash
-modulectl create [--module-config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY] [flags]
+modulectl create [--config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY] [flags]
 ```
 
 ## Examples
@@ -60,14 +60,14 @@ Build a simple module and push it to a remote registry
 ## Flags
 
 ```bash
+-c, --config-file string              Specifies the path to the module configuration file.
     --git-remote string               Specifies the URL of the module's GitHub repository. 
 -h, --help                            Provides help for the create command.
     --insecure                        Uses an insecure connection to access the registry.
-    --module-config-file string       Specifies the path to the module configuration file.
 -o, --output string                   Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").
 -r, --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
     --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
--c, --registry-credentials string     Basic authentication credentials for the given repository in the <user:password> format.
+    --registry-credentials string     Basic authentication credentials for the given repository in the <user:password> format.
 ```
 
 ## See also
