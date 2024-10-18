@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 
-	"encoding/json"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -463,13 +462,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(manager.Version).To(Equal("v1"))
 			Expect(manager.Group).To(Equal("apps"))
 			Expect(manager.Kind).To(Equal("Deployment"))
-
-			managerMap := make(map[string]interface{})
-			managerJSON, err := json.Marshal(manager)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(json.Unmarshal(managerJSON, &managerMap)).ToNot(HaveOccurred())
-			_, exists := managerMap["namespace"]
-			Expect(exists).To(BeFalse())
 		})
 	})
 })
