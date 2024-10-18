@@ -67,9 +67,7 @@ spec:
 {{- with .Manager}}
   manager:
     name: {{.Name}}
-    {{- if .Namespace}}      
     namespace: {{.Namespace}}
-    {{- end}}
     group: {{.GroupVersionKind.Group}}
     version: {{.GroupVersionKind.Version}}
     kind: {{.GroupVersionKind.Kind}}
