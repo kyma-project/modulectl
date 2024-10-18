@@ -5,10 +5,11 @@ import (
 	"net/url"
 	"testing"
 
-	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/mandelsoft/goutils/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 )
 
@@ -64,7 +65,7 @@ func Test_Resolve_Returns_CorrectPath_When_Relative(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Contains(t, result, "/path/to/manifest.yaml")
-	assert.Equal(t, rune(result[0]), '/')
+	assert.Equal(t, '/', rune(result[0]))
 }
 
 func TestService_ParseURL(t *testing.T) {
@@ -136,7 +137,7 @@ func (s *tmpfileSystemStub) RemoveTempFiles() []error {
 type tempfileSystemErrorStub struct{}
 
 func (*tempfileSystemErrorStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
-	return "", fmt.Errorf("error downloading file")
+	return "", errors.New("error downloading file")
 }
 
 func (s *tempfileSystemErrorStub) RemoveTempFiles() []error {
