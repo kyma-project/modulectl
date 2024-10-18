@@ -423,6 +423,44 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(manager.Kind).To(Equal("Deployment"))
 		})
 	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing manager field without namespace and different version",
+			func() {
+				cmd = createCmd{
+					moduleConfigFile: withNoNamespaceManagerConfig,
+					registry:         ociRegistry,
+					insecure:         true,
+					output:           templateOutputPath,
+				}
+			})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+
+			By("And annotation should have correct version")
+			annotations := template.Annotations
+			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.6"))
+
+			By("And spec.manager should be correct")
+			manager := template.Spec.Manager
+			Expect(manager).ToNot(BeNil())
+			Expect(manager.Name).To(Equal("template-operator-controller-manager"))
+			Expect(manager.Namespace).To(BeEmpty())
+			Expect(manager.Version).To(Equal("v1"))
+			Expect(manager.Group).To(Equal("apps"))
+			Expect(manager.Kind).To(Equal("Deployment"))
+		})
+	})
 })
 
 // Test helper functions
