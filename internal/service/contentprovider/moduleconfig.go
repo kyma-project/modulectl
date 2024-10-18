@@ -38,12 +38,12 @@ func (s *ModuleConfigProvider) GetDefaultContent(args types.KeyValueArgs) (strin
 
 func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleConfig {
 	return ModuleConfig{
-		Name:          args[ArgModuleName],
-		Version:       args[ArgModuleVersion],
-		Channel:       args[ArgModuleChannel],
-		Manifest:      args[ArgManifestFile],
-		Security:      args[ArgSecurityConfigFile],
-		DefaultCRPath: args[ArgDefaultCRFile],
+		Name:      args[ArgModuleName],
+		Version:   args[ArgModuleVersion],
+		Channel:   args[ArgModuleChannel],
+		Manifest:  args[ArgManifestFile],
+		Security:  args[ArgSecurityConfigFile],
+		DefaultCR: args[ArgDefaultCRFile],
 	}
 }
 
@@ -80,22 +80,21 @@ type Manager struct {
 }
 
 type ModuleConfig struct {
-	Name             string            `yaml:"name" comment:"required, the name of the Module"`
-	Version          string            `yaml:"version" comment:"required, the version of the Module"`
-	Channel          string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
-	Manifest         string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	ManifestFilePath string            `yaml:"-"` // ignore this field, will be filled programmatically
-	Mandatory        bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath    string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName     string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
-	Namespace        string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security         string            `yaml:"security" comment:"optional, name of the security scanners config file"`
-	Internal         bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
-	Beta             bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
-	Labels           map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations      map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	Manager          *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
-	Resources        ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Name         string            `yaml:"name" comment:"required, the name of the Module"`
+	Version      string            `yaml:"version" comment:"required, the version of the Module"`
+	Channel      string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
+	Manifest     string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	Mandatory    bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
+	DefaultCR    string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	ResourceName string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
+	Namespace    string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Security     string            `yaml:"security" comment:"optional, name of the security scanners config file"`
+	Internal     bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
+	Beta         bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
+	Labels       map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
+	Annotations  map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	Manager      *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
+	Resources    ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
 
 type resource struct {
