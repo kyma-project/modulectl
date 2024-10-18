@@ -297,7 +297,7 @@ func Test_ValidateManager(t *testing.T) {
 					Kind:    "Deployment",
 				},
 			},
-			expectedError: fmt.Errorf("manager name must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("name must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid manager - empty kind",
@@ -309,7 +309,7 @@ func Test_ValidateManager(t *testing.T) {
 					Version: "v1",
 				},
 			},
-			expectedError: fmt.Errorf("manager kind must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid manager - empty group",
@@ -321,7 +321,7 @@ func Test_ValidateManager(t *testing.T) {
 					Kind:    "Deployment",
 				},
 			},
-			expectedError: fmt.Errorf("manager group must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid manager - empty version",
@@ -333,7 +333,7 @@ func Test_ValidateManager(t *testing.T) {
 					Group: "apps",
 				},
 			},
-			expectedError: fmt.Errorf("manager version must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
