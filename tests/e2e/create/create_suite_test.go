@@ -21,10 +21,15 @@ const (
 	testdataDir = "./testdata/moduleconfig/"
 
 	invalidConfigs        = testdataDir + "invalid/"
+	duplicateResources    = invalidConfigs + "duplicate-resources.yaml"
+	emptyResourceName     = invalidConfigs + "empty-resource-name.yaml"
 	missingNameConfig     = invalidConfigs + "missing-name.yaml"
 	missingChannelConfig  = invalidConfigs + "missing-channel.yaml"
 	missingVersionConfig  = invalidConfigs + "missing-version.yaml"
 	missingManifestConfig = invalidConfigs + "missing-manifest.yaml"
+	nonHttpsResource      = invalidConfigs + "non-https-resource.yaml"
+	resourceWithoutLink   = invalidConfigs + "resource-without-link.yaml"
+	resourceWithoutName   = invalidConfigs + "resource-without-name.yaml"
 
 	validConfigs                 = testdataDir + "valid/"
 	minimalConfig                = validConfigs + "minimal.yaml"
@@ -32,6 +37,8 @@ const (
 	withDefaultCrConfig          = validConfigs + "with-defaultcr.yaml"
 	withSecurityConfig           = validConfigs + "with-security.yaml"
 	withMandatoryConfig          = validConfigs + "with-mandatory.yaml"
+	withResources                = validConfigs + "with-resources.yaml"
+	withResourcesOverwrite       = validConfigs + "with-resources-overwrite.yaml"
 	withManagerConfig            = validConfigs + "with-manager.yaml"
 	withNoNamespaceManagerConfig = validConfigs + "with-manager-no-namespace.yaml"
 

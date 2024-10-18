@@ -49,6 +49,8 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,
+		Manifest:     "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources:    contentprovider.ResourcesMap{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
 	data := []byte("test-data")
@@ -62,6 +64,30 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "someResource")
+	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+	require.Contains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+}
+
+func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Manifest:  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources: contentprovider.ResourcesMap{"rawManifest": "https://some.other/location/template-operator.yaml"},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
+	require.NotContains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
 func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {

@@ -2,12 +2,14 @@ package validation
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -102,6 +104,37 @@ func ValidateNamespace(namespace string) error {
 	} else if !matched {
 		return fmt.Errorf("%w: namespace must match the required pattern, only small alphanumeric characters and hyphens",
 			commonerrors.ErrInvalidOption)
+	}
+
+	return nil
+}
+
+func ValidateResources(resources contentprovider.ResourcesMap) error {
+	for name, link := range resources {
+		if name == "" {
+			return fmt.Errorf("%w: name must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if link == "" {
+			return fmt.Errorf("%w: link must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if err := ValidateIsValidHTTPSURL(link); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func ValidateIsValidHTTPSURL(input string) error {
+	_url, err := url.Parse(input)
+	if err != nil {
+		return fmt.Errorf("%w: link %s is not a valid URL", commonerrors.ErrInvalidOption, input)
+	}
+
+	if _url.Scheme != "https" {
+		return fmt.Errorf("%w: link %s is not using https scheme", commonerrors.ErrInvalidOption, input)
 	}
 
 	return nil

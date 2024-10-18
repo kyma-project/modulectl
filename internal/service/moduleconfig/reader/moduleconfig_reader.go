@@ -58,7 +58,7 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 	}
 
 	if err = ValidateModuleConfig(moduleConfig); err != nil {
-		return nil, fmt.Errorf("failed to value module config: %w", err)
+		return nil, fmt.Errorf("failed to validate module config: %w", err)
 	}
 
 	moduleConfig.DefaultCRPath, err = GetDefaultCRPath(moduleConfig.DefaultCRPath, s.tempFileSystem)
@@ -66,7 +66,7 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 		return nil, fmt.Errorf("failed to get default CR path: %w", err)
 	}
 
-	moduleConfig.ManifestPath, err = GetManifestPath(moduleConfig.ManifestPath, s.tempFileSystem)
+	moduleConfig.ManifestFilePath, err = GetManifestPath(moduleConfig.Manifest, s.tempFileSystem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get manifest path: %w", err)
 	}
@@ -144,8 +144,12 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
 	}
 
-	if moduleConfig.ManifestPath == "" {
-		return fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption)
+	if err := validation.ValidateResources(moduleConfig.Resources); err != nil {
+		return fmt.Errorf("failed to validate resources: %w", err)
+	}
+
+	if moduleConfig.Manifest == "" {
+		return fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if err := ValidateManager(moduleConfig.Manager); err != nil {

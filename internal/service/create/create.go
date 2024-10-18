@@ -132,7 +132,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
-	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, moduleConfig.ManifestPath,
+	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, moduleConfig.ManifestFilePath,
 		moduleConfig.DefaultCRPath, opts.RegistryCredSelector)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)
@@ -169,7 +169,7 @@ func (s *Service) Run(opts Options) error {
 
 func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
 	opts.Out.Write("- Pushing component version\n")
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath, moduleConfig.ManifestPath)
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath, moduleConfig.ManifestFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
 	}
