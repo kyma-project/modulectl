@@ -41,12 +41,30 @@ func Test_Resolve_Returns_CorrectPath(t *testing.T) {
 	require.Equal(t, "file.yaml", result)
 }
 
-func Test_Resolve_Returns_CorrectPath_When_NotUrl(t *testing.T) {
+func Test_Resolve_Returns_Error_WhenFailingToDownload(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tempfileSystemErrorStub{})
+	result, err := resolver.Resolve("https://example.com/path")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to download file")
+	assert.Empty(t, result)
+}
+
+func Test_Resolve_Returns_CorrectPath_When_AbsolutePath(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
 	result, err := resolver.Resolve("/path/to/manifest.yaml")
 
 	require.NoError(t, err)
-	require.Equal(t, "/path/to/manifest.yaml", result)
+	assert.Equal(t, "/path/to/manifest.yaml", result)
+}
+
+func Test_Resolve_Returns_CorrectPath_When_Relative(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	result, err := resolver.Resolve("./path/to/manifest.yaml")
+
+	require.NoError(t, err)
+	assert.Contains(t, result, "/path/to/manifest.yaml")
+	assert.Equal(t, rune(result[0]), '/')
 }
 
 func TestService_ParseURL(t *testing.T) {
@@ -112,5 +130,15 @@ func (*tmpfileSystemStub) DownloadTempFile(_ string, _ string, _ *url.URL) (stri
 }
 
 func (s *tmpfileSystemStub) RemoveTempFiles() []error {
+	return nil
+}
+
+type tempfileSystemErrorStub struct{}
+
+func (*tempfileSystemErrorStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
+	return "", fmt.Errorf("error downloading file")
+}
+
+func (s *tempfileSystemErrorStub) RemoveTempFiles() []error {
 	return nil
 }

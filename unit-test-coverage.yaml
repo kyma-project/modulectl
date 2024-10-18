@@ -4,6 +4,7 @@ packages:
   internal/service/scaffold: 92
   internal/service/contentprovider: 98
   internal/service/filegenerator: 100
+  internal/service/fileresolver: 92
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 50
   internal/service/create: 43
