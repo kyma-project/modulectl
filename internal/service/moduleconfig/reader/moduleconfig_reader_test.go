@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -45,6 +46,11 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, contentprovider.ResourcesMap{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	}, result.Resources)
+	require.Equal(t, "manager-name", result.Manager.Name)
+	require.Equal(t, "manager-namespace", result.Manager.Namespace)
+	require.Equal(t, "apps", result.Manager.GroupVersionKind.Group)
+	require.Equal(t, "v1", result.Manager.GroupVersionKind.Version)
+	require.Equal(t, "Deployment", result.Manager.GroupVersionKind.Kind)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
@@ -289,6 +295,104 @@ func Test_ValidateModuleConfig(t *testing.T) {
 	}
 }
 
+func Test_ValidateManager(t *testing.T) {
+	tests := []struct {
+		name          string
+		manager       *contentprovider.Manager
+		expectedError error
+	}{
+		{
+			name:          "nil manager",
+			manager:       nil,
+			expectedError: nil,
+		},
+		{
+			name: "valid manager",
+			manager: &contentprovider.Manager{
+				Name: "manager-name",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+				Namespace: "manager-namespace",
+			},
+			expectedError: nil,
+		},
+		{
+			name: "valid manager - empty namespace",
+			manager: &contentprovider.Manager{
+				Name: "manager-name",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			},
+			expectedError: nil,
+		},
+		{
+			name: "invalid manager - empty name",
+			manager: &contentprovider.Manager{
+				Name:      "",
+				Namespace: "manager-namespace",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			},
+			expectedError: fmt.Errorf("name must not be empty: %w", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid manager - empty kind",
+			manager: &contentprovider.Manager{
+				Name:      "manager-name",
+				Namespace: "manager-namespace",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Group:   "apps",
+					Version: "v1",
+				},
+			},
+			expectedError: fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid manager - empty group",
+			manager: &contentprovider.Manager{
+				Name:      "manager-name",
+				Namespace: "manager-namespace",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			},
+			expectedError: fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid manager - empty version",
+			manager: &contentprovider.Manager{
+				Name:      "manager-name",
+				Namespace: "manager-namespace",
+				GroupVersionKind: metav1.GroupVersionKind{
+					Kind:  "Deployment",
+					Group: "apps",
+				},
+			},
+			expectedError: fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := moduleconfigreader.ValidateManager(test.manager)
+			if test.expectedError != nil {
+				require.ErrorContains(t, err, test.expectedError.Error())
+				return
+			}
+			require.NoError(t, err)
+		})
+	}
+}
+
 // Test Stubs
 
 type fileExistsStub struct{}
@@ -313,6 +417,15 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Annotations:   map[string]string{"annotation1": "value1"},
 	Resources: contentprovider.ResourcesMap{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	},
+	Manager: &contentprovider.Manager{
+		Name:      "manager-name",
+		Namespace: "manager-namespace",
+		GroupVersionKind: metav1.GroupVersionKind{
+			Group:   "apps",
+			Version: "v1",
+			Kind:    "Deployment",
+		},
 	},
 }
 

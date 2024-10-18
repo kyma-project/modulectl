@@ -152,6 +152,40 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
+	if err := ValidateManager(moduleConfig.Manager); err != nil {
+		return fmt.Errorf("failed to validate manager: %w", err)
+	}
+
+	return nil
+}
+
+func ValidateManager(manager *contentprovider.Manager) error {
+	if manager == nil {
+		return nil
+	}
+
+	if manager.Name == "" {
+		return fmt.Errorf("name must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if manager.Kind == "" {
+		return fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if manager.Group == "" {
+		return fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if manager.Version == "" {
+		return fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if manager.Namespace != "" {
+		if err := validation.ValidateNamespace(manager.Namespace); err != nil {
+			return fmt.Errorf("namespace is invalid: %w", err)
+		}
+	}
+
 	return nil
 }
 

@@ -14,8 +14,8 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     createcmd.ModuleConfigFileFlagName,
-			value:    createcmd.ModuleConfigFileFlagDefault,
+			name:     createcmd.ConfigFileFlagName,
+			value:    createcmd.ConfigFileFlagDefault,
 			expected: "module-config.yaml",
 		},
 		{name: createcmd.CredentialsFlagName, value: createcmd.CredentialsFlagDefault, expected: ""},

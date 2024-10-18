@@ -36,7 +36,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	err = svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	require.Contains(t, err.Error(), "opts.ModuleConfigFile")
+	require.Contains(t, err.Error(), "opts.ConfigFile")
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
@@ -120,7 +120,7 @@ func (b *createOptionsBuilder) withOut(out iotools.Out) *createOptionsBuilder {
 }
 
 func (b *createOptionsBuilder) withModuleConfigFile(moduleConfigFile string) *createOptionsBuilder {
-	b.options.ModuleConfigFile = moduleConfigFile
+	b.options.ConfigFile = moduleConfigFile
 	return b
 }
 

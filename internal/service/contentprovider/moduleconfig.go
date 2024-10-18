@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
@@ -71,6 +73,12 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 	return nil
 }
 
+type Manager struct {
+	Name                    string `yaml:"name" comment:"required, the name of the manager"`
+	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
+	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+}
+
 type ModuleConfig struct {
 	Name             string            `yaml:"name" comment:"required, the name of the Module"`
 	Version          string            `yaml:"version" comment:"required, the version of the Module"`
@@ -86,6 +94,7 @@ type ModuleConfig struct {
 	Beta             bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
 	Labels           map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
 	Annotations      map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	Manager          *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
 	Resources        ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
 

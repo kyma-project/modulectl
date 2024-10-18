@@ -1,7 +1,10 @@
 name: kyma-project.io/module/template-operator
 channel: regular
-version: 1.0.8
+version: 1.0.5
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
-resources:
-- name: rawManifest
-  link: https://some.other/location/template-operator.yaml
+manager:
+  name: template-operator-controller-manager
+  namespace: template-operator-system
+  group: apps
+  version: v1
+  kind: Deployment

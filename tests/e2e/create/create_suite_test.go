@@ -31,14 +31,16 @@ const (
 	resourceWithoutLink   = invalidConfigs + "resource-without-link.yaml"
 	resourceWithoutName   = invalidConfigs + "resource-without-name.yaml"
 
-	validConfigs           = testdataDir + "valid/"
-	minimalConfig          = validConfigs + "minimal.yaml"
-	withAnnotationsConfig  = validConfigs + "with-annotations.yaml"
-	withDefaultCrConfig    = validConfigs + "with-defaultcr.yaml"
-	withSecurityConfig     = validConfigs + "with-security.yaml"
-	withMandatoryConfig    = validConfigs + "with-mandatory.yaml"
-	withResources          = validConfigs + "with-resources.yaml"
-	withResourcesOverwrite = validConfigs + "with-resources-overwrite.yaml"
+	validConfigs                 = testdataDir + "valid/"
+	minimalConfig                = validConfigs + "minimal.yaml"
+	withAnnotationsConfig        = validConfigs + "with-annotations.yaml"
+	withDefaultCrConfig          = validConfigs + "with-defaultcr.yaml"
+	withSecurityConfig           = validConfigs + "with-security.yaml"
+	withMandatoryConfig          = validConfigs + "with-mandatory.yaml"
+	withResources                = validConfigs + "with-resources.yaml"
+	withResourcesOverwrite       = validConfigs + "with-resources-overwrite.yaml"
+	withManagerConfig            = validConfigs + "with-manager.yaml"
+	withNoNamespaceManagerConfig = validConfigs + "with-manager-no-namespace.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"
@@ -61,7 +63,7 @@ func (cmd *createCmd) execute() error {
 	args := []string{"create"}
 
 	if cmd.moduleConfigFile != "" {
-		args = append(args, "--module-config-file="+cmd.moduleConfigFile)
+		args = append(args, "--config-file="+cmd.moduleConfigFile)
 	}
 
 	if cmd.registry != "" {

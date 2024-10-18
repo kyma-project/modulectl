@@ -85,6 +85,14 @@ func ValidateModuleNamespace(namespace string) error {
 		return fmt.Errorf("%w: opts.ModuleNamespace must not be empty", commonerrors.ErrInvalidOption)
 	}
 
+	if err := ValidateNamespace(namespace); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ValidateNamespace(namespace string) error {
 	if len(namespace) > namespaceMaxLength {
 		return fmt.Errorf("%w: opts.ModuleNamespace length must not exceed %q characters",
 			commonerrors.ErrInvalidOption,
