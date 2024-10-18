@@ -66,7 +66,7 @@ func (cmd *scaffoldCmd) execute() error {
 		args = append(args, "--overwrite=true")
 	}
 
-	command = exec.Command("modulectl", args...)
+	command = exec.Command("/Users/I507792/Workspaces/go/src/github.com/c-pius/modulectl/bin/modulectl-darwin-arm", args...)
 	cmdOut, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("scaffold command failed with output: %s and error: %w", cmdOut, err)
