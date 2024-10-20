@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/validation"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"gopkg.in/yaml.v3"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var ErrNoPathForDefaultCR = errors.New("no path for default CR given")

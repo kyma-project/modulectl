@@ -7,14 +7,14 @@ import (
 	"strings"
 	"text/template"
 
-	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/kyma-project/lifecycle-manager/api/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"sigs.k8s.io/yaml"
 
-	"github.com/kyma-project/lifecycle-manager/api/shared"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 var (

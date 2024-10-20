@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
