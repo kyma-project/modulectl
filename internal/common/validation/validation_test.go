@@ -225,3 +225,36 @@ func TestValidateNamespace(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateGvk(t *testing.T) {
+	type args struct {
+		group   string
+		version string
+		kind    string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "valid GVK",
+			args:    args{group: "kyma-project.io", version: "v1alpha1", kind: "Module"},
+			wantErr: false},
+		{name: "invalid GVK when group empty",
+			args:    args{version: "v1alpha1", kind: "Module"},
+			wantErr: true},
+		{name: "invalid GVK when version empty",
+			args:    args{group: "kyma-project.io", kind: "Module"},
+			wantErr: true},
+		{name: "invalid GVK when kind empty",
+			args:    args{group: "kyma-project.io", version: "v1alpha1"},
+			wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validation.ValidateGvk(tt.args.group, tt.args.version, tt.args.kind); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateGvk() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

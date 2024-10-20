@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"text/template"
 
@@ -60,6 +61,14 @@ metadata:
 spec:
   channel: {{.Channel}}
   mandatory: {{.Mandatory}}
+{{- with .AssociatedResources}}
+  associatedResources:
+  {{- range .}}
+  - group: {{.Group}}
+    version: {{.Version}}
+    kind: {{.Kind}}
+  {{- end}}
+{{- end}}
 {{- with .Data}}
   data:
 {{. | indent 4}}
@@ -80,15 +89,16 @@ spec:
 )
 
 type moduleTemplateData struct {
-	ResourceName string
-	Namespace    string
-	Descriptor   compdesc.ComponentDescriptorVersion
-	Channel      string
-	Labels       map[string]string
-	Annotations  map[string]string
-	Mandatory    bool
-	Data         string
-	Manager      *contentprovider.Manager
+	ResourceName        string
+	Namespace           string
+	Descriptor          compdesc.ComponentDescriptorVersion
+	Channel             string
+	Labels              map[string]string
+	Annotations         map[string]string
+	Mandatory           bool
+	Data                string
+	AssociatedResources []*metav1.GroupVersionKind
+	Manager             *contentprovider.Manager
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -132,14 +142,15 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	mtData := moduleTemplateData{
-		ResourceName: moduleConfig.ResourceName,
-		Namespace:    moduleConfig.Namespace,
-		Descriptor:   cva,
-		Channel:      moduleConfig.Channel,
-		Labels:       labels,
-		Annotations:  annotations,
-		Mandatory:    moduleConfig.Mandatory,
-		Manager:      moduleConfig.Manager,
+		ResourceName:        moduleConfig.ResourceName,
+		Namespace:           moduleConfig.Namespace,
+		Descriptor:          cva,
+		Channel:             moduleConfig.Channel,
+		Labels:              labels,
+		Annotations:         annotations,
+		Mandatory:           moduleConfig.Mandatory,
+		AssociatedResources: moduleConfig.AssociatedResources,
+		Manager:             moduleConfig.Manager,
 	}
 
 	if len(data) > 0 {

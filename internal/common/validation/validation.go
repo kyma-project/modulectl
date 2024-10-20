@@ -2,10 +2,9 @@ package validation
 
 import (
 	"fmt"
+	"github.com/Masterminds/semver/v3"
 	"regexp"
 	"strings"
-
-	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
@@ -112,6 +111,22 @@ func validateSemanticVersion(version string) error {
 	if err != nil {
 		return fmt.Errorf("%w: opts.ModuleVersion failed to parse as semantic version: %w",
 			commonerrors.ErrInvalidOption, err)
+	}
+
+	return nil
+}
+
+func ValidateGvk(group, version, kind string) error {
+	if kind == "" {
+		return fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if group == "" {
+		return fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if version == "" {
+		return fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	return nil

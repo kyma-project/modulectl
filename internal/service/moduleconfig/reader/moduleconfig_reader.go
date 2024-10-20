@@ -3,6 +3,7 @@ package moduleconfigreader
 import (
 	"errors"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -148,10 +149,23 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
+	if err := validateAssociatedResources(moduleConfig.AssociatedResources); err != nil {
+		return fmt.Errorf("failed to validate associated resources: %w", err)
+	}
+
 	if err := ValidateManager(moduleConfig.Manager); err != nil {
 		return fmt.Errorf("failed to validate manager: %w", err)
 	}
 
+	return nil
+}
+
+func validateAssociatedResources(resources []*metav1.GroupVersionKind) error {
+	for _, resource := range resources {
+		if err := validation.ValidateGvk(resource.Group, resource.Version, resource.Kind); err != nil {
+			return fmt.Errorf("GVK is invalid: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -164,16 +178,8 @@ func ValidateManager(manager *contentprovider.Manager) error {
 		return fmt.Errorf("name must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
-	if manager.Kind == "" {
-		return fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption)
-	}
-
-	if manager.Group == "" {
-		return fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption)
-	}
-
-	if manager.Version == "" {
-		return fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption)
+	if err := validation.ValidateGvk(manager.Group, manager.Version, manager.Kind); err != nil {
+		return fmt.Errorf("GVK is invalid: %w", err)
 	}
 
 	if manager.Namespace != "" {
