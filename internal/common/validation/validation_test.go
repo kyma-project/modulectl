@@ -237,18 +237,26 @@ func TestValidateGvk(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{name: "valid GVK",
+		{
+			name:    "valid GVK",
 			args:    args{group: "kyma-project.io", version: "v1alpha1", kind: "Module"},
-			wantErr: false},
-		{name: "invalid GVK when group empty",
+			wantErr: false,
+		},
+		{
+			name:    "invalid GVK when group empty",
 			args:    args{version: "v1alpha1", kind: "Module"},
-			wantErr: true},
-		{name: "invalid GVK when version empty",
+			wantErr: true,
+		},
+		{
+			name:    "invalid GVK when version empty",
 			args:    args{group: "kyma-project.io", kind: "Module"},
-			wantErr: true},
-		{name: "invalid GVK when kind empty",
+			wantErr: true,
+		},
+		{
+			name:    "invalid GVK when kind empty",
 			args:    args{group: "kyma-project.io", version: "v1alpha1"},
-			wantErr: true},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

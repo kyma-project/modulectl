@@ -4,17 +4,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"text/template"
 
-	"github.com/kyma-project/lifecycle-manager/api/shared"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"sigs.k8s.io/yaml"
 
-	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/kyma-project/lifecycle-manager/api/shared"
 )
 
 var (
