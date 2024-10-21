@@ -54,7 +54,7 @@ modulectl create [--config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY]
 
 ```bash
 Build a simple module and push it to a remote registry
-		modulectl create --module-config-file=/path/to/module-config-file --registry http://localhost:5001/unsigned --insecure
+		modulectl create --config-file=/path/to/module-config-file --registry http://localhost:5001/unsigned --insecure
 ```
 
 ## Flags

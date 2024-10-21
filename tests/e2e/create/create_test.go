@@ -39,7 +39,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing name", func() {
+		It("When invoked with '--config-file' using file with missing name", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingNameConfig,
 			}
@@ -53,7 +53,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing channel", func() {
+		It("When invoked with '--config-file' using file with missing channel", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingChannelConfig,
 			}
@@ -67,7 +67,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing version", func() {
+		It("When invoked with '--config-file' using file with missing version", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingVersionConfig,
 			}
@@ -81,7 +81,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing manifest", func() {
+		It("When invoked with '--config-file' using file with missing manifest", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingManifestConfig,
 			}
@@ -95,7 +95,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using valid file", func() {
+		It("When invoked with '--config-file' using valid file", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 			}
