@@ -17,9 +17,6 @@ linters:
     - paralleltest  # should be enabled consciously for long running tests
     - wsl           # too strict and mostly code is not more readable
 linters-settings:
-  gomoddirectives:
-    replace-allow-list:
-      - ocm.software/ocm
   revive:
     severity: error
     rules:
