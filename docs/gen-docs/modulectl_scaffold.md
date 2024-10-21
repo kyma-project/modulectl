@@ -17,7 +17,7 @@ allowing for a tailored scaffolding experience according to the specific needs o
 The command generates or uses the following files:
  - Module Config:
 	Enabled: Always
-	Adjustable with flag: --module-config=VALUE
+	Adjustable with flag: --config-file=VALUE
 	Generated when: The file doesn't exist or the --overwrite=true flag is provided
 	Default file name: scaffold-module-config.yaml
  - Manifest:
@@ -75,7 +75,7 @@ Generate a scaffold with a manifest file, default CR and security-scanners confi
     --gen-security-config string   Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist (default "sec-scanners-config.yaml").
 -h, --help                         Provides help for the scaffold command.
     --module-channel string        Specifies the module channel in the generated module config file (default "regular").
-    --module-config string         Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml").
+    --config-file string           Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml").
     --module-name string           Specifies the module name in the generated config file (default "kyma-project.io/module/mymodule").
     --module-version string        Specifies the module version in the generated module config file (default "0.0.1").
 -o, --overwrite                    Specifies if the command overwrites an existing module configuration file.

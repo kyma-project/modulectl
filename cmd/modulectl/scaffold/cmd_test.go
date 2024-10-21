@@ -56,7 +56,7 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
-		"--module-config", moduleConfigFile,
+		"--config-file", moduleConfigFile,
 		"--overwrite",
 		"--gen-manifest", manifestFile,
 		"--gen-default-cr=" + defaultCRFile,

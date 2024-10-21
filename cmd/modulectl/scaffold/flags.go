@@ -12,7 +12,7 @@ const (
 	DirectoryFlagDefault = "./"
 	directoryFlagUsage   = `Specifies the target directory where the scaffolding shall be generated (default "./").`
 
-	ModuleConfigFileFlagName    = "module-config"
+	ModuleConfigFileFlagName    = "config-file"
 	ModuleConfigFileFlagDefault = "scaffold-module-config.yaml"
 	moduleConfigFileFlagUsage   = `Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml").`
 

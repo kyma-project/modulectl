@@ -47,7 +47,7 @@ func (cmd *scaffoldCmd) execute() error {
 	}
 
 	if cmd.moduleConfigFileFlag != "" {
-		args = append(args, "--module-config="+cmd.moduleConfigFileFlag)
+		args = append(args, "--config-file="+cmd.moduleConfigFileFlag)
 	}
 
 	if cmd.genDefaultCRFlag != "" {
