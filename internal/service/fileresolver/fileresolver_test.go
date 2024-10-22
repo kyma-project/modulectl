@@ -51,21 +51,22 @@ func Test_Resolve_Returns_Error_WhenFailingToDownload(t *testing.T) {
 	assert.Empty(t, result)
 }
 
-func Test_Resolve_Returns_CorrectPath_When_AbsolutePath(t *testing.T) {
+func Test_Resolve_Returns_Error_When_AbsolutePath(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
 	result, err := resolver.Resolve("/path/to/manifest.yaml")
 
-	require.NoError(t, err)
-	assert.Equal(t, "/path/to/manifest.yaml", result)
+	require.Error(t, err)
+	assert.Empty(t, result)
+	assert.Equal(t, "failed to parse URL: failed to parse url /path/to/manifest.yaml: invalid argument", err.Error())
 }
 
-func Test_Resolve_Returns_CorrectPath_When_Relative(t *testing.T) {
+func Test_Resolve_Returns_Error_When_Relative(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
 	result, err := resolver.Resolve("./path/to/manifest.yaml")
 
-	require.NoError(t, err)
-	assert.Contains(t, result, "/path/to/manifest.yaml")
-	assert.Equal(t, '/', rune(result[0]))
+	require.Error(t, err)
+	assert.Empty(t, result)
+	assert.Equal(t, "failed to parse URL: failed to parse url ./path/to/manifest.yaml: invalid argument", err.Error())
 }
 
 func TestService_ParseURL(t *testing.T) {

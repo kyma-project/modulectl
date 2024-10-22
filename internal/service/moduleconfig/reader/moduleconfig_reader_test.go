@@ -32,12 +32,12 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "github.com/module-name", result.Name)
 	require.Equal(t, "0.0.1", result.Version)
 	require.Equal(t, "regular", result.Channel)
-	require.Equal(t, "path/to/manifests", result.Manifest)
-	require.Equal(t, "path/to/defaultCR", result.DefaultCR)
+	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
+	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
 	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
-	require.Equal(t, "path/to/securityConfig", result.Security)
+	require.Equal(t, "https://example.com/path/to/securityConfig", result.Security)
 	require.False(t, result.Internal)
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
@@ -121,7 +121,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Namespace: "kcp-system",
 				Manifest:  "",
 			},
-			expectedError: fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - not a URL",
@@ -135,7 +135,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: link %%%% not a URL is not a valid URL", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty name",
@@ -164,6 +164,29 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "manifest file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "./test",
+			},
+			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "default CR file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "github.com/module-name",
+				Version:   "0.0.1",
+				Channel:   "regular",
+				Namespace: "kcp-system",
+				Manifest:  "https://example.com/test",
+				DefaultCR: "/test",
+			},
+			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme", commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
@@ -288,12 +311,12 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Name:         "github.com/module-name",
 	Version:      "0.0.1",
 	Channel:      "regular",
-	Manifest:     "path/to/manifests",
+	Manifest:     "https://example.com/path/to/manifests",
 	Mandatory:    false,
-	DefaultCR:    "path/to/defaultCR",
+	DefaultCR:    "https://example.com/path/to/defaultCR",
 	ResourceName: "module-name-0.0.1",
 	Namespace:    "kcp-system",
-	Security:     "path/to/securityConfig",
+	Security:     "https://example.com/path/to/securityConfig",
 	Internal:     false,
 	Beta:         false,
 	Labels:       map[string]string{"label1": "value1"},

@@ -66,8 +66,14 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate resources: %w", err)
 	}
 
-	if moduleConfig.Manifest == "" {
-		return fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption)
+	if err := validation.ValidateIsValidHTTPSURL(moduleConfig.Manifest); err != nil {
+		return fmt.Errorf("failed to validate manifest: %w", err)
+	}
+
+	if moduleConfig.DefaultCR != "" {
+		if err := validation.ValidateIsValidHTTPSURL(moduleConfig.DefaultCR); err != nil {
+			return fmt.Errorf("failed to validate default CR: %w", err)
+		}
 	}
 
 	if err := ValidateManager(moduleConfig.Manager); err != nil {

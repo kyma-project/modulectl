@@ -30,6 +30,8 @@ const (
 	nonHttpsResource      = invalidConfigs + "non-https-resource.yaml"
 	resourceWithoutLink   = invalidConfigs + "resource-without-link.yaml"
 	resourceWithoutName   = invalidConfigs + "resource-without-name.yaml"
+	manifestFileref       = invalidConfigs + "manifest-fileref.yaml"
+	defaultCRFileref      = invalidConfigs + "defaultcr-fileref.yaml"
 
 	validConfigs                 = testdataDir + "valid/"
 	minimalConfig                = validConfigs + "minimal.yaml"
