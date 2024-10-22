@@ -316,7 +316,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	DefaultCR:    "https://example.com/path/to/defaultCR",
 	ResourceName: "module-name-0.0.1",
 	Namespace:    "kcp-system",
-	Security:     "https://example.com/path/to/securityConfig",
+	Security:     "path/to/securityConfig",
 	Internal:     false,
 	Beta:         false,
 	Labels:       map[string]string{"label1": "value1"},
