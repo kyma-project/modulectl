@@ -37,7 +37,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
-	require.Equal(t, "https://example.com/path/to/securityConfig", result.Security)
+	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.False(t, result.Internal)
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
