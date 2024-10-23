@@ -5,12 +5,13 @@ package create_test
 import (
 	"io/fs"
 	"os"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -217,6 +218,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
+
+			descriptorSplit := strings.Split(descriptor.Name, "/")
+			descriptorName := descriptorSplit[len(descriptorSplit)-1]
+			Expect(template.Name).To(Equal(descriptorName + "-" + descriptor.Version))
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
