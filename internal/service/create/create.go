@@ -15,7 +15,14 @@ import (
 
 type ModuleConfigService interface {
 	ParseAndValidateModuleConfig(moduleConfigFile string) (*contentprovider.ModuleConfig, error)
-	GetDefaultCRData(defaultCRPath string) ([]byte, error)
+}
+
+type FileSystem interface {
+	ReadFile(path string) ([]byte, error)
+}
+
+type FileResolver interface {
+	Resolve(file string) (string, error)
 	CleanupTempFiles() []error
 }
 
@@ -62,6 +69,9 @@ type Service struct {
 	registryService         RegistryService
 	moduleTemplateService   ModuleTemplateService
 	crdParserService        CRDParserService
+	manifestFileResolver    FileResolver
+	defaultCRFileResolver   FileResolver
+	fileSystem              FileSystem
 }
 
 func NewService(moduleConfigService ModuleConfigService,
@@ -71,6 +81,9 @@ func NewService(moduleConfigService ModuleConfigService,
 	registryService RegistryService,
 	moduleTemplateService ModuleTemplateService,
 	crdParserService CRDParserService,
+	manifestFileResolver FileResolver,
+	defaultCRFileResolver FileResolver,
+	fileSystem FileSystem,
 ) (*Service, error) {
 	if moduleConfigService == nil {
 		return nil, fmt.Errorf("%w: moduleConfigService must not be nil", commonerrors.ErrInvalidArg)
@@ -100,6 +113,18 @@ func NewService(moduleConfigService ModuleConfigService,
 		return nil, fmt.Errorf("%w: crdParserService must not be nil", commonerrors.ErrInvalidArg)
 	}
 
+	if manifestFileResolver == nil {
+		return nil, fmt.Errorf("%w: manifestFileResolver must not be nil", commonerrors.ErrInvalidArg)
+	}
+
+	if defaultCRFileResolver == nil {
+		return nil, fmt.Errorf("%w: defaultCRFileResolver must not be nil", commonerrors.ErrInvalidArg)
+	}
+
+	if fileSystem == nil {
+		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+	}
+
 	return &Service{
 		moduleConfigService:     moduleConfigService,
 		gitSourcesService:       gitSourcesService,
@@ -108,6 +133,9 @@ func NewService(moduleConfigService ModuleConfigService,
 		registryService:         registryService,
 		moduleTemplateService:   moduleTemplateService,
 		crdParserService:        crdParserService,
+		manifestFileResolver:    manifestFileResolver,
+		defaultCRFileResolver:   defaultCRFileResolver,
+		fileSystem:              fileSystem,
 	}, nil
 }
 
@@ -117,8 +145,12 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	defer func() {
-		if err := s.moduleConfigService.CleanupTempFiles(); err != nil {
-			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary files: %v\n", err))
+		if err := s.defaultCRFileResolver.CleanupTempFiles(); err != nil {
+			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary default CR files: %v\n", err))
+		}
+
+		if err := s.manifestFileResolver.CleanupTempFiles(); err != nil {
+			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary manifest files: %v\n", err))
 		}
 	}()
 
@@ -127,13 +159,26 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to parse module config: %w", err)
 	}
 
+	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest)
+	if err != nil {
+		return fmt.Errorf("failed to resolve manifest file: %w", err)
+	}
+
+	defaultCRFilePath := moduleConfig.DefaultCR
+	if moduleConfig.DefaultCR != "" {
+		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR)
+		if err != nil {
+			return fmt.Errorf("failed to resolve default CR file: %w", err)
+		}
+	}
+
 	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version)
 	if err != nil {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
-	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, moduleConfig.ManifestPath,
-		moduleConfig.DefaultCRPath, opts.RegistryCredSelector)
+	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, manifestFilePath,
+		defaultCRFilePath, opts.RegistryCredSelector)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
@@ -162,14 +207,14 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	if opts.RegistryURL != "" {
-		return s.pushImgAndCreateTemplate(archive, moduleConfig, opts)
+		return s.pushImgAndCreateTemplate(archive, moduleConfig, manifestFilePath, defaultCRFilePath, opts)
 	}
 	return nil
 }
 
-func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
+func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options) error {
 	opts.Out.Write("- Pushing component version\n")
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(moduleConfig.DefaultCRPath, moduleConfig.ManifestPath)
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(defaultCRFilePath, manifestFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
 	}
@@ -185,8 +230,8 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 	}
 
 	var crData []byte
-	if moduleConfig.DefaultCRPath != "" {
-		crData, err = s.moduleConfigService.GetDefaultCRData(moduleConfig.DefaultCRPath)
+	if defaultCRFilePath != "" {
+		crData, err = s.fileSystem.ReadFile(defaultCRFilePath)
 		if err != nil {
 			return fmt.Errorf("%w: failed to get default CR data", err)
 		}

@@ -3,9 +3,6 @@ package moduleconfigreader
 import (
 	"errors"
 	"fmt"
-	"net/url"
-	"os"
-	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,37 +14,21 @@ import (
 
 var ErrNoPathForDefaultCR = errors.New("no path for default CR given")
 
-const (
-	defaultCRFilePattern       = "kyma-module-default-cr-*.yaml"
-	defaultManifestFilePattern = "kyma-module-manifest-*.yaml"
-)
-
 type FileSystem interface {
 	ReadFile(path string) ([]byte, error)
 }
 
-type TempFileSystem interface {
-	DownloadTempFile(dir, pattern string, url *url.URL) (string, error)
-	RemoveTempFiles() []error
-}
-
 type Service struct {
-	fileSystem     FileSystem
-	tempFileSystem TempFileSystem
+	fileSystem FileSystem
 }
 
-func NewService(fileSystem FileSystem, tmpFileSystem TempFileSystem) (*Service, error) {
+func NewService(fileSystem FileSystem) (*Service, error) {
 	if fileSystem == nil {
 		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
 	}
 
-	if tmpFileSystem == nil {
-		return nil, fmt.Errorf("%w: tempFileSystem must not be nil", commonerrors.ErrInvalidArg)
-	}
-
 	return &Service{
-		fileSystem:     fileSystem,
-		tempFileSystem: tmpFileSystem,
+		fileSystem: fileSystem,
 	}, nil
 }
 
@@ -59,73 +40,10 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 	}
 
 	if err = ValidateModuleConfig(moduleConfig); err != nil {
-		return nil, fmt.Errorf("failed to value module config: %w", err)
-	}
-
-	moduleConfig.DefaultCRPath, err = GetDefaultCRPath(moduleConfig.DefaultCRPath, s.tempFileSystem)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get default CR path: %w", err)
-	}
-
-	moduleConfig.ManifestPath, err = GetManifestPath(moduleConfig.ManifestPath, s.tempFileSystem)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get manifest path: %w", err)
+		return nil, fmt.Errorf("failed to validate module config: %w", err)
 	}
 
 	return moduleConfig, nil
-}
-
-func (s *Service) GetDefaultCRData(defaultCRPath string) ([]byte, error) {
-	if defaultCRPath == "" {
-		return nil, ErrNoPathForDefaultCR
-	}
-	defaultCRData, err := s.fileSystem.ReadFile(defaultCRPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read default CR file: %w", err)
-	}
-
-	return defaultCRData, nil
-}
-
-func (s *Service) CleanupTempFiles() []error {
-	return s.tempFileSystem.RemoveTempFiles()
-}
-
-func GetManifestPath(manifestPath string, tempFileSystem TempFileSystem) (string, error) {
-	path := manifestPath
-
-	if parsedURL, err := ParseURL(manifestPath); err == nil {
-		path, err = tempFileSystem.DownloadTempFile("", defaultManifestFilePattern, parsedURL)
-		if err != nil {
-			return "", fmt.Errorf("failed to download Manifest file: %w", err)
-		}
-		return path, nil
-	}
-
-	if !filepath.IsAbs(manifestPath) {
-		// Get the current working directory
-		homeDir, err := os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("failed to get the current directory: %w", err)
-		}
-		// Get the relative path from the current directory
-		path = filepath.Join(homeDir, path)
-		path, err = filepath.Abs(path)
-		if err != nil {
-			return "", fmt.Errorf("failed to obtain absolute path to manifest file: %w", err)
-		}
-		return path, nil
-	}
-
-	return path, nil
-}
-
-func ParseURL(urlString string) (*url.URL, error) {
-	urlParsed, err := url.Parse(urlString)
-	if err == nil && urlParsed.Scheme != "" && urlParsed.Host != "" {
-		return urlParsed, nil
-	}
-	return nil, fmt.Errorf("failed to parse url %s: %w", urlString, commonerrors.ErrInvalidArg)
 }
 
 func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
@@ -145,8 +63,12 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
 	}
 
-	if moduleConfig.ManifestPath == "" {
-		return fmt.Errorf("manifest path must not be empty: %w", commonerrors.ErrInvalidOption)
+	if err := validation.ValidateResources(moduleConfig.Resources); err != nil {
+		return fmt.Errorf("failed to validate resources: %w", err)
+	}
+
+	if moduleConfig.Manifest == "" {
+		return fmt.Errorf("manifest must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if err := validateAssociatedResources(moduleConfig.AssociatedResources); err != nil {
@@ -207,37 +129,4 @@ func ParseModuleConfig(configFilePath string, fileSystem FileSystem) (*contentpr
 	}
 
 	return moduleConfig, nil
-}
-
-func GetDefaultCRPath(defaultCRPath string, tempFileSystem TempFileSystem) (string, error) {
-	if defaultCRPath == "" {
-		return defaultCRPath, nil
-	}
-
-	path := defaultCRPath
-
-	if parsedURL, err := ParseURL(defaultCRPath); err == nil {
-		path, err = tempFileSystem.DownloadTempFile("", defaultCRFilePattern, parsedURL)
-		if err != nil {
-			return "", fmt.Errorf("failed to download default CR file: %w", err)
-		}
-		return path, nil
-	}
-
-	if !filepath.IsAbs(defaultCRPath) {
-		// Get the current working directory
-		homeDir, err := os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("failed to get the current working directory: %w", err)
-		}
-		// Get the relative path from the current directory
-		path = filepath.Join(homeDir, path)
-		path, err = filepath.Abs(path)
-		if err != nil {
-			return "", fmt.Errorf("failed to obtain absolute path to deefault CR file: %w", err)
-		}
-		return path, nil
-	}
-
-	return path, nil
 }

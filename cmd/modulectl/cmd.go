@@ -17,6 +17,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/create"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
+	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
@@ -89,7 +90,17 @@ func buildModuleService() (*create.Service, error) {
 	fileSystemUtil := &filesystem.Util{}
 	tmpFileSystem := filesystem.NewTempFileSystem()
 
-	moduleConfigService, err := moduleconfigreader.NewService(fileSystemUtil, tmpFileSystem)
+	manifestFileResolver, err := fileresolver.NewFileResolver("kyma-module-manifest-*.yaml", tmpFileSystem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create manifest file resolver: %w", err)
+	}
+
+	defaultCRFileResolver, err := fileresolver.NewFileResolver("kyma-module-default-cr-*.yaml", tmpFileSystem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create default CR file resolver: %w", err)
+	}
+
+	moduleConfigService, err := moduleconfigreader.NewService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
@@ -127,7 +138,8 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		securityConfigService, componentArchiveService, registryService, moduleTemplateService, crdParserService)
+		securityConfigService, componentArchiveService, registryService, moduleTemplateService,
+		crdParserService, manifestFileResolver, defaultCRFileResolver, fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}

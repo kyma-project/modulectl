@@ -1,6 +1,7 @@
 package contentprovider
 
 import (
+	"errors"
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -8,6 +9,8 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
+
+var ErrDuplicateResourceNames = errors.New("resources contain duplicate entries")
 
 type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter
@@ -35,12 +38,12 @@ func (s *ModuleConfigProvider) GetDefaultContent(args types.KeyValueArgs) (strin
 
 func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleConfig {
 	return ModuleConfig{
-		Name:          args[ArgModuleName],
-		Version:       args[ArgModuleVersion],
-		Channel:       args[ArgModuleChannel],
-		ManifestPath:  args[ArgManifestFile],
-		Security:      args[ArgSecurityConfigFile],
-		DefaultCRPath: args[ArgDefaultCRFile],
+		Name:      args[ArgModuleName],
+		Version:   args[ArgModuleVersion],
+		Channel:   args[ArgModuleChannel],
+		Manifest:  args[ArgManifestFile],
+		Security:  args[ArgSecurityConfigFile],
+		DefaultCR: args[ArgDefaultCRFile],
 	}
 }
 
@@ -92,4 +95,38 @@ type ModuleConfig struct {
 	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
 	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated to the ModuleTemplate"`
 	Manager             *Manager                   `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
+	Resources           ResourcesMap               `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+}
+
+type resource struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
+}
+
+type ResourcesMap map[string]string
+
+func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	resources := []resource{}
+	if err := unmarshal(&resources); err != nil {
+		return err
+	}
+
+	*rm = make(map[string]string)
+	for _, resource := range resources {
+		(*rm)[resource.Name] = resource.Link
+	}
+
+	if len(resources) > len(*rm) {
+		return ErrDuplicateResourceNames
+	}
+
+	return nil
+}
+
+func (rm ResourcesMap) MarshalYAML() (interface{}, error) {
+	resources := []resource{}
+	for name, link := range rm {
+		resources = append(resources, resource{Name: name, Link: link})
+	}
+	return resources, nil
 }

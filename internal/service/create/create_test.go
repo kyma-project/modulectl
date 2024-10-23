@@ -20,7 +20,8 @@ import (
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	require.Contains(t, err.Error(), "moduleConfigService")
@@ -28,7 +29,8 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
@@ -41,7 +43,8 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
@@ -54,7 +57,8 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
@@ -67,7 +71,8 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
@@ -79,9 +84,9 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
-		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{})
+	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -90,6 +95,34 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to read module config file")
+}
+
+func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t *testing.T) {
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverErrorStub{}, &fileResolverStub{}, &fileExistsStub{})
+	require.NoError(t, err)
+
+	opts := newCreateOptionsBuilder().build()
+
+	err = svc.Run(opts)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to resolve file")
+}
+
+func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t *testing.T) {
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&fileResolverStub{}, &fileResolverErrorStub{}, &fileExistsStub{})
+	require.NoError(t, err)
+
+	opts := newCreateOptionsBuilder().build()
+
+	err = svc.Run(opts)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to resolve file")
 }
 
 type createOptionsBuilder struct {
@@ -144,19 +177,42 @@ func (b *createOptionsBuilder) withCredentials(credentials string) *createOption
 	return b
 }
 
-// Test Stubs
+type fileExistsStub struct{}
+
+func (*fileExistsStub) FileExists(_ string) (bool, error) {
+	return true, nil
+}
+
+func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
+	return nil, nil
+}
+
+type fileResolverStub struct{}
+
+func (*fileResolverStub) Resolve(_ string) (string, error) {
+	return "/tmp/some-file.yaml", nil
+}
+
+func (*fileResolverStub) CleanupTempFiles() []error {
+	return nil
+}
+
+type fileResolverErrorStub struct{}
+
+func (*fileResolverErrorStub) Resolve(_ string) (string, error) {
+	return "", errors.New("failed to resolve file")
+}
+
+func (*fileResolverErrorStub) CleanupTempFiles() []error {
+	return []error{errors.New("failed to cleanup temp files")}
+}
+
 type moduleConfigServiceStub struct{}
 
 func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
-	return &contentprovider.ModuleConfig{}, nil
-}
-
-func (*moduleConfigServiceStub) GetDefaultCRData(_ string) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (*moduleConfigServiceStub) CleanupTempFiles() []error {
-	return nil
+	return &contentprovider.ModuleConfig{
+		DefaultCR: "default-cr.yaml",
+	}, nil
 }
 
 type moduleConfigServiceParseErrorStub struct{}
@@ -165,14 +221,6 @@ func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string)
 	error,
 ) {
 	return nil, errors.New("failed to read module config file")
-}
-
-func (*moduleConfigServiceParseErrorStub) GetDefaultCRData(_ string) ([]byte, error) {
-	return []byte{}, nil
-}
-
-func (*moduleConfigServiceParseErrorStub) CleanupTempFiles() []error {
-	return nil
 }
 
 type gitSourcesServiceStub struct{}
