@@ -118,19 +118,19 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 	moduleConfig := contentprovider.ModuleConfig{
-		Name:          "module-name",
-		Version:       "0.0.1",
-		Channel:       "regular",
-		ManifestPath:  "path/to/manifests",
-		Mandatory:     false,
-		DefaultCRPath: "path/to/defaultCR",
-		ResourceName:  "module-name-0.0.1",
-		Namespace:     "kcp-system",
-		Security:      "path/to/securityConfig",
-		Internal:      false,
-		Beta:          false,
-		Labels:        map[string]string{"label1": "value1"},
-		Annotations:   map[string]string{"annotation1": "value1"},
+		Name:         "module-name",
+		Version:      "0.0.1",
+		Channel:      "regular",
+		Manifest:     "path/to/manifests",
+		Mandatory:    false,
+		DefaultCR:    "path/to/defaultCR",
+		ResourceName: "module-name-0.0.1",
+		Namespace:    "kcp-system",
+		Security:     "path/to/securityConfig",
+		Internal:     false,
+		Beta:         false,
+		Labels:       map[string]string{"label1": "value1"},
+		Annotations:  map[string]string{"annotation1": "value1"},
 		AssociatedResources: []*metav1.GroupVersionKind{
 			{
 				Group:   "networking.istio.io",

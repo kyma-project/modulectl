@@ -83,9 +83,9 @@ type ModuleConfig struct {
 	Name                string                     `yaml:"name" comment:"required, the name of the Module"`
 	Version             string                     `yaml:"version" comment:"required, the version of the Module"`
 	Channel             string                     `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
-	ManifestPath        string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	Manifest            string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCRPath       string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
 	ResourceName        string                     `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
 	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
 	Security            string                     `yaml:"security" comment:"optional, name of the security scanners config file"`
@@ -93,7 +93,7 @@ type ModuleConfig struct {
 	Beta                bool                       `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
 	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
 	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated to the ModuleTemplate"`
+	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated with the module and have to be deleted with module deletion"`
 	Manager             *Manager                   `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
 	Resources           ResourcesMap               `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
