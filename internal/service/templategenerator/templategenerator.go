@@ -96,17 +96,17 @@ spec:
 )
 
 type moduleTemplateData struct {
-	ResourceName string
-	Namespace    string
-	Descriptor   compdesc.ComponentDescriptorVersion
-	Channel      string
-	Labels       map[string]string
-	Annotations  map[string]string
-	Mandatory    bool
-	Data         string
+	ResourceName        string
+	Namespace           string
+	Descriptor          compdesc.ComponentDescriptorVersion
+	Channel             string
+	Labels              map[string]string
+	Annotations         map[string]string
+	Mandatory           bool
+	Data                string
 	AssociatedResources []*metav1.GroupVersionKind
-	Resources    contentprovider.ResourcesMap
-	Manager      *contentprovider.Manager
+	Resources           contentprovider.ResourcesMap
+	Manager             *contentprovider.Manager
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -150,13 +150,13 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	mtData := moduleTemplateData{
-		ResourceName: moduleConfig.ResourceName,
-		Namespace:    moduleConfig.Namespace,
-		Descriptor:   cva,
-		Channel:      moduleConfig.Channel,
-		Labels:       labels,
-		Annotations:  annotations,
-		Mandatory:    moduleConfig.Mandatory,
+		ResourceName:        moduleConfig.ResourceName,
+		Namespace:           moduleConfig.Namespace,
+		Descriptor:          cva,
+		Channel:             moduleConfig.Channel,
+		Labels:              labels,
+		Annotations:         annotations,
+		Mandatory:           moduleConfig.Mandatory,
 		AssociatedResources: moduleConfig.AssociatedResources,
 		Resources: contentprovider.ResourcesMap{
 			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
