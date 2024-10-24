@@ -253,6 +253,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
 
+			By("And spec.associatedResources should be empty")
+			Expect(template.Spec.AssociatedResources).To(BeEmpty())
+
 			By("And spec.manager should be nil")
 			Expect(template.Spec.Manager).To(BeNil())
 
@@ -537,6 +540,43 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(manager.Version).To(Equal("v1"))
 			Expect(manager.Group).To(Equal("apps"))
 			Expect(manager.Kind).To(Equal("Deployment"))
+		})
+	})
+  
+  
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing associatedResources list", func() {
+			cmd = createCmd{
+				moduleConfigFile: withAssociatedResourcesConfig,
+        registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+
+			By("And annotation should have correct version")
+			annotations := template.Annotations
+			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.7"))
+
+			By("And spec.associatedResources should be correct")
+			resources := template.Spec.AssociatedResources
+			Expect(resources).ToNot(BeEmpty())
+			Expect(len(resources)).To(Equal(1))
+			Expect(resources[0].Group).To(Equal("networking.istio.io"))
+			Expect(resources[0].Version).To(Equal("v1alpha3"))
+			Expect(resources[0].Kind).To(Equal("Gateway"))
 		})
 	})
 

@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/oci"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"sigs.k8s.io/yaml"
@@ -60,6 +61,14 @@ metadata:
 spec:
   channel: {{.Channel}}
   mandatory: {{.Mandatory}}
+{{- with .AssociatedResources}}
+  associatedResources:
+  {{- range .}}
+  - group: {{.Group}}
+    version: {{.Version}}
+    kind: {{.Kind}}
+  {{- end}}
+{{- end}}
 {{- with .Data}}
   data:
 {{. | indent 4}}
@@ -87,16 +96,17 @@ spec:
 )
 
 type moduleTemplateData struct {
-	ResourceName string
-	Namespace    string
-	Descriptor   compdesc.ComponentDescriptorVersion
-	Channel      string
-	Labels       map[string]string
-	Annotations  map[string]string
-	Mandatory    bool
-	Data         string
-	Resources    contentprovider.ResourcesMap
-	Manager      *contentprovider.Manager
+	ResourceName        string
+	Namespace           string
+	Descriptor          compdesc.ComponentDescriptorVersion
+	Channel             string
+	Labels              map[string]string
+	Annotations         map[string]string
+	Mandatory           bool
+	Data                string
+	AssociatedResources []*metav1.GroupVersionKind
+	Resources           contentprovider.ResourcesMap
+	Manager             *contentprovider.Manager
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -140,13 +150,14 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	mtData := moduleTemplateData{
-		ResourceName: moduleConfig.ResourceName,
-		Namespace:    moduleConfig.Namespace,
-		Descriptor:   cva,
-		Channel:      moduleConfig.Channel,
-		Labels:       labels,
-		Annotations:  annotations,
-		Mandatory:    moduleConfig.Mandatory,
+		ResourceName:        moduleConfig.ResourceName,
+		Namespace:           moduleConfig.Namespace,
+		Descriptor:          cva,
+		Channel:             moduleConfig.Channel,
+		Labels:              labels,
+		Annotations:         annotations,
+		Mandatory:           moduleConfig.Mandatory,
+		AssociatedResources: moduleConfig.AssociatedResources,
 		Resources: contentprovider.ResourcesMap{
 			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
 		},
