@@ -120,7 +120,7 @@ func ValidateResources(resources contentprovider.ResourcesMap) error {
 		}
 
 		if err := ValidateIsValidHTTPSURL(link); err != nil {
-			return err
+			return fmt.Errorf("failed to validate link: %w", err)
 		}
 	}
 
@@ -128,13 +128,17 @@ func ValidateResources(resources contentprovider.ResourcesMap) error {
 }
 
 func ValidateIsValidHTTPSURL(input string) error {
+	if input == "" {
+		return fmt.Errorf("%w: must not be empty", commonerrors.ErrInvalidOption)
+	}
+
 	_url, err := url.Parse(input)
 	if err != nil {
-		return fmt.Errorf("%w: link %s is not a valid URL", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("%w: '%s' is not a valid URL", commonerrors.ErrInvalidOption, input)
 	}
 
 	if _url.Scheme != "https" {
-		return fmt.Errorf("%w: link %s is not using https scheme", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("%w: '%s' is not using https scheme", commonerrors.ErrInvalidOption, input)
 	}
 
 	return nil

@@ -3,8 +3,6 @@ package fileresolver
 import (
 	"fmt"
 	"net/url"
-	"os"
-	"path/filepath"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
@@ -34,31 +32,17 @@ func NewFileResolver(filePattern string, tempFileSystem TempFileSystem) (*FileRe
 	}, nil
 }
 
-func (r *FileResolver) Resolve(file string) (string, error) {
-	if parsedURL, err := r.ParseURL(file); err == nil {
-		file, err = r.tempFileSystem.DownloadTempFile("", r.filePattern, parsedURL)
-		if err != nil {
-			return "", fmt.Errorf("failed to download file: %w", err)
-		}
-		return file, nil
+func (r *FileResolver) Resolve(fileName string) (string, error) {
+	parsedURL, err := r.ParseURL(fileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL: %w", err)
 	}
 
-	if !filepath.IsAbs(file) {
-		// Get the current working directory
-		homeDir, err := os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("failed to get the current directory: %w", err)
-		}
-		// Get the relative path from the current directory
-		file = filepath.Join(homeDir, file)
-		file, err = filepath.Abs(file)
-		if err != nil {
-			return "", fmt.Errorf("failed to obtain absolute path to file: %w", err)
-		}
-		return file, nil
+	tempFilePath, err := r.tempFileSystem.DownloadTempFile("", r.filePattern, parsedURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to download file: %w", err)
 	}
-
-	return file, nil
+	return tempFilePath, nil
 }
 
 func (r *FileResolver) ParseURL(urlString string) (*url.URL, error) {

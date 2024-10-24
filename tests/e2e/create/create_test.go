@@ -89,7 +89,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: manifest must not be empty: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: invalid Option: must not be empty"))
 		})
 	})
 
@@ -131,7 +131,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: link http://some.other/location/template-operator.yaml is not using https scheme"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: failed to validate link: invalid Option: 'http://some.other/location/template-operator.yaml' is not using https scheme"))
 		})
 	})
 
@@ -631,6 +631,34 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Resources).To(HaveLen(1))
 			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
 			Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with manifest being a fileref", func() {
+			cmd = createCmd{
+				moduleConfigFile: manifestFileref,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: invalid Option: './template-operator.yaml' is not using https scheme"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with default CR being a fileref", func() {
+			cmd = createCmd{
+				moduleConfigFile: defaultCRFileref,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: invalid Option: '/tmp/default-sample-cr.yaml' is not using https scheme"))
 		})
 	})
 })
