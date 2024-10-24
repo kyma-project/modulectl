@@ -302,6 +302,61 @@ func Test_ValidateManager(t *testing.T) {
 	}
 }
 
+func Test_ValidateAssociatedResources(t *testing.T) {
+	type args struct {
+		resources []*metav1.GroupVersionKind
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"pass on empty resources",
+			args{resources: []*metav1.GroupVersionKind{}},
+			false,
+		},
+		{
+			"pass when all resources are valid",
+			args{resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			}},
+			false,
+		},
+		{
+			"fail when even one resources is invalid",
+			args{resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group: "apps",
+					Kind:  "Deployment",
+				},
+			}},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := moduleconfigreader.ValidateAssociatedResources(tt.args.resources); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 // Test Stubs
 
 type fileExistsStub struct{}
@@ -343,49 +398,6 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 			Kind:    "Deployment",
 		},
 	},
-}
-
-func Test_ValidateAssociatedResources(t *testing.T) {
-	type args struct {
-		resources []*metav1.GroupVersionKind
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"pass on empty resources", args{resources: []*metav1.GroupVersionKind{}}, false},
-		{"pass when all resources are valid", args{resources: []*metav1.GroupVersionKind{
-			{
-				Group:   "networking.istio.io",
-				Version: "v1alpha3",
-				Kind:    "Gateway",
-			},
-			{
-				Group:   "apps",
-				Version: "v1",
-				Kind:    "Deployment",
-			},
-		}}, false},
-		{"fail when even one resources is invalid", args{resources: []*metav1.GroupVersionKind{
-			{
-				Group:   "networking.istio.io",
-				Version: "v1alpha3",
-				Kind:    "Gateway",
-			},
-			{
-				Group: "apps",
-				Kind:  "Deployment",
-			},
-		}}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := moduleconfigreader.ValidateAssociatedResources(tt.args.resources); (err != nil) != tt.wantErr {
-				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
 }
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
