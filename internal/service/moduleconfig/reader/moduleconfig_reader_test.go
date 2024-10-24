@@ -303,22 +303,19 @@ func Test_ValidateManager(t *testing.T) {
 }
 
 func Test_ValidateAssociatedResources(t *testing.T) {
-	type args struct {
-		resources []*metav1.GroupVersionKind
-	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name      string
+		resources []*metav1.GroupVersionKind
+		wantErr   bool
 	}{
 		{
-			"pass on empty resources",
-			args{resources: []*metav1.GroupVersionKind{}},
-			false,
+			name:      "pass on empty resources",
+			resources: []*metav1.GroupVersionKind{},
+			wantErr:   false,
 		},
 		{
-			"pass when all resources are valid",
-			args{resources: []*metav1.GroupVersionKind{
+			name: "pass when all resources are valid",
+			resources: []*metav1.GroupVersionKind{
 				{
 					Group:   "networking.istio.io",
 					Version: "v1alpha3",
@@ -329,12 +326,12 @@ func Test_ValidateAssociatedResources(t *testing.T) {
 					Version: "v1",
 					Kind:    "Deployment",
 				},
-			}},
-			false,
+			},
+			wantErr: false,
 		},
 		{
-			"fail when even one resources is invalid",
-			args{resources: []*metav1.GroupVersionKind{
+			name: "fail when even one resources is invalid",
+			resources: []*metav1.GroupVersionKind{
 				{
 					Group:   "networking.istio.io",
 					Version: "v1alpha3",
@@ -344,13 +341,13 @@ func Test_ValidateAssociatedResources(t *testing.T) {
 					Group: "apps",
 					Kind:  "Deployment",
 				},
-			}},
-			true,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := moduleconfigreader.ValidateAssociatedResources(tt.args.resources); (err != nil) != tt.wantErr {
+			if err := moduleconfigreader.ValidateAssociatedResources(tt.resources); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
