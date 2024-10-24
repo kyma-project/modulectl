@@ -1,7 +1,6 @@
 package moduleconfigreader
 
 import (
-	"errors"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -10,8 +9,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/validation"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
-
-var ErrNoPathForDefaultCR = errors.New("no path for default CR given")
 
 type FileSystem interface {
 	ReadFile(path string) ([]byte, error)
