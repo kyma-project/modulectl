@@ -133,7 +133,7 @@ func (s *Service) GenerateModuleTemplate(
 	shortName := trimShortNameFromRef(ref)
 	labels[shared.ModuleName] = shortName
 	if moduleConfig.ResourceName == "" {
-		moduleConfig.ResourceName = shortName + "-" + moduleConfig.Channel
+		moduleConfig.ResourceName = shortName + "-" + moduleConfig.Version
 	}
 
 	moduleTemplate, err := template.New("moduleTemplate").Funcs(template.FuncMap{

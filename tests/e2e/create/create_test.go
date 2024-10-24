@@ -5,6 +5,7 @@ package create_test
 import (
 	"io/fs"
 	"os"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
@@ -217,6 +218,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
+
+			descriptorSplit := strings.Split(descriptor.Name, "/")
+			descriptorName := descriptorSplit[len(descriptorSplit)-1]
+			Expect(template.Name).To(Equal(descriptorName + "-" + descriptor.Version))
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
