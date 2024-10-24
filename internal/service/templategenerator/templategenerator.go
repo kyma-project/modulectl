@@ -64,8 +64,25 @@ spec:
   data:
 {{. | indent 4}}
 {{- end}}
+{{- with .Manager}}
+  manager:
+    name: {{.Name}}
+    {{- if .Namespace}}      
+    namespace: {{.Namespace}}
+    {{- end}}
+    group: {{.GroupVersionKind.Group}}
+    version: {{.GroupVersionKind.Version}}
+    kind: {{.GroupVersionKind.Kind}}
+{{- end}}
   descriptor:
 {{yaml .Descriptor | printf "%s" | indent 4}}
+{{- with .Resources}}
+  resources:
+    {{- range $key, $value := . }}
+  - name: {{ $key }}
+    link: {{ $value }}
+    {{- end}}
+{{- end}}
 `
 )
 
@@ -78,6 +95,8 @@ type moduleTemplateData struct {
 	Annotations  map[string]string
 	Mandatory    bool
 	Data         string
+	Resources    contentprovider.ResourcesMap
+	Manager      *contentprovider.Manager
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -128,10 +147,18 @@ func (s *Service) GenerateModuleTemplate(
 		Labels:       labels,
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
+		Resources: contentprovider.ResourcesMap{
+			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+		},
+		Manager: moduleConfig.Manager,
 	}
 
 	if len(data) > 0 {
 		mtData.Data = string(data)
+	}
+
+	for name, link := range moduleConfig.Resources {
+		mtData.Resources[name] = link
 	}
 
 	w := &bytes.Buffer{}

@@ -39,7 +39,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing name", func() {
+		It("When invoked with '--config-file' using file with missing name", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingNameConfig,
 			}
@@ -53,7 +53,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing channel", func() {
+		It("When invoked with '--config-file' using file with missing channel", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingChannelConfig,
 			}
@@ -67,7 +67,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing version", func() {
+		It("When invoked with '--config-file' using file with missing version", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingVersionConfig,
 			}
@@ -81,7 +81,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--module-config-file' using file with missing manifest", func() {
+		It("When invoked with '--config-file' using file with missing manifest", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingManifestConfig,
 			}
@@ -89,27 +89,97 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to value module config: manifest path must not be empty: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: invalid Option: must not be empty"))
 		})
 	})
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+<<<<<<< HEAD
 		It("When invoked with '--config-file' using file with missing info", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingInfoConfig,
+=======
+		It("When invoked with duplicate entry in resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: duplicateResources,
+>>>>>>> main
 			}
 		})
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
+<<<<<<< HEAD
 			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleInfo must not be empty"))
+=======
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: resources contain duplicate entries"))
+>>>>>>> main
 		})
 	})
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+<<<<<<< HEAD
 		It("When invoked with '--module-config-file' using valid file", func() {
+=======
+		It("When invoked with empty resource name", func() {
+			cmd = createCmd{
+				moduleConfigFile: emptyResourceName,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with non https resource", func() {
+			cmd = createCmd{
+				moduleConfigFile: nonHttpsResource,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: failed to validate link: invalid Option: 'http://some.other/location/template-operator.yaml' is not using https scheme"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with invalid resource - link missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: resourceWithoutLink,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: link must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with invalid resource - name missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: resourceWithoutName,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with '--config-file' using valid file", func() {
+>>>>>>> main
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 			}
@@ -197,12 +267,22 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
 
+<<<<<<< HEAD
 			By("And spec.info should be correct")
 			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
 			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 			Expect(template.Spec.Info.Icons).To(HaveLen(1))
 			Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
 			Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
+=======
+			By("And spec.manager should be nil")
+			Expect(template.Spec.Manager).To(BeNil())
+
+			By("And spec.resources should contain rawManifest")
+			Expect(template.Spec.Resources).To(HaveLen(1))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+>>>>>>> main
 		})
 	})
 
@@ -405,6 +485,163 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And spec.mandatory should be true")
 			Expect(template.Spec.Mandatory).To(BeTrue())
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing manager field and different version", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManagerConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+
+			By("And annotation should have correct version")
+			annotations := template.Annotations
+			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.5"))
+
+			By("And spec.manager should be correct")
+			manager := template.Spec.Manager
+			Expect(manager).ToNot(BeNil())
+			Expect(manager.Name).To(Equal("template-operator-controller-manager"))
+			Expect(manager.Namespace).To(Equal("template-operator-system"))
+			Expect(manager.Version).To(Equal("v1"))
+			Expect(manager.Group).To(Equal("apps"))
+			Expect(manager.Kind).To(Equal("Deployment"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing manager field without namespace and different version",
+			func() {
+				cmd = createCmd{
+					moduleConfigFile: withNoNamespaceManagerConfig,
+					registry:         ociRegistry,
+					insecure:         true,
+					output:           templateOutputPath,
+				}
+			})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+
+			By("And annotation should have correct version")
+			annotations := template.Annotations
+			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.6"))
+
+			By("And spec.manager should be correct")
+			manager := template.Spec.Manager
+			Expect(manager).ToNot(BeNil())
+			Expect(manager.Name).To(Equal("template-operator-controller-manager"))
+			Expect(manager.Namespace).To(BeEmpty())
+			Expect(manager.Version).To(Equal("v1"))
+			Expect(manager.Group).To(Equal("apps"))
+			Expect(manager.Kind).To(Equal("Deployment"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with minimal valid module-config containing resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: withResources,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain merged .spec.resources", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(template.Spec.Resources).To(HaveLen(2))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+			Expect(template.Spec.Resources[1].Name).To(Equal("someResource"))
+			Expect(template.Spec.Resources[1].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
+			cmd = createCmd{
+				moduleConfigFile: withResourcesOverwrite,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain rawManifest value from module-config", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(template.Spec.Resources).To(HaveLen(1))
+			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+			Expect(template.Spec.Resources[0].Link).To(Equal("https://some.other/location/template-operator.yaml"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with manifest being a fileref", func() {
+			cmd = createCmd{
+				moduleConfigFile: manifestFileref,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: invalid Option: './template-operator.yaml' is not using https scheme"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with default CR being a fileref", func() {
+			cmd = createCmd{
+				moduleConfigFile: defaultCRFileref,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: invalid Option: '/tmp/default-sample-cr.yaml' is not using https scheme"))
 		})
 	})
 })

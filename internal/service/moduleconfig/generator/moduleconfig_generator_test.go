@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
@@ -117,19 +118,28 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 	moduleConfig := contentprovider.ModuleConfig{
-		Name:          "module-name",
-		Version:       "0.0.1",
-		Channel:       "regular",
-		ManifestPath:  "path/to/manifests",
-		Mandatory:     false,
-		DefaultCRPath: "path/to/defaultCR",
-		ResourceName:  "module-name-0.0.1",
-		Namespace:     "kcp-system",
-		Security:      "path/to/securityConfig",
-		Internal:      false,
-		Beta:          false,
-		Labels:        map[string]string{"label1": "value1"},
-		Annotations:   map[string]string{"annotation1": "value1"},
+		Name:         "module-name",
+		Version:      "0.0.1",
+		Channel:      "regular",
+		Manifest:     "path/to/manifests",
+		Mandatory:    false,
+		DefaultCR:    "path/to/defaultCR",
+		ResourceName: "module-name-0.0.1",
+		Namespace:    "kcp-system",
+		Security:     "path/to/securityConfig",
+		Internal:     false,
+		Beta:         false,
+		Labels:       map[string]string{"label1": "value1"},
+		Annotations:  map[string]string{"annotation1": "value1"},
+		Manager: &contentprovider.Manager{
+			Name:      "manager-name",
+			Namespace: "manager-namespace",
+			GroupVersionKind: metav1.GroupVersionKind{
+				Group:   "apps",
+				Version: "v1",
+				Kind:    "Deployment",
+			},
+		},
 	}
 
 	return yaml.Marshal(moduleConfig)

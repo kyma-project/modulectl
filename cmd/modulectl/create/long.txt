@@ -7,7 +7,7 @@ For more information about Kyma modules see the [documentation](https://kyma-pro
 
 ### Configuration
 
-Provide the `--module-config-file` flag with a config file path.
+Provide the `--config-file` flag with a config file path.
 The module config file is a YAML file used to configure the following attributes for the module:
 
 ```yaml
