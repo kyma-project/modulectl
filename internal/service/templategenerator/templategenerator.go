@@ -95,7 +95,7 @@ type moduleTemplateData struct {
 	Annotations  map[string]string
 	Mandatory    bool
 	Data         string
-	Resources    contentprovider.ResourcesMap
+	Resources    contentprovider.Resources
 	Manager      *contentprovider.Manager
 }
 
@@ -147,7 +147,7 @@ func (s *Service) GenerateModuleTemplate(
 		Labels:       labels,
 		Annotations:  annotations,
 		Mandatory:    moduleConfig.Mandatory,
-		Resources: contentprovider.ResourcesMap{
+		Resources: contentprovider.Resources{
 			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
 		},
 		Manager: moduleConfig.Manager,

@@ -200,7 +200,7 @@ resources:
 
 	// round trip a module config (marshal and unmarshal)
 	moduleConfig := &contentprovider.ModuleConfig{
-		Resources: contentprovider.ResourcesMap{
+		Resources: contentprovider.Resources{
 			"resource1": "https://example.com/resource1",
 			"resource2": "https://example.com/resource2",
 		},

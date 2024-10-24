@@ -42,7 +42,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
-	require.Equal(t, contentprovider.ResourcesMap{
+	require.Equal(t, contentprovider.Resources{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	}, result.Resources)
 	require.Equal(t, "manager-name", result.Manager.Name)
@@ -131,7 +131,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
-				Resources: contentprovider.ResourcesMap{
+				Resources: contentprovider.Resources{
 					"key": "%% not a URL",
 				},
 			},
@@ -145,7 +145,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
-				Resources: contentprovider.ResourcesMap{
+				Resources: contentprovider.Resources{
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
@@ -159,7 +159,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
-				Resources: contentprovider.ResourcesMap{
+				Resources: contentprovider.Resources{
 					"name": "",
 				},
 			},
@@ -321,7 +321,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Beta:         false,
 	Labels:       map[string]string{"label1": "value1"},
 	Annotations:  map[string]string{"annotation1": "value1"},
-	Resources: contentprovider.ResourcesMap{
+	Resources: contentprovider.Resources{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	},
 	Manager: &contentprovider.Manager{

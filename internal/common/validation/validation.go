@@ -109,7 +109,7 @@ func ValidateNamespace(namespace string) error {
 	return nil
 }
 
-func ValidateResources(resources contentprovider.ResourcesMap) error {
+func ValidateResources(resources contentprovider.Resources) error {
 	for name, link := range resources {
 		if name == "" {
 			return fmt.Errorf("%w: name must not be empty", commonerrors.ErrInvalidOption)

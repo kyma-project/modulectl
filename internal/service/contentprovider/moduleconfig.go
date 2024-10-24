@@ -73,12 +73,6 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 	return nil
 }
 
-type Manager struct {
-	Name                    string `yaml:"name" comment:"required, the name of the manager"`
-	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
-	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
-}
-
 type ModuleConfig struct {
 	Name         string            `yaml:"name" comment:"required, the name of the Module"`
 	Version      string            `yaml:"version" comment:"required, the version of the Module"`
@@ -94,7 +88,20 @@ type ModuleConfig struct {
 	Labels       map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
 	Annotations  map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
 	Manager      *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
-	Resources    ResourcesMap      `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Resources    Resources         `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Icons        Icons             `yaml:"icons,omitempty" comment:"optional, list of icons to represent the module repository"`
+}
+
+type Manager struct {
+	Name                    string `yaml:"name" comment:"required, the name of the manager"`
+	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
+	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+}
+
+type Info struct {
+	Repository    string `yaml:"repository" comment:"required, name of the repository"`
+	Documentation string `yaml:"documentation" comment:"required, link to documentation"`
+	Icons         string `yaml:"icons" comment:"required, list of icons"`
 }
 
 type resource struct {
@@ -102,9 +109,16 @@ type resource struct {
 	Link string `yaml:"link"`
 }
 
-type ResourcesMap map[string]string
+type icon struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
+}
 
-func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+type Resources map[string]string
+
+type Icons map[string]string
+
+func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	resources := []resource{}
 	if err := unmarshal(&resources); err != nil {
 		return err
@@ -122,7 +136,7 @@ func (rm *ResourcesMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func (rm ResourcesMap) MarshalYAML() (interface{}, error) {
+func (rm Resources) MarshalYAML() (interface{}, error) {
 	resources := []resource{}
 	for name, link := range rm {
 		resources = append(resources, resource{Name: name, Link: link})

@@ -231,12 +231,12 @@ func TestValidateNamespace(t *testing.T) {
 func TestValidateResources(t *testing.T) {
 	tests := []struct {
 		name      string
-		resources contentprovider.ResourcesMap
+		resources contentprovider.Resources
 		wantErr   bool
 	}{
 		{
 			name: "valid resources",
-			resources: contentprovider.ResourcesMap{
+			resources: contentprovider.Resources{
 				"first":  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				"second": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
@@ -244,21 +244,21 @@ func TestValidateResources(t *testing.T) {
 		},
 		{
 			name: "empty name",
-			resources: contentprovider.ResourcesMap{
+			resources: contentprovider.Resources{
 				"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
 		},
 		{
 			name: "empty link",
-			resources: contentprovider.ResourcesMap{
+			resources: contentprovider.Resources{
 				"first": "",
 			},
 			wantErr: true,
 		},
 		{
 			name: "non-https schema",
-			resources: contentprovider.ResourcesMap{
+			resources: contentprovider.Resources{
 				"first": "http://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
