@@ -360,3 +360,46 @@ var errReadingFile = errors.New("some error reading file")
 func (*fileDoesNotExistStub) ReadFile(_ string) ([]byte, error) {
 	return nil, errReadingFile
 }
+
+func Test_ValidateAssociatedResources(t *testing.T) {
+	type args struct {
+		resources []*metav1.GroupVersionKind
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"pass on empty resources", args{resources: []*metav1.GroupVersionKind{}}, false},
+		{"pass when all resources are valid", args{resources: []*metav1.GroupVersionKind{
+			{
+				Group:   "networking.istio.io",
+				Version: "v1alpha3",
+				Kind:    "Gateway",
+			},
+			{
+				Group:   "apps",
+				Version: "v1",
+				Kind:    "Deployment",
+			},
+		}}, false},
+		{"fail when even one resources is invalid", args{resources: []*metav1.GroupVersionKind{
+			{
+				Group:   "networking.istio.io",
+				Version: "v1alpha3",
+				Kind:    "Gateway",
+			},
+			{
+				Group: "apps",
+				Kind:  "Deployment",
+			},
+		}}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := moduleconfigreader.ValidateAssociatedResources(tt.args.resources); (err != nil) != tt.wantErr {
+				t.Errorf("validateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

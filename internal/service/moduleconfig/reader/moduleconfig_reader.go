@@ -1,7 +1,6 @@
 package moduleconfigreader
 
 import (
-	"errors"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -11,8 +10,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/validation"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
-
-var ErrNoPathForDefaultCR = errors.New("no path for default CR given")
 
 type FileSystem interface {
 	ReadFile(path string) ([]byte, error)
@@ -77,7 +74,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		}
 	}
 
-	if err := validateAssociatedResources(moduleConfig.AssociatedResources); err != nil {
+	if err := ValidateAssociatedResources(moduleConfig.AssociatedResources); err != nil {
 		return fmt.Errorf("failed to validate associated resources: %w", err)
 	}
 
@@ -88,7 +85,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	return nil
 }
 
-func validateAssociatedResources(resources []*metav1.GroupVersionKind) error {
+func ValidateAssociatedResources(resources []*metav1.GroupVersionKind) error {
 	for _, resource := range resources {
 		if err := validation.ValidateGvk(resource.Group, resource.Version, resource.Kind); err != nil {
 			return fmt.Errorf("GVK is invalid: %w", err)
