@@ -95,33 +95,34 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-<<<<<<< HEAD
-		It("When invoked with '--config-file' using file with missing info", func() {
-			cmd = createCmd{
-				moduleConfigFile: missingInfoConfig,
-=======
 		It("When invoked with duplicate entry in resources", func() {
 			cmd = createCmd{
 				moduleConfigFile: duplicateResources,
->>>>>>> main
 			}
 		})
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-<<<<<<< HEAD
-			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleInfo must not be empty"))
-=======
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: resources contain duplicate entries"))
->>>>>>> main
 		})
 	})
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-<<<<<<< HEAD
-		It("When invoked with '--module-config-file' using valid file", func() {
-=======
+		It("When invoked with '--config-file' using file with missing info", func() {
+			cmd = createCmd{
+				moduleConfigFile: missingInfoConfig,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleInfo must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with empty resource name", func() {
 			cmd = createCmd{
 				moduleConfigFile: emptyResourceName,
@@ -179,7 +180,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
 		It("When invoked with '--config-file' using valid file", func() {
->>>>>>> main
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 			}
@@ -267,14 +267,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
 
-<<<<<<< HEAD
 			By("And spec.info should be correct")
 			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
 			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 			Expect(template.Spec.Info.Icons).To(HaveLen(1))
 			Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
 			Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
-=======
 			By("And spec.manager should be nil")
 			Expect(template.Spec.Manager).To(BeNil())
 
@@ -282,7 +280,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Resources).To(HaveLen(1))
 			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
 			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
->>>>>>> main
 		})
 	})
 
