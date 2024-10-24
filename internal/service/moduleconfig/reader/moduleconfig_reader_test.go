@@ -345,22 +345,6 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	},
 }
 
-func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
-	return yaml.Marshal(expectedReturnedModuleConfig)
-}
-
-type fileDoesNotExistStub struct{}
-
-func (*fileDoesNotExistStub) FileExists(_ string) (bool, error) {
-	return false, nil
-}
-
-var errReadingFile = errors.New("some error reading file")
-
-func (*fileDoesNotExistStub) ReadFile(_ string) ([]byte, error) {
-	return nil, errReadingFile
-}
-
 func Test_ValidateAssociatedResources(t *testing.T) {
 	type args struct {
 		resources []*metav1.GroupVersionKind
@@ -398,8 +382,24 @@ func Test_ValidateAssociatedResources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := moduleconfigreader.ValidateAssociatedResources(tt.args.resources); (err != nil) != tt.wantErr {
-				t.Errorf("validateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
+	return yaml.Marshal(expectedReturnedModuleConfig)
+}
+
+type fileDoesNotExistStub struct{}
+
+func (*fileDoesNotExistStub) FileExists(_ string) (bool, error) {
+	return false, nil
+}
+
+var errReadingFile = errors.New("some error reading file")
+
+func (*fileDoesNotExistStub) ReadFile(_ string) ([]byte, error) {
+	return nil, errReadingFile
 }
