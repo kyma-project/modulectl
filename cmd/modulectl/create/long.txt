@@ -25,15 +25,15 @@ The module config file is a YAML file used to configure the following attributes
 - labels:           a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
 - annotations:      a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
 - manager:          # an object, optional, module resource that indicates the installation readiness of the module
-    name: a string, required, the name of the module resource
-    namespace: a string, optional, the namespace of the module resource
-    group: a string, required, the API group of the module resource
-    version: a string, required, the API version of the module resource
-    kind: a string, required, the API kind of the module resource
+    name:           a string, required, the name of the module resource
+    namespace:      a string, optional, the namespace of the module resource
+    group:          a string, required, the API group of the module resource
+    version:        a string, required, the API version of the module resource
+    kind:           a string, required, the API kind of the module resource
 - associatedResources: a list of Group-Version-Kind(GVK), optional, resources that should be cleaned up with the module deletion
 - resources:        # a map with string keys and values, optional, additional resources of the module that may be fetched
-    - name: a string, required, the name of the resource
-      link: a URL, required, the link to the resource
+    - name:         a string, required, the name of the resource
+      link:         a URL, required, the link to the resource
 ```
 
 The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated.
