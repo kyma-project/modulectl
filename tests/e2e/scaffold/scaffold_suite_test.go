@@ -157,7 +157,6 @@ type moduleConfig struct {
 	ManifestPath  string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
 	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName  string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
 	Namespace     string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
 	Security      string            `yaml:"security" comment:"optional, name of the security scanners config file"`
 	Internal      bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
