@@ -5,13 +5,12 @@ package create_test
 import (
 	"io/fs"
 	"os"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -219,9 +218,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(descriptor).ToNot(BeNil())
 			Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
 
-			descriptorSplit := strings.Split(descriptor.Name, "/")
-			descriptorName := descriptorSplit[len(descriptorSplit)-1]
-			Expect(template.Name).To(Equal(descriptorName + "-" + descriptor.Version))
+			Expect(template.Name).To(Equal("template-operator-1.0.0"))
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
@@ -308,6 +305,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 
+			Expect(template.Name).To(Equal("template-operator-1.0.1"))
+
 			By("And new annotation should be correctly added")
 			annotations := template.Annotations
 			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.1"))
@@ -341,6 +340,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+
+			Expect(template.Name).To(Equal("template-operator-1.0.2"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -388,6 +389,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+
+			Expect(template.Name).To(Equal("template-operator-1.0.3"))
 
 			By("And descriptor.component.resources should be correct")
 			Expect(descriptor.Resources).To(HaveLen(2))
@@ -464,6 +467,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 
+			Expect(template.Name).To(Equal("template-operator-1.0.4"))
+
 			By("And annotation should have correct version")
 			annotations := template.Annotations
 			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.4"))
@@ -494,6 +499,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+
+			Expect(template.Name).To(Equal("template-operator-1.0.5"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -533,6 +540,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 
+			Expect(template.Name).To(Equal("template-operator-1.0.6"))
+
 			By("And annotation should have correct version")
 			annotations := template.Annotations
 			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.6"))
@@ -547,14 +556,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(manager.Kind).To(Equal("Deployment"))
 		})
 	})
-  
-  
+
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
 		It("When invoked with valid module-config containing associatedResources list", func() {
 			cmd = createCmd{
 				moduleConfigFile: withAssociatedResourcesConfig,
-        registry:         ociRegistry,
+				registry:         ociRegistry,
 				insecure:         true,
 				output:           templateOutputPath,
 			}
@@ -570,6 +578,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+
+			Expect(template.Name).To(Equal("template-operator-1.0.7"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
