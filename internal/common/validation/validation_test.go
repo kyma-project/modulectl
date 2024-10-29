@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/kyma-project/modulectl/internal/common/validation"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func TestValidateModuleName(t *testing.T) {
@@ -228,15 +227,15 @@ func TestValidateNamespace(t *testing.T) {
 	}
 }
 
-func TestValidateResources(t *testing.T) {
+func TestValidateMapEntries(t *testing.T) {
 	tests := []struct {
 		name      string
-		resources contentprovider.Resources
+		resources map[string]string
 		wantErr   bool
 	}{
 		{
 			name: "valid resources",
-			resources: contentprovider.Resources{
+			resources: map[string]string{
 				"first":  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				"second": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
@@ -244,21 +243,21 @@ func TestValidateResources(t *testing.T) {
 		},
 		{
 			name: "empty name",
-			resources: contentprovider.Resources{
+			resources: map[string]string{
 				"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
 		},
 		{
 			name: "empty link",
-			resources: contentprovider.Resources{
+			resources: map[string]string{
 				"first": "",
 			},
 			wantErr: true,
 		},
 		{
 			name: "non-https schema",
-			resources: contentprovider.Resources{
+			resources: map[string]string{
 				"first": "http://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
@@ -266,9 +265,9 @@ func TestValidateResources(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validation.ValidateResources(tt.resources); (err != nil) != tt.wantErr {
+			if err := validation.ValidateMapEntries(tt.resources); (err != nil) != tt.wantErr {
 				fmt.Println(err.Error())
-				t.Errorf("ValidateResources() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateMapEntries() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

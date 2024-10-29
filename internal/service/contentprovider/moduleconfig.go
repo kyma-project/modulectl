@@ -76,7 +76,7 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 type ModuleConfig struct {
 	Name         string            `yaml:"name" comment:"required, the name of the Module"`
 	Version      string            `yaml:"version" comment:"required, the version of the Module"`
-	Info         Info              `yaml:"info" comment:"required, metadata about the module"`
+	Info         *Info             `yaml:"info" comment:"required, metadata about the module"`
 	Channel      string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
 	Manifest     string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory    bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`

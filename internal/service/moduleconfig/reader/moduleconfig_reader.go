@@ -51,6 +51,10 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module version: %w", err)
 	}
 
+	if err := ValidateInfo(moduleConfig.Info); err != nil {
+		return fmt.Errorf("failed to validate info: %w", err)
+	}
+
 	if err := validation.ValidateModuleChannel(moduleConfig.Channel); err != nil {
 		return fmt.Errorf("failed to validate module channel: %w", err)
 	}
@@ -59,7 +63,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
 	}
 
-	if err := validation.ValidateResources(moduleConfig.Resources); err != nil {
+	if err := validation.ValidateMapEntries(moduleConfig.Resources); err != nil {
 		return fmt.Errorf("failed to validate resources: %w", err)
 	}
 
@@ -78,6 +82,26 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	}
 
 	return nil
+}
+
+func ValidateInfo(info *contentprovider.Info) error {
+	if info == nil {
+		return fmt.Errorf("info must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if info.Repository == "" {
+		return fmt.Errorf("repository must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if info.Documentation == "" {
+		return fmt.Errorf("documentation must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if len(info.Icons) == 0 {
+		return fmt.Errorf("icons must contain at least one entry: %w", commonerrors.ErrInvalidOption)
+	}
+
+	return validation.ValidateMapEntries(info.Icons)
 }
 
 func ValidateManager(manager *contentprovider.Manager) error {

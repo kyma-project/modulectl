@@ -9,7 +9,6 @@ import (
 	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -109,8 +108,8 @@ func ValidateNamespace(namespace string) error {
 	return nil
 }
 
-func ValidateResources(resources contentprovider.Resources) error {
-	for name, link := range resources {
+func ValidateMapEntries(nameLinkMap map[string]string) error {
+	for name, link := range nameLinkMap {
 		if name == "" {
 			return fmt.Errorf("%w: name must not be empty", commonerrors.ErrInvalidOption)
 		}

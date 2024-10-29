@@ -105,7 +105,7 @@ type moduleTemplateData struct {
 	Mandatory    bool
 	Data         string
 	Resources    contentprovider.Resources
-	Info         contentprovider.Info
+	Info         *contentprovider.Info
 	Manager      *contentprovider.Manager
 }
 
