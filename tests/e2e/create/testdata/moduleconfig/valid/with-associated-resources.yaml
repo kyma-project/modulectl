@@ -1,0 +1,8 @@
+name: kyma-project.io/module/template-operator
+channel: regular
+version: 1.0.7
+manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
+associatedResources:
+  - group: networking.istio.io
+    version: v1alpha3
+    kind: Gateway

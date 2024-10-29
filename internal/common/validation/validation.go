@@ -2,12 +2,14 @@ package validation
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -83,6 +85,14 @@ func ValidateModuleNamespace(namespace string) error {
 		return fmt.Errorf("%w: opts.ModuleNamespace must not be empty", commonerrors.ErrInvalidOption)
 	}
 
+	if err := ValidateNamespace(namespace); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ValidateNamespace(namespace string) error {
 	if len(namespace) > namespaceMaxLength {
 		return fmt.Errorf("%w: opts.ModuleNamespace length must not exceed %q characters",
 			commonerrors.ErrInvalidOption,
@@ -99,11 +109,62 @@ func ValidateModuleNamespace(namespace string) error {
 	return nil
 }
 
+func ValidateResources(resources contentprovider.ResourcesMap) error {
+	for name, link := range resources {
+		if name == "" {
+			return fmt.Errorf("%w: name must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if link == "" {
+			return fmt.Errorf("%w: link must not be empty", commonerrors.ErrInvalidOption)
+		}
+
+		if err := ValidateIsValidHTTPSURL(link); err != nil {
+			return fmt.Errorf("failed to validate link: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func ValidateIsValidHTTPSURL(input string) error {
+	if input == "" {
+		return fmt.Errorf("%w: must not be empty", commonerrors.ErrInvalidOption)
+	}
+
+	_url, err := url.Parse(input)
+	if err != nil {
+		return fmt.Errorf("%w: '%s' is not a valid URL", commonerrors.ErrInvalidOption, input)
+	}
+
+	if _url.Scheme != "https" {
+		return fmt.Errorf("%w: '%s' is not using https scheme", commonerrors.ErrInvalidOption, input)
+	}
+
+	return nil
+}
+
 func validateSemanticVersion(version string) error {
 	_, err := semver.StrictNewVersion(strings.TrimSpace(version))
 	if err != nil {
 		return fmt.Errorf("%w: opts.ModuleVersion failed to parse as semantic version: %w",
 			commonerrors.ErrInvalidOption, err)
+	}
+
+	return nil
+}
+
+func ValidateGvk(group, version, kind string) error {
+	if kind == "" {
+		return fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if group == "" {
+		return fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if version == "" {
+		return fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	return nil
