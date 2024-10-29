@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	ModuleConfigFileFlagName    = "module-config-file"
-	ModuleConfigFileFlagDefault = "module-config.yaml"
-	moduleConfigFileFlagUsage   = "Specifies the path to the module configuration file."
+	ConfigFileFlagName    = "config-file"
+	configFileFlagShort   = "c"
+	ConfigFileFlagDefault = "module-config.yaml"
+	configFileFlagUsage   = "Specifies the path to the module configuration file."
 
 	CredentialsFlagName    = "registry-credentials" //nolint:gosec // Not hardcoded credentials, rather just flag name
-	credentialsFlagShort   = "c"
 	CredentialsFlagDefault = ""
 	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
 
@@ -42,9 +42,9 @@ const (
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
-	flags.StringVar(&opts.ModuleConfigFile, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault,
-		moduleConfigFileFlagUsage)
-	flags.StringVarP(&opts.Credentials, CredentialsFlagName, credentialsFlagShort, CredentialsFlagDefault,
+	flags.StringVarP(&opts.ConfigFile, ConfigFileFlagName, configFileFlagShort, ConfigFileFlagDefault,
+		configFileFlagUsage)
+	flags.StringVar(&opts.Credentials, CredentialsFlagName, CredentialsFlagDefault,
 		credentialsFlagUsage)
 	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)

@@ -1,1 +1,1 @@
-create [--module-config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY] [flags]
+create [--config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY] [flags]
