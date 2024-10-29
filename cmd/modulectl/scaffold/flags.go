@@ -12,7 +12,8 @@ const (
 	DirectoryFlagDefault = "./"
 	directoryFlagUsage   = `Specifies the target directory where the scaffolding shall be generated (default "./").`
 
-	ModuleConfigFileFlagName    = "module-config"
+	ModuleConfigFileFlagName    = "config-file"
+	moduleConfigFileFlagShort   = "c"
 	ModuleConfigFileFlagDefault = "scaffold-module-config.yaml"
 	moduleConfigFileFlagUsage   = `Specifies the name of the generated module configuration file (default "scaffold-module-config.yaml").`
 
@@ -50,7 +51,7 @@ const (
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
 	flags.StringVarP(&opts.Directory, DirectoryFlagName, directoryFlagShort, DirectoryFlagDefault, directoryFlagUsage)
-	flags.StringVar(&opts.ModuleConfigFileName, ModuleConfigFileFlagName, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
+	flags.StringVarP(&opts.ModuleConfigFileName, ModuleConfigFileFlagName, moduleConfigFileFlagShort, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
 	flags.BoolVarP(&opts.ModuleConfigFileOverwrite, ModuleConfigFileOverwriteFlagName, moduleConfigFileOverwriteFlagShort, ModuleConfigFileOverwriteFlagDefault, moduleConfigFileOverwriteFlagUsage)
 	flags.StringVar(&opts.ManifestFileName, ManifestFileFlagName, ManifestFileFlagDefault, manifestFileFlagUsage)
 	flags.StringVar(&opts.DefaultCRFileName, DefaultCRFlagName, DefaultCRFlagDefault, defaultCRFlagUsage)

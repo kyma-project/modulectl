@@ -59,7 +59,7 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
@@ -92,6 +92,41 @@ func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.
 		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
+func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Namespace:   "default",
+		Channel:     "stable",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
+		AssociatedResources: []*metav1.GroupVersionKind{
+			{
+				Group:   "networking.istio.io",
+				Version: "v1alpha3",
+				Kind:    "Gateway",
+			},
+		},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "stable")
+	require.Contains(t, mockFS.writtenTemplate, "test-data")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "associatedResources")
+	require.Contains(t, mockFS.writtenTemplate, "networking.istio.io")
+	require.Contains(t, mockFS.writtenTemplate, "v1alpha3")
+	require.Contains(t, mockFS.writtenTemplate, "Gateway")
+}
+
 func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	mockFS := &mockFileSystem{}
 	svc, _ := templategenerator.NewService(mockFS)
@@ -120,7 +155,7 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
@@ -160,7 +195,7 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")

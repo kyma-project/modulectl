@@ -130,6 +130,13 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Beta:        false,
 		Labels:      map[string]string{"label1": "value1"},
 		Annotations: map[string]string{"annotation1": "value1"},
+		AssociatedResources: []*metav1.GroupVersionKind{
+			{
+				Group:   "networking.istio.io",
+				Version: "v1alpha3",
+				Kind:    "Gateway",
+			},
+		},
 		Manager: &contentprovider.Manager{
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
@@ -139,6 +146,7 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 				Kind:    "Deployment",
 			},
 		},
+		Resources: contentprovider.ResourcesMap{},
 	}
 
 	return yaml.Marshal(moduleConfig)
