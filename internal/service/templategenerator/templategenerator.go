@@ -83,6 +83,15 @@ spec:
     link: {{ $value }}
     {{- end}}
 {{- end}}
+{{- with .Info}}
+  info:
+    repository: {{.Repository}}
+    documentation: {{.Documentation}}
+      {{- range $key, $value := . }}
+    - name: {{ $key }}
+      link: {{ $value }}
+      {{- end}}
+{{- end}}
 `
 )
 
@@ -96,6 +105,7 @@ type moduleTemplateData struct {
 	Mandatory    bool
 	Data         string
 	Resources    contentprovider.Resources
+	Info         contentprovider.Info
 	Manager      *contentprovider.Manager
 }
 
@@ -150,6 +160,7 @@ func (s *Service) GenerateModuleTemplate(
 		Resources: contentprovider.Resources{
 			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
 		},
+		Info:    moduleConfig.Info,
 		Manager: moduleConfig.Manager,
 	}
 

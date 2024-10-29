@@ -76,6 +76,7 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 type ModuleConfig struct {
 	Name         string            `yaml:"name" comment:"required, the name of the Module"`
 	Version      string            `yaml:"version" comment:"required, the version of the Module"`
+	Info         Info              `yaml:"info" comment:"required, metadata about the module"`
 	Channel      string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
 	Manifest     string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory    bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
@@ -89,7 +90,6 @@ type ModuleConfig struct {
 	Annotations  map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
 	Manager      *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
 	Resources    Resources         `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
-	Icons        Icons             `yaml:"icons,omitempty" comment:"optional, list of icons to represent the module repository"`
 }
 
 type Manager struct {
@@ -101,7 +101,7 @@ type Manager struct {
 type Info struct {
 	Repository    string `yaml:"repository" comment:"required, name of the repository"`
 	Documentation string `yaml:"documentation" comment:"required, link to documentation"`
-	Icons         string `yaml:"icons" comment:"required, list of icons"`
+	Icons         Icons  `yaml:"icons,omitempty" comment:"required, list of icons to represent the module repository"`
 }
 
 type resource struct {
@@ -142,4 +142,30 @@ func (rm Resources) MarshalYAML() (interface{}, error) {
 		resources = append(resources, resource{Name: name, Link: link})
 	}
 	return resources, nil
+}
+
+func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	icons := []icon{}
+	if err := unmarshal(&icons); err != nil {
+		return err
+	}
+
+	*i = make(map[string]string)
+	for _, icon := range icons {
+		(*i)[icon.Name] = icon.Link
+	}
+
+	if len(icons) > len(*i) {
+		return ErrDuplicateResourceNames
+	}
+
+	return nil
+}
+
+func (i Icons) MarshalYAML() (interface{}, error) {
+	icons := []icon{}
+	for name, link := range i {
+		icons = append(icons, icon{Name: name, Link: link})
+	}
+	return icons, nil
 }
