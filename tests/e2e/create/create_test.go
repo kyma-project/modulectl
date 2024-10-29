@@ -95,20 +95,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with empty resource name", func() {
-			cmd = createCmd{
-				moduleConfigFile: emptyResourceName,
-			}
-		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
 		It("When invoked with non https resource", func() {
 			cmd = createCmd{
 				moduleConfigFile: nonHttpsResource,

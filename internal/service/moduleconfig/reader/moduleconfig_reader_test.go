@@ -33,7 +33,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "0.0.1", result.Version)
 	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
-	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
@@ -348,27 +347,23 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 }
 
 var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
-	Name:         "github.com/module-name",
-	Version:      "0.0.1",
-	Manifest:     "https://example.com/path/to/manifests",
-	Mandatory:    false,
-	DefaultCR:    "https://example.com/path/to/defaultCR",
-	ResourceName: "module-name-0.0.1",
-	Namespace:    "kcp-system",
-	Security:     "path/to/securityConfig",
-	Internal:     false,
-	Beta:         false,
-	Labels:       map[string]string{"label1": "value1"},
-	Annotations:  map[string]string{"annotation1": "value1"},
+	Name:        "github.com/module-name",
+	Version:     "0.0.1",
+	Manifest:    "https://example.com/path/to/manifests",
+	Mandatory:   false,
+	DefaultCR:   "https://example.com/path/to/defaultCR",
+	Namespace:   "kcp-system",
+	Security:    "path/to/securityConfig",
+	Internal:    false,
+	Beta:        false,
+	Labels:      map[string]string{"label1": "value1"},
+	Annotations: map[string]string{"annotation1": "value1"},
 	AssociatedResources: []*metav1.GroupVersionKind{
 		{
 			Group:   "networking.istio.io",
 			Version: "v1alpha3",
 			Kind:    "Gateway",
 		},
-	},
-	Resources: contentprovider.ResourcesMap{
-		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	},
 	Manager: &contentprovider.Manager{
 		Name:      "manager-name",
@@ -378,6 +373,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 			Version: "v1",
 			Kind:    "Deployment",
 		},
+	},
+	Resources: contentprovider.ResourcesMap{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	},
 }
 

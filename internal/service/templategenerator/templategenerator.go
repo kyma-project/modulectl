@@ -130,9 +130,7 @@ func (s *Service) GenerateModuleTemplate(
 	}
 	shortName := trimShortNameFromRef(ref)
 	labels[shared.ModuleName] = shortName
-	if moduleConfig.ResourceName == "" {
-		moduleConfig.ResourceName = shortName + "-" + moduleConfig.Version
-	}
+	moduleTemplateName := shortName + "-" + moduleConfig.Version
 
 	moduleTemplate, err := template.New("moduleTemplate").Funcs(template.FuncMap{
 		"yaml":   yaml.Marshal,
@@ -148,7 +146,7 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	mtData := moduleTemplateData{
-		ResourceName:        moduleConfig.ResourceName,
+		ResourceName:        moduleTemplateName,
 		Namespace:           moduleConfig.Namespace,
 		Descriptor:          cva,
 		Labels:              labels,
