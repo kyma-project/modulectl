@@ -45,7 +45,6 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	moduleConfig := &contentprovider.ModuleConfig{
 		ResourceName: "test-resource",
 		Namespace:    "default",
-		Channel:      "stable",
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,
@@ -67,7 +66,8 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
-	require.Contains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
 func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.T) {
@@ -87,7 +87,8 @@ func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
-	require.NotContains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.NotContains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
 func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
@@ -97,7 +98,6 @@ func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
 	moduleConfig := &contentprovider.ModuleConfig{
 		ResourceName: "test-resource",
 		Namespace:    "default",
-		Channel:      "stable",
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,
@@ -134,7 +134,6 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	moduleConfig := &contentprovider.ModuleConfig{
 		ResourceName: "test-resource",
 		Namespace:    "default",
-		Channel:      "stable",
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,
@@ -175,7 +174,6 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 	moduleConfig := &contentprovider.ModuleConfig{
 		ResourceName: "test-resource",
 		Namespace:    "default",
-		Channel:      "stable",
 		Labels:       map[string]string{"key": "value"},
 		Annotations:  map[string]string{"annotation": "value"},
 		Mandatory:    true,

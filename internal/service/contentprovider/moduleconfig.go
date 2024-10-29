@@ -40,7 +40,6 @@ func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleCo
 	return ModuleConfig{
 		Name:      args[ArgModuleName],
 		Version:   args[ArgModuleVersion],
-		Channel:   args[ArgModuleChannel],
 		Manifest:  args[ArgManifestFile],
 		Security:  args[ArgSecurityConfigFile],
 		DefaultCR: args[ArgDefaultCRFile],
@@ -64,12 +63,6 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 		return fmt.Errorf("%w: %s must not be empty", ErrInvalidArg, ArgModuleVersion)
 	}
 
-	if value, ok := args[ArgModuleChannel]; !ok {
-		return fmt.Errorf("%w: %s", ErrMissingArg, ArgModuleChannel)
-	} else if value == "" {
-		return fmt.Errorf("%w: %s must not be empty", ErrInvalidArg, ArgModuleChannel)
-	}
-
 	return nil
 }
 
@@ -82,7 +75,6 @@ type Manager struct {
 type ModuleConfig struct {
 	Name                string                     `yaml:"name" comment:"required, the name of the Module"`
 	Version             string                     `yaml:"version" comment:"required, the version of the Module"`
-	Channel             string                     `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
 	Manifest            string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
 	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`

@@ -31,7 +31,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "github.com/module-name", result.Name)
 	require.Equal(t, "0.0.1", result.Version)
-	require.Equal(t, "regular", result.Channel)
 	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
 	require.Equal(t, "module-name-0.0.1", result.ResourceName)
@@ -76,7 +75,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "invalid name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
 			},
@@ -87,29 +85,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "invalid version",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
 			},
 			expectedError: fmt.Errorf("failed to validate module version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
-			name: "invalid module channel",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "invalid channel",
-				Namespace: "kcp-system",
-				Manifest:  "test",
-			},
-			expectedError: fmt.Errorf("failed to validate module channel: %w", commonerrors.ErrInvalidOption),
-		},
-		{
 			name: "invalid module namespace",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "invalid namespace",
 				Manifest:  "test",
 			},
@@ -120,76 +105,76 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "",
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - not a URL",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
 				Resources: contentprovider.ResourcesMap{
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
 				Resources: contentprovider.ResourcesMap{
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty link",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "test",
 				Resources: contentprovider.ResourcesMap{
 					"name": "",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "manifest file path",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "./test",
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "default CR file path",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "github.com/module-name",
 				Version:   "0.0.1",
-				Channel:   "regular",
 				Namespace: "kcp-system",
 				Manifest:  "https://example.com/test",
 				DefaultCR: "/test",
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
@@ -365,7 +350,6 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Name:         "github.com/module-name",
 	Version:      "0.0.1",
-	Channel:      "regular",
 	Manifest:     "https://example.com/path/to/manifests",
 	Mandatory:    false,
 	DefaultCR:    "https://example.com/path/to/defaultCR",

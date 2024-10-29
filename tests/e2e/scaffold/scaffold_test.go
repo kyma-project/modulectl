@@ -131,7 +131,6 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 			cmd = scaffoldCmd{
 				moduleName:                    "github.com/custom/module",
 				moduleVersion:                 "3.2.1",
-				moduleChannel:                 "custom",
 				moduleConfigFileFlag:          "custom-module-config.yaml",
 				genManifestFlag:               "custom-manifest.yaml",
 				genDefaultCRFlag:              "custom-default-cr.yaml",

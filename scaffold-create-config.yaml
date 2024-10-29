@@ -1,6 +1,5 @@
 name: "kyma-project.io/create/mymodule" # required, the name of the Module
 version: "0.0.1" # required, the version of the Module
-channel: "regular" # required, channel that should be used in the ModuleTemplate
 manifest: "manifest.yaml" # required, relative path or remote URL to the manifests
 # mandatory: false # optional, default=false, indicates whether the module is mandatory to be installed on all clusters
 # defaultCR: "" # optional, relative path or remote URL to a YAML file containing the default CR for the module

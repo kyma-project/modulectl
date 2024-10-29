@@ -43,22 +43,20 @@ const (
 	ModuleVersionFlagName    = "module-version"
 	ModuleVersionFlagDefault = "0.0.1"
 	moduleVersionFlagUsage   = `Specifies the module version in the generated module config file (default "0.0.1").`
-
-	ModuleChannelFlagName    = "module-channel"
-	ModuleChannelFlagDefault = "regular"
-	moduleChannelFlagUsage   = `Specifies the module channel in the generated module config file (default "regular").`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
 	flags.StringVarP(&opts.Directory, DirectoryFlagName, directoryFlagShort, DirectoryFlagDefault, directoryFlagUsage)
-	flags.StringVarP(&opts.ModuleConfigFileName, ModuleConfigFileFlagName, moduleConfigFileFlagShort, ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
-	flags.BoolVarP(&opts.ModuleConfigFileOverwrite, ModuleConfigFileOverwriteFlagName, moduleConfigFileOverwriteFlagShort, ModuleConfigFileOverwriteFlagDefault, moduleConfigFileOverwriteFlagUsage)
+	flags.StringVarP(&opts.ModuleConfigFileName, ModuleConfigFileFlagName, moduleConfigFileFlagShort,
+		ModuleConfigFileFlagDefault, moduleConfigFileFlagUsage)
+	flags.BoolVarP(&opts.ModuleConfigFileOverwrite, ModuleConfigFileOverwriteFlagName,
+		moduleConfigFileOverwriteFlagShort, ModuleConfigFileOverwriteFlagDefault, moduleConfigFileOverwriteFlagUsage)
 	flags.StringVar(&opts.ManifestFileName, ManifestFileFlagName, ManifestFileFlagDefault, manifestFileFlagUsage)
 	flags.StringVar(&opts.DefaultCRFileName, DefaultCRFlagName, DefaultCRFlagDefault, defaultCRFlagUsage)
-	flags.StringVar(&opts.SecurityConfigFileName, SecurityConfigFileFlagName, SecurityConfigFileFlagDefault, securityConfigFileFlagUsage)
+	flags.StringVar(&opts.SecurityConfigFileName, SecurityConfigFileFlagName, SecurityConfigFileFlagDefault,
+		securityConfigFileFlagUsage)
 	flags.StringVar(&opts.ModuleName, ModuleNameFlagName, ModuleNameFlagDefault, moduleNameFlagUsage)
 	flags.StringVar(&opts.ModuleVersion, ModuleVersionFlagName, ModuleVersionFlagDefault, moduleVersionFlagUsage)
-	flags.StringVar(&opts.ModuleChannel, ModuleChannelFlagName, ModuleChannelFlagDefault, moduleChannelFlagUsage)
 
 	flags.Lookup(SecurityConfigFileFlagName).NoOptDefVal = SecurityConfigFileFlagNoOptDefault
 	flags.Lookup(DefaultCRFlagName).NoOptDefVal = DefaultCRFlagNoOptDefault

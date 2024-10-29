@@ -52,10 +52,6 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module version: %w", err)
 	}
 
-	if err := validation.ValidateModuleChannel(moduleConfig.Channel); err != nil {
-		return fmt.Errorf("failed to validate module channel: %w", err)
-	}
-
 	if err := validation.ValidateModuleNamespace(moduleConfig.Namespace); err != nil {
 		return fmt.Errorf("failed to validate module namespace: %w", err)
 	}

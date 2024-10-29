@@ -52,7 +52,6 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 	securityConfigFile := testutils.RandomName(10)
 	moduleName := testutils.RandomName(10)
 	moduleVersion := "1.1.1"
-	moduleChannel := testutils.RandomName(10)
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
@@ -63,7 +62,6 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 		"--gen-security-config=" + securityConfigFile,
 		"--module-name", moduleName,
 		"--module-version", moduleVersion,
-		"--module-channel", moduleChannel,
 	}
 	svc := &scaffoldServiceStub{}
 	cmd, _ := scaffoldcmd.NewCmd(svc)
@@ -79,7 +77,6 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 	assert.Equal(t, defaultCRFile, svc.opts.DefaultCRFileName)
 	assert.Equal(t, securityConfigFile, svc.opts.SecurityConfigFileName)
 	assert.Equal(t, moduleVersion, svc.opts.ModuleVersion)
-	assert.Equal(t, moduleChannel, svc.opts.ModuleChannel)
 }
 
 func Test_Execute_ParsesShortOptions(t *testing.T) {
@@ -120,7 +117,6 @@ func Test_Execute_ParsesDefaults(t *testing.T) {
 	assert.Equal(t, scaffoldcmd.DefaultCRFlagDefault, svc.opts.DefaultCRFileName)
 	assert.Equal(t, scaffoldcmd.SecurityConfigFileFlagDefault, svc.opts.SecurityConfigFileName)
 	assert.Equal(t, scaffoldcmd.ModuleVersionFlagDefault, svc.opts.ModuleVersion)
-	assert.Equal(t, scaffoldcmd.ModuleChannelFlagDefault, svc.opts.ModuleChannel)
 }
 
 func Test_Execute_ParsesNoOptDefaults(t *testing.T) {

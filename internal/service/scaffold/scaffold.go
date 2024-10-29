@@ -60,7 +60,8 @@ func (s *Service) Run(opts Options) error {
 		return err
 	}
 
-	if err := s.moduleConfigService.ForceExplicitOverwrite(opts.Directory, opts.ModuleConfigFileName, opts.ModuleConfigFileOverwrite); err != nil {
+	if err := s.moduleConfigService.ForceExplicitOverwrite(opts.Directory, opts.ModuleConfigFileName,
+		opts.ModuleConfigFileOverwrite); err != nil {
 		return fmt.Errorf("%w %s: %w", ErrOverwritingFile, opts.ModuleConfigFileName, err)
 	}
 
@@ -95,7 +96,6 @@ func (s *Service) Run(opts Options) error {
 		types.KeyValueArgs{
 			contentprovider.ArgModuleName:         opts.ModuleName,
 			contentprovider.ArgModuleVersion:      opts.ModuleVersion,
-			contentprovider.ArgModuleChannel:      opts.ModuleChannel,
 			contentprovider.ArgManifestFile:       opts.ManifestFileName,
 			contentprovider.ArgDefaultCRFile:      defaultCRFilePath,
 			contentprovider.ArgSecurityConfigFile: securityConfigFilePath,

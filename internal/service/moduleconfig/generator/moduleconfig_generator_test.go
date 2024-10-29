@@ -120,7 +120,6 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 	moduleConfig := contentprovider.ModuleConfig{
 		Name:         "module-name",
 		Version:      "0.0.1",
-		Channel:      "regular",
 		Manifest:     "path/to/manifests",
 		Mandatory:    false,
 		DefaultCR:    "path/to/defaultCR",

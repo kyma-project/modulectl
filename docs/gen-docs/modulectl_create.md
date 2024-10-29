@@ -21,7 +21,6 @@ The module config file is a YAML file used to configure the following attributes
 ```yaml
 - name:             a string, required, the name of the module
 - version:          a string, required, the version of the module
-- channel:          a string, required, channel that should be used in the ModuleTemplate CR
 - manifest:         a string, required, reference to the manifest, must be a URL
 
 - defaultCR:        a string, optional, reference to a YAML file containing the default CR for the module, must be a URL

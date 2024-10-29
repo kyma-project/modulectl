@@ -42,14 +42,13 @@ Only the module config file may be force-overwritten when the --overwrite=true f
 You can specify the required fields of the module config using the following CLI flags:
 --module-name=NAME
 --module-version=VERSION
---module-channel=CHANNEL
 
 **NOTE:** If the required fields aren't provided, the defaults are applied and the module-config.yaml is not ready to be used. You must manually edit the file to make it usable.
 Also, edit the sec-scanners-config.yaml to be able to use it.
 
 
 ```bash
-modulectl scaffold [--module-name MODULE_NAME --module-version MODULE_VERSION --module-channel CHANNEL] [--directory MODULE_DIRECTORY] [flags]
+modulectl scaffold [--module-name MODULE_NAME --module-version MODULE_VERSION] [--directory MODULE_DIRECTORY] [flags]
 ```
 
 ## Examples
@@ -58,7 +57,7 @@ modulectl scaffold [--module-name MODULE_NAME --module-version MODULE_VERSION --
 Generate a minimal scaffold for a module - only a blank manifest file and module config file is generated using defaults
                 modulectl scaffold
 Generate a scaffold providing required values explicitly
-				modulectl scaffold --module-name="kyma-project.io/module/testmodule" --module-version="0.1.1" --module-channel=fast
+				modulectl scaffold --module-name="kyma-project.io/module/testmodule" --module-version="0.1.1"
 Generate a scaffold with a manifest file, default CR and security-scanners config for a module
 				modulectl scaffold --gen-default-cr --gen-security-config
 Generate a scaffold with a manifest file, default CR and security-scanners config for a module, overriding default values
@@ -75,7 +74,6 @@ Generate a scaffold with a manifest file, default CR and security-scanners confi
     --gen-manifest string          Specifies the manifest in the generated module config. A blank manifest file is generated if it doesn't exist (default "manifest.yaml").
     --gen-security-config string   Specifies the security file in the generated module config. A scaffold security config file is generated if it doesn't exist (default "sec-scanners-config.yaml").
 -h, --help                         Provides help for the scaffold command.
-    --module-channel string        Specifies the module channel in the generated module config file (default "regular").
     --module-name string           Specifies the module name in the generated config file (default "kyma-project.io/module/mymodule").
     --module-version string        Specifies the module version in the generated module config file (default "0.0.1").
 -o, --overwrite                    Specifies if the command overwrites an existing module configuration file.
