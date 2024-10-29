@@ -8,7 +8,7 @@ allowing for a tailored scaffolding experience according to the specific needs o
 The command generates or uses the following files:
  - Module Config:
 	Enabled: Always
-	Adjustable with flag: --module-config=VALUE
+	Adjustable with flag: --config-file=VALUE
 	Generated when: The file doesn't exist or the --overwrite=true flag is provided
 	Default file name: scaffold-module-config.yaml
  - Manifest:

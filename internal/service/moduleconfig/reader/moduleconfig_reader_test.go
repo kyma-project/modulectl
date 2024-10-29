@@ -42,6 +42,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
+	require.Equal(t, "networking.istio.io", result.AssociatedResources[0].Group)
+	require.Equal(t, "v1alpha3", result.AssociatedResources[0].Version)
+	require.Equal(t, "Gateway", result.AssociatedResources[0].Kind)
 	require.Equal(t, contentprovider.ResourcesMap{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	}, result.Resources)
@@ -299,6 +302,58 @@ func Test_ValidateManager(t *testing.T) {
 	}
 }
 
+func Test_ValidateAssociatedResources(t *testing.T) {
+	tests := []struct {
+		name      string
+		resources []*metav1.GroupVersionKind
+		wantErr   bool
+	}{
+		{
+			name:      "pass on empty resources",
+			resources: []*metav1.GroupVersionKind{},
+			wantErr:   false,
+		},
+		{
+			name: "pass when all resources are valid",
+			resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "fail when even one resources is invalid",
+			resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group: "apps",
+					Kind:  "Deployment",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := moduleconfigreader.ValidateAssociatedResources(tt.resources); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 // Test Stubs
 
 type fileExistsStub struct{}
@@ -321,6 +376,13 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Beta:         false,
 	Labels:       map[string]string{"label1": "value1"},
 	Annotations:  map[string]string{"annotation1": "value1"},
+	AssociatedResources: []*metav1.GroupVersionKind{
+		{
+			Group:   "networking.istio.io",
+			Version: "v1alpha3",
+			Kind:    "Gateway",
+		},
+	},
 	Resources: contentprovider.ResourcesMap{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	},

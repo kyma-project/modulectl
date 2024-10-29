@@ -153,3 +153,19 @@ func validateSemanticVersion(version string) error {
 
 	return nil
 }
+
+func ValidateGvk(group, version, kind string) error {
+	if kind == "" {
+		return fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if group == "" {
+		return fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if version == "" {
+		return fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	return nil
+}
