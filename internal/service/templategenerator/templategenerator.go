@@ -87,10 +87,13 @@ spec:
   info:
     repository: {{.Repository}}
     documentation: {{.Documentation}}
+    {{- with .Icons}}
+    icons:
       {{- range $key, $value := . }}
     - name: {{ $key }}
       link: {{ $value }}
       {{- end}}
+    {{- end}}
 {{- end}}
 `
 )
