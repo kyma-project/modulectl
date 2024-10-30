@@ -74,70 +74,31 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 }
 
 type ModuleConfig struct {
-	Name          string            `yaml:"name" comment:"required, the name of the Module"`
-	Version       string            `yaml:"version" comment:"required, the version of the Module"`
-	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
-	Manifest      string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	Repository    string            `yaml:"repository" comment:"required, link to the repository"`
-	Documentation string            `yaml:"documentation" comment:"required, link to documentation"`
-	Icons         Icons             `yaml:"icons,omitempty" comment:"required, list of icons to represent the module in the UI"`
-	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCR     string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	ResourceName  string            `yaml:"resourceName" comment:"optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created"`
-	Namespace     string            `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security      string            `yaml:"security" comment:"optional, name of the security scanners config file"`
-	Internal      bool              `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
-	Beta          bool              `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
-	Labels        map[string]string `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations   map[string]string `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	Manager       *Manager          `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
-	Resources     Resources         `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Name                string                     `yaml:"name" comment:"required, the name of the Module"`
+	Version             string                     `yaml:"version" comment:"required, the version of the Module"`
+	Channel             string                     `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
+	Manifest            string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
+	Repository          string                     `yaml:"repository" comment:"required, link to the repository"`
+	Documentation       string                     `yaml:"documentation" comment:"required, link to documentation"`
+	Icons               Icons                      `yaml:"icons,omitempty" comment:"required, list of icons to represent the module in the UI"`
+	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
+	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
+	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Security            string                     `yaml:"security" comment:"optional, name of the security scanners config file"`
+	Internal            bool                       `yaml:"internal" comment:"optional, default=false, determines whether the ModuleTemplate should have the internal flag or not"`
+	Beta                bool                       `yaml:"beta" comment:"optional, default=false, determines whether the ModuleTemplate should have the beta flag or not"`
+	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
+	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
+	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated with the module and have to be deleted with module deletion"`
+	Manager             *Manager                   `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
+	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
 
-type Manager struct {
-	Name                    string `yaml:"name" comment:"required, the name of the manager"`
-	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
-	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
-}
-
-type resource struct {
-	Name string `yaml:"name"`
-	Link string `yaml:"link"`
-}
+type Icons map[string]string
 
 type icon struct {
 	Name string `yaml:"name"`
 	Link string `yaml:"link"`
-}
-
-type Resources map[string]string
-
-type Icons map[string]string
-
-func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	resources := []resource{}
-	if err := unmarshal(&resources); err != nil {
-		return err
-	}
-
-	*rm = make(map[string]string)
-	for _, resource := range resources {
-		(*rm)[resource.Name] = resource.Link
-	}
-
-	if len(resources) > len(*rm) {
-		return ErrDuplicateResourceNames
-	}
-
-	return nil
-}
-
-func (rm Resources) MarshalYAML() (interface{}, error) {
-	resources := []resource{}
-	for name, link := range rm {
-		resources = append(resources, resource{Name: name, Link: link})
-	}
-	return resources, nil
 }
 
 func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -164,4 +125,43 @@ func (i Icons) MarshalYAML() (interface{}, error) {
 		icons = append(icons, icon{Name: name, Link: link})
 	}
 	return icons, nil
+}
+
+type Manager struct {
+	Name                    string `yaml:"name" comment:"required, the name of the manager"`
+	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
+	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+}
+
+type Resources map[string]string
+
+type resource struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
+}
+
+func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	resources := []resource{}
+	if err := unmarshal(&resources); err != nil {
+		return err
+	}
+
+	*rm = make(map[string]string)
+	for _, resource := range resources {
+		(*rm)[resource.Name] = resource.Link
+	}
+
+	if len(resources) > len(*rm) {
+		return ErrDuplicateResourceNames
+	}
+
+	return nil
+}
+
+func (rm Resources) MarshalYAML() (interface{}, error) {
+	resources := []resource{}
+	for name, link := range rm {
+		resources = append(resources, resource{Name: name, Link: link})
+	}
+	return resources, nil
 }

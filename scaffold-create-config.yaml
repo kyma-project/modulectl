@@ -4,7 +4,6 @@ channel: "regular" # required, channel that should be used in the ModuleTemplate
 manifest: "manifest.yaml" # required, relative path or remote URL to the manifests
 # mandatory: false # optional, default=false, indicates whether the module is mandatory to be installed on all clusters
 # defaultCR: "" # optional, relative path or remote URL to a YAML file containing the default CR for the module
-# resourceName: "" # optional, default={name}-{channel}, when channel is 'none', the default is {name}-{version}, the name for the ModuleTemplate that will be created
 # namespace: "" # optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed
 # security: "" # optional, name of the security scanners config file
 # internal: false # optional, default=false, determines whether the ModuleTemplate should have the internal flag or not

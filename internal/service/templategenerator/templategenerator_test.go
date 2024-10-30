@@ -43,14 +43,14 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	svc, _ := templategenerator.NewService(mockFS)
 
 	moduleConfig := &contentprovider.ModuleConfig{
-		ResourceName: "test-resource",
-		Namespace:    "default",
-		Channel:      "stable",
-		Labels:       map[string]string{"key": "value"},
-		Annotations:  map[string]string{"annotation": "value"},
-		Mandatory:    true,
-		Manifest:     "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
-		Resources:    contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+		Namespace:   "default",
+		Version:     "1.0.0",
+		Channel:     "stable",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
+		Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
 	data := []byte("test-data")
@@ -59,7 +59,7 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
@@ -67,7 +67,8 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
-	require.Contains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
 func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.T) {
@@ -87,7 +88,43 @@ func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
-	require.NotContains(t, mockFS.writtenTemplate, "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.NotContains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+}
+
+func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Namespace:   "default",
+		Channel:     "stable",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
+		AssociatedResources: []*metav1.GroupVersionKind{
+			{
+				Group:   "networking.istio.io",
+				Version: "v1alpha3",
+				Kind:    "Gateway",
+			},
+		},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "stable")
+	require.Contains(t, mockFS.writtenTemplate, "test-data")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "associatedResources")
+	require.Contains(t, mockFS.writtenTemplate, "networking.istio.io")
+	require.Contains(t, mockFS.writtenTemplate, "v1alpha3")
+	require.Contains(t, mockFS.writtenTemplate, "Gateway")
 }
 
 func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
@@ -95,12 +132,12 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	svc, _ := templategenerator.NewService(mockFS)
 
 	moduleConfig := &contentprovider.ModuleConfig{
-		ResourceName: "test-resource",
-		Namespace:    "default",
-		Channel:      "stable",
-		Labels:       map[string]string{"key": "value"},
-		Annotations:  map[string]string{"annotation": "value"},
-		Mandatory:    true,
+		Namespace:   "default",
+		Channel:     "stable",
+		Version:     "1.0.0",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
 		Manager: &contentprovider.Manager{
 			Name:      "manager-name",
 			Namespace: "manager-ns",
@@ -118,7 +155,7 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
@@ -136,12 +173,12 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 	svc, _ := templategenerator.NewService(mockFS)
 
 	moduleConfig := &contentprovider.ModuleConfig{
-		ResourceName: "test-resource",
-		Namespace:    "default",
-		Channel:      "stable",
-		Labels:       map[string]string{"key": "value"},
-		Annotations:  map[string]string{"annotation": "value"},
-		Mandatory:    true,
+		Namespace:   "default",
+		Channel:     "stable",
+		Version:     "1.0.0",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
 		Manager: &contentprovider.Manager{
 			Name: "manager-name",
 			GroupVersionKind: metav1.GroupVersionKind{
@@ -158,7 +195,7 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
-	require.Contains(t, mockFS.writtenTemplate, "test-resource")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")

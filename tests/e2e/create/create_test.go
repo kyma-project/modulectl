@@ -10,7 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc/versions/v2"
+	v2 "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
@@ -104,34 +104,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: resources contain duplicate entries"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		It("When invoked with '--config-file' using file with missing info", func() {
-			cmd = createCmd{
-				moduleConfigFile: missingInfoConfig,
-			}
-		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleInfo must not be empty"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		It("When invoked with empty resource name", func() {
-			cmd = createCmd{
-				moduleConfigFile: emptyResourceName,
-			}
-		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: invalid Option: name must not be empty"))
 		})
 	})
 
@@ -231,6 +203,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
+			Expect(template.Name).To(Equal("template-operator-1.0.0"))
+
+			By("And spec.info should be correct")
+			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
+			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
+			Expect(template.Spec.Info.Icons).To(HaveLen(1))
+			Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
+			Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
@@ -267,12 +247,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
 
-			By("And spec.info should be correct")
-			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
-			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
-			Expect(template.Spec.Info.Icons).To(HaveLen(1))
-			Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
-			Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
+			By("And spec.associatedResources should be empty")
+			Expect(template.Spec.AssociatedResources).To(BeEmpty())
+
 			By("And spec.manager should be nil")
 			Expect(template.Spec.Manager).To(BeNil())
 
@@ -319,6 +296,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.1"))
 
 			By("And new annotation should be correctly added")
 			annotations := template.Annotations
@@ -353,6 +331,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.2"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -400,6 +379,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.3"))
 
 			By("And descriptor.component.resources should be correct")
 			Expect(descriptor.Resources).To(HaveLen(2))
@@ -475,6 +455,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.4"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -506,6 +487,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.5"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -544,6 +526,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.6"))
 
 			By("And annotation should have correct version")
 			annotations := template.Annotations
@@ -557,6 +540,44 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(manager.Version).To(Equal("v1"))
 			Expect(manager.Group).To(Equal("apps"))
 			Expect(manager.Kind).To(Equal("Deployment"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing associatedResources list", func() {
+			cmd = createCmd{
+				moduleConfigFile: withAssociatedResourcesConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+
+			Expect(template.Name).To(Equal("template-operator-1.0.7"))
+
+			By("And annotation should have correct version")
+			annotations := template.Annotations
+			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.7"))
+
+			By("And spec.associatedResources should be correct")
+			resources := template.Spec.AssociatedResources
+			Expect(resources).ToNot(BeEmpty())
+			Expect(len(resources)).To(Equal(1))
+			Expect(resources[0].Group).To(Equal("networking.istio.io"))
+			Expect(resources[0].Version).To(Equal("v1alpha3"))
+			Expect(resources[0].Kind).To(Equal("Gateway"))
 		})
 	})
 

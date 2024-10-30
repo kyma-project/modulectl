@@ -56,7 +56,7 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 	os.Args = []string{
 		"scaffold",
 		"--directory", directory,
-		"--module-config", moduleConfigFile,
+		"--config-file", moduleConfigFile,
 		"--overwrite",
 		"--gen-manifest", manifestFile,
 		"--gen-default-cr=" + defaultCRFile,
@@ -84,8 +84,10 @@ func Test_Execute_ParsesOptions(t *testing.T) {
 
 func Test_Execute_ParsesShortOptions(t *testing.T) {
 	directory := testutils.RandomName(10)
+	configFile := testutils.RandomName(10)
 	os.Args = []string{
 		"scaffold",
+		"-c", configFile,
 		"-d", directory,
 		"-o",
 	}
@@ -95,6 +97,7 @@ func Test_Execute_ParsesShortOptions(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
+	assert.Equal(t, configFile, svc.opts.ModuleConfigFileName)
 	assert.Equal(t, directory, svc.opts.Directory)
 	assert.True(t, svc.opts.ModuleConfigFileOverwrite)
 }

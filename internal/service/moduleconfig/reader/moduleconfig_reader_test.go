@@ -34,7 +34,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "regular", result.Channel)
 	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
-	require.Equal(t, "module-name-0.0.1", result.ResourceName)
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
@@ -42,6 +41,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
+	require.Equal(t, "networking.istio.io", result.AssociatedResources[0].Group)
+	require.Equal(t, "v1alpha3", result.AssociatedResources[0].Version)
+	require.Equal(t, "Gateway", result.AssociatedResources[0].Kind)
 	require.Equal(t, contentprovider.Resources{
 		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	}, result.Resources)
@@ -121,7 +123,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Namespace: "kcp-system",
 				Manifest:  "",
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - not a URL",
@@ -135,7 +138,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty name",
@@ -149,7 +153,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module resources - empty link",
@@ -163,7 +168,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"name": "",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "manifest file path",
@@ -174,7 +180,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Namespace: "kcp-system",
 				Manifest:  "./test",
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "default CR file path",
@@ -186,7 +193,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Manifest:  "https://example.com/test",
 				DefaultCR: "/test",
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
 		},
 	}
 	for _, test := range tests {
@@ -299,6 +307,58 @@ func Test_ValidateManager(t *testing.T) {
 	}
 }
 
+func Test_ValidateAssociatedResources(t *testing.T) {
+	tests := []struct {
+		name      string
+		resources []*metav1.GroupVersionKind
+		wantErr   bool
+	}{
+		{
+			name:      "pass on empty resources",
+			resources: []*metav1.GroupVersionKind{},
+			wantErr:   false,
+		},
+		{
+			name: "pass when all resources are valid",
+			resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "fail when even one resources is invalid",
+			resources: []*metav1.GroupVersionKind{
+				{
+					Group:   "networking.istio.io",
+					Version: "v1alpha3",
+					Kind:    "Gateway",
+				},
+				{
+					Group: "apps",
+					Kind:  "Deployment",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := moduleconfigreader.ValidateAssociatedResources(tt.resources); (err != nil) != tt.wantErr {
+				t.Errorf("ValidateAssociatedResources() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 // Test Stubs
 
 type fileExistsStub struct{}
@@ -308,21 +368,24 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 }
 
 var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
-	Name:         "github.com/module-name",
-	Version:      "0.0.1",
-	Channel:      "regular",
-	Manifest:     "https://example.com/path/to/manifests",
-	Mandatory:    false,
-	DefaultCR:    "https://example.com/path/to/defaultCR",
-	ResourceName: "module-name-0.0.1",
-	Namespace:    "kcp-system",
-	Security:     "path/to/securityConfig",
-	Internal:     false,
-	Beta:         false,
-	Labels:       map[string]string{"label1": "value1"},
-	Annotations:  map[string]string{"annotation1": "value1"},
-	Resources: contentprovider.Resources{
-		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+	Name:        "github.com/module-name",
+	Version:     "0.0.1",
+	Channel:     "regular",
+	Manifest:    "https://example.com/path/to/manifests",
+	Mandatory:   false,
+	DefaultCR:   "https://example.com/path/to/defaultCR",
+	Namespace:   "kcp-system",
+	Security:    "path/to/securityConfig",
+	Internal:    false,
+	Beta:        false,
+	Labels:      map[string]string{"label1": "value1"},
+	Annotations: map[string]string{"annotation1": "value1"},
+	AssociatedResources: []*metav1.GroupVersionKind{
+		{
+			Group:   "networking.istio.io",
+			Version: "v1alpha3",
+			Kind:    "Gateway",
+		},
 	},
 	Manager: &contentprovider.Manager{
 		Name:      "manager-name",
@@ -332,6 +395,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 			Version: "v1",
 			Kind:    "Deployment",
 		},
+	},
+	Resources: contentprovider.Resources{
+		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 	},
 }
 
