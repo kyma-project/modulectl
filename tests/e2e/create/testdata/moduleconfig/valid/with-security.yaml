@@ -2,10 +2,9 @@ name: kyma-project.io/module/template-operator
 channel: regular
 version: 1.0.3
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
-info:
-  repository: https://github.com/kyma-project/template-operator
-  documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
-  icons:
-    - name: module-icon
-      link: https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png
+repository: https://github.com/kyma-project/template-operator
+documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
+icons:
+  - name: module-icon
+    link: https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png
 security: sec-scanners-config.yaml
