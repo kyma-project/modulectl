@@ -146,7 +146,7 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 				Kind:    "Deployment",
 			},
 		},
-		Resources: contentprovider.ResourcesMap{},
+		Resources: contentprovider.Resources{},
 	}
 
 	return yaml.Marshal(moduleConfig)

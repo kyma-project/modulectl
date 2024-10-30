@@ -61,7 +61,6 @@ metadata:
 spec:
   channel: {{.Channel}}
   mandatory: {{.Mandatory}}
-{{- with .Info}}
   info:
     repository: {{.Repository}}
     documentation: {{.Documentation}}
@@ -72,7 +71,6 @@ spec:
       link: {{ $value }}
       {{- end}}
     {{- end}}
-{{- end}}
 {{- with .AssociatedResources}}
   associatedResources:
   {{- range .}}

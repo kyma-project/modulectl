@@ -34,6 +34,11 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "regular", result.Channel)
 	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
+	require.Equal(t, "https://example.com/path/to/repository", result.Repository)
+	require.Equal(t, "https://example.com/path/to/documentation", result.Documentation)
+	require.Equal(t, contentprovider.Icons{
+		"module-icon": "https://example.com/path/to/some-icon",
+	}, result.Icons)
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
@@ -73,67 +78,266 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		{
 			name: "invalid module name",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "invalid name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "invalid name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 			},
 			expectedError: fmt.Errorf("failed to validate module name: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module version",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "invalid version",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "invalid version",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 			},
 			expectedError: fmt.Errorf("failed to validate module version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module channel",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "invalid channel",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "invalid channel",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 			},
 			expectedError: fmt.Errorf("failed to validate module channel: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "invalid namespace",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "invalid namespace",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 			},
 			expectedError: fmt.Errorf("failed to validate module namespace: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "empty manifest path",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 			},
 			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty",
 				commonerrors.ErrInvalidOption),
 		},
 		{
+			name: "manifest file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "./test",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "default CR file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+				DefaultCR: "/test",
+			},
+			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "empty repository",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate repository: %w: must not be empty",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "repository is not a URL",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "some repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate repository: %w: 'some repository' is not using https scheme",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "empty documentation",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate documentation: %w: must not be empty",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "documentation is not a URL",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "some documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate documentation: %w: 'some documentation' is not using https scheme",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "empty icons",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons:         contentprovider.Icons{},
+			},
+			expectedError: fmt.Errorf("failed to validate module icons: %w: must contain at least one icon",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid icon - empty name",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"": "https://example.com/path/to/some-icon",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate module icons: %w: name must not be empty",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid icon - empty link",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate module icons: %w: link must not be empty",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid icon - not a URL",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "this is not a URL",
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate module icons: failed to validate link: %w: 'this is not a URL' is not using https scheme",
+				commonerrors.ErrInvalidOption),
+		},
+		{
 			name: "invalid module resources - not a URL",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 				Resources: contentprovider.Resources{
 					"key": "%% not a URL",
 				},
@@ -144,11 +348,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		{
 			name: "invalid module resources - empty name",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 				Resources: contentprovider.Resources{
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
@@ -159,41 +368,21 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		{
 			name: "invalid module resources - empty link",
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "test",
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Channel:       "regular",
+				Namespace:     "kcp-system",
+				Manifest:      "https://example.com/path/to/manifest",
+				Repository:    "https://example.com/path/to/repository",
+				Documentation: "https://example.com/path/to/documentation",
+				Icons: contentprovider.Icons{
+					"module-icon": "https://example.com/path/to/some-icon",
+				},
 				Resources: contentprovider.Resources{
 					"name": "",
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty",
-				commonerrors.ErrInvalidOption),
-		},
-		{
-			name: "manifest file path",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "./test",
-			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme",
-				commonerrors.ErrInvalidOption),
-		},
-		{
-			name: "default CR file path",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "github.com/module-name",
-				Version:   "0.0.1",
-				Channel:   "regular",
-				Namespace: "kcp-system",
-				Manifest:  "https://example.com/test",
-				DefaultCR: "/test",
-			},
-			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme",
 				commonerrors.ErrInvalidOption),
 		},
 	}
@@ -368,10 +557,15 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 }
 
 var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
-	Name:        "github.com/module-name",
-	Version:     "0.0.1",
-	Channel:     "regular",
-	Manifest:    "https://example.com/path/to/manifests",
+	Name:          "github.com/module-name",
+	Version:       "0.0.1",
+	Channel:       "regular",
+	Manifest:      "https://example.com/path/to/manifests",
+	Repository:    "https://example.com/path/to/repository",
+	Documentation: "https://example.com/path/to/documentation",
+	Icons: contentprovider.Icons{
+		"module-icon": "https://example.com/path/to/some-icon",
+	},
 	Mandatory:   false,
 	DefaultCR:   "https://example.com/path/to/defaultCR",
 	Namespace:   "kcp-system",
