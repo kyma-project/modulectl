@@ -71,7 +71,7 @@ jobs:
         run: ./.github/scripts/upload_artifacts.sh ${{ github.event.inputs.tag }}
   publish-release:
     runs-on: ubuntu-latest
-    needs: [ validate-release, draft-release, create-artifacts ]
+    needs: [validate-release, draft-release, create-artifacts]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

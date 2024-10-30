@@ -28,7 +28,7 @@ linters-settings:
       - name: line-length-limit
         severity: warning
         disabled: true
-        arguments: [ 120 ]
+        arguments: [120]
   funlen:
     statements: 50
     lines: 80
@@ -102,7 +102,7 @@ issues:
         - funlen # Table driven unit and integration tests exceed function length by design
         - maintidx # Table driven unit and integration tests exceed maintainability index by design
     - path: tests/e2e/
-      linters: [ gci ] # Disable gci due to the test utilities dot import.
+      linters: [gci] # Disable gci due to the test utilities dot import.
     - linters:
         - importas
       text: has alias "" which is not part of config # Ignore false positives that emerged due to https://github.com/julz/importas/issues/15.
