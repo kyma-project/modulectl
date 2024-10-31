@@ -94,74 +94,78 @@ type ModuleConfig struct {
 	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
 }
 
-type Icons map[string]string
-
-type icon struct {
-	Name string `yaml:"name"`
-	Link string `yaml:"link"`
-}
-
-func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	icons := []icon{}
-	if err := unmarshal(&icons); err != nil {
-		return err
-	}
-
-	*i = make(map[string]string)
-	for _, icon := range icons {
-		(*i)[icon.Name] = icon.Link
-	}
-
-	if len(icons) > len(*i) {
-		return ErrDuplicateResourceNames
-	}
-
-	return nil
-}
-
-func (i Icons) MarshalYAML() (interface{}, error) {
-	icons := []icon{}
-	for name, link := range i {
-		icons = append(icons, icon{Name: name, Link: link})
-	}
-	return icons, nil
-}
-
 type Manager struct {
 	Name                    string `yaml:"name" comment:"required, the name of the manager"`
 	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
 	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
 }
 
-type Resources map[string]string
+// Icons represents a map of icon names to links.
+type Icons map[string]string
 
-type resource struct {
-	Name string `yaml:"name"`
-	Link string `yaml:"link"`
-}
-
-func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	resources := []resource{}
-	if err := unmarshal(&resources); err != nil {
+// UnmarshalYAML unmarshals Icons from YAML format.
+func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	dataMap, err := unmarshalToMap(unmarshal)
+	if err != nil {
 		return err
 	}
-
-	*rm = make(map[string]string)
-	for _, resource := range resources {
-		(*rm)[resource.Name] = resource.Link
-	}
-
-	if len(resources) > len(*rm) {
-		return ErrDuplicateResourceNames
-	}
-
+	*i = dataMap
 	return nil
 }
 
-func (rm Resources) MarshalYAML() (interface{}, error) {
-	resources := []resource{}
-	for name, link := range rm {
-		resources = append(resources, resource{Name: name, Link: link})
+// MarshalYAML marshals Icons to YAML format.
+func (i *Icons) MarshalYAML() (interface{}, error) {
+	return marshalFromMap(*i)
+}
+
+// Resources represents a map of resource names to links.
+type Resources map[string]string
+
+// UnmarshalYAML unmarshals Resources from YAML format.
+func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	dataMap, err := unmarshalToMap(unmarshal)
+	if err != nil {
+		return err
 	}
-	return resources, nil
+	*rm = dataMap
+	return nil
+}
+
+// MarshalYAML marshals Resources to YAML format.
+func (rm *Resources) MarshalYAML() (interface{}, error) {
+	return marshalFromMap(*rm)
+}
+
+func unmarshalToMap(unmarshal func(interface{}) error) (map[string]string, error) {
+	var items []nameLinkItem
+	if err := unmarshal(&items); err == nil {
+		resultMap := make(map[string]string)
+		for _, item := range items {
+			if _, exists := resultMap[item.Name]; exists {
+				return nil, ErrDuplicateResourceNames
+			}
+			resultMap[item.Name] = item.Link
+		}
+		return resultMap, nil
+	}
+
+	resultMap := make(map[string]string)
+	if err := unmarshal(&resultMap); err != nil {
+		return nil, err
+	}
+
+	return resultMap, nil
+}
+
+func marshalFromMap(dataMap map[string]string) (interface{}, error) {
+	items := make([]nameLinkItem, 0, len(dataMap))
+	for name, link := range dataMap {
+		items = append(items, nameLinkItem{Name: name, Link: link})
+	}
+	return items, nil
+}
+
+type nameLinkItem struct {
+	Name string `yaml:"name"`
+	Link string `yaml:"link"`
 }
