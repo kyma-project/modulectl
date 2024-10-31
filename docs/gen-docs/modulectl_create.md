@@ -23,7 +23,11 @@ The module config file is a YAML file used to configure the following attributes
 - version:          a string, required, the version of the module
 - channel:          a string, required, channel that should be used in the ModuleTemplate CR
 - manifest:         a string, required, reference to the manifest, must be a URL
-
+- repository:       a string, required, reference to the repository, must be a URL
+- documentation:    a string, required, reference to the documentation, must be a URL
+- icons:            a map with string keys and values, required, icons used for UI
+    - name:         a string, required, the name of the icon
+      link:         a URL, required, the link to the icon
 - defaultCR:        a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
 - mandatory:        a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
 - internal:         a boolean, optional, default=false, determines whether the ModuleTemplate CR should have the internal flag or not
