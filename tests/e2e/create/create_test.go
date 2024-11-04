@@ -53,20 +53,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--config-file' using file with missing channel", func() {
-			cmd = createCmd{
-				moduleConfigFile: missingChannelConfig,
-			}
-		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleChannel must not be empty"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
 		It("When invoked with '--config-file' using file with missing version", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingVersionConfig,

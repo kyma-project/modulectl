@@ -59,7 +59,6 @@ metadata:
     {{- end}}
 {{- end}} 
 spec:
-  channel: {{.Channel}}
   mandatory: {{.Mandatory}}
   info:
     repository: {{.Repository}}
@@ -109,7 +108,6 @@ type moduleTemplateData struct {
 	ResourceName        string
 	Namespace           string
 	Descriptor          compdesc.ComponentDescriptorVersion
-	Channel             string
 	Repository          string
 	Documentation       string
 	Icons               contentprovider.Icons
@@ -164,7 +162,6 @@ func (s *Service) GenerateModuleTemplate(
 		ResourceName:        moduleTemplateName,
 		Namespace:           moduleConfig.Namespace,
 		Descriptor:          cva,
-		Channel:             moduleConfig.Channel,
 		Repository:          moduleConfig.Repository,
 		Documentation:       moduleConfig.Documentation,
 		Icons:               moduleConfig.Icons,

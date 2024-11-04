@@ -15,9 +15,6 @@ const (
 	// // taken from "https://github.com/open-component-model/ocm/blob/4473dacca406e4c84c0ac5e6e14393c659384afc/resources/component-descriptor-v2-schema.yaml#L40"
 	moduleNamePattern   = "^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$"
 	moduleNameMaxLength = 255
-	channelMinLength    = 3
-	channelMaxLength    = 32
-	channelPattern      = "^[a-z]+$"
 	namespaceMaxLength  = 253
 	namespacePattern    = "^[a-z0-9]+(?:-[a-z0-9]+)*$"
 )
@@ -49,31 +46,6 @@ func ValidateModuleVersion(version string) error {
 
 	if err := validateSemanticVersion(version); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func ValidateModuleChannel(channel string) error {
-	if channel == "" {
-		return fmt.Errorf("%w: opts.ModuleChannel must not be empty", commonerrors.ErrInvalidOption)
-	}
-
-	if len(channel) > channelMaxLength {
-		return fmt.Errorf("%w: opts.ModuleChannel length must not exceed %q characters", commonerrors.ErrInvalidOption,
-			channelMaxLength)
-	}
-
-	if len(channel) < channelMinLength {
-		return fmt.Errorf("%w: opts.ModuleChannel length must be at least %q characters", commonerrors.ErrInvalidOption,
-			channelMinLength)
-	}
-
-	if matched, err := regexp.MatchString(channelPattern, channel); err != nil {
-		return fmt.Errorf("%w: failed to evaluate regex pattern for opts.ModuleChannel", commonerrors.ErrInvalidOption)
-	} else if !matched {
-		return fmt.Errorf("%w: opts.ModuleChannel must match the required pattern, only characters from a-z are allowed",
-			commonerrors.ErrInvalidOption)
 	}
 
 	return nil

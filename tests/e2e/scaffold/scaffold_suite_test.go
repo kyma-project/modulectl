@@ -21,7 +21,6 @@ func Test_Scaffold(t *testing.T) {
 type scaffoldCmd struct {
 	moduleName                    string
 	moduleVersion                 string
-	moduleChannel                 string
 	moduleConfigFileFlag          string
 	genDefaultCRFlag              string
 	genSecurityScannersConfigFlag string
@@ -40,10 +39,6 @@ func (cmd *scaffoldCmd) execute() error {
 
 	if cmd.moduleVersion != "" {
 		args = append(args, "--module-version="+cmd.moduleVersion)
-	}
-
-	if cmd.moduleChannel != "" {
-		args = append(args, "--module-channel="+cmd.moduleChannel)
 	}
 
 	if cmd.moduleConfigFileFlag != "" {
@@ -83,9 +78,6 @@ func (cmd *scaffoldCmd) toConfigBuilder() *moduleConfigBuilder {
 	if cmd.moduleVersion != "" {
 		res.withVersion(cmd.moduleVersion)
 	}
-	if cmd.moduleChannel != "" {
-		res.withChannel(cmd.moduleChannel)
-	}
 	if cmd.genDefaultCRFlag != "" {
 		res.withDefaultCRPath(cmd.genDefaultCRFlag)
 	}
@@ -118,11 +110,6 @@ func (mcb *moduleConfigBuilder) withVersion(val string) *moduleConfigBuilder {
 	return mcb
 }
 
-func (mcb *moduleConfigBuilder) withChannel(val string) *moduleConfigBuilder {
-	mcb.Channel = val
-	return mcb
-}
-
 func (mcb *moduleConfigBuilder) withManifestPath(val string) *moduleConfigBuilder {
 	mcb.ManifestPath = val
 	return mcb
@@ -142,7 +129,6 @@ func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 	return mcb.
 		withName("kyma-project.io/module/mymodule").
 		withVersion("0.0.1").
-		withChannel("regular").
 		withManifestPath("manifest.yaml")
 }
 
@@ -153,7 +139,6 @@ func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 type moduleConfig struct {
 	Name          string            `yaml:"name" comment:"required, the name of the Module"`
 	Version       string            `yaml:"version" comment:"required, the version of the Module"`
-	Channel       string            `yaml:"channel" comment:"required, channel that should be used in the ModuleTemplate"`
 	ManifestPath  string            `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
 	Mandatory     bool              `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
 	DefaultCRPath string            `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`

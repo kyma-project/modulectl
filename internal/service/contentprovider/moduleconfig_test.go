@@ -38,22 +38,13 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgsMissing(t 
 		{
 			argName: contentprovider.ArgModuleName,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleChannel: "experimental",
 				contentprovider.ArgModuleVersion: "0.0.1",
 			},
 		},
 		{
 			argName: contentprovider.ArgModuleVersion,
 			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "module-name",
-				contentprovider.ArgModuleChannel: "experimental",
-			},
-		},
-		{
-			argName: contentprovider.ArgModuleChannel,
-			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "module-name",
-				contentprovider.ArgModuleVersion: "0.0.1",
+				contentprovider.ArgModuleName: "module-name",
 			},
 		},
 	}
@@ -84,7 +75,6 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 			argName: contentprovider.ArgModuleName,
 			args: types.KeyValueArgs{
 				contentprovider.ArgModuleName:    "",
-				contentprovider.ArgModuleChannel: "experimental",
 				contentprovider.ArgModuleVersion: "0.0.1",
 			},
 		},
@@ -92,16 +82,7 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsError_WhenRequiredArgIsEmpty(t *
 			argName: contentprovider.ArgModuleVersion,
 			args: types.KeyValueArgs{
 				contentprovider.ArgModuleName:    "module-name",
-				contentprovider.ArgModuleChannel: "experimental",
 				contentprovider.ArgModuleVersion: "",
-			},
-		},
-		{
-			argName: contentprovider.ArgModuleChannel,
-			args: types.KeyValueArgs{
-				contentprovider.ArgModuleName:    "module-name",
-				contentprovider.ArgModuleChannel: "",
-				contentprovider.ArgModuleVersion: "0.0.1",
 			},
 		},
 	}
@@ -127,7 +108,6 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{
 		contentprovider.ArgModuleName:    "module-name",
-		contentprovider.ArgModuleChannel: "regular",
 		contentprovider.ArgModuleVersion: "0.0.1",
 	})
 

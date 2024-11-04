@@ -94,47 +94,6 @@ func TestValidateModuleVersion(t *testing.T) {
 	}
 }
 
-func TestValidateModuleChannel(t *testing.T) {
-	tests := []struct {
-		name          string
-		moduleChannel string
-		wantErr       bool
-	}{
-		{
-			name:          "valid channel",
-			moduleChannel: "experimental",
-			wantErr:       false,
-		},
-		{
-			name:          "empty channel",
-			moduleChannel: "",
-			wantErr:       true,
-		},
-		{
-			name:          "invalid channel - too short ",
-			moduleChannel: "a",
-			wantErr:       true,
-		},
-		{
-			name:          "invalid channel - too long",
-			moduleChannel: "thisstringvaluehaslengthof33chars",
-			wantErr:       true,
-		},
-		{
-			name:          "invalid channel - contains invalid characters",
-			moduleChannel: "this value has spaces",
-			wantErr:       true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validation.ValidateModuleChannel(tt.moduleChannel); (err != nil) != tt.wantErr {
-				t.Errorf("ValidateChannel() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestValidateModuleNamespace(t *testing.T) {
 	tests := []struct {
 		name            string

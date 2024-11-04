@@ -23,7 +23,6 @@ const (
 	invalidConfigs        = testdataDir + "invalid/"
 	duplicateResources    = invalidConfigs + "duplicate-resources.yaml"
 	missingNameConfig     = invalidConfigs + "missing-name.yaml"
-	missingChannelConfig  = invalidConfigs + "missing-channel.yaml"
 	missingVersionConfig  = invalidConfigs + "missing-version.yaml"
 	missingManifestConfig = invalidConfigs + "missing-manifest.yaml"
 	missingInfoConfig     = invalidConfigs + "missing-info.yaml"

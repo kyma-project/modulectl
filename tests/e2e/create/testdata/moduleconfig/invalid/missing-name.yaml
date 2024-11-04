@@ -1,4 +1,3 @@
-channel: regular
 version: 1.0.1
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
 repository: https://github.com/kyma-project/template-operator

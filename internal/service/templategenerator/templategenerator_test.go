@@ -45,7 +45,6 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	moduleConfig := &contentprovider.ModuleConfig{
 		Namespace:   "default",
 		Version:     "1.0.0",
-		Channel:     "stable",
 		Labels:      map[string]string{"key": "value"},
 		Annotations: map[string]string{"annotation": "value"},
 		Mandatory:   true,
@@ -61,7 +60,6 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
@@ -98,7 +96,6 @@ func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
 
 	moduleConfig := &contentprovider.ModuleConfig{
 		Namespace:   "default",
-		Channel:     "stable",
 		Labels:      map[string]string{"key": "value"},
 		Annotations: map[string]string{"annotation": "value"},
 		Mandatory:   true,
@@ -118,7 +115,6 @@ func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "associatedResources")
@@ -133,7 +129,6 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 
 	moduleConfig := &contentprovider.ModuleConfig{
 		Namespace:   "default",
-		Channel:     "stable",
 		Version:     "1.0.0",
 		Labels:      map[string]string{"key": "value"},
 		Annotations: map[string]string{"annotation": "value"},
@@ -157,7 +152,6 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "manager-name")
@@ -174,7 +168,6 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 
 	moduleConfig := &contentprovider.ModuleConfig{
 		Namespace:   "default",
-		Channel:     "stable",
 		Version:     "1.0.0",
 		Labels:      map[string]string{"key": "value"},
 		Annotations: map[string]string{"annotation": "value"},
@@ -197,7 +190,6 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "stable")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "manager-name")

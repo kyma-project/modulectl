@@ -20,7 +20,6 @@ type Options struct {
 	SecurityConfigFileName    string
 	ModuleName                string
 	ModuleVersion             string
-	ModuleChannel             string
 }
 
 func (opts Options) Validate() error {
@@ -37,10 +36,6 @@ func (opts Options) Validate() error {
 	}
 
 	if err := opts.validateVersion(); err != nil {
-		return err
-	}
-
-	if err := opts.validateChannel(); err != nil {
 		return err
 	}
 
@@ -85,14 +80,6 @@ func (opts Options) validateModuleName() error {
 
 func (opts Options) validateVersion() error {
 	if err := validation.ValidateModuleVersion(opts.ModuleVersion); err != nil {
-		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
-	}
-
-	return nil
-}
-
-func (opts Options) validateChannel() error {
-	if err := validation.ValidateModuleChannel(opts.ModuleChannel); err != nil {
 		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
