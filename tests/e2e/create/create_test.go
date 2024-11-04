@@ -145,7 +145,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate icons: invalid Option: must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("failed to execute modulectl command: failed to parse module config: failed to validate module config: failed to validate module icons: invalid Option: must contain at least one icon"))
 		})
 	})
 
