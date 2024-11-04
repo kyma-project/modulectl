@@ -39,7 +39,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--config-file' using file with missing name", func() {
+		It("When invoked with missing name", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingNameConfig,
 			}
@@ -53,7 +53,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--config-file' using file with missing version", func() {
+		It("When invoked with missing version", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingVersionConfig,
 			}
@@ -67,7 +67,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with '--config-file' using file with missing manifest", func() {
+		It("When invoked with missing manifest", func() {
 			cmd = createCmd{
 				moduleConfigFile: missingManifestConfig,
 			}
@@ -104,6 +104,34 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: invalid Option: must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with non https repository", func() {
+			cmd = createCmd{
+				moduleConfigFile: nonHttpsRepository,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: failed to validate link: invalid Option: 'http://github.com/kyma-project/template-operator' is not using https scheme"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with non https documentation", func() {
+			cmd = createCmd{
+				moduleConfigFile: nonHttpsDocumentation,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: failed to validate link: invalid Option: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme"))
 		})
 	})
 

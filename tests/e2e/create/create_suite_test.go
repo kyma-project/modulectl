@@ -29,6 +29,8 @@ const (
 	missingDocumentationConfig = invalidConfigs + "missing-documentation.yaml"
 	missingRepositoryConfig    = invalidConfigs + "missing-repository.yaml"
 	missingIconsConfig         = invalidConfigs + "missing-icons.yaml"
+	nonHttpsRepository         = invalidConfigs + "non-https-repository.yaml"
+	nonHttpsDocumentation      = invalidConfigs + "non-https-documentation.yaml"
 	nonHttpsResource           = invalidConfigs + "non-https-resource.yaml"
 	resourceWithoutLink        = invalidConfigs + "resource-without-link.yaml"
 	resourceWithoutName        = invalidConfigs + "resource-without-name.yaml"
