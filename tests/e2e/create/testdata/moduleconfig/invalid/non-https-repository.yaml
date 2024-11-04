@@ -1,5 +1,8 @@
 name: kyma-project.io/module/template-operator
 version: 1.0.0
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
-repository: https://github.com/kyma-project/template-operator
+repository: http://github.com/kyma-project/template-operator
 documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
+icons:
+  - name: module-icon
+    link: https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png
