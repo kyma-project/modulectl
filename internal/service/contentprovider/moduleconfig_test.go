@@ -115,6 +115,85 @@ func Test_ModuleConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
 	assert.Equal(t, mcConvertedContent, result)
 }
 
+func Test_ModuleConfig_Unmarshal_Icons_Success(t *testing.T) {
+	moduleConfigData := `
+icons:
+  - name: icon1
+    link: https://example.com/icon1
+  - name: icon2
+    link: https://example.com/icon2
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	require.NoError(t, err)
+	assert.Len(t, moduleConfig.Icons, 2)
+	assert.Equal(t, "https://example.com/icon1", moduleConfig.Icons["icon1"])
+	assert.Equal(t, "https://example.com/icon2", moduleConfig.Icons["icon2"])
+}
+
+func Test_ModuleConfig_Unmarshal_Icons_Success_Ignoring_Unknown_Fields(t *testing.T) {
+	moduleConfigData := `
+icons:
+  - name: icon
+    link: https://example.com/icon
+    unknown: something
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	require.NoError(t, err)
+	assert.Len(t, moduleConfig.Icons, 1)
+	assert.Equal(t, "https://example.com/icon", moduleConfig.Icons["icon"])
+}
+
+func Test_ModuleConfig_Unmarshal_Icons_FailOnDuplicateNames(t *testing.T) {
+	moduleConfigData := `
+icons:
+  - name: icon1
+    link: https://example.com/icon1
+  - name: icon1
+    link: https://example.com/icon2
+`
+
+	moduleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
+
+	require.Error(t, err)
+	assert.Equal(t, "failed to unmarshal Icons: map contains duplicate entries", err.Error())
+}
+
+func Test_ModuleConfig_Marshal_Icons_Success(t *testing.T) {
+	// parse the expected config
+	expectedModuleConfigData := `
+icons:
+  - name: icon1
+    link: https://example.com/icon1
+  - name: icon2
+    link: https://example.com/icon2
+`
+	expectedModuleConfig := &contentprovider.ModuleConfig{}
+	err := yaml.Unmarshal([]byte(expectedModuleConfigData), expectedModuleConfig)
+	require.NoError(t, err)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Icons: contentprovider.Icons{
+			"icon1": "https://example.com/icon1",
+			"icon2": "https://example.com/icon2",
+		},
+	}
+	marshalledModuleConfigData, err := yaml.Marshal(moduleConfig)
+	require.NoError(t, err)
+
+	marshalledModuleConfig := &contentprovider.ModuleConfig{}
+	err = yaml.Unmarshal(marshalledModuleConfigData, marshalledModuleConfig)
+
+	require.NoError(t, err)
+	assert.Equal(t, expectedModuleConfig.Icons, marshalledModuleConfig.Icons)
+}
+
 func Test_ModuleConfig_Unmarshall_Resources_Success(t *testing.T) {
 	moduleConfigData := `
 resources:
@@ -162,7 +241,7 @@ resources:
 	err := yaml.Unmarshal([]byte(moduleConfigData), moduleConfig)
 
 	require.Error(t, err)
-	assert.Equal(t, "resources contain duplicate entries", err.Error())
+	assert.Equal(t, "failed to unmarshal Resources: map contains duplicate entries", err.Error())
 }
 
 func Test_ModuleConfig_Marshall_Resources_Success(t *testing.T) {
