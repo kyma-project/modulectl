@@ -10,7 +10,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
-var ErrDuplicateResourceNames = errors.New("resources contain duplicate entries")
+var ErrDuplicateMapEntries = errors.New("map contains duplicate entries")
 
 type ModuleConfigProvider struct {
 	yamlConverter ObjectToYAMLConverter
@@ -99,7 +99,7 @@ type Icons map[string]string
 func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	dataMap, err := unmarshalToMap(unmarshal)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal Icons: %w", err)
 	}
 	*i = dataMap
 	return nil
@@ -117,7 +117,7 @@ type Resources map[string]string
 func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	dataMap, err := unmarshalToMap(unmarshal)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal Resources: %w", err)
 	}
 	*rm = dataMap
 	return nil
@@ -134,7 +134,7 @@ func unmarshalToMap(unmarshal func(interface{}) error) (map[string]string, error
 		resultMap := make(map[string]string)
 		for _, item := range items {
 			if _, exists := resultMap[item.Name]; exists {
-				return nil, ErrDuplicateResourceNames
+				return nil, ErrDuplicateMapEntries
 			}
 			resultMap[item.Name] = item.Link
 		}

@@ -131,7 +131,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to execute modulectl command: failed to parse module config: failed to validate module config: failed to validate documentation: invalid Option: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: invalid Option: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme"))
 		})
 	})
 
@@ -145,7 +145,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to execute modulectl command: failed to parse module config: failed to validate module config: failed to validate module icons: invalid Option: must contain at least one icon"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: invalid Option: must contain at least one icon"))
 		})
 	})
 
@@ -159,7 +159,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: icons contain duplicate entries"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Icons: map contains duplicate entries"))
 		})
 	})
 
@@ -173,7 +173,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: resources contain duplicate entries"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Resources: map contains duplicate entries"))
 		})
 	})
 
