@@ -165,6 +165,34 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with invalid icon - link missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: iconsWithoutLink,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: invalid Option: link must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with invalid icon - name missing", func() {
+			cmd = createCmd{
+				moduleConfigFile: iconsWithoutName,
+			}
+		})
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: invalid Option: name must not be empty"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with duplicate entry in resources", func() {
 			cmd = createCmd{
 				moduleConfigFile: duplicateResources,
