@@ -16,10 +16,6 @@ const (
 	CredentialsFlagDefault = ""
 	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
 
-	GitRemoteFlagName    = "git-remote"
-	GitRemoteFlagDefault = ""
-	gitRemoteFlagUsage   = "Specifies the URL of the module's GitHub repository. "
-
 	InsecureFlagName    = "insecure"
 	InsecureFlagDefault = false
 	insecureFlagUsage   = "Uses an insecure connection to access the registry."
@@ -46,7 +42,6 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 		configFileFlagUsage)
 	flags.StringVar(&opts.Credentials, CredentialsFlagName, CredentialsFlagDefault,
 		credentialsFlagUsage)
-	flags.StringVar(&opts.GitRemote, GitRemoteFlagName, GitRemoteFlagDefault, gitRemoteFlagUsage)
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
 	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault,
 		templateOutputFlagUsage)

@@ -19,7 +19,6 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 			expected: "module-config.yaml",
 		},
 		{name: createcmd.CredentialsFlagName, value: createcmd.CredentialsFlagDefault, expected: ""},
-		{name: createcmd.GitRemoteFlagName, value: createcmd.GitRemoteFlagDefault, expected: ""},
 		{name: createcmd.InsecureFlagName, value: strconv.FormatBool(createcmd.InsecureFlagDefault), expected: "false"},
 		{name: createcmd.TemplateOutputFlagName, value: createcmd.TemplateOutputFlagDefault, expected: "template.yaml"},
 		{name: createcmd.RegistryURLFlagName, value: createcmd.RegistryURLFlagDefault, expected: ""},

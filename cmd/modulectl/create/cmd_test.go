@@ -76,7 +76,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 
 	assert.Equal(t, moduleConfigFile, svc.opts.ConfigFile)
 	assert.Equal(t, credentials, svc.opts.Credentials)
-	assert.Equal(t, gitRemote, svc.opts.GitRemote)
 	assert.Equal(t, insecureFlagSet, svc.opts.Insecure)
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
 	assert.Equal(t, registryURL, svc.opts.RegistryURL)
@@ -119,7 +118,6 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 
 	assert.Equal(t, createcmd.ConfigFileFlagDefault, svc.opts.ConfigFile)
 	assert.Equal(t, createcmd.CredentialsFlagDefault, svc.opts.Credentials)
-	assert.Equal(t, createcmd.GitRemoteFlagDefault, svc.opts.GitRemote)
 	assert.Equal(t, createcmd.InsecureFlagDefault, svc.opts.Insecure)
 	assert.Equal(t, createcmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
 	assert.Equal(t, createcmd.RegistryURLFlagDefault, svc.opts.RegistryURL)

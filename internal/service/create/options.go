@@ -13,7 +13,6 @@ type Options struct {
 	Out                  iotools.Out
 	ConfigFile           string
 	Credentials          string
-	GitRemote            string
 	Insecure             bool
 	TemplateOutput       string
 	RegistryURL          string

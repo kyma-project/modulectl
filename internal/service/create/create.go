@@ -183,16 +183,14 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
 
-	if opts.GitRemote != "" {
-		if err = s.gitSourcesService.AddGitSources(descriptor, opts.GitRemote,
-			moduleConfig.Version); err != nil {
-			return fmt.Errorf("failed to add git sources: %w", err)
-		}
-		if moduleConfig.Security != "" {
-			err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
-			if err != nil {
-				return fmt.Errorf("failed to configure security scanners: %w", err)
-			}
+	if err = s.gitSourcesService.AddGitSources(descriptor, moduleConfig.Repository,
+		moduleConfig.Version); err != nil {
+		return fmt.Errorf("failed to add git sources: %w", err)
+	}
+	if moduleConfig.Security != "" {
+		err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+		if err != nil {
+			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
 	}
 
@@ -248,7 +246,7 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 
 func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
 	opts.Out.Write("- Configuring security scanners config\n")
-	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(opts.GitRemote, moduleConfig.Security)
+	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Repository, moduleConfig.Security)
 	if err != nil {
 		return fmt.Errorf("%w: failed to parse security config data", err)
 	}

@@ -62,7 +62,6 @@ type createCmd struct {
 	registry         string
 	output           string
 	moduleConfigFile string
-	gitRemote        string
 	insecure         bool
 }
 
@@ -81,10 +80,6 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.output != "" {
 		args = append(args, "--output="+cmd.output)
-	}
-
-	if cmd.gitRemote != "" {
-		args = append(args, "--git-remote="+cmd.gitRemote)
 	}
 
 	if cmd.insecure {
