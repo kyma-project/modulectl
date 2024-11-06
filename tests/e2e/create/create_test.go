@@ -339,8 +339,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
 			Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-tar"))
 
-			By("And descriptor.component.sources should be empty")
-			Expect(len(descriptor.Sources)).To(Equal(0))
+			By("And descriptor.component.sources should contain repository entry")
+			Expect(len(descriptor.Sources)).To(Equal(1))
+			source := descriptor.Sources[0]
+			sourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(source.Access)
+			Expect(err).ToNot(HaveOccurred())
+			githubAccessSpec, ok := sourceAccessSpec.(*github.AccessSpec)
+			Expect(ok).To(BeTrue())
+			Expect(github.Type).To(Equal(githubAccessSpec.Type))
+			Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
 
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
@@ -456,14 +463,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing security-scanner-config and different version, and the git-remote flag",
+		It("When invoked with valid module-config containing security-scanner-config and different version",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile: withSecurityConfig,
 					registry:         ociRegistry,
 					insecure:         true,
 					output:           templateOutputPath,
-					gitRemote:        gitRemote,
 				}
 			})
 		It("Then the command should succeed", func() {

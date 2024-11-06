@@ -53,7 +53,6 @@ const (
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"
-	gitRemote          = "https://github.com/kyma-project/template-operator"
 )
 
 // Command wrapper for `modulectl create`

@@ -48,7 +48,6 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	moduleConfigFile := testutils.RandomName(10)
 	credentials := testutils.RandomName(10)
-	gitRemote := testutils.RandomName(10)
 	insecure := "true"
 	templateOutput := testutils.RandomName(10)
 	registryURL := testutils.RandomName(10)
@@ -57,7 +56,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	os.Args = []string{
 		"create",
 		"--config-file", moduleConfigFile,
-		"--git-remote", gitRemote,
 		"--insecure", insecure,
 		"--output", templateOutput,
 		"--registry", registryURL,
