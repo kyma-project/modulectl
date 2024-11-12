@@ -1,11 +1,11 @@
 package fileresolver_test
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"testing"
 
-	"github.com/mandelsoft/goutils/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
