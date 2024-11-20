@@ -3,7 +3,7 @@ module github.com/kyma-project/modulectl
 go 1.23.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.0
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241112094726-752a03026e0d
 	github.com/mandelsoft/vfs v0.4.4
