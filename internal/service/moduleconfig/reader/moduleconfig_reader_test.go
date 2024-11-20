@@ -35,6 +35,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
 	require.Equal(t, "https://example.com/path/to/repository", result.Repository)
 	require.Equal(t, "https://example.com/path/to/documentation", result.Documentation)
+	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, contentprovider.Icons{
 		"module-icon": "https://example.com/path/to/some-icon",
 	}, result.Icons)

@@ -14,6 +14,12 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
+func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(nil)
+	require.ErrorContains(t, err, "fileReader must not be nil")
+	require.Nil(t, securityConfigService)
+}
+
 func Test_GetImageNameAndTag(t *testing.T) {
 	tests := []struct {
 		name              string
@@ -152,11 +158,10 @@ func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&gitServiceSecurityConfigStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{})
 	require.NoError(t, err)
 
-	returned, err := securityConfigService.ParseSecurityConfigData("https://github.com/kyma-project/template-operator",
-		"sec-scanners-config.yaml")
+	returned, err := securityConfigService.ParseSecurityConfigData("sec-scanners-config.yaml")
 	require.NoError(t, err)
 
 	require.Equal(t, securityConfig.RcTag, returned.RcTag)
@@ -166,18 +171,39 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *tes
 	require.Equal(t, securityConfig.WhiteSource.Language, returned.WhiteSource.Language)
 }
 
-func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnRemoteFileReadingError(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&gitServiceNoRemoteFile{})
+func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileExistenceCheckError(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsErrorStub{})
 	require.NoError(t, err)
 
-	_, err = securityConfigService.ParseSecurityConfigData("testUrl", "testFile")
-	require.ErrorContains(t, err, "failed to get security config content")
+	_, err = securityConfigService.ParseSecurityConfigData("testFile")
+	require.ErrorContains(t, err, "failed to check if security config file exists")
 }
 
-type gitServiceSecurityConfigStub struct{}
+func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileReadingError(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderReadFileErrorStub{})
+	require.NoError(t, err)
 
-func (g *gitServiceSecurityConfigStub) GetLatestCommit(_ string) (string, error) {
-	return "latestCommit", nil
+	_, err = securityConfigService.ParseSecurityConfigData("testFile")
+	require.ErrorContains(t, err, "failed to read security config file")
+}
+
+func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileDoesNotExist(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsFalseStub{})
+	require.NoError(t, err)
+
+	_, err = securityConfigService.ParseSecurityConfigData("testFile")
+	require.ErrorContains(t, err, "security config file does not exist")
+}
+
+type fileReaderStub struct{}
+
+func (*fileReaderStub) FileExists(path string) (bool, error) {
+	return true, nil
+}
+
+func (*fileReaderStub) ReadFile(path string) ([]byte, error) {
+	securityConfigBytes, _ := yaml.Marshal(securityConfig)
+	return securityConfigBytes, nil
 }
 
 var securityConfig = contentprovider.SecurityScanConfig{
@@ -190,17 +216,32 @@ var securityConfig = contentprovider.SecurityScanConfig{
 	},
 }
 
-func (g *gitServiceSecurityConfigStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	securityConfigBytes, _ := yaml.Marshal(securityConfig)
-	return string(securityConfigBytes), nil
+type fileReaderFileExistsErrorStub struct{}
+
+func (*fileReaderFileExistsErrorStub) FileExists(path string) (bool, error) {
+	return false, errors.New("error while checking file existence")
 }
 
-type gitServiceNoRemoteFile struct{}
-
-func (*gitServiceNoRemoteFile) GetLatestCommit(_ string) (string, error) {
-	return "latestCommit", nil
+func (*fileReaderFileExistsErrorStub) ReadFile(path string) ([]byte, error) {
+	return nil, errors.New("error while reading file")
 }
 
-func (*gitServiceNoRemoteFile) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "", errors.New("error")
+type fileReaderReadFileErrorStub struct{}
+
+func (*fileReaderReadFileErrorStub) FileExists(path string) (bool, error) {
+	return true, nil
+}
+
+func (*fileReaderReadFileErrorStub) ReadFile(path string) ([]byte, error) {
+	return nil, errors.New("error while reading file")
+}
+
+type fileReaderFileExistsFalseStub struct{}
+
+func (*fileReaderFileExistsFalseStub) FileExists(path string) (bool, error) {
+	return false, nil
+}
+
+func (*fileReaderFileExistsFalseStub) ReadFile(path string) ([]byte, error) {
+	return nil, nil
 }

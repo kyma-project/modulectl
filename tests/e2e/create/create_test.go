@@ -486,13 +486,20 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Name).To(Equal("template-operator-1.0.3"))
 
 			By("And descriptor.component.resources should be correct")
-			Expect(descriptor.Resources).To(HaveLen(2))
+			Expect(descriptor.Resources).To(HaveLen(3))
 			resource := descriptor.Resources[0]
 			Expect(resource.Name).To(Equal("template-operator"))
 			Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 			Expect(resource.Type).To(Equal("ociArtifact"))
 			Expect(resource.Version).To(Equal("1.0.1"))
+
 			resource = descriptor.Resources[1]
+			Expect(resource.Name).To(Equal("template-operator"))
+			Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
+			Expect(resource.Type).To(Equal("ociArtifact"))
+			Expect(resource.Version).To(Equal("2.0.0"))
+
+			resource = descriptor.Resources[2]
 			Expect(resource.Name).To(Equal("raw-manifest"))
 			Expect(resource.Version).To(Equal("1.0.3"))
 
@@ -507,7 +514,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And descriptor.component.resources[1].access should be correct")
 			resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
 			Expect(err).ToNot(HaveOccurred())
-			localBlobAccessSpec, ok := resourceAccessSpec1.(*localblob.AccessSpec)
+			ociArtifactAccessSpec, ok = resourceAccessSpec1.(*ociartifact.AccessSpec)
+			Expect(ok).To(BeTrue())
+			Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
+			Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
+
+			By("And descriptor.component.resources[2].access should be correct")
+			resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+			Expect(err).ToNot(HaveOccurred())
+			localBlobAccessSpec, ok := resourceAccessSpec2.(*localblob.AccessSpec)
 			Expect(ok).To(BeTrue())
 			Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
 			Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
@@ -535,6 +550,25 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/subprojects", "false"))
 			Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/exclude",
 				"**/test/**,**/*_test.go"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with invalid module-config containing not existing security-scanner-config",
+			func() {
+				cmd = createCmd{
+					moduleConfigFile: invalidSecurityConfig,
+					registry:         ociRegistry,
+					insecure:         true,
+					output:           templateOutputPath,
+				}
+			})
+		It("Then the command should succeed", func() {
+			err := cmd.execute()
+
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to parse security config data: security config file does not exist"))
 		})
 	})
 

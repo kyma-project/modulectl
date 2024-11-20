@@ -27,7 +27,7 @@ type FileResolver interface {
 }
 
 type SecurityConfigService interface {
-	ParseSecurityConfigData(gitRepoURL, securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
+	ParseSecurityConfigData(securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
 	AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
 		securityConfig contentprovider.SecurityScanConfig) error
 }
@@ -246,9 +246,9 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 
 func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
 	opts.Out.Write("- Configuring security scanners config\n")
-	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Repository, moduleConfig.Security)
+	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
 	if err != nil {
-		return fmt.Errorf("%w: failed to parse security config data", err)
+		return fmt.Errorf("failed to parse security config data: %w", err)
 	}
 
 	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {

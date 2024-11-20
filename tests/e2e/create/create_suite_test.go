@@ -38,6 +38,7 @@ const (
 	iconsWithoutName           = invalidConfigs + "icons-without-name.yaml"
 	manifestFileref            = invalidConfigs + "manifest-fileref.yaml"
 	defaultCRFileref           = invalidConfigs + "defaultcr-fileref.yaml"
+	invalidSecurityConfig      = invalidConfigs + "not-existing-security.yaml"
 
 	validConfigs                  = testdataDir + "valid/"
 	minimalConfig                 = validConfigs + "minimal.yaml"

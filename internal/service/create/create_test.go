@@ -227,7 +227,7 @@ func (*gitSourcesServiceStub) AddGitSources(_ *compdesc.ComponentDescriptor,
 
 type securityConfigServiceStub struct{}
 
-func (*securityConfigServiceStub) ParseSecurityConfigData(_, _ string) (*contentprovider.SecurityScanConfig, error) {
+func (*securityConfigServiceStub) ParseSecurityConfigData(_ string) (*contentprovider.SecurityScanConfig, error) {
 	return &contentprovider.SecurityScanConfig{}, nil
 }
 

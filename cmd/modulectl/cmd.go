@@ -109,7 +109,8 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create git sources service: %w", err)
 	}
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(gitService)
+
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config service: %w", err)
 	}

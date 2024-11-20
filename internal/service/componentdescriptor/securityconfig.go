@@ -35,37 +35,45 @@ const (
 	refLabel                  = "git.kyma-project.io/ref"
 )
 
-type SecurityConfigService struct {
-	gitService GitService
+type FileReader interface {
+	FileExists(path string) (bool, error)
+	ReadFile(path string) ([]byte, error)
 }
 
-func NewSecurityConfigService(gitService GitService) (*SecurityConfigService, error) {
-	if gitService == nil {
-		return nil, fmt.Errorf("%w: gitService must not be nil", commonerrors.ErrInvalidArg)
+type SecurityConfigService struct {
+	fileReader FileReader
+}
+
+func NewSecurityConfigService(fileReader FileReader) (*SecurityConfigService, error) {
+	if fileReader == nil {
+		return nil, fmt.Errorf("%w: fileReader must not be nil", commonerrors.ErrInvalidArg)
 	}
 
 	return &SecurityConfigService{
-		gitService: gitService,
+		fileReader: fileReader,
 	}, nil
 }
 
-func (s *SecurityConfigService) ParseSecurityConfigData(gitRepoURL, securityConfigFile string) (
+func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile string) (
 	*contentprovider.SecurityScanConfig,
 	error,
 ) {
-	latestCommit, err := s.gitService.GetLatestCommit(gitRepoURL)
+	exists, err := s.fileReader.FileExists(securityConfigFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get latest commit: %w", err)
+		return nil, fmt.Errorf("failed to check if security config file exists: %w", err)
+	}
+	if !exists {
+		return nil, fmt.Errorf("security config file does not exist")
 	}
 
-	securityConfigContent, err := s.gitService.GetRemoteGitFileContent(gitRepoURL, latestCommit, securityConfigFile)
+	securityConfigContent, err := s.fileReader.ReadFile(securityConfigFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get security config content: %w", err)
+		return nil, fmt.Errorf("failed to read security config file: %w", err)
 	}
 
 	securityConfig := &contentprovider.SecurityScanConfig{}
-	if err := yaml.Unmarshal([]byte(securityConfigContent), securityConfig); err != nil {
-		return nil, fmt.Errorf("failed to parse security config file: %w", err)
+	if err := yaml.Unmarshal(securityConfigContent, securityConfig); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal security config file: %w", err)
 	}
 
 	return securityConfig, nil
