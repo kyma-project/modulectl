@@ -35,7 +35,7 @@ const (
 	refLabel                  = "git.kyma-project.io/ref"
 )
 
-ErrSecurityConfigFileDoesNotExist := errors.New("security config file does not exist")
+var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
 
 type FileReader interface {
 	FileExists(path string) (bool, error)
