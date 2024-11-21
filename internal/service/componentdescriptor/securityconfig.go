@@ -35,6 +35,8 @@ const (
 	refLabel                  = "git.kyma-project.io/ref"
 )
 
+ErrSecurityConfigFileDoesNotExist := errors.New("security config file does not exist")
+
 type FileReader interface {
 	FileExists(path string) (bool, error)
 	ReadFile(path string) ([]byte, error)
@@ -63,7 +65,7 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 		return nil, fmt.Errorf("failed to check if security config file exists: %w", err)
 	}
 	if !exists {
-		return nil, errors.New("security config file does not exist")
+		return nil, ErrSecurityConfigFileDoesNotExist
 	}
 
 	securityConfigContent, err := s.fileReader.ReadFile(securityConfigFile)
