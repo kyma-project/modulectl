@@ -63,7 +63,7 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 		return nil, fmt.Errorf("failed to check if security config file exists: %w", err)
 	}
 	if !exists {
-		return nil, fmt.Errorf("security config file does not exist")
+		return nil, errors.New("security config file does not exist")
 	}
 
 	securityConfigContent, err := s.fileReader.ReadFile(securityConfigFile)
