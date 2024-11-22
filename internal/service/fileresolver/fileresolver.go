@@ -19,11 +19,11 @@ type FileResolver struct {
 
 func NewFileResolver(filePattern string, tempFileSystem TempFileSystem) (*FileResolver, error) {
 	if filePattern == "" {
-		return nil, fmt.Errorf("%w: filePattern must not be empty", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("filePattern must not be empty: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if tempFileSystem == nil {
-		return nil, fmt.Errorf("%w: tempFileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("tempFileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &FileResolver{

@@ -18,7 +18,7 @@ type ModuleConfigProvider struct {
 
 func NewModuleConfigProvider(yamlConverter ObjectToYAMLConverter) (*ModuleConfigProvider, error) {
 	if yamlConverter == nil {
-		return nil, fmt.Errorf("%w: yamlConverter must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("yamlConverter must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &ModuleConfigProvider{
@@ -48,19 +48,19 @@ func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleCo
 
 func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 	if args == nil {
-		return fmt.Errorf("%w: args must not be nil", ErrInvalidArg)
+		return fmt.Errorf("args must not be nil: %w", ErrInvalidArg)
 	}
 
 	if value, ok := args[ArgModuleName]; !ok {
-		return fmt.Errorf("%w: %s", ErrMissingArg, ArgModuleName)
+		return fmt.Errorf("%s: %w", ArgModuleName, ErrMissingArg)
 	} else if value == "" {
-		return fmt.Errorf("%w: %s must not be empty", ErrInvalidArg, ArgModuleName)
+		return fmt.Errorf("%s: %w ,must not be empty", ArgModuleName, ErrInvalidArg)
 	}
 
 	if value, ok := args[ArgModuleVersion]; !ok {
-		return fmt.Errorf("%w: %s", ErrMissingArg, ArgModuleVersion)
+		return fmt.Errorf("%s: %w", ArgModuleVersion, ErrMissingArg)
 	} else if value == "" {
-		return fmt.Errorf("%w: %s must not be empty", ErrInvalidArg, ArgModuleVersion)
+		return fmt.Errorf("%s: %w ,must not be empty", ArgModuleVersion, ErrInvalidArg)
 	}
 
 	return nil

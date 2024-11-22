@@ -13,7 +13,7 @@ type SecurityConfig struct {
 
 func NewSecurityConfig(yamlConverter ObjectToYAMLConverter) (*SecurityConfig, error) {
 	if yamlConverter == nil {
-		return nil, fmt.Errorf("%w: yamlConverter must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("yamlConverter must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &SecurityConfig{
@@ -31,16 +31,16 @@ func (s *SecurityConfig) GetDefaultContent(args types.KeyValueArgs) (string, err
 
 func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 	if args == nil {
-		return fmt.Errorf("%w: args must not be nil", ErrInvalidArg)
+		return fmt.Errorf("args must not be nil: %w", ErrInvalidArg)
 	}
 
 	value, ok := args[ArgModuleName]
 	if !ok {
-		return fmt.Errorf("%w: %s", ErrMissingArg, ArgModuleName)
+		return fmt.Errorf("%s: %v", ArgModuleName, ErrMissingArg)
 	}
 
 	if value == "" {
-		return fmt.Errorf("%w: %s must not be empty", ErrInvalidArg, ArgModuleName)
+		return fmt.Errorf("%s: %w must not be empty", ArgModuleName, ErrInvalidArg)
 	}
 
 	return nil

@@ -86,43 +86,43 @@ func NewService(moduleConfigService ModuleConfigService,
 	fileSystem FileSystem,
 ) (*Service, error) {
 	if moduleConfigService == nil {
-		return nil, fmt.Errorf("%w: moduleConfigService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("moduleConfigService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if gitSourcesService == nil {
-		return nil, fmt.Errorf("%w: gitSourcesService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("gitSourcesService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if securityConfigService == nil {
-		return nil, fmt.Errorf("%w: securityConfigService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("securityConfigService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if componentArchiveService == nil {
-		return nil, fmt.Errorf("%w: componentArchiveService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("componentArchiveService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if registryService == nil {
-		return nil, fmt.Errorf("%w: registryService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("registryService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if moduleTemplateService == nil {
-		return nil, fmt.Errorf("%w: moduleTemplateService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("moduleTemplateService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if crdParserService == nil {
-		return nil, fmt.Errorf("%w: crdParserService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("crdParserService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if manifestFileResolver == nil {
-		return nil, fmt.Errorf("%w: manifestFileResolver must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("manifestFileResolver must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if defaultCRFileResolver == nil {
-		return nil, fmt.Errorf("%w: defaultCRFileResolver must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("defaultCRFileResolver must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if fileSystem == nil {
-		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("fileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
@@ -219,19 +219,19 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 
 	if err := s.registryService.PushComponentVersion(archive, opts.Insecure, opts.Credentials,
 		opts.RegistryURL); err != nil {
-		return fmt.Errorf("%w: failed to push component archive", err)
+		return fmt.Errorf("failed to push component archive: %w", err)
 	}
 
 	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials, opts.RegistryURL)
 	if err != nil {
-		return fmt.Errorf("%w: failed to get component version", err)
+		return fmt.Errorf("failed to get component version: %w", err)
 	}
 
 	var crData []byte
 	if defaultCRFilePath != "" {
 		crData, err = s.fileSystem.ReadFile(defaultCRFilePath)
 		if err != nil {
-			return fmt.Errorf("%w: failed to get default CR data", err)
+			return fmt.Errorf("failed to get default CR data: %w", err)
 		}
 	}
 
@@ -239,7 +239,7 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 	descriptor := componentVersionAccess.GetDescriptor()
 	if err = s.moduleTemplateService.GenerateModuleTemplate(moduleConfig, descriptor,
 		crData, isCRDClusterScoped, opts.TemplateOutput); err != nil {
-		return fmt.Errorf("%w: failed to generate module template", err)
+		return fmt.Errorf("failed to generate module template: %w", err)
 	}
 	return nil
 }
@@ -252,7 +252,7 @@ func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescript
 	}
 
 	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
-		return fmt.Errorf("%w: failed to append security scan config", err)
+		return fmt.Errorf("failed to append security scan config: %w", err)
 	}
 	return nil
 }

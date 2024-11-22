@@ -69,7 +69,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	}
 
 	if len(moduleConfig.Icons) == 0 {
-		return fmt.Errorf("failed to validate module icons: %w: must contain at least one icon",
+		return fmt.Errorf("failed to validate module icons: %v: must contain at least one icon",
 			commonerrors.ErrInvalidOption)
 	}
 

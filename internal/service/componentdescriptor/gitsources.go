@@ -23,7 +23,7 @@ type GitSourcesService struct {
 
 func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
 	if gitService == nil {
-		return nil, fmt.Errorf("%w: gitService must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("gitService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &GitSourcesService{

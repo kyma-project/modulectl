@@ -21,28 +21,28 @@ type Options struct {
 
 func (opts Options) Validate() error {
 	if opts.Out == nil {
-		return fmt.Errorf("%w: opts.Out must not be nil", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.Out must not be nil: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.ConfigFile == "" {
-		return fmt.Errorf("%w:  opts.ConfigFile must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.ConfigFile must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.Credentials != "" {
 		matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
 		if err != nil {
-			return fmt.Errorf("%w: opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
+			return fmt.Errorf("opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
 		} else if !matched {
-			return fmt.Errorf("%w: opts.Credentials is in invalid format", commonerrors.ErrInvalidOption)
+			return fmt.Errorf("opts.Credentials is in invalid format: %w", commonerrors.ErrInvalidOption)
 		}
 	}
 
 	if opts.TemplateOutput == "" {
-		return fmt.Errorf("%w:  opts.TemplateOutput must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.TemplateOutput must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.RegistryURL != "" && !strings.HasPrefix(opts.RegistryURL, "http") {
-		return fmt.Errorf("%w:  opts.RegistryURL does not start with http(s)", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
 	}
 
 	return nil
