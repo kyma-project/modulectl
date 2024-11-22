@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	_ "embed"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -8,8 +9,6 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	iotools "github.com/kyma-project/modulectl/tools/io"
-
-	_ "embed"
 )
 
 //go:embed use.txt
@@ -30,7 +29,7 @@ type Service interface {
 
 func NewCmd(service Service) (*cobra.Command, error) {
 	if service == nil {
-		return nil, fmt.Errorf("%w: service must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("service must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	opts := scaffold.Options{}

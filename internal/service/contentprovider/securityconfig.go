@@ -36,7 +36,7 @@ func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 
 	value, ok := args[ArgModuleName]
 	if !ok {
-		return fmt.Errorf("%s: %v", ArgModuleName, ErrMissingArg)
+		return fmt.Errorf("%s: %w", ArgModuleName, ErrMissingArg)
 	}
 
 	if value == "" {
