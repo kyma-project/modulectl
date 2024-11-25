@@ -357,7 +357,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := moduleconfigreader.ValidateModuleConfig(test.moduleConfig)
 			if test.expectedError != nil {
-				require.ErrorContains(t, err, test.expectedError.Error())
+				require.ErrorAs(t, err, &test.expectedError)
+				require.ErrorIs(t, err, test.expectedError, test.expectedError.Error())
 				return
 			}
 			require.NoError(t, err)
