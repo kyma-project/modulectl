@@ -88,7 +88,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module name: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module version",
@@ -103,7 +103,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module version: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("opts.ModuleVersion failed to parse as semantic version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
@@ -118,7 +118,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module namespace: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "empty manifest path",
@@ -133,7 +133,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: must not be empty",
+			expectedError: fmt.Errorf("failed to validate manifest: must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -149,7 +149,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: %w: './test' is not using https scheme",
+			expectedError: fmt.Errorf("failed to validate manifest: './test' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -166,7 +166,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				},
 				DefaultCR: "/test",
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: %w: '/test' is not using https scheme",
+			expectedError: fmt.Errorf("failed to validate default CR: '/test' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -182,7 +182,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate repository: %w: must not be empty",
+			expectedError: fmt.Errorf("failed to validate repository: must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -198,7 +198,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate repository: %w: 'some repository' is not using https scheme",
+			expectedError: fmt.Errorf("failed to validate repository: 'some repository' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -214,7 +214,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate documentation: %w: must not be empty",
+			expectedError: fmt.Errorf("failed to validate documentation: must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -230,7 +230,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate documentation: %w: 'some documentation' is not using https scheme",
+			expectedError: fmt.Errorf("failed to validate documentation: 'some documentation' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -244,7 +244,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Documentation: "https://example.com/path/to/documentation",
 				Icons:         contentprovider.Icons{},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: %w: must contain at least one icon",
+			expectedError: fmt.Errorf("failed to validate module icons: must contain at least one icon: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -260,7 +260,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: %w: name must not be empty",
+			expectedError: fmt.Errorf("failed to validate module icons: name must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -276,7 +276,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: %w: link must not be empty",
+			expectedError: fmt.Errorf("failed to validate module icons: link must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -292,7 +292,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "this is not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: failed to validate link: %w: 'this is not a URL' is not using https scheme",
+			expectedError: fmt.Errorf("failed to validate module icons: failed to validate link: 'this is not a URL' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -311,7 +311,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: %w: '%%%% not a URL' is not a valid URL",
+			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: '%%%% not a URL' is not a valid URL: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -330,7 +330,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: name must not be empty",
+			expectedError: fmt.Errorf("failed to validate resources: name must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -349,7 +349,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"name": "",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: %w: link must not be empty",
+			expectedError: fmt.Errorf("failed to validate resources: link must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
 	}
@@ -357,7 +357,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := moduleconfigreader.ValidateModuleConfig(test.moduleConfig)
 			if test.expectedError != nil {
-				require.ErrorIs(t, err, test.expectedError, test.expectedError.Error())
+				require.ErrorContains(t, err, test.expectedError.Error())
 				return
 			}
 			require.NoError(t, err)

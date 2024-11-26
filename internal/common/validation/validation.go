@@ -117,8 +117,8 @@ func ValidateIsValidHTTPSURL(input string) error {
 func validateSemanticVersion(version string) error {
 	_, err := semver.StrictNewVersion(strings.TrimSpace(version))
 	if err != nil {
-		return fmt.Errorf("opts.ModuleVersion failed to parse as semantic version: %w: %w",
-			commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("opts.ModuleVersion failed to parse as semantic version: %w",
+			commonerrors.ErrInvalidOption)
 	}
 
 	return nil
