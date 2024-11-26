@@ -47,7 +47,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleName must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("opts.ModuleName must not be empty: invalid Option"))
 		})
 	})
 
@@ -61,7 +61,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("invalid Option: opts.ModuleVersion must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("opts.ModuleVersion must not be empty: invalid Option"))
 		})
 	})
 
@@ -75,7 +75,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		It("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: invalid Option: must not be empty"))
+			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: must not be empty: invalid Option"))
 		})
 	})
 
