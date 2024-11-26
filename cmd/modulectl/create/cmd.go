@@ -1,7 +1,6 @@
 package create
 
 import (
-	_ "embed"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -9,6 +8,8 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
+
+	_ "embed"
 )
 
 //go:embed use.txt
