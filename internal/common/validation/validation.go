@@ -25,8 +25,7 @@ func ValidateModuleName(name string) error {
 	}
 
 	if len(name) > moduleNameMaxLength {
-		return fmt.Errorf("%w: opts.ModuleName length must not exceed %q characters", commonerrors.ErrInvalidOption,
-			moduleNameMaxLength)
+		return fmt.Errorf("opts.ModuleName length must not exceed %q characters: %w", moduleNameMaxLength, commonerrors.ErrInvalidOption)
 	}
 
 	if matched, err := regexp.MatchString(moduleNamePattern, name); err != nil {
@@ -53,7 +52,7 @@ func ValidateModuleVersion(version string) error {
 
 func ValidateModuleNamespace(namespace string) error {
 	if namespace == "" {
-		return fmt.Errorf("%w: opts.ModuleNamespace must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.ModuleNamespace must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if err := ValidateNamespace(namespace); err != nil {
@@ -65,9 +64,9 @@ func ValidateModuleNamespace(namespace string) error {
 
 func ValidateNamespace(namespace string) error {
 	if len(namespace) > namespaceMaxLength {
-		return fmt.Errorf("%w: opts.ModuleNamespace length must not exceed %q characters",
-			commonerrors.ErrInvalidOption,
-			namespaceMaxLength)
+		return fmt.Errorf("opts.ModuleNamespace length must not exceed %q characters: %w",
+			namespaceMaxLength,
+			commonerrors.ErrInvalidOption)
 	}
 
 	if matched, err := regexp.MatchString(namespacePattern, namespace); err != nil {
@@ -105,11 +104,11 @@ func ValidateIsValidHTTPSURL(input string) error {
 
 	_url, err := url.Parse(input)
 	if err != nil {
-		return fmt.Errorf("%w: '%s' is not a valid URL", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("'%s' is not a valid URL: %w", input, commonerrors.ErrInvalidOption)
 	}
 
 	if _url.Scheme != "https" {
-		return fmt.Errorf("%w: '%s' is not using https scheme", commonerrors.ErrInvalidOption, input)
+		return fmt.Errorf("'%s' is not using https scheme: %w", input, commonerrors.ErrInvalidOption)
 	}
 
 	return nil
@@ -118,7 +117,7 @@ func ValidateIsValidHTTPSURL(input string) error {
 func validateSemanticVersion(version string) error {
 	_, err := semver.StrictNewVersion(strings.TrimSpace(version))
 	if err != nil {
-		return fmt.Errorf("%w: opts.ModuleVersion failed to parse as semantic version: %w",
+		return fmt.Errorf("opts.ModuleVersion failed to parse as semantic version: %w: %w",
 			commonerrors.ErrInvalidOption, err)
 	}
 

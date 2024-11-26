@@ -29,7 +29,7 @@ type Service struct {
 
 func NewService(ociRepository OCIRepository, repo cpi.Repository) (*Service, error) {
 	if ociRepository == nil {
-		return nil, fmt.Errorf("%w: ociRepository must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("ociRepository must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
