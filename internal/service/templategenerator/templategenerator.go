@@ -59,6 +59,8 @@ metadata:
     {{- end}}
 {{- end}} 
 spec:
+  moduleName: {{.ModuleName}}
+  version: {{.ModuleVersion}}
   mandatory: {{.Mandatory}}
   info:
     repository: {{.Repository}}
@@ -105,8 +107,10 @@ spec:
 )
 
 type moduleTemplateData struct {
+	ModuleName          string
 	ResourceName        string
 	Namespace           string
+	ModuleVersion       string
 	Descriptor          compdesc.ComponentDescriptorVersion
 	Repository          string
 	Documentation       string
@@ -159,8 +163,10 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	mtData := moduleTemplateData{
+		ModuleName:          shortName,
 		ResourceName:        moduleTemplateName,
 		Namespace:           moduleConfig.Namespace,
+		ModuleVersion:       moduleConfig.Version,
 		Descriptor:          cva,
 		Repository:          moduleConfig.Repository,
 		Documentation:       moduleConfig.Documentation,
@@ -217,7 +223,6 @@ func generateAnnotations(config *contentprovider.ModuleConfig, isCrdClusterScope
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[shared.ModuleVersionAnnotation] = config.Version
 	if isCrdClusterScoped {
 		annotations[shared.IsClusterScopedAnnotation] = shared.EnableLabelValue
 	} else {
