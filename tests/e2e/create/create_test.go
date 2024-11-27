@@ -304,6 +304,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Name).To(Equal("template-operator-1.0.0"))
 
 			By("And spec.info should be correct")
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.0"))
 			Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
 			Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 			Expect(template.Spec.Info.Icons).To(HaveLen(1))
@@ -312,7 +314,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And annotations should be correct")
 			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.0"))
 			Expect(annotations[shared.IsClusterScopedAnnotation]).To(Equal("false"))
 
 			By("And descriptor.component.repositoryContexts should be correct")
@@ -402,10 +403,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.1"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.1"))
 
 			By("And new annotation should be correctly added")
 			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.1"))
 			Expect(annotations[shared.IsClusterScopedAnnotation]).To(Equal("false"))
 			Expect(annotations["operator.kyma-project.io/doc-url"]).To(Equal("https://kyma-project.io"))
 
@@ -437,10 +439,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.2"))
-
-			By("And annotation should have correct version")
-			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.2"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.2"))
 
 			By("And descriptor.component.resources should be correct")
 			Expect(descriptor.Resources).To(HaveLen(2))
@@ -484,6 +484,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.3"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.3"))
 
 			By("And descriptor.component.resources should be correct")
 			Expect(descriptor.Resources).To(HaveLen(3))
@@ -594,10 +596,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.4"))
-
-			By("And annotation should have correct version")
-			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.4"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.4"))
 
 			By("And spec.mandatory should be true")
 			Expect(template.Spec.Mandatory).To(BeTrue())
@@ -626,10 +626,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.5"))
-
-			By("And annotation should have correct version")
-			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.5"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.5"))
 
 			By("And spec.manager should be correct")
 			manager := template.Spec.Manager
@@ -665,10 +663,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			descriptor := getDescriptor(template)
 			Expect(descriptor).ToNot(BeNil())
 			Expect(template.Name).To(Equal("template-operator-1.0.6"))
-
-			By("And annotation should have correct version")
-			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.6"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.6"))
 
 			By("And spec.manager should be correct")
 			manager := template.Spec.Manager
@@ -704,10 +700,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(descriptor).ToNot(BeNil())
 
 			Expect(template.Name).To(Equal("template-operator-1.0.7"))
-
-			By("And annotation should have correct version")
-			annotations := template.Annotations
-			Expect(annotations[shared.ModuleVersionAnnotation]).To(Equal("1.0.7"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.7"))
 
 			By("And spec.associatedResources should be correct")
 			resources := template.Spec.AssociatedResources
