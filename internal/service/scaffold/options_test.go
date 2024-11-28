@@ -81,7 +81,7 @@ func Test_Validate_Options(t *testing.T) {
 				ModuleVersion: "invalid",
 			},
 			wantErr: true,
-			errMsg:  "opts.ModuleVersion failed to parse as semantic version",
+			errMsg:  "opts.ModuleVersion failed to be parsed as semantic version",
 		},
 		{
 			name: "ModuleConfigFileName is empty",

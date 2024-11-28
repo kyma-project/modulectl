@@ -40,7 +40,7 @@ func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 	}
 
 	if value == "" {
-		return fmt.Errorf("%s: %w must not be empty", ArgModuleName, ErrInvalidArg)
+		return fmt.Errorf("%s must not be empty: %w", ArgModuleName, ErrInvalidArg)
 	}
 
 	return nil

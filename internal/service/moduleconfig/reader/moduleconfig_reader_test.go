@@ -103,7 +103,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("opts.ModuleVersion failed to parse as semantic version: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("opts.ModuleVersion failed to be parsed as semantic version: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
