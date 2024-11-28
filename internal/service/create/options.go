@@ -31,7 +31,7 @@ func (opts Options) Validate() error {
 	if opts.Credentials != "" {
 		matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
 		if err != nil {
-			return fmt.Errorf("%w: opts.Credentials could not be parsed: %w", commonerrors.ErrInvalidOption, err)
+			return fmt.Errorf("opts.Credentials could not be parsed: %w: %w", commonerrors.ErrInvalidOption, err)
 		} else if !matched {
 			return fmt.Errorf("opts.Credentials is in invalid format: %w", commonerrors.ErrInvalidOption)
 		}

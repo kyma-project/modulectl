@@ -51,7 +51,7 @@ func Test_GenerateFile_Succeeds_WhenFileDoesAlreadyExist(t *testing.T) {
 
 	require.NoError(t, result)
 	require.Len(t, out.sink, 1)
-	assert.Contains(t, out.sink[0], "The test-kind file already exists, reusing:")
+	assert.Equal(t, out.sink[0], "the path: 'test-kind' file already exists, reusing: 'some-path'\n")
 }
 
 func Test_GenerateFile_ReturnsError_WhenFileGenerationReturnsError(t *testing.T) {

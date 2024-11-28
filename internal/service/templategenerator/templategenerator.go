@@ -32,7 +32,7 @@ type Service struct {
 
 func NewService(fileSystem FileSystem) (*Service, error) {
 	if fileSystem == nil {
-		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("fileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{

@@ -23,11 +23,11 @@ type ArchiveFileSystem struct {
 
 func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) (*ArchiveFileSystem, error) {
 	if memoryFileSystem == nil {
-		return nil, fmt.Errorf("%w: memoryFileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("memoryFileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if osFileSystem == nil {
-		return nil, fmt.Errorf("%w: osFileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("osFileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &ArchiveFileSystem{

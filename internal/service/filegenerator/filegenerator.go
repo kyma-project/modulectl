@@ -60,7 +60,7 @@ func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValue
 
 func (s *Service) writeFile(content, path string) error {
 	if err := s.fileWriter.WriteFile(path, content); err != nil {
-		return fmt.Errorf("%w %s: %w", ErrWritingFile, path, err)
+		return fmt.Errorf("%w at %s: %w", ErrWritingFile, path, err)
 	}
 
 	return nil

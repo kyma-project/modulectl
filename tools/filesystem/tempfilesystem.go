@@ -58,18 +58,21 @@ func getBytesFromURL(url *url.URL) ([]byte, error) {
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("http GET request failed for %s: %w", url, err)
+		return nil, fmt.Errorf("failed to create HTTP GET request for %s: %w", url, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http GET request failed for %s: %w", url, err)
+		return nil, fmt.Errorf("HTTP GET request failed for %s: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			err = fmt.Errorf("failed to close response body: %w", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%w: bad status for GET request to %s: %q", errBadHTTPStatus, url,
-			resp.StatusCode)
+		return nil, fmt.Errorf("received status code %d for GET request to %s: %w", resp.StatusCode, url, errBadHTTPStatus)
 	}
 
 	data, err := io.ReadAll(resp.Body)

@@ -54,13 +54,13 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 	if value, ok := args[ArgModuleName]; !ok {
 		return fmt.Errorf("%s: %w", ArgModuleName, ErrMissingArg)
 	} else if value == "" {
-		return fmt.Errorf("%s: %w ,must not be empty", ArgModuleName, ErrInvalidArg)
+		return fmt.Errorf("must not be empty: %s: %w", ArgModuleName, ErrInvalidArg)
 	}
 
 	if value, ok := args[ArgModuleVersion]; !ok {
 		return fmt.Errorf("%s: %w", ArgModuleVersion, ErrMissingArg)
 	} else if value == "" {
-		return fmt.Errorf("%s: %w ,must not be empty", ArgModuleVersion, ErrInvalidArg)
+		return fmt.Errorf("must not be empty: %s: %w", ArgModuleVersion, ErrInvalidArg)
 	}
 
 	return nil

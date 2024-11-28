@@ -24,7 +24,7 @@ type Options struct {
 
 func (opts Options) Validate() error {
 	if opts.Out == nil {
-		return fmt.Errorf("%w: opts.Out must not be nil", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.Out must not be nil: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if err := opts.validateModuleName(); err != nil {
@@ -40,11 +40,11 @@ func (opts Options) Validate() error {
 	}
 
 	if opts.ModuleConfigFileName == "" {
-		return fmt.Errorf("%w: opts.ModuleConfigFileName must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.ModuleConfigFileName must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.ManifestFileName == "" {
-		return fmt.Errorf("%w: opts.ManifestFileName must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.ManifestFileName must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	return nil
@@ -52,19 +52,19 @@ func (opts Options) Validate() error {
 
 func (opts Options) validateDirectory() error {
 	if opts.Directory == "" {
-		return fmt.Errorf("%w: opts.Directory must not be empty", commonerrors.ErrInvalidOption)
+		return fmt.Errorf("opts.Directory must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	fileInfo, err := os.Stat(opts.Directory)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("%w: directory %s does not exist", commonerrors.ErrInvalidOption, opts.Directory)
+			return fmt.Errorf("directory %s does not exist: %w: ", opts.Directory, commonerrors.ErrInvalidOption)
 		}
-		return fmt.Errorf("%w: failed to get directory info %s: %w", commonerrors.ErrInvalidOption, opts.Directory, err)
+		return fmt.Errorf("failed to get directory info %s: %w: %w", opts.Directory, commonerrors.ErrInvalidOption, err)
 	}
 
 	if !fileInfo.IsDir() {
-		return fmt.Errorf("%w: %s is not a directory", commonerrors.ErrInvalidOption, opts.Directory)
+		return fmt.Errorf("%s is not a directory: %w", opts.Directory, commonerrors.ErrInvalidOption)
 	}
 
 	return nil
@@ -72,7 +72,7 @@ func (opts Options) validateDirectory() error {
 
 func (opts Options) validateModuleName() error {
 	if err := validation.ValidateModuleName(opts.ModuleName); err != nil {
-		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("module name: %w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (opts Options) validateModuleName() error {
 
 func (opts Options) validateVersion() error {
 	if err := validation.ValidateModuleVersion(opts.ModuleVersion); err != nil {
-		return fmt.Errorf("%w: %w", commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("module version: %w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
 	return nil

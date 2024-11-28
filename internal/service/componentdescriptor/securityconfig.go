@@ -48,7 +48,7 @@ type SecurityConfigService struct {
 
 func NewSecurityConfigService(fileReader FileReader) (*SecurityConfigService, error) {
 	if fileReader == nil {
-		return nil, fmt.Errorf("%w: fileReader must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("fileReader must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &SecurityConfigService{
@@ -193,12 +193,12 @@ func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey 
 func GetImageNameAndTag(imageURL string) (string, string, error) {
 	imageTag := strings.Split(imageURL, ":")
 	if len(imageTag) != imageTagSlicesLength {
-		return "", "", fmt.Errorf("%w: , image URL: %s", errInvalidURL, imageURL)
+		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
 	}
 
 	imageName := strings.Split(imageTag[0], "/")
 	if len(imageName) == 0 {
-		return "", "", fmt.Errorf("%w: , image URL: %s", errInvalidURL, imageURL)
+		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
 	}
 
 	return imageName[len(imageName)-1], imageTag[len(imageTag)-1], nil

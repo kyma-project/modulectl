@@ -29,15 +29,15 @@ func NewService(
 	fileGenerator FileGenerator,
 ) (*Service, error) {
 	if kind == "" {
-		return nil, fmt.Errorf("%w: kind must not be empty", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if fileSystem == nil {
-		return nil, fmt.Errorf("%w: fileSystem must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("fileSystem must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if fileGenerator == nil {
-		return nil, fmt.Errorf("%w: fileGenerator must not be nil", commonerrors.ErrInvalidArg)
+		return nil, fmt.Errorf("fileGenerator must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
@@ -50,17 +50,17 @@ func NewService(
 func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
 	fileExists, err := s.fileReader.FileExists(path)
 	if err != nil {
-		return fmt.Errorf("%w %s: %w", ErrCheckingFileExistence, path, err)
+		return fmt.Errorf("the path: '%s': %w: %w", path, ErrCheckingFileExistence, err)
 	}
 
 	if fileExists {
-		out.Write(fmt.Sprintf("The %s file already exists, reusing: %s\n", s.kind, path))
+		out.Write(fmt.Sprintf("the path: '%s' file already exists, reusing: '%s'\n", s.kind, path))
 		return nil
 	}
 
 	err = s.fileGenerator.GenerateFile(out, path, args)
 	if err != nil {
-		return fmt.Errorf("%w: %w", ErrGeneratingFile, err)
+		return fmt.Errorf("the path: '%s': %w: %w", path, ErrGeneratingFile, err)
 	}
 
 	return nil
