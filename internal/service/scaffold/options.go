@@ -58,7 +58,7 @@ func (opts Options) validateDirectory() error {
 	fileInfo, err := os.Stat(opts.Directory)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("directory %s does not exist: %w:", opts.Directory, commonerrors.ErrInvalidOption)
+			return fmt.Errorf("directory %s does not exist: %w", opts.Directory, commonerrors.ErrInvalidOption)
 		}
 		return fmt.Errorf("failed to get directory info %s: %w: %w", opts.Directory, commonerrors.ErrInvalidOption, err)
 	}
