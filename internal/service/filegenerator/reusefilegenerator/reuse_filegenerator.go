@@ -50,17 +50,17 @@ func NewService(
 func (s *Service) GenerateFile(out iotools.Out, path string, args types.KeyValueArgs) error {
 	fileExists, err := s.fileReader.FileExists(path)
 	if err != nil {
-		return fmt.Errorf("the path: '%s': %w: %w", path, ErrCheckingFileExistence, err)
+		return fmt.Errorf("the '%s' file path: %w: %w", path, ErrCheckingFileExistence, err)
 	}
 
 	if fileExists {
-		out.Write(fmt.Sprintf("the path: '%s' file already exists, reusing: '%s'\n", s.kind, path))
+		out.Write(fmt.Sprintf("the '%s' file path already exists, reusing: '%s'\n", s.kind, path))
 		return nil
 	}
 
 	err = s.fileGenerator.GenerateFile(out, path, args)
 	if err != nil {
-		return fmt.Errorf("the path: '%s': %w: %w", path, ErrGeneratingFile, err)
+		return fmt.Errorf("the '%s' file path: %w: %w", path, ErrGeneratingFile, err)
 	}
 
 	return nil

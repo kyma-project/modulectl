@@ -58,7 +58,7 @@ func (opts Options) validateDirectory() error {
 	fileInfo, err := os.Stat(opts.Directory)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("directory %s does not exist: %w: ", opts.Directory, commonerrors.ErrInvalidOption)
+			return fmt.Errorf("directory %s does not exist: %w:", opts.Directory, commonerrors.ErrInvalidOption)
 		}
 		return fmt.Errorf("failed to get directory info %s: %w: %w", opts.Directory, commonerrors.ErrInvalidOption, err)
 	}
@@ -72,7 +72,7 @@ func (opts Options) validateDirectory() error {
 
 func (opts Options) validateModuleName() error {
 	if err := validation.ValidateModuleName(opts.ModuleName); err != nil {
-		return fmt.Errorf("module name: %w: %w", commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("opts.ModuleName: %w: %w", commonerrors.ErrInvalidOption, err)
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (opts Options) validateModuleName() error {
 
 func (opts Options) validateVersion() error {
 	if err := validation.ValidateModuleVersion(opts.ModuleVersion); err != nil {
-		return fmt.Errorf("module version: %w: %w", commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("opts.ModuleVersion: %w", err)
 	}
 
 	return nil
