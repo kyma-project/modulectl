@@ -72,7 +72,7 @@ func (opts Options) validateDirectory() error {
 
 func (opts Options) validateModuleName() error {
 	if err := validation.ValidateModuleName(opts.ModuleName); err != nil {
-		return fmt.Errorf("opts.ModuleName: %w: %w", commonerrors.ErrInvalidOption, err)
+		return fmt.Errorf("opts.ModuleName: %w", err)
 	}
 
 	return nil
