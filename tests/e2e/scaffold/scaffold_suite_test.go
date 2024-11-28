@@ -61,7 +61,7 @@ func (cmd *scaffoldCmd) execute() error {
 		args = append(args, "--overwrite=true")
 	}
 
-	command = exec.Command("/Users/Mo/Projects/kyma-operator-manager/modulectl/bin/modulectl-darwin-arm", args...)
+	command = exec.Command("modulectl", args...)
 	cmdOut, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("scaffold command failed with output: %s and error: %w", cmdOut, err)
