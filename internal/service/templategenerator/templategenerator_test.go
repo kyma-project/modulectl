@@ -58,6 +58,8 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "test-data")
