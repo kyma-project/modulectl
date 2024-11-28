@@ -3,6 +3,8 @@
 package create_test
 
 import (
+	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 
@@ -22,6 +24,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
+
+func printErrorChain(err error) {
+	fmt.Println("Error chain:")
+	for err != nil {
+		fmt.Printf(" - %v\n", err)
+		err = errors.Unwrap(err)
+	}
+}
 
 var _ = Describe("Test 'create' command", Ordered, func() {
 	Context("Given 'modulectl create' command", func() {
@@ -776,6 +786,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		It("Then the command should fail", func() {
 			err := cmd.execute()
+			printErrorChain(err)
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: './template-operator.yaml' is not using https scheme: invalid Option"))
 		})
@@ -790,8 +801,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		It("Then the command should fail", func() {
 			err := cmd.execute()
+			printErrorChain(err)
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: '/tmp/default-sample-cr.yaml' is not using https scheme: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("failed to be parsed module config: failed to validate module config: failed to validate default CR: '/tmp/default-sample-cr.yaml' is not using https scheme: invalid Option"))
 		})
 	})
 })
