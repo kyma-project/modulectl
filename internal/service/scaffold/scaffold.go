@@ -85,7 +85,7 @@ func (s *Service) Run(opts Options) error {
 			opts.Out,
 			securityConfigFilePath,
 			types.KeyValueArgs{contentprovider.ArgModuleName: opts.ModuleName}); err != nil {
-			return fmt.Errorf("failed to generate security config file %q at %q for module %q: %w", opts.SecurityConfigFileName, securityConfigFilePath, opts.ModuleName, err)
+			return fmt.Errorf("failed to generate security config file %q at %q: %w", opts.SecurityConfigFileName, securityConfigFilePath, err)
 		}
 	}
 
