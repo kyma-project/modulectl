@@ -57,35 +57,35 @@ func NewService(moduleConfigService ModuleConfigService,
 
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
-		return err
+		return fmt.Errorf("validation failed for options: %w", err)
 	}
 
 	if err := s.moduleConfigService.ForceExplicitOverwrite(opts.Directory, opts.ModuleConfigFileName,
 		opts.ModuleConfigFileOverwrite); err != nil {
-		return fmt.Errorf("%s %w: %w", opts.ModuleConfigFileName, ErrOverwritingFile, err)
+		return fmt.Errorf("failed to force explicit overwrite for file %q in directory %q: %w", opts.ModuleConfigFileName, opts.Directory, err)
 	}
 
 	manifestFilePath := path.Join(opts.Directory, opts.ManifestFileName)
 	if err := s.manifestService.GenerateFile(opts.Out, manifestFilePath, nil); err != nil {
-		return fmt.Errorf("%s %w: %w", opts.ManifestFileName, ErrGeneratingFile, err)
+		return fmt.Errorf("failed to generate manifest file %q at %q: %w", opts.ManifestFileName, manifestFilePath, err)
 	}
 
-	defaultCRFilePath := ""
+	var defaultCRFilePath string
 	if opts.defaultCRFileNameConfigured() {
 		defaultCRFilePath = path.Join(opts.Directory, opts.DefaultCRFileName)
 		if err := s.defaultCRService.GenerateFile(opts.Out, defaultCRFilePath, nil); err != nil {
-			return fmt.Errorf("%s %w: %w", opts.DefaultCRFileName, ErrGeneratingFile, err)
+			return fmt.Errorf("failed to generate default CR file %q at %q: %w", opts.DefaultCRFileName, defaultCRFilePath, err)
 		}
 	}
 
-	securityConfigFilePath := ""
+	var securityConfigFilePath string
 	if opts.securityConfigFileNameConfigured() {
 		securityConfigFilePath = path.Join(opts.Directory, opts.SecurityConfigFileName)
 		if err := s.securityConfigService.GenerateFile(
 			opts.Out,
 			securityConfigFilePath,
 			types.KeyValueArgs{contentprovider.ArgModuleName: opts.ModuleName}); err != nil {
-			return fmt.Errorf("%s %w: %w", opts.SecurityConfigFileName, ErrGeneratingFile, err)
+			return fmt.Errorf("failed to generate security config file %q at %q for module %q: %w", opts.SecurityConfigFileName, securityConfigFilePath, opts.ModuleName, err)
 		}
 	}
 
@@ -100,7 +100,7 @@ func (s *Service) Run(opts Options) error {
 			contentprovider.ArgDefaultCRFile:      defaultCRFilePath,
 			contentprovider.ArgSecurityConfigFile: securityConfigFilePath,
 		}); err != nil {
-		return fmt.Errorf("%s %w: %w", opts.ModuleConfigFileName, ErrGeneratingFile, err)
+		return fmt.Errorf("failed to generate module config file %q at %q: %w", opts.ModuleConfigFileName, moduleConfigFilePath, err)
 	}
 
 	return nil

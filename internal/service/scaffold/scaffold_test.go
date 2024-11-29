@@ -79,7 +79,6 @@ func Test_CreateScaffold_ReturnsError_WhenGeneratingManifestFileFails(t *testing
 
 	result := svc.Run(newScaffoldOptionsBuilder().build())
 
-	require.ErrorIs(t, result, scaffold.ErrGeneratingFile)
 	require.ErrorIs(t, result, errSomeFileGeneratorError)
 	assert.Contains(t, result.Error(), "manifest.yaml")
 }
@@ -117,7 +116,6 @@ func Test_CreateScaffold_ReturnsError_WhenGeneratingDefaultCRFileFails(t *testin
 
 	result := svc.Run(newScaffoldOptionsBuilder().build())
 
-	require.ErrorIs(t, result, scaffold.ErrGeneratingFile)
 	require.ErrorIs(t, result, errSomeFileGeneratorError)
 	assert.Contains(t, result.Error(), "default-cr.yaml")
 }
@@ -143,7 +141,6 @@ func Test_CreateScaffold_ReturnsError_WhenGeneratingSecurityConfigFileFails(t *t
 
 	result := svc.Run(newScaffoldOptionsBuilder().build())
 
-	require.ErrorIs(t, result, scaffold.ErrGeneratingFile)
 	require.ErrorIs(t, result, errSomeFileGeneratorError)
 	assert.Contains(t, result.Error(), "security-config.yaml")
 }
@@ -169,7 +166,6 @@ func Test_CreateScaffold_ReturnsError_WhenGeneratingModuleConfigReturnsError(t *
 
 	result := svc.Run(newScaffoldOptionsBuilder().build())
 
-	require.ErrorIs(t, result, scaffold.ErrGeneratingFile)
 	require.ErrorIs(t, result, errSomeFileGeneratorError)
 	assert.Contains(t, result.Error(), "module-config.yaml")
 }
