@@ -1,4 +1,7 @@
 module-name: modulectl
+kind: kcp
+checkmarxOne:
+  checkmarx_preset: golang
 whitesource:
   language: golang-mod
   exclude:
