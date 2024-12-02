@@ -601,7 +601,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And spec.mandatory should be true")
 			Expect(template.Spec.Mandatory).To(BeTrue())
-			Expect(template.Labels[shared.MandatoryLabel]).To(Equal("true"))
+			Expect(template.Labels[shared.IsMandatoryModule]).To(Equal("true"))
 		})
 	})
 
