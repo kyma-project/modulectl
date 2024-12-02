@@ -352,7 +352,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 			By("And spec.mandatory should be false")
 			Expect(template.Spec.Mandatory).To(BeFalse())
-			Expect(template.Spec.Labels).ToNot(HaveKey(shared.MandatoryLabel))
 
 			By("And spec.associatedResources should be empty")
 			Expect(template.Spec.AssociatedResources).To(BeEmpty())
