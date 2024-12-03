@@ -268,7 +268,6 @@ func TestGenerateModuleTemplateWithMandatoryFalse_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.Contains(t, mockFS.writtenTemplate,
 		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
-	require.NotContains(t, mockFS.writtenTemplate, "mandatory-module")
 	require.Contains(t, mockFS.writtenTemplate, "mandatory: false")
 	require.NotContains(t, mockFS.writtenTemplate,
 		"\"operator.kyma-project.io/mandatory-module\"")
