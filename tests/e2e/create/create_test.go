@@ -543,8 +543,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(github.Type).To(Equal(githubAccessSpec.Type))
 			Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
 
-			By("And spec.mandatory should be false")
+			By("And module template should not marked as mandatory")
 			Expect(template.Spec.Mandatory).To(BeFalse())
+			val, ok := template.Labels[shared.IsMandatoryModule]
+			Expect(val).To(BeEmpty())
+			Expect(ok).To(BeFalse())
 
 			By("And security scan labels should be correct")
 			secScanLabels := flatten(descriptor.Sources[0].Labels)
