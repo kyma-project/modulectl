@@ -350,8 +350,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(github.Type).To(Equal(githubAccessSpec.Type))
 			Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
 
-			By("And spec.mandatory should be false")
+			By("And module template should not marked as mandatory")
 			Expect(template.Spec.Mandatory).To(BeFalse())
+			val, ok := template.Labels[shared.IsMandatoryModule]
+			Expect(val).To(BeEmpty())
+			Expect(ok).To(BeFalse())
 
 			By("And spec.associatedResources should be empty")
 			Expect(template.Spec.AssociatedResources).To(BeEmpty())
@@ -599,7 +602,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
 			Expect(template.Spec.Version).To(Equal("1.0.4"))
 
-			By("And spec.mandatory should be true")
+			By("And module template should be marked as mandatory")
 			Expect(template.Spec.Mandatory).To(BeTrue())
 			Expect(template.Labels[shared.IsMandatoryModule]).To(Equal("true"))
 		})

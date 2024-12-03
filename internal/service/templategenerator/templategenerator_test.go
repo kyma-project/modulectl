@@ -201,7 +201,7 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 	require.Equal(t, 1, strings.Count(mockFS.writtenTemplate, "namespace"))
 }
 
-func TestGenerateModuleTemplateWithMandatoryIsTrueItShouldAddModuleLabelToTrue_Success(t *testing.T) {
+func TestGenerateModuleTemplateWithMandatoryTrue_Success(t *testing.T) {
 	mockFS := &mockFileSystem{}
 	svc, _ := templategenerator.NewService(mockFS)
 
@@ -232,11 +232,12 @@ func TestGenerateModuleTemplateWithMandatoryIsTrueItShouldAddModuleLabelToTrue_S
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.Contains(t, mockFS.writtenTemplate,
 		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "mandatory: true")
 	require.Contains(t, mockFS.writtenTemplate,
 		"\"operator.kyma-project.io/mandatory-module\": \"true\"")
 }
 
-func TestGenerateModuleTemplateWithMandatoryIsFalseItShouldNotAddModuleLabelToTrue_Success(t *testing.T) {
+func TestGenerateModuleTemplateWithMandatoryFalse_Success(t *testing.T) {
 	mockFS := &mockFileSystem{}
 	svc, _ := templategenerator.NewService(mockFS)
 
