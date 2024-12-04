@@ -29,8 +29,6 @@ The module config file is a YAML file used to configure the following attributes
       link:         a URL, required, the link to the icon
 - defaultCR:        a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
 - mandatory:        a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
-- internal:         a boolean, optional, default=false, determines whether the ModuleTemplate CR should have the internal flag or not
-- beta:             a boolean, optional, default=false, determines whether the ModuleTemplate CR should have the beta flag or not
 - security:         a string, optional, reference to a YAML file containing the security scanners config, must be a local file path
 - labels:           a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
 - annotations:      a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
