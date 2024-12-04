@@ -42,8 +42,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.False(t, result.Mandatory)
 	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
-	require.False(t, result.Internal)
-	require.False(t, result.Beta)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
 	require.Equal(t, "networking.istio.io", result.AssociatedResources[0].Group)
@@ -536,8 +534,6 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	DefaultCR:   "https://example.com/path/to/defaultCR",
 	Namespace:   "kcp-system",
 	Security:    "path/to/securityConfig",
-	Internal:    false,
-	Beta:        false,
 	Labels:      map[string]string{"label1": "value1"},
 	Annotations: map[string]string{"annotation1": "value1"},
 	AssociatedResources: []*metav1.GroupVersionKind{

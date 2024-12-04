@@ -207,13 +207,6 @@ func generateLabels(config *contentprovider.ModuleConfig) map[string]string {
 	if labels == nil {
 		labels = make(map[string]string)
 	}
-	if config.Beta {
-		labels[shared.BetaLabel] = shared.EnableLabelValue
-	}
-
-	if config.Internal {
-		labels[shared.InternalLabel] = shared.EnableLabelValue
-	}
 
 	if config.Mandatory {
 		labels[shared.IsMandatoryModule] = shared.EnableLabelValue
