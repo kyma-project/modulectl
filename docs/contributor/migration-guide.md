@@ -65,7 +65,7 @@ Look at the key changes between Kyma CLI and `modulectl`.
 
 - Both old and new approaches will be supported simultaneously by KLM during the migration period.
 - After the full migration to the new approach, KLM will no longer accept ModuleTemplate with the old naming pattern.
-- For testing, provide ModuleTemplate CRs in the new format accompanied by [ModuleReleaseMeta CRs](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. Use the internal label, to avoid syncing the new ModuleTemplate to the SKR while testing.
+- For testing, provide ModuleTemplate CRs in the new format accompanied by [ModuleReleaseMeta CRs](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. The ModuleReleaseMeta CR can be marked as internal and beta to avoid syncing it.
 
 ## Submission Process
 
