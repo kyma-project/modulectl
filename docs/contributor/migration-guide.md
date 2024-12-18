@@ -5,7 +5,7 @@ It covers all necessary changes and deprecations to ensure a smooth transition.
 
 ## Overview
 
-`modulectl` is the successor of the module developer facing capabilities of Kyma CLI.
+`modulectl` is the successor of the module developer-facing capabilities of Kyma CLI.
 It is already tailored for the update ModuleTemplate metadata as discussed in [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681).
 
 ## Use `modulectl`
@@ -15,16 +15,16 @@ For an overview of the supported commands and flags, use `modulectl -h` or `modu
 
 ## Deprecations and Changes
 
-In the following, the key changes between Kyma CLI and `modulectl` are briefly described.
+Look at the key changes between Kyma CLI and `modulectl`.
 
-1. **New command**
+1. **New Command**
 
-   - The new module create command is `modulectl create`, use `modulectl create -h` for detailed description. 
+   - The new command for module creation is `modulectl create`, use `modulectl create -h` for a detailed description. 
 
 2. **Release Channel Configuration**
 
    - **Deprecated**: The **.channel** field is no longer required in the config file.
-   - **New Approach**: Release Channel is configured separately in the [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md).
+   - **New Approach**: The release channel is configured separately in the [ModuleReleaseMeta CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md).
 
 3. **Manifest and Default CR data**
 
@@ -33,9 +33,9 @@ In the following, the key changes between Kyma CLI and `modulectl` are briefly d
 
 4. **Annotations and Labels**
 
-   - **Deprecated**: The documentation link is not added as an annotation `operator.kyma-project.io/doc-url`.
+   - **Deprecated**: The documentation link is not added as the `operator.kyma-project.io/doc-url` annotation.
    - **New**: The documentation link is added as **.spec.info.documentation**. The value is configured in the module config file with key **.documentation**.
-   - **Deprecated**: The module version is not added as a label `operator.kyma-project.io/module-version`.
+   - **Deprecated**: The module version is not added as the `operator.kyma-project.io/module-version` label.
    - **New**: The module version is added as **.spec.version**.
 
 5. **Command Flags**
@@ -43,7 +43,7 @@ In the following, the key changes between Kyma CLI and `modulectl` are briefly d
    - **Deprecated**: Flag `--module-config-file` is deprecated.
    - **New**: Flag `--config-file` with shortcut `-c` (applicable for both scaffold and create commands).
    - **Deprecated**: Flag `--module-archive-version-overwrite` is deprecated.
-     - There is no successor, this feature has been sunset entirely. Reason is that module versions should be immutable once built and pushed. If a version really needs to be re-written, it should be deleted from the registry explicitly first.
+     - There is no successor, this feature has been sunset entirely. The reason is that module versions should be immutable once built and pushed. If a version needs to be rewritten, first it should be explicitly deleted from the registry.
 
 6. **ModuleTemplate Naming Pattern**
 
@@ -56,8 +56,8 @@ In the following, the key changes between Kyma CLI and `modulectl` are briefly d
 
 8. **Beta and Internal Flags**
 
-- **Deprecated**: Beta and Internal flags are not supported for ModuleTemplates.
-- **New**: Beta and Intenral flags are configured as part of the ModuleReleaseMeta, see [ModuleReleaseMeta Configuration](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md#configuration).
+   - **Deprecated**: Beta and Internal flags are not supported for ModuleTemplates.
+   - **New**: Beta and Intenral flags are configured as part of the ModuleReleaseMeta, see [ModuleReleaseMeta Configuration](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md#configuration).
 
 ## Migration Period
 
@@ -65,7 +65,7 @@ In the following, the key changes between Kyma CLI and `modulectl` are briefly d
 
 - Both old and new approaches will be supported simultaneously by KLM during the migration period.
 - After the full migration to the new approach, KLM will no longer accept ModuleTemplate with the old naming pattern.
-- For testing, provide ModuleTemplates in the new format accompanied by [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. To avoid syncing the new ModuleTemplate to the SKR while testing, use the internal label.
+- For testing, provide ModuleTemplate CRs in the new format accompanied by [ModuleReleaseMeta CRs](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. Use the internal label, to avoid syncing the new ModuleTemplate to the SKR while testing.
 
 ## Submission Process
 
@@ -77,7 +77,7 @@ The general submission process may look as follows:
 4. The submission pipeline gets triggered.
 5. After certain quality gates are passed, the new version of ModuleTemplate gets provisioned into KCP first.
 6. The updated ModuleReleaseMeta gets provisioned into KCP.
-8. Outdated ModuleTemplate (the version not mentioned in ModuleReleaseMeta) should be removed. This step allows both outdated and new versions to coexist temporary. KLM only handle the version defined in ModuleReleaseMeta.
+7. Outdated ModuleTemplate (the version not mentioned in ModuleReleaseMeta) should be removed. This step allows both outdated and new versions to coexist temporarily. KLM only handles the version defined in ModuleReleaseMeta.
 
 ## Additional Resources
 
