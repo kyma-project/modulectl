@@ -81,6 +81,5 @@ The general submission process may look as follows:
 
 ## Additional Resources
 
-- [Update on Module Metadata @iteration review](https://sap-my.sharepoint.com/:p:/p/c_schwaegerl/EbvSNmRnr3JEjaLoZ__cI9UB9lu5tt0qaly-f7yQO2Gwbw?e=slfiDf)
 - [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
 - [`modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
