@@ -366,6 +366,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Resources).To(HaveLen(1))
 			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
 			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+
+			By("And spec.requiresDowntime should be set to false")
+			Expect(template.Spec.RequiresDowntime).To(Equal("false"))
 		})
 	})
 
@@ -799,6 +802,37 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: '/tmp/default-sample-cr.yaml' is not using https scheme: invalid Option"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing requiresDowntime true and different version", func() {
+			cmd = createCmd{
+				moduleConfigFile: withRequiresDowntimeConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.10"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.10"))
+
+			By("And module template should have spec.requiresDowntime set to true")
+			Expect(template.Spec.Mandatory).To(BeTrue())
+			Expect(template.Spec.RequiresDowntime).To(Equal("true"))
 		})
 	})
 })
