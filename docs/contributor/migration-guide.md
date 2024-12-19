@@ -52,7 +52,7 @@ Look at the key changes between Kyma CLI and `modulectl`.
 
 7. **Mandatory ModuleTemplates**
 
-   - **Restriction**: At the moment, `modulectl` is not used for the creation of mandatory ModuleTemplates. Please use Kyma CLI instead until the next release.
+   - Mandatory modules can be created using `modulectl` by setting the **.mandatory** field to `true` in the module config. If multiple ModuleTemplates for the same mandatory module get deployed to the Kyma Control Plane, Lifecycle Manager picks up the ModuleTemplate with the highest version.
 
 8. **Beta and Internal Flags**
 
