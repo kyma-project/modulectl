@@ -852,27 +852,15 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	return moduleTemplate, err
 }
 
-func getDescriptor(template *v1beta2.ModuleTemplate) *v1beta2.Descriptor {
-	if template.Spec.Descriptor.Object != nil {
-		desc, ok := template.Spec.Descriptor.Object.(*v1beta2.Descriptor)
-		if !ok || desc == nil {
-			return nil
-		}
-		return desc
-	}
+func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescriptor {
 	ocmDesc, err := compdesc.Decode(
 		template.Spec.Descriptor.Raw,
 		[]compdesc.DecodeOption{compdesc.DisableValidation(true)}...)
 	if err != nil {
 		return nil
 	}
-	template.Spec.Descriptor.Object = &v1beta2.Descriptor{ComponentDescriptor: ocmDesc}
-	desc, ok := template.Spec.Descriptor.Object.(*v1beta2.Descriptor)
-	if !ok {
-		return nil
-	}
 
-	return desc
+	return ocmDesc
 }
 
 func flatten(labels ocmv1.Labels) map[string]string {
