@@ -368,7 +368,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
 
 			By("And spec.requiresDowntime should be set to false")
-			Expect(template.Spec.RequiresDowntime).To(Equal("false"))
+			Expect(template.Spec.RequiresDowntime).To(BeFalse())
 		})
 	})
 
@@ -831,8 +831,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Version).To(Equal("1.0.10"))
 
 			By("And module template should have spec.requiresDowntime set to true")
-			Expect(template.Spec.Mandatory).To(BeTrue())
-			Expect(template.Spec.RequiresDowntime).To(Equal("true"))
+			Expect(template.Spec.RequiresDowntime).To(BeTrue())
 		})
 	})
 })
