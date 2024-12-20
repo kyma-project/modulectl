@@ -1,11 +1,11 @@
 module github.com/kyma-project/modulectl
 
-go 1.23.2
+go 1.23.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/go-git/go-git/v5 v5.12.0
-	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241112094726-752a03026e0d
+	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241220072206-67aceb44e13a
 	github.com/mandelsoft/vfs v0.4.4
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/onsi/gomega v1.36.1
@@ -311,7 +311,6 @@ require (
 	golang.org/x/time v0.7.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/api v0.200.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241007155032-5fefd90f89a9 // indirect
@@ -331,7 +330,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 // indirect
 	oras.land/oras-go v1.2.6 // indirect
-	sigs.k8s.io/controller-runtime v0.19.1 // indirect
+	sigs.k8s.io/controller-runtime v0.19.3 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/kustomize/api v0.18.0 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.18.1 // indirect
