@@ -273,6 +273,75 @@ func TestGenerateModuleTemplateWithMandatoryFalse_Success(t *testing.T) {
 		"\"operator.kyma-project.io/mandatory-module\"")
 }
 
+func TestGenerateModuleTemplateWithRequiresDowntimeFalse_Success(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Namespace:        "default",
+		Version:          "1.0.0",
+		Labels:           map[string]string{"key": "value"},
+		Annotations:      map[string]string{"annotation": "value"},
+		Mandatory:        false,
+		RequiresDowntime: false,
+		Manifest:         "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "test-data")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "someResource")
+	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+	require.Contains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "requiresDowntime: false")
+}
+
+func TestGenerateModuleTemplateWithRequiresDowntimeTrue_Success(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Namespace:        "default",
+		Version:          "1.0.0",
+		Labels:           map[string]string{"key": "value"},
+		Annotations:      map[string]string{"annotation": "value"},
+		RequiresDowntime: true,
+		Manifest:         "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte("test-data")
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "test-data")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "someResource")
+	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+	require.Contains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "requiresDowntime: true")
+}
+
 type mockFileSystem struct {
 	path, writtenTemplate string
 }

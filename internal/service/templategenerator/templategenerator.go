@@ -62,6 +62,7 @@ spec:
   moduleName: {{.ModuleName}}
   version: {{.ModuleVersion}}
   mandatory: {{.Mandatory}}
+  requiresDowntime: {{.RequiresDowntime}}
   info:
     repository: {{.Repository}}
     documentation: {{.Documentation}}
@@ -122,6 +123,7 @@ type moduleTemplateData struct {
 	AssociatedResources []*metav1.GroupVersionKind
 	Resources           contentprovider.Resources
 	Manager             *contentprovider.Manager
+	RequiresDowntime    bool
 }
 
 func (s *Service) GenerateModuleTemplate(
@@ -178,7 +180,8 @@ func (s *Service) GenerateModuleTemplate(
 		Resources: contentprovider.Resources{
 			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
 		},
-		Manager: moduleConfig.Manager,
+		Manager:          moduleConfig.Manager,
+		RequiresDowntime: moduleConfig.RequiresDowntime,
 	}
 
 	if len(data) > 0 {

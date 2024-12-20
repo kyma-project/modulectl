@@ -51,6 +51,7 @@ const (
 	withResourcesOverwrite        = validConfigs + "with-resources-overwrite.yaml"
 	withManagerConfig             = validConfigs + "with-manager.yaml"
 	withNoNamespaceManagerConfig  = validConfigs + "with-manager-no-namespace.yaml"
+	withRequiresDowntimeConfig    = validConfigs + "with-requiresDowntime.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"

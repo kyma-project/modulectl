@@ -40,6 +40,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 		"module-icon": "https://example.com/path/to/some-icon",
 	}, result.Icons)
 	require.False(t, result.Mandatory)
+	require.False(t, result.RequiresDowntime)
 	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
@@ -86,7 +87,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module version",
@@ -101,7 +103,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("opts.ModuleVersion failed to be parsed as semantic version: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("opts.ModuleVersion failed to be parsed as semantic version: %w",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module namespace",
@@ -116,7 +119,8 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "https://example.com/path/to/some-icon",
 				},
 			},
-			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
+				commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "empty manifest path",
@@ -530,12 +534,13 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Icons: contentprovider.Icons{
 		"module-icon": "https://example.com/path/to/some-icon",
 	},
-	Mandatory:   false,
-	DefaultCR:   "https://example.com/path/to/defaultCR",
-	Namespace:   "kcp-system",
-	Security:    "path/to/securityConfig",
-	Labels:      map[string]string{"label1": "value1"},
-	Annotations: map[string]string{"annotation1": "value1"},
+	Mandatory:        false,
+	RequiresDowntime: false,
+	DefaultCR:        "https://example.com/path/to/defaultCR",
+	Namespace:        "kcp-system",
+	Security:         "path/to/securityConfig",
+	Labels:           map[string]string{"label1": "value1"},
+	Annotations:      map[string]string{"annotation1": "value1"},
 	AssociatedResources: []*metav1.GroupVersionKind{
 		{
 			Group:   "networking.istio.io",

@@ -366,6 +366,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(template.Spec.Resources).To(HaveLen(1))
 			Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
 			Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+
+			By("And spec.requiresDowntime should be set to false")
+			Expect(template.Spec.RequiresDowntime).To(BeFalse())
 		})
 	})
 
@@ -801,6 +804,36 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: '/tmp/default-sample-cr.yaml' is not using https scheme: invalid Option"))
 		})
 	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing requiresDowntime true and different version", func() {
+			cmd = createCmd{
+				moduleConfigFile: withRequiresDowntimeConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+			Expect(descriptor).ToNot(BeNil())
+			Expect(template.Name).To(Equal("template-operator-1.0.10"))
+			Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+			Expect(template.Spec.Version).To(Equal("1.0.10"))
+
+			By("And module template should have spec.requiresDowntime set to true")
+			Expect(template.Spec.RequiresDowntime).To(BeTrue())
+		})
+	})
 })
 
 // Test helper functions
@@ -818,27 +851,15 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	return moduleTemplate, err
 }
 
-func getDescriptor(template *v1beta2.ModuleTemplate) *v1beta2.Descriptor {
-	if template.Spec.Descriptor.Object != nil {
-		desc, ok := template.Spec.Descriptor.Object.(*v1beta2.Descriptor)
-		if !ok || desc == nil {
-			return nil
-		}
-		return desc
-	}
+func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescriptor {
 	ocmDesc, err := compdesc.Decode(
 		template.Spec.Descriptor.Raw,
 		[]compdesc.DecodeOption{compdesc.DisableValidation(true)}...)
 	if err != nil {
 		return nil
 	}
-	template.Spec.Descriptor.Object = &v1beta2.Descriptor{ComponentDescriptor: ocmDesc}
-	desc, ok := template.Spec.Descriptor.Object.(*v1beta2.Descriptor)
-	if !ok {
-		return nil
-	}
 
-	return desc
+	return ocmDesc
 }
 
 func flatten(labels ocmv1.Labels) map[string]string {
