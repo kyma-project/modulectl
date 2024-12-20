@@ -42,7 +42,7 @@ The module config file is a YAML file used to configure the following attributes
 - resources:        # a map with string keys and values, optional, additional resources of the module that may be fetched
     - name:         a string, required, the name of the resource
       link:         a URL, required, the link to the resource
-- requiresDowntime: a boolean, optional, default=false, indicates whether the module requires downtime in support of maintenance windows during module upgrades
+- requiresDowntime: a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
 ```
 
 The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated.

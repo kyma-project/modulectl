@@ -82,7 +82,7 @@ type ModuleConfig struct {
 	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated with the module and have to be deleted with module deletion"`
 	Manager             *Manager                   `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
 	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
-	RequiresDowntime    bool                       `yaml:"requiresDowntime" comment:"optional, default=false, indicates whether the module requires downtime in support of maintenance windows during module upgrades"`
+	RequiresDowntime    bool                       `yaml:"requiresDowntime" comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"`
 }
 
 type Manager struct {
