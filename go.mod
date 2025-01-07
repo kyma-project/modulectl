@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241220120036-4210b9ef25e5
 	github.com/mandelsoft/vfs v0.4.4
-	github.com/onsi/ginkgo/v2 v2.22.1
+	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
