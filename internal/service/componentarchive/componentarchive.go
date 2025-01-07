@@ -71,12 +71,14 @@ func (s *Service) CreateComponentArchive(descriptor *compdesc.ComponentDescripto
 }
 
 type ComponentArchive interface {
-	AddBlob(blob cpi.BlobAccess, artType string, refName string, global cpi.AccessSpec, opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error)
+	AddBlob(blob cpi.BlobAccess, artType string, refName string, global cpi.AccessSpec,
+		opts ...cpi.BlobUploadOption) (cpi.AccessSpec, error)
 	SetResource(meta *cpi.ResourceMeta, access compdesc.AccessSpec, opts ...cpi.ModificationOption) error
 	Close() error
 }
 
-func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive, moduleResources []componentdescriptor.Resource) error {
+func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive,
+	moduleResources []componentdescriptor.Resource) error {
 	for _, resource := range moduleResources {
 		if resource.Path != "" {
 			access, err := s.fileSystem.GenerateTarFileSystemAccess(resource.Path)
@@ -90,7 +92,7 @@ func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive, moduleRe
 			}
 
 			if err = archive.SetResource(&resource.ResourceMeta, blobAccess,
-				cpi.ModifyResource(true)); err != nil {
+				cpi.ModifyElement(true)); err != nil {
 				return fmt.Errorf("failed to set resource, %w", err)
 			}
 		}
