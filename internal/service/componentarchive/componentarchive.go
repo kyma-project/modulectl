@@ -78,7 +78,8 @@ type ComponentArchive interface {
 }
 
 func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive,
-	moduleResources []componentdescriptor.Resource) error {
+	moduleResources []componentdescriptor.Resource,
+) error {
 	for _, resource := range moduleResources {
 		if resource.Path != "" {
 			access, err := s.fileSystem.GenerateTarFileSystemAccess(resource.Path)
