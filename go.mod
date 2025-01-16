@@ -14,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apiextensions-apiserver v0.32.0
-	k8s.io/apimachinery v0.32.0
+	k8s.io/apimachinery v0.32.1
 	ocm.software/ocm v0.19.0
 	sigs.k8s.io/yaml v1.4.0
 )
