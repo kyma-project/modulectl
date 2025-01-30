@@ -185,16 +185,11 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	if len(data) > 0 {
-		var crData map[string]interface{}
-		if err := yaml.Unmarshal(data, &crData); err != nil {
-			return fmt.Errorf("failed to unmarshal cr data: %w", err)
-		}
-
-		cr, err := yaml.Marshal(crData)
+		crData, err := parseDefaultCRYaml(data)
 		if err != nil {
-			fmt.Printf("Error marshaling cr data yaml: %v\n", err)
+			return fmt.Errorf("failed to parse cr data: %w", err)
 		}
-		mtData.Data = string(cr)
+		mtData.Data = string(crData)
 	}
 
 	for name, link := range moduleConfig.Resources {
@@ -211,6 +206,20 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	return nil
+}
+
+func parseDefaultCRYaml(data []byte) ([]byte, error) {
+	var crData map[string]interface{}
+	if err := yaml.Unmarshal(data, &crData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal cr data: %w", err)
+	}
+
+	cr, err := yaml.Marshal(crData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal cr data yaml: %w", err)
+	}
+
+	return cr, nil
 }
 
 func generateLabels(config *contentprovider.ModuleConfig) map[string]string {
