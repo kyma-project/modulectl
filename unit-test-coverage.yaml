@@ -11,7 +11,7 @@ packages:
   internal/service/moduleconfig/reader: 76
   internal/service/create: 43
   internal/service/componentdescriptor: 80
-  internal/service/templategenerator: 85
+  internal/service/templategenerator: 88
   internal/service/crdparser: 73
   internal/service/registry: 52
   internal/service/componentarchive: 41
