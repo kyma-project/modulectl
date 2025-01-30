@@ -52,7 +52,13 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -62,7 +68,6 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
@@ -126,7 +131,13 @@ func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.
 		Resources: contentprovider.Resources{"rawManifest": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -156,19 +167,30 @@ func TestGenerateModuleTemplateWithAssociatedResources_Success(t *testing.T) {
 		},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
 	require.NoError(t, err)
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "associatedResources")
 	require.Contains(t, mockFS.writtenTemplate, "networking.istio.io")
 	require.Contains(t, mockFS.writtenTemplate, "v1alpha3")
 	require.Contains(t, mockFS.writtenTemplate, "Gateway")
+	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
+	require.Contains(t, mockFS.writtenTemplate, "kind: Sample")
+	require.Contains(t, mockFS.writtenTemplate, "metadata:")
+	require.Contains(t, mockFS.writtenTemplate, "name: sample-yaml")
+	require.Contains(t, mockFS.writtenTemplate, "spec:")
+	require.Contains(t, mockFS.writtenTemplate, "resourceFilePath: ./module-data.yaml")
 }
 
 func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
@@ -192,7 +214,13 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 		},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -200,13 +228,18 @@ func TestGenerateModuleTemplateWithManager_Success(t *testing.T) {
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "manager-name")
 	require.Contains(t, mockFS.writtenTemplate, "manager-ns")
 	require.Contains(t, mockFS.writtenTemplate, "apps")
 	require.Contains(t, mockFS.writtenTemplate, "v1")
 	require.Contains(t, mockFS.writtenTemplate, "Deployment")
+	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
+	require.Contains(t, mockFS.writtenTemplate, "kind: Sample")
+	require.Contains(t, mockFS.writtenTemplate, "metadata:")
+	require.Contains(t, mockFS.writtenTemplate, "name: sample-yaml")
+	require.Contains(t, mockFS.writtenTemplate, "spec:")
+	require.Contains(t, mockFS.writtenTemplate, "resourceFilePath: ./module-data.yaml")
 	require.Equal(t, 2, strings.Count(mockFS.writtenTemplate, "namespace"))
 }
 
@@ -230,7 +263,13 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 		},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -238,7 +277,6 @@ func TestGenerateModuleTemplateWithManagerWithoutNamespace_Success(t *testing.T)
 	require.Equal(t, "output.yaml", mockFS.path)
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "manager-name")
 	require.Contains(t, mockFS.writtenTemplate, "apps")
@@ -261,7 +299,13 @@ func TestGenerateModuleTemplateWithMandatoryTrue_Success(t *testing.T) {
 		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -271,7 +315,6 @@ func TestGenerateModuleTemplateWithMandatoryTrue_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
@@ -297,7 +340,13 @@ func TestGenerateModuleTemplateWithMandatoryFalse_Success(t *testing.T) {
 		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -307,7 +356,6 @@ func TestGenerateModuleTemplateWithMandatoryFalse_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
@@ -334,7 +382,13 @@ func TestGenerateModuleTemplateWithRequiresDowntimeFalse_Success(t *testing.T) {
 		Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -344,7 +398,6 @@ func TestGenerateModuleTemplateWithRequiresDowntimeFalse_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
@@ -368,7 +421,13 @@ func TestGenerateModuleTemplateWithRequiresDowntimeTrue_Success(t *testing.T) {
 		Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 	}
 	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-	data := []byte("test-data")
+	data := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
 
 	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
 
@@ -378,7 +437,6 @@ func TestGenerateModuleTemplateWithRequiresDowntimeTrue_Success(t *testing.T) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
-	require.Contains(t, mockFS.writtenTemplate, "test-data")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "someResource")
 	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
