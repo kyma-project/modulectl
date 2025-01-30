@@ -185,7 +185,16 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	if len(data) > 0 {
-		mtData.Data = string(data)
+		var crData map[string]interface{}
+		if err := yaml.Unmarshal(data, &crData); err != nil {
+			return fmt.Errorf("failed to unmarshal cr data: %w", err)
+		}
+
+		cr, err := yaml.Marshal(crData)
+		if err != nil {
+			fmt.Printf("Error marshaling cr data yaml: %v\n", err)
+		}
+		mtData.Data = string(cr)
 	}
 
 	for name, link := range moduleConfig.Resources {

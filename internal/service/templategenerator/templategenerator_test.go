@@ -71,6 +71,52 @@ func TestGenerateModuleTemplate_Success(t *testing.T) {
 		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
 }
 
+func TestGenerateModuleTemplate_WihDefaultCrStartingWithDashes(t *testing.T) {
+	mockFS := &mockFileSystem{}
+	svc, _ := templategenerator.NewService(mockFS)
+
+	moduleConfig := &contentprovider.ModuleConfig{
+		Namespace:   "default",
+		Version:     "1.0.0",
+		Labels:      map[string]string{"key": "value"},
+		Annotations: map[string]string{"annotation": "value"},
+		Mandatory:   true,
+		Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+	}
+	descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+	data := []byte(`---
+apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
+
+	err := svc.GenerateModuleTemplate(moduleConfig, descriptor, data, true, "output.yaml")
+
+	require.NoError(t, err)
+	require.Equal(t, "output.yaml", mockFS.path)
+	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
+	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
+	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
+	require.Contains(t, mockFS.writtenTemplate, "someResource")
+	require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+	require.Contains(t, mockFS.writtenTemplate,
+		"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+	require.NotContains(t, mockFS.writtenTemplate, "---")
+	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
+	require.Contains(t, mockFS.writtenTemplate, "kind: Sample")
+	require.Contains(t, mockFS.writtenTemplate, "metadata:")
+	require.Contains(t, mockFS.writtenTemplate, "name: sample-yaml")
+	require.Contains(t, mockFS.writtenTemplate, "spec:")
+	require.Contains(t, mockFS.writtenTemplate, "resourceFilePath: ./module-data.yaml")
+}
+
 func TestGenerateModuleTemplate_Success_With_Overwritten_RawManifest(t *testing.T) {
 	mockFS := &mockFileSystem{}
 	svc, _ := templategenerator.NewService(mockFS)
