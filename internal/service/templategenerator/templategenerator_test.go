@@ -66,6 +66,7 @@ spec:
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Equal(t, "output.yaml", mockFS.path)
 
@@ -94,6 +95,7 @@ spec:
 				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 			},
 		},
@@ -105,6 +107,7 @@ spec:
 				Resources: contentprovider.Resources{"rawManifest": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
 				require.NotContains(t, mockFS.writtenTemplate,
 					"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
@@ -128,12 +131,12 @@ spec:
 				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "associatedResources")
 				require.Contains(t, mockFS.writtenTemplate, "networking.istio.io")
 				require.Contains(t, mockFS.writtenTemplate, "v1alpha3")
 				require.Contains(t, mockFS.writtenTemplate, "Gateway")
-
 			},
 		},
 		{
@@ -156,6 +159,7 @@ spec:
 				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "manager-name")
 				require.Contains(t, mockFS.writtenTemplate, "manager-ns")
@@ -184,6 +188,7 @@ spec:
 				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "manager-name")
 				require.Contains(t, mockFS.writtenTemplate, "apps")
@@ -205,6 +210,7 @@ spec:
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "mandatory: false")
 				require.NotContains(t, mockFS.writtenTemplate, "\"operator.kyma-project.io/mandatory-module\"")
@@ -223,6 +229,7 @@ spec:
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "mandatory: true")
 				require.Contains(t, mockFS.writtenTemplate,
@@ -242,6 +249,7 @@ spec:
 				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "requiresDowntime: true")
 			},
@@ -259,6 +267,7 @@ spec:
 				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				assertCommonTemplateProperties(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "requiresDowntime: false")
 			},
@@ -275,6 +284,7 @@ spec:
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
 				require.NotContains(t, mockFS.writtenTemplate, "kind: Sample")
 			},
 		},
@@ -306,6 +316,7 @@ func (m *mockFileSystem) WriteFile(path, content string) error {
 }
 
 func assertCommonTemplateProperties(t *testing.T, mockFS *mockFileSystem) {
+	t.Helper()
 	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
