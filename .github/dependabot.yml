@@ -17,6 +17,17 @@ updates:
       interval: "daily"
     commit-message:
       prefix: "chore(dependabot)"
+    groups:
+      k8s-dependencies:
+        patterns:
+          - "k8s.io/*"
+      istio-dependencies:
+        patterns:
+          - "istio.io/*"
+      ginkgo-gomega:
+        patterns:
+          - "github.com/onsi/ginkgo/v2"
+          - "github.com/onsi/gomega"
   - package-ecosystem: "docker"
     directory: "/"
     labels:
