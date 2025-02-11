@@ -28,12 +28,3 @@ updates:
         patterns:
           - "github.com/onsi/ginkgo/v2"
           - "github.com/onsi/gomega"
-  - package-ecosystem: "docker"
-    directory: "/"
-    labels:
-      - "docker"
-      - "area/dependency"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "chore(dependabot)"
