@@ -35,11 +35,7 @@ const (
 	refLabel                  = "git.kyma-project.io/ref"
 )
 
-var (
-	ignoredProtecodeTags = []string{"latest"}
-
-	ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
-)
+var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
 
 type FileReader interface {
 	FileExists(path string) (bool, error)
@@ -184,6 +180,8 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 }
 
 func shouldIgnoreProtecodeTag(t string) bool {
+	ignoredProtecodeTags := []string{"latest"}
+
 	for _, tag := range ignoredProtecodeTags {
 		if t == tag {
 			return true
