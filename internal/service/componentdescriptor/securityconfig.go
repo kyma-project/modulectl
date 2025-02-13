@@ -144,6 +144,10 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 			return fmt.Errorf("failed to get image name and tag: %w", err)
 		}
 
+		if shouldIgnoreProtecodeTag(imgTag) {
+			continue
+		}
+
 		imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
 		imageTypeLabel, err := ocmv1.NewLabel(imageTypeLabelKey, thirdPartyImageLabelValue,
 			ocmv1.WithVersion(ocmVersion))
@@ -153,9 +157,6 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 
 		access := ociartifact.New(img)
 		access.SetType(ociartifact.Type)
-		if err != nil {
-			return fmt.Errorf("failed to convert access to unstructured object: %w", err)
-		}
 		proteccodeImageLayer := compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
 				Type:     ociartifacttypes.TYPE,
@@ -176,6 +177,17 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 	}
 
 	return nil
+}
+
+func shouldIgnoreProtecodeTag(t string) bool {
+	ignoredProtecodeTags := []string{"latest"}
+
+	for _, tag := range ignoredProtecodeTags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
 
 func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey string) error {
