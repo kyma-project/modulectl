@@ -20,64 +20,6 @@ func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
 	require.Nil(t, securityConfigService)
 }
 
-func Test_GetImageNameAndTag(t *testing.T) {
-	tests := []struct {
-		name              string
-		imageURL          string
-		expectedImageName string
-		expectedImageTag  string
-		expectedError     error
-	}{
-		{
-			name:              "valid image URL",
-			imageURL:          "docker.io/template-operator/test:latest",
-			expectedImageName: "test",
-			expectedImageTag:  "latest",
-			expectedError:     nil,
-		},
-		{
-			name:              "invalid image URL - no tag",
-			imageURL:          "docker.io/template-operator/test",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - multiple tags",
-			imageURL:          "docker.io/template-operator/test:latest:latest",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - no slashes",
-			imageURL:          "docker.io",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - empty URL",
-			imageURL:          "",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			imgName, imgTag, err := componentdescriptor.GetImageNameAndTag(test.imageURL)
-			if test.expectedError != nil {
-				require.ErrorContains(t, err, test.expectedError.Error())
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, test.expectedImageName, imgName)
-				require.Equal(t, test.expectedImageTag, imgTag)
-			}
-		})
-	}
-}
-
 func Test_AppendProtecodeImagesLayers_ReturnCorrectResources(t *testing.T) {
 	cd := &compdesc.ComponentDescriptor{}
 	cd.SetName("test.io/module/test")
@@ -99,35 +41,6 @@ func Test_AppendProtecodeImagesLayers_ReturnCorrectResources(t *testing.T) {
 
 	require.Equal(t, "anotherimage", cd.Resources[1].Name)
 	require.Equal(t, "4.5.6", cd.Resources[1].Version)
-
-	for _, res := range cd.Resources {
-		require.Equal(t, "ociArtifact", res.Type)
-		require.Equal(t, "scan.security.kyma-project.io/type", res.Labels[0].Name)
-		expectedLabel := json.RawMessage(`"third-party-image"`)
-		require.Equal(t, expectedLabel, res.Labels[0].Value)
-	}
-}
-
-func Test_AppendProtecodeImagesLayers_IgnoresLatestTag(t *testing.T) {
-	cd := &compdesc.ComponentDescriptor{}
-	cd.SetName("test.io/module/test")
-	cd.SetVersion("1.0.0")
-	cd.Provider = ocmv1.Provider{Name: "kyma"}
-
-	securityConfig := contentprovider.SecurityScanConfig{
-		Protecode: []string{
-			"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.0",
-			"europe-docker.pkg.dev/kyma-project/prod/template-operator:latest",
-		},
-	}
-
-	err := componentdescriptor.AppendProtecodeImagesLayers(cd, securityConfig)
-	require.NoError(t, err)
-
-	require.Equal(t, 1, cd.Resources.Len())
-
-	require.Equal(t, "template-operator", cd.Resources[0].Name)
-	require.Equal(t, "1.0.0", cd.Resources[0].Version)
 
 	for _, res := range cd.Resources {
 		require.Equal(t, "ociArtifact", res.Type)

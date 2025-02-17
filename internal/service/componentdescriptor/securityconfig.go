@@ -13,9 +13,8 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/kyma-project/modulectl/internal/utils"
 )
-
-var errInvalidURL = errors.New("invalid image URL")
 
 const (
 	secBaseLabelKey           = "security.kyma-project.io"
@@ -29,7 +28,6 @@ const (
 	excludeLabelKey           = "exclude"
 	typeLabelKey              = "type"
 	thirdPartyImageLabelValue = "third-party-image"
-	imageTagSlicesLength      = 2
 	ocmIdentityName           = "module-sources"
 	ocmVersion                = "v1"
 	refLabel                  = "git.kyma-project.io/ref"
@@ -139,13 +137,9 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 ) error {
 	protecodeImages := securityScanConfig.Protecode
 	for _, img := range protecodeImages {
-		imgName, imgTag, err := GetImageNameAndTag(img)
+		imgName, imgTag, err := utils.GetImageNameAndTag(img)
 		if err != nil {
 			return fmt.Errorf("failed to get image name and tag: %w", err)
-		}
-
-		if shouldIgnoreProtecodeTag(imgTag) {
-			continue
 		}
 
 		imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
@@ -179,17 +173,6 @@ func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescript
 	return nil
 }
 
-func shouldIgnoreProtecodeTag(t string) bool {
-	ignoredProtecodeTags := []string{"latest"}
-
-	for _, tag := range ignoredProtecodeTags {
-		if t == tag {
-			return true
-		}
-	}
-	return false
-}
-
 func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey string) error {
 	labels := labeled.GetLabels()
 	securityLabelKey := fmt.Sprintf("%s/%s", baseKey, key)
@@ -200,18 +183,4 @@ func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey 
 	labels = append(labels, *labelValue)
 	labeled.SetLabels(labels)
 	return nil
-}
-
-func GetImageNameAndTag(imageURL string) (string, string, error) {
-	imageTag := strings.Split(imageURL, ":")
-	if len(imageTag) != imageTagSlicesLength {
-		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
-	}
-
-	imageName := strings.Split(imageTag[0], "/")
-	if len(imageName) == 0 {
-		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
-	}
-
-	return imageName[len(imageName)-1], imageTag[len(imageTag)-1], nil
 }
