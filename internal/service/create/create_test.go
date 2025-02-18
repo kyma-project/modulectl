@@ -84,7 +84,8 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
+		&securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
@@ -253,7 +254,7 @@ func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ componentarchi
 
 type registryServiceStub struct{}
 
-func (*registryServiceStub) PushComponentVersion(_ *comparch.ComponentArchive, _ bool,
+func (*registryServiceStub) PushComponentVersion(_ *comparch.ComponentArchive, _, _ bool,
 	_, _ string,
 ) error {
 	return nil

@@ -19,7 +19,7 @@ import (
 
 type OCIRepository interface {
 	GetComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository) (cpi.ComponentVersionAccess, error)
-	PushComponentVersionIfNotExist(archive *comparch.ComponentArchive, repo cpi.Repository) error
+	PushComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository, overwrite bool) error
 }
 
 type Service struct {
@@ -38,7 +38,7 @@ func NewService(ociRepository OCIRepository, repo cpi.Repository) (*Service, err
 	}, nil
 }
 
-func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure bool,
+func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure, overwrite bool,
 	credentials, registryURL string,
 ) error {
 	repo, err := s.getRepository(insecure, credentials, registryURL)
@@ -46,7 +46,7 @@ func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insec
 		return fmt.Errorf("could not get repository: %w", err)
 	}
 
-	if err = s.ociRepository.PushComponentVersionIfNotExist(archive, repo); err != nil {
+	if err = s.ociRepository.PushComponentVersion(archive, repo, overwrite); err != nil {
 		return fmt.Errorf("could not push component version: %w", err)
 	}
 
