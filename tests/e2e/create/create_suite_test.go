@@ -64,6 +64,7 @@ type createCmd struct {
 	output           string
 	moduleConfigFile string
 	insecure         bool
+	overwrite        bool
 }
 
 func (cmd *createCmd) execute() error {
@@ -85,6 +86,10 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.insecure {
 		args = append(args, "--insecure")
+	}
+
+	if cmd.overwrite {
+		args = append(args, "--overwrite")
 	}
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))

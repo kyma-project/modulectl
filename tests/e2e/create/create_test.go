@@ -389,6 +389,22 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with same version that already exists in the registry and overwrite flag", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				overwrite:        true,
+			}
+		})
+		It("Then the command should succeed", func() {
+			err := cmd.execute()
+			Expect(err).Should(Succeed())
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with valid module-config containing annotations and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withAnnotationsConfig,
