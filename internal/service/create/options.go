@@ -10,13 +10,14 @@ import (
 )
 
 type Options struct {
-	Out                  iotools.Out
-	ConfigFile           string
-	Credentials          string
-	Insecure             bool
-	TemplateOutput       string
-	RegistryURL          string
-	RegistryCredSelector string
+	Out                       iotools.Out
+	ConfigFile                string
+	Credentials               string
+	Insecure                  bool
+	TemplateOutput            string
+	RegistryURL               string
+	RegistryCredSelector      string
+	OverwriteComponentVersion bool
 }
 
 func (opts Options) Validate() error {
@@ -43,6 +44,10 @@ func (opts Options) Validate() error {
 
 	if opts.RegistryURL != "" && !strings.HasPrefix(opts.RegistryURL, "http") {
 		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
+	}
+
+	if opts.OverwriteComponentVersion {
+		opts.Out.Write("Warning: overwrite flag is set to true. This should be only used for testing purposes.\n")
 	}
 
 	return nil
