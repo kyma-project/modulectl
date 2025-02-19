@@ -27,7 +27,8 @@ func (o *OCIRepo) GetComponentVersion(archive *comparch.ComponentArchive,
 }
 
 func (o *OCIRepo) PushComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository,
-	overwrite bool) error {
+	overwrite bool,
+) error {
 	if exists, _ := repo.ExistsComponentVersion(archive.GetName(),
 		archive.GetVersion()); exists && !overwrite {
 		return fmt.Errorf("cannot push component version %s: %w",

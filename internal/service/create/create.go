@@ -212,7 +212,8 @@ func (s *Service) Run(opts Options) error {
 }
 
 func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive,
-	moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options) error {
+	moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options,
+) error {
 	opts.Out.Write("- Pushing component version\n")
 	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(defaultCRFilePath, manifestFilePath)
 	if err != nil {
@@ -249,7 +250,8 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive,
 }
 
 func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options) error {
+	moduleConfig *contentprovider.ModuleConfig, opts Options,
+) error {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
 	if err != nil {
