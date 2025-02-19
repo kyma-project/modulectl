@@ -256,6 +256,11 @@ func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescript
 		return fmt.Errorf("failed to parse security config data: %w", err)
 	}
 
+	err = securityConfig.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate security config data: %w", err)
+	}
+
 	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
 		return fmt.Errorf("failed to append security scan config: %w", err)
 	}
