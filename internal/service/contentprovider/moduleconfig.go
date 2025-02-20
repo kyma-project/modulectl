@@ -76,7 +76,7 @@ type ModuleConfig struct {
 	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL"`
 	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
 	Security            string                     `yaml:"security" comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"`
-	Labels              map[string]string          `yaml:"labels" comment:"values, optional, additional labels for the generated ModuleTemplate CR"`
+	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the generated ModuleTemplate CR"`
 	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the generated ModuleTemplate CR"`
 	Manager             *Manager                   `yaml:"manager" comment:"optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module"`
 	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, optional, resources that should be cleaned up with the module deletion"`
