@@ -37,7 +37,7 @@ const (
 	registryCredSelectorFlagUsage = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
 
 	OverwriteComponentVersionFlagName    = "overwrite"
-	overwriteComponentVersionFlagUsage   = "Overwrites the pushed component version in an OCI registry. This flag should be used only for testing purposes."
+	overwriteComponentVersionFlagUsage   = "Overwrites the pushed component version if it already exists in the OCI registry. This flag should be used ONLY for testing purposes."
 	OverwriteComponentVersionFlagDefault = false
 )
 
