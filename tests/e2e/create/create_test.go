@@ -26,8 +26,10 @@ import (
 var _ = Describe("Test 'create' command", Ordered, func() {
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked without any args", func() {
-			cmd = createCmd{}
+		It("When invoked without config-file arg", func() {
+			cmd = createCmd{
+				registry: ociRegistry,
+			}
 		})
 
 		It("Then the command should fail", func() {
@@ -39,8 +41,24 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked without registry arg", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+			}
+		})
+
+		It("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("opts.RegistryURL must not be empty: invalid Option"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with missing name", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingNameConfig,
 			}
 		})
@@ -55,6 +73,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with missing version", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingVersionConfig,
 			}
 		})
@@ -69,6 +88,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with missing manifest", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingManifestConfig,
 			}
 		})
@@ -83,6 +103,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with missing repository", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingRepositoryConfig,
 			}
 		})
@@ -97,6 +118,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with missing documentation", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingDocumentationConfig,
 			}
 		})
@@ -111,6 +133,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with non https repository", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsRepository,
 			}
 		})
@@ -125,6 +148,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with non https documentation", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsDocumentation,
 			}
 		})
@@ -139,6 +163,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with missing icons", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: missingIconsConfig,
 			}
 		})
@@ -153,6 +178,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with duplicate entry in icons", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: duplicateIcons,
 			}
 		})
@@ -167,6 +193,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with invalid icon - link missing", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: iconsWithoutLink,
 			}
 		})
@@ -181,6 +208,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with invalid icon - name missing", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: iconsWithoutName,
 			}
 		})
@@ -195,6 +223,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with duplicate entry in resources", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: duplicateResources,
 			}
 		})
@@ -209,6 +238,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with non https resource", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsResource,
 			}
 		})
@@ -223,6 +253,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with invalid resource - link missing", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: resourceWithoutLink,
 			}
 		})
@@ -237,6 +268,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with invalid resource - name missing", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: resourceWithoutName,
 			}
 		})
@@ -244,23 +276,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: name must not be empty: invalid Option"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		It("When invoked with '--config-file' using valid file", func() {
-			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-			}
-		})
-		It("Then the command should succeed", func() {
-			Expect(cmd.execute()).To(Succeed())
-
-			By("And no module template file should be generated")
-			currentDir, err := os.Getwd()
-			Expect(err).ToNot(HaveOccurred())
-			Expect(filesIn(currentDir)).Should(Not(ContainElement("template.yaml")))
 		})
 	})
 
@@ -786,6 +801,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with manifest being a fileref", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: manifestFileref,
 			}
 		})
@@ -800,6 +816,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with default CR being a fileref", func() {
 			cmd = createCmd{
+				registry:         ociRegistry,
 				moduleConfigFile: defaultCRFileref,
 			}
 		})

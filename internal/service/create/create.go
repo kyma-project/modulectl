@@ -206,7 +206,7 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	opts.Out.Write("- Pushing component version\n")
-	if !opts.DryRun && opts.RegistryURL != "" {
+	if !opts.DryRun {
 		descriptor, err = s.pushComponentVersion(archive, opts)
 		if err != nil {
 			return fmt.Errorf("failed to push component version: %w", err)
@@ -215,15 +215,13 @@ func (s *Service) Run(opts Options) error {
 		opts.Out.Write("\t\tSkipping due to dry-run mode\n")
 	}
 
-	if opts.RegistryURL != "" {
-		opts.Out.Write("- Generating ModuleTemplate\n")
-		if err = s.generateModuleTemplate(moduleConfig,
-			descriptor,
-			manifestFilePath,
-			defaultCRFilePath,
-			opts.TemplateOutput); err != nil {
-			return fmt.Errorf("failed to generate module template: %w", err)
-		}
+	opts.Out.Write("- Generating ModuleTemplate\n")
+	if err = s.generateModuleTemplate(moduleConfig,
+		descriptor,
+		manifestFilePath,
+		defaultCRFilePath,
+		opts.TemplateOutput); err != nil {
+		return fmt.Errorf("failed to generate module template: %w", err)
 	}
 
 	return nil
