@@ -57,6 +57,7 @@ spec:
 			name: "With Resources",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -87,6 +88,7 @@ spec:
    resourceFilePath: "./module-data.yaml"
 `),
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -103,6 +105,7 @@ spec:
 			name: "With Overwritten Raw Manifest",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:      "example.com/component",
 				Manifest:  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
 				Resources: contentprovider.Resources{"rawManifest": "https://some.other/location/template-operator.yaml"},
 			},
@@ -117,6 +120,7 @@ spec:
 			name: "With Associated Resources",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -143,6 +147,7 @@ spec:
 			name: "With Manager",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -173,6 +178,7 @@ spec:
 			name: "With Manager Without Namespace",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -201,6 +207,7 @@ spec:
 			name: "With Mandatory False",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -220,6 +227,7 @@ spec:
 			name: "With Mandatory True",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
@@ -240,6 +248,7 @@ spec:
 			name: "With Requires Downtime True",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:             "example.com/component",
 				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
@@ -258,6 +267,7 @@ spec:
 			name: "With Requires Downtime False",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:             "example.com/component",
 				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
@@ -276,6 +286,7 @@ spec:
 			name: "With No Default CR",
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
 				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
