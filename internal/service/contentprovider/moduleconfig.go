@@ -67,22 +67,22 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 }
 
 type ModuleConfig struct {
-	Name                string                     `yaml:"name" comment:"required, the name of the Module"`
-	Version             string                     `yaml:"version" comment:"required, the version of the Module"`
-	Manifest            string                     `yaml:"manifest" comment:"required, relative path or remote URL to the manifests"`
-	Repository          string                     `yaml:"repository" comment:"required, link to the repository"`
-	Documentation       string                     `yaml:"documentation" comment:"required, link to documentation"`
-	Icons               Icons                      `yaml:"icons,omitempty" comment:"required, list of icons to represent the module in the UI"`
+	Name                string                     `yaml:"name" comment:"required, the name of the module"`
+	Version             string                     `yaml:"version" comment:"required, the version of the module"`
+	Manifest            string                     `yaml:"manifest" comment:"required, reference to the manifest, must be a URL"`
+	Repository          string                     `yaml:"repository" comment:"required, reference to the repository, must be a URL"`
+	Documentation       string                     `yaml:"documentation" comment:"required, reference to the documentation, must be a URL"`
+	Icons               Icons                      `yaml:"icons,omitempty" comment:"required, icons used for UI"`
+	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL"`
 	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
-	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Security            string                     `yaml:"security" comment:"optional, name of the security scanners config file"`
-	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the ModuleTemplate"`
-	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the ModuleTemplate"`
-	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, GVK of the resources which are associated with the module and have to be deleted with module deletion"`
-	Manager             *Manager                   `yaml:"manager" comment:"optional, the module resource that can be used to indicate the installation readiness of the module. This is typically the manager deployment of the module"`
-	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the ModuleTemplate that may be fetched"`
+	Security            string                     `yaml:"security" comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"`
+	Labels              map[string]string          `yaml:"labels" comment:"values, optional, additional labels for the generated ModuleTemplate CR"`
+	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the generated ModuleTemplate CR"`
+	Manager             *Manager                   `yaml:"manager" comment:"optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module"`
+	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, optional, resources that should be cleaned up with the module deletion"`
+	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the module that may be fetched"`
 	RequiresDowntime    bool                       `yaml:"requiresDowntime" comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"`
+	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
 }
 
 type Manager struct {

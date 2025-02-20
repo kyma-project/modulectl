@@ -19,30 +19,31 @@ Provide the `--config-file` flag with a config file path.
 The module config file is a YAML file used to configure the following attributes for the module:
 
 ```yaml
-- name:             a string, required, the name of the module
-- version:          a string, required, the version of the module
-- manifest:         a string, required, reference to the manifest, must be a URL
-- repository:       a string, required, reference to the repository, must be a URL
-- documentation:    a string, required, reference to the documentation, must be a URL
-- icons:            a map with string keys and values, required, icons used for UI
-    - name:         a string, required, the name of the icon
-      link:         a URL, required, the link to the icon
-- defaultCR:        a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
-- mandatory:        a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
-- security:         a string, optional, reference to a YAML file containing the security scanners config, must be a local file path
-- labels:           a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
-- annotations:      a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
-- manager:          # an object, optional, module resource that indicates the installation readiness of the module
-    name:           a string, required, the name of the module resource
-    namespace:      a string, optional, the namespace of the module resource
-    group:          a string, required, the API group of the module resource
-    version:        a string, required, the API version of the module resource
-    kind:           a string, required, the API kind of the module resource
-- associatedResources: a list of Group-Version-Kind(GVK), optional, resources that should be cleaned up with the module deletion
-- resources:        # a map with string keys and values, optional, additional resources of the module that may be fetched
-    - name:         a string, required, the name of the resource
-      link:         a URL, required, the link to the resource
-- requiresDowntime: a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
+- name:                 a string, required, the name of the module
+- version:              a string, required, the version of the module
+- manifest:             a string, required, reference to the manifest, must be a URL
+- repository:           a string, required, reference to the repository, must be a URL
+- documentation:        a string, required, reference to the documentation, must be a URL
+- icons:                a map with string keys and values, required, icons used for UI
+    - name:             a string, required, the name of the icon
+      link:             a URL, required, the link to the icon
+- defaultCR:            a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
+- mandatory:            a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
+- security:             a string, optional, reference to a YAML file containing the security scanners config, must be a local file path
+- labels:               a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
+- annotations:          a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
+- manager:              an object, optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module
+    name:               a string, required, the name of the module resource
+    namespace:          a string, optional, the namespace of the module resource
+    group:              a string, required, the API group of the module resource
+    version:            a string, required, the API version of the module resource
+    kind:               a string, required, the API kind of the module resource
+- associatedResources:  a list of Group-Version-Kind(GVK), optional, resources that should be cleaned up with the module deletion
+- resources:            a map with string keys and values, optional, additional resources of the module that may be fetched
+    - name:             a string, required, the name of the resource
+      link:             a URL, required, the link to the resource
+- requiresDowntime:     a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
+- namespace:            a string, optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed
 ```
 
 The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated.
