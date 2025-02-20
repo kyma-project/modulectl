@@ -205,19 +205,23 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)
 	}
 
-	opts.Out.Write("- Pushing component version\n")
-	descriptor, err = s.pushComponentVersion(archive, opts)
-	if err != nil {
-		return fmt.Errorf("failed to push component version: %w", err)
+	if opts.RegistryURL != "" {
+		opts.Out.Write("- Pushing component version\n")
+		descriptor, err = s.pushComponentVersion(archive, opts)
+		if err != nil {
+			return fmt.Errorf("failed to push component version: %w", err)
+		}
 	}
 
-	opts.Out.Write("- Generating ModuleTemplate\n")
-	if err = s.generateModuleTemplate(moduleConfig,
-		descriptor,
-		manifestFilePath,
-		defaultCRFilePath,
-		opts.TemplateOutput); err != nil {
-		return fmt.Errorf("failed to generate module template: %w", err)
+	if opts.RegistryURL != "" {
+		opts.Out.Write("- Generating ModuleTemplate\n")
+		if err = s.generateModuleTemplate(moduleConfig,
+			descriptor,
+			manifestFilePath,
+			defaultCRFilePath,
+			opts.TemplateOutput); err != nil {
+			return fmt.Errorf("failed to generate module template: %w", err)
+		}
 	}
 
 	return nil
