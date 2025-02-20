@@ -47,7 +47,7 @@ func (opts Options) Validate() error {
 	}
 
 	if opts.OverwriteComponentVersion {
-		opts.Out.Write("Warning: overwrite flag is set to true. This should be only used for testing purposes.\n")
+		opts.Out.Write("Warning: overwrite flag is set to true. This should ONLY be used for testing purposes.\n")
 	}
 
 	return nil
