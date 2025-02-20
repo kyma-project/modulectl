@@ -14,14 +14,6 @@ import (
 	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
 
-var defaultData = []byte(`apiVersion: operator.kyma-project.io/v1alpha1
-kind: Sample
-metadata:
-  name: sample-yaml
-spec:
-  resourceFilePath: "./module-data.yaml"
-`)
-
 func TestNew_WhenCalledWithNilDependencies_ReturnsError(t *testing.T) {
 	_, err := templategenerator.NewService(nil)
 
@@ -37,30 +29,24 @@ func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.
 	require.ErrorIs(t, err, templategenerator.ErrEmptyModuleConfig)
 }
 
-func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor(t *testing.T) {
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:        "example.com/component",
-		Namespace:   "default",
-		Version:     "1.0.0",
-		Labels:      map[string]string{"key": "value"},
-		Annotations: map[string]string{"annotation": "value"},
-		Mandatory:   true,
-		Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
-		Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
-	}
+func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *testing.T) {
+	svc, _ := templategenerator.NewService(&mockFileSystem{})
 
-	mockFS := &mockFileSystem{}
-	svc, _ := templategenerator.NewService(mockFS)
+	err := svc.GenerateModuleTemplate(&contentprovider.ModuleConfig{}, nil, nil, false, "")
 
-	err := svc.GenerateModuleTemplate(moduleConfig, nil, defaultData, true, "output.yaml")
-
-	require.NoError(t, err)
-
-	assertCommonTemplateProperties(t, mockFS)
-	require.Contains(t, mockFS.writtenTemplate, "descriptor:\n    null")
+	require.Error(t, err)
+	require.ErrorIs(t, err, templategenerator.ErrEmptyDescriptor)
 }
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {
+	defaultData := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
+kind: Sample
+metadata:
+  name: sample-yaml
+spec:
+  resourceFilePath: "./module-data.yaml"
+`)
+
 	tests := []struct {
 		name         string
 		data         []byte
@@ -326,7 +312,6 @@ spec:
 			require.NoError(t, err)
 			require.Equal(t, "output.yaml", mockFS.path)
 			tt.assertions(t, mockFS)
-			require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 		})
 	}
 }
@@ -347,6 +332,7 @@ func assertCommonTemplateProperties(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.NotContains(t, mockFS.writtenTemplate, "---")
 	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")

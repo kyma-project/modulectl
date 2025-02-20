@@ -136,6 +136,9 @@ func (s *Service) GenerateModuleTemplate(
 	if moduleConfig == nil {
 		return ErrEmptyModuleConfig
 	}
+	if descriptor == nil {
+		return ErrEmptyDescriptor
+	}
 
 	labels := generateLabels(moduleConfig)
 	annotations := generateAnnotations(moduleConfig, isCrdClusterScoped)
@@ -156,12 +159,9 @@ func (s *Service) GenerateModuleTemplate(
 		return fmt.Errorf("failed to parse module template: %w", err)
 	}
 
-	var cva compdesc.ComponentDescriptorVersion = nil
-	if descriptor != nil {
-		cva, err = compdesc.Convert(descriptor)
-		if err != nil {
-			return fmt.Errorf("failed to convert descriptor: %w", err)
-		}
+	cva, err := compdesc.Convert(descriptor)
+	if err != nil {
+		return fmt.Errorf("failed to convert descriptor: %w", err)
 	}
 
 	mtData := moduleTemplateData{
