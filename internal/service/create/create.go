@@ -44,7 +44,8 @@ type ComponentArchiveService interface {
 }
 
 type RegistryService interface {
-	PushComponentVersion(archive *comparch.ComponentArchive, insecure bool, credentials, registryURL string) error
+	PushComponentVersion(archive *comparch.ComponentArchive, insecure, overwrite bool,
+		credentials, registryURL string) error
 	GetComponentVersion(archive *comparch.ComponentArchive, insecure bool,
 		userPasswordCreds, registryURL string) (cpi.ComponentVersionAccess, error)
 }
@@ -210,19 +211,23 @@ func (s *Service) Run(opts Options) error {
 	return nil
 }
 
-func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options) error {
+func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive,
+	moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options,
+) error {
 	opts.Out.Write("- Pushing component version\n")
 	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(defaultCRFilePath, manifestFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
 	}
 
-	if err := s.registryService.PushComponentVersion(archive, opts.Insecure, opts.Credentials,
+	if err := s.registryService.PushComponentVersion(archive, opts.Insecure, opts.OverwriteComponentVersion,
+		opts.Credentials,
 		opts.RegistryURL); err != nil {
 		return fmt.Errorf("failed to push component archive: %w", err)
 	}
 
-	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials, opts.RegistryURL)
+	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials,
+		opts.RegistryURL)
 	if err != nil {
 		return fmt.Errorf("failed to get component version: %w", err)
 	}
@@ -244,7 +249,9 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 	return nil
 }
 
-func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
+func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
+	moduleConfig *contentprovider.ModuleConfig, opts Options,
+) error {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
 	if err != nil {

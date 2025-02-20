@@ -77,6 +77,7 @@ Build a simple module and push it to a remote registry
 -h, --help                            Provides help for the create command.
     --insecure                        Uses an insecure connection to access the registry.
 -o, --output string                   Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").
+    --overwrite                       Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes.
 -r, --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
     --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
     --registry-credentials string     Basic authentication credentials for the given repository in the <user:password> format.

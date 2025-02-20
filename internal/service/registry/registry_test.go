@@ -29,9 +29,21 @@ func TestService_PushComponentVersion_ReturnErrorWhenSameComponentVersionExists(
 
 	svc, _ := registry.NewService(&ociRepositoryVersionExistsStub{}, repo)
 
-	err = svc.PushComponentVersion(componentArchive, true, "", "ghcr.io/template-operator")
+	err = svc.PushComponentVersion(componentArchive, true, false, "", "ghcr.io/template-operator")
 
 	require.ErrorContains(t, err, "could not push component version")
+}
+
+func TestService_PushComponentVersion_ReturnNoErrorWhenSameComponentVersionExistsWithOverwrite(t *testing.T) {
+	repo, err := ocireg.NewRepository(cpi.DefaultContext(), "URL")
+	require.NoError(t, err)
+	componentArchive := &comparch.ComponentArchive{}
+
+	svc, _ := registry.NewService(&ociRepositoryStub{}, repo)
+
+	err = svc.PushComponentVersion(componentArchive, true, true, "", "ghcr.io/template-operator")
+
+	require.NoError(t, err)
 }
 
 func TestService_PushComponentVersion_ReturnNoErrorOnSuccess(t *testing.T) {
@@ -40,7 +52,7 @@ func TestService_PushComponentVersion_ReturnNoErrorOnSuccess(t *testing.T) {
 	componentArchive := &comparch.ComponentArchive{}
 
 	svc, _ := registry.NewService(&ociRepositoryStub{}, repo)
-	err = svc.PushComponentVersion(componentArchive, true, "", "ghcr.io/template-operator")
+	err = svc.PushComponentVersion(componentArchive, true, false, "", "ghcr.io/template-operator")
 	require.NoError(t, err)
 }
 
@@ -124,8 +136,8 @@ func (*ociRepositoryVersionExistsStub) GetComponentVersion(_ *comparch.Component
 	return componentVersion, nil
 }
 
-func (*ociRepositoryVersionExistsStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository,
+func (*ociRepositoryVersionExistsStub) PushComponentVersion(_ *comparch.ComponentArchive,
+	_ cpi.Repository, _ bool,
 ) error {
 	return errors.New("component version already exists")
 }
@@ -139,8 +151,8 @@ func (*ociRepositoryStub) GetComponentVersion(_ *comparch.ComponentArchive,
 	return componentVersion, nil
 }
 
-func (*ociRepositoryStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository,
+func (*ociRepositoryStub) PushComponentVersion(_ *comparch.ComponentArchive,
+	_ cpi.Repository, _ bool,
 ) error {
 	return nil
 }
@@ -153,8 +165,8 @@ func (*ociRepositoryNotExistStub) GetComponentVersion(_ *comparch.ComponentArchi
 	return nil, errors.New("failed to get component version")
 }
 
-func (*ociRepositoryNotExistStub) PushComponentVersionIfNotExist(_ *comparch.ComponentArchive,
-	_ cpi.Repository,
+func (*ociRepositoryNotExistStub) PushComponentVersion(_ *comparch.ComponentArchive,
+	_ cpi.Repository, _ bool,
 ) error {
 	return nil
 }

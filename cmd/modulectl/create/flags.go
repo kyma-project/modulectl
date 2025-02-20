@@ -35,6 +35,10 @@ const (
 	RegistryCredSelectorFlagDefault = ""
 	//nolint:gosec // Not hardcoded credentials, rather just flag name
 	registryCredSelectorFlagUsage = `Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".`
+
+	OverwriteComponentVersionFlagName    = "overwrite"
+	overwriteComponentVersionFlagUsage   = "Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes."
+	OverwriteComponentVersionFlagDefault = false
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
@@ -45,7 +49,10 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 	flags.BoolVar(&opts.Insecure, InsecureFlagName, InsecureFlagDefault, insecureFlagUsage)
 	flags.StringVarP(&opts.TemplateOutput, TemplateOutputFlagName, templateOutputFlagShort, TemplateOutputFlagDefault,
 		templateOutputFlagUsage)
-	flags.StringVarP(&opts.RegistryURL, RegistryURLFlagName, registryFlagShort, RegistryURLFlagDefault, registryURLFlagUsage)
+	flags.StringVarP(&opts.RegistryURL, RegistryURLFlagName, registryFlagShort, RegistryURLFlagDefault,
+		registryURLFlagUsage)
 	flags.StringVar(&opts.RegistryCredSelector, RegistryCredSelectorFlagName, RegistryCredSelectorFlagDefault,
 		registryCredSelectorFlagUsage)
+	flags.BoolVar(&opts.OverwriteComponentVersion, OverwriteComponentVersionFlagName,
+		OverwriteComponentVersionFlagDefault, overwriteComponentVersionFlagUsage)
 }
