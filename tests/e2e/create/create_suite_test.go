@@ -65,6 +65,7 @@ type createCmd struct {
 	moduleConfigFile string
 	insecure         bool
 	overwrite        bool
+	dryRun           bool
 }
 
 func (cmd *createCmd) execute() error {
@@ -90,6 +91,10 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.overwrite {
 		args = append(args, "--overwrite")
+	}
+
+	if cmd.dryRun {
+		args = append(args, "--dry-run")
 	}
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))

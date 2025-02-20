@@ -205,12 +205,14 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)
 	}
 
-	if opts.RegistryURL != "" {
-		opts.Out.Write("- Pushing component version\n")
+	opts.Out.Write("- Pushing component version\n")
+	if !opts.DryRun && opts.RegistryURL != "" {
 		descriptor, err = s.pushComponentVersion(archive, opts)
 		if err != nil {
 			return fmt.Errorf("failed to push component version: %w", err)
 		}
+	} else {
+		opts.Out.Write("\t\tSkipping due to dry-run mode\n")
 	}
 
 	if opts.RegistryURL != "" {
