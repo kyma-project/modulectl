@@ -4,12 +4,18 @@ import (
 	"errors"
 	"fmt"
 
+	mandelsofterrors "github.com/mandelsoft/goutils/errors"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/ocm/tools/transfer"
 	"ocm.software/ocm/api/ocm/tools/transfer/transferhandler/standard"
 	"ocm.software/ocm/api/utils/misc"
 )
+
+type ComponentArchiveMeta interface {
+	GetName() string
+	GetVersion() string
+}
 
 type OCIRepo struct{}
 
@@ -24,6 +30,17 @@ func (o *OCIRepo) GetComponentVersion(archive *comparch.ComponentArchive,
 	}
 
 	return version, nil
+}
+
+func (o *OCIRepo) ExistsComponentVersion(archive ComponentArchiveMeta,
+	repo cpi.Repository,
+) (bool, error) {
+	exists, err := repo.ExistsComponentVersion(archive.GetName(), archive.GetVersion())
+	if err != nil && !mandelsofterrors.IsErrNotFound(err) {
+		return false, fmt.Errorf("failed to check if component version exists: %w", err)
+	}
+
+	return exists, nil
 }
 
 func (o *OCIRepo) PushComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository,

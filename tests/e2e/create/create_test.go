@@ -296,6 +296,38 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with minimal valid module-config and dry-run flag", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+				dryRun:           true,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+		})
+		It("Then module template should contain the expected content", func() {
+			template, err := readModuleTemplate(templateOutputPath)
+			Expect(err).ToNot(HaveOccurred())
+			descriptor := getDescriptor(template)
+
+			validateMinimalModuleTemplate(template, descriptor)
+
+			By("And descriptor.component.repositoryContexts should be empty")
+			Expect(descriptor.RepositoryContexts).To(HaveLen(0))
+
+			By("And descriptor.component.resources should be empty")
+			Expect(descriptor.Resources).To(HaveLen(0))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
@@ -367,6 +399,29 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				registry:         ociRegistry,
 				insecure:         true,
 				output:           templateOutputPath,
+				dryRun:           true,
+			}
+		})
+		It("Then the command should fail with same version exists message", func() {
+			err := cmd.execute()
+			Expect(err.Error()).Should(ContainSubstring("component kyma-project.io/module/template-operator in version 1.0.0 already exists: component version already exists"))
+
+			By("And no module template file should be generated")
+			currentDir, err := os.Getwd()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(filesIn(currentDir)).Should(Not(ContainElement("template.yaml")))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+				overwrite:        true,
 				dryRun:           true,
 			}
 		})

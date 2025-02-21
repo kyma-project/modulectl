@@ -1,6 +1,7 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -12,6 +13,8 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
+
+var ErrComponentVersionExists = errors.New("component version already exists")
 
 type ModuleConfigService interface {
 	ParseAndValidateModuleConfig(moduleConfigFile string) (*contentprovider.ModuleConfig, error)
@@ -44,10 +47,22 @@ type ComponentArchiveService interface {
 }
 
 type RegistryService interface {
-	PushComponentVersion(archive *comparch.ComponentArchive, insecure, overwrite bool,
-		credentials, registryURL string) error
-	GetComponentVersion(archive *comparch.ComponentArchive, insecure bool,
-		userPasswordCreds, registryURL string) (cpi.ComponentVersionAccess, error)
+	PushComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		overwrite bool,
+		credentials string,
+		registryURL string,
+	) error
+	GetComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		userPasswordCreds string,
+		registryURL string,
+	) (cpi.ComponentVersionAccess, error)
+	ExistsComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		credentials string,
+		registryURL string,
+	) (bool, error)
 }
 
 type ModuleTemplateService interface {
@@ -213,7 +228,10 @@ func (s *Service) Run(opts Options) error {
 			return fmt.Errorf("failed to push component version: %w", err)
 		}
 	} else {
-		opts.Out.Write("\t\tSkipping due to dry-run mode\n")
+		opts.Out.Write("\tSkipping push due to dry-run mode\n")
+		if err = s.ensureComponentVersionDoesNotExist(archive, opts); err != nil {
+			return err
+		}
 	}
 
 	opts.Out.Write("- Generating ModuleTemplate\n")
@@ -226,6 +244,32 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	return nil
+}
+
+func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.ComponentArchive, opts Options) error {
+	exists, err := s.registryService.ExistsComponentVersion(archive,
+		opts.Insecure,
+		opts.Credentials,
+		opts.RegistryURL)
+	if err != nil {
+		return fmt.Errorf("failed to check if component version exists: %w", err)
+	}
+
+	if !exists {
+		opts.Out.Write(
+			fmt.Sprintf("\tComponent %s in version %s does not exist yet\n", archive.GetName(), archive.GetVersion()))
+		return nil
+	}
+
+	if opts.OverwriteComponentVersion {
+		opts.Out.Write(
+			fmt.Sprintf("\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
+				archive.GetName(),
+				archive.GetVersion()))
+		return nil
+	}
+
+	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(), ErrComponentVersionExists)
 }
 
 func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor, error) {
