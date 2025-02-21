@@ -15,4 +15,4 @@ packages:
   internal/service/crdparser: 73
   internal/service/registry: 55
   internal/service/componentarchive: 41
-  internal/tools/ocirepo: 10
+  tools/ocirepo: 10
