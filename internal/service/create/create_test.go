@@ -267,6 +267,12 @@ func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ 
 	return componentVersion, nil
 }
 
+func (*registryServiceStub) ExistsComponentVersion(_ *comparch.ComponentArchive, _ bool,
+	_, _ string,
+) (bool, error) {
+	return false, nil
+}
+
 type ModuleTemplateServiceStub struct{}
 
 func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.ModuleConfig,

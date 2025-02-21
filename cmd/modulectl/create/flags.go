@@ -41,7 +41,7 @@ const (
 	OverwriteComponentVersionFlagDefault = false
 
 	DryRunFlagName    = "dry-run"
-	dryRunFlagUsage   = "Skips the push of the module descriptor to the registry."
+	dryRunFlagUsage   = "Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true."
 	DryRunFlagDefault = false
 )
 

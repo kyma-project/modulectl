@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241220120036-4210b9ef25e5
+	github.com/mandelsoft/goutils v0.0.0-20241227142622-83a787399095
 	github.com/mandelsoft/vfs v0.4.4
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
@@ -205,7 +206,6 @@ require (
 	github.com/magiconair/properties v1.8.9 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mandelsoft/filepath v0.0.0-20240223090642-3e2777258aa3 // indirect
-	github.com/mandelsoft/goutils v0.0.0-20241005173814-114fa825bbdc // indirect
 	github.com/mandelsoft/logging v0.0.0-20240618075559-fdca28a87b0a // indirect
 	github.com/mandelsoft/spiff v1.7.0-beta-6 // indirect
 	github.com/marstr/guid v1.1.0 // indirect
