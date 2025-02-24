@@ -398,7 +398,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
 				insecure:         true,
-				output:           templateOutputPath,
+				output:           "/tmp/template-2-yaml",
 				dryRun:           true,
 			}
 		})
@@ -407,9 +407,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err.Error()).Should(ContainSubstring("component kyma-project.io/module/template-operator in version 1.0.0 already exists: component version already exists"))
 
 			By("And no module template file should be generated")
-			currentDir, err := os.Getwd()
-			Expect(err).ToNot(HaveOccurred())
-			Expect(filesIn(currentDir)).Should(Not(ContainElement("template.yaml")))
+			Expect(filesIn("/tmp/")).Should(Not(ContainElement("template-2.yaml")))
 		})
 	})
 
@@ -454,6 +452,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				registry:         ociRegistry,
 				insecure:         true,
 				overwrite:        true,
+				output:           templateOutputPath,
 			}
 		})
 		It("Then the command should succeed", func() {
