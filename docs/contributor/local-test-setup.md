@@ -17,8 +17,6 @@ Follow the steps using scripts from the project root.
 
 ### 1. Create a Local Registry
 
-Create a local registry.
-
 ```sh
 ./scripts/re-create-test-registry.sh
 ```
@@ -31,7 +29,7 @@ Create a local registry.
 
 ### 3. Run the CREATE Command Tests
 
-> :bulb: Re-running the Create command requires to re-create to local registry.
+> :bulb: Re-running the Create command requires to re-create the local registry.
 
 ```sh
 ./scripts/run-e2e-test.sh --cmd=create
