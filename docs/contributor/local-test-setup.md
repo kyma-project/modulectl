@@ -6,7 +6,7 @@ This tutorial shows how to setup and run local e2e tests.
 
 ## Prerequisites
 
-Install the following tooling in the versions defined in [`versions.yaml`](../../versions.yaml):
+Install the following tooling in the versions defined in [`versions.yaml`](https://github.com/kyma-project/lifecycle-manager/blob/main/versions.yaml):
 
 - [Go](https://go.dev/)
 - [k3d](https://k3d.io/stable/)

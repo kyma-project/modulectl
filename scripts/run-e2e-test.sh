@@ -19,6 +19,4 @@ if [[ -z "$CMD" ]]; then
   exit 1
 fi
 
-
-
 export PATH=$(pwd)/bin/:$PATH && make -C ./tests/e2e test-${CMD}-cmd
