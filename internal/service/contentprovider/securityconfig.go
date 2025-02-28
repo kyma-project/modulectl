@@ -3,8 +3,11 @@ package contentprovider
 import (
 	"fmt"
 
+	"github.com/Masterminds/semver/v3"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/utils"
 )
 
 type SecurityConfig struct {
@@ -65,6 +68,43 @@ type SecurityScanConfig struct {
 	WhiteSource WhiteSourceSecConfig `json:"whitesource" yaml:"whitesource" comment:"whitesource (aka. Mend) security scanner specific configuration"`
 	DevBranch   string               `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
 	RcTag       string               `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
+}
+
+func (s *SecurityScanConfig) Validate() error {
+	if err := s.ValidateProtecodeImageTags(); err != nil {
+		return fmt.Errorf("failed to validate protecode image tags: %w", err)
+	}
+	return nil
+}
+
+func (s *SecurityScanConfig) ValidateProtecodeImageTags() error {
+	filteredImages := make([]string, 0, len(s.Protecode))
+	for _, image := range s.Protecode {
+		_, tag, err := utils.GetImageNameAndTag(image)
+		if err != nil {
+			return fmt.Errorf("failed to get image name and tag: %w", err)
+		}
+		if IsWhitelistedNonSemVerTags(tag) {
+			continue
+		}
+		_, err = semver.NewVersion(tag)
+		if err != nil {
+			return fmt.Errorf("failed to parse image tag [%s] as semantic version: %w", tag, err)
+		}
+		filteredImages = append(filteredImages, image)
+	}
+	s.Protecode = filteredImages
+	return nil
+}
+
+func IsWhitelistedNonSemVerTags(tag string) bool {
+	whitelistedNonSemVerTags := []string{"latest"}
+	for _, whitelistedTag := range whitelistedNonSemVerTags {
+		if tag == whitelistedTag {
+			return true
+		}
+	}
+	return false
 }
 
 type WhiteSourceSecConfig struct {

@@ -1,0 +1,40 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Delete test registry",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/delete-test-registry.sh",
+    },
+    {
+      "label": "Re-Create test registry",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/re-create-test-registry.sh",
+    },
+    {
+      "label": "Build modulectl-darwin-arm",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/build-modulectl.sh",
+    },
+    {
+      "label": "Run E2E tests CREATE",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/run-e2e-test.sh --cmd=create",
+      "dependsOn": [
+        "Re-Create test registry",
+        "Build modulectl-darwin-arm"
+      ],
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "Run E2E tests SCAFFOLD",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/run-e2e-test.sh --cmd=scaffold",
+      "dependsOn": [
+        "Build modulectl-darwin-arm"
+      ],
+    }
+  ]
+}

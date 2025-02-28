@@ -68,10 +68,10 @@ linters-settings:
         alias: ocmv1
       - pkg: ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact
         alias: ociartifacttypes
-      - pkg: ocm.software/ocm/api/oci/extensions/repositories/ocireg
-        alias: ocirepo
       - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
         alias: metav1
+      - pkg: github.com/mandelsoft/goutils/errors
+        alias: mandelsofterrors
   ireturn:
     allow:
       - anon

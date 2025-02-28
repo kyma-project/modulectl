@@ -10,13 +10,15 @@ import (
 )
 
 type Options struct {
-	Out                  iotools.Out
-	ConfigFile           string
-	Credentials          string
-	Insecure             bool
-	TemplateOutput       string
-	RegistryURL          string
-	RegistryCredSelector string
+	Out                       iotools.Out
+	ConfigFile                string
+	Credentials               string
+	Insecure                  bool
+	TemplateOutput            string
+	RegistryURL               string
+	RegistryCredSelector      string
+	OverwriteComponentVersion bool
+	DryRun                    bool
 }
 
 func (opts Options) Validate() error {
@@ -41,8 +43,20 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("opts.TemplateOutput must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
-	if opts.RegistryURL != "" && !strings.HasPrefix(opts.RegistryURL, "http") {
+	if opts.RegistryURL == "" {
+		return fmt.Errorf("opts.RegistryURL must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if !strings.HasPrefix(opts.RegistryURL, "http") {
 		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
+	}
+
+	if opts.OverwriteComponentVersion {
+		opts.Out.Write("Warning: overwrite flag is set to true. This should ONLY be used for testing purposes.\n")
+	}
+
+	if opts.DryRun {
+		opts.Out.Write("Warning: dry-run flag is set to true. The descriptor will NOT be pushed.\n")
 	}
 
 	return nil
