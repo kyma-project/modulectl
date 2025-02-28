@@ -1,11 +1,15 @@
 module-name: modulectl
 kind: kcp
-checkmarxOne:
-  checkmarx_preset: golang
-whitesource:
+checkmarx-one:
+  preset: go-default
+  exclude:
+    - "**/test/**"
+    - "**/*_test.go"
+    - "**/mocks/**"
+mend:
   language: golang-mod
   exclude:
     - "**/test/**"
     - "**/*_test.go"
     - "**/mocks/**"
-  subprojects: false
+
