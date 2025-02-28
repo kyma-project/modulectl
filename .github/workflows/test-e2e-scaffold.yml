@@ -1,9 +1,13 @@
 name: E2E test - scaffold command
+
+permissions: { }
+
 on:
   pull_request:
     branches:
       - main
       - 'release-**'
+
 jobs:
   test-scaffold-cmd:
     runs-on: ubuntu-latest
