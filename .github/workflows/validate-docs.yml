@@ -1,10 +1,14 @@
 name: Validate Docs
+
+permissions: { }
+
 on:
   pull_request:
     branches:
       - main
       - 'release-**'
   workflow_dispatch:
+
 jobs:
   validate:
     name: Validate Docs

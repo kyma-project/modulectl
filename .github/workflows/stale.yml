@@ -1,5 +1,7 @@
 name: Manage Stale Issues and Pull Requests
 
+permissions: { }
+
 on:
   schedule:
     - cron: '0 0 * * *'  # Runs daily at midnight
