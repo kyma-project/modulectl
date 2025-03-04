@@ -52,7 +52,7 @@ func (s *SecurityConfig) validateArgs(args types.KeyValueArgs) error {
 func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig {
 	return SecurityScanConfig{
 		ModuleName: moduleName,
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
 		},
@@ -64,22 +64,22 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 
 type SecurityScanConfig struct {
 	ModuleName  string               `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
-	Protecode   []string             `json:"protecode" yaml:"protecode" comment:"list, includes the images which must be scanned by the Protecode scanner (aka. Black Duck Binary Analysis)"`
+	BDBA        []string             `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
 	WhiteSource WhiteSourceSecConfig `json:"whitesource" yaml:"whitesource" comment:"whitesource (aka. Mend) security scanner specific configuration"`
 	DevBranch   string               `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
 	RcTag       string               `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
 func (s *SecurityScanConfig) Validate() error {
-	if err := s.ValidateProtecodeImageTags(); err != nil {
-		return fmt.Errorf("failed to validate protecode image tags: %w", err)
+	if err := s.ValidateBDBAImageTags(); err != nil {
+		return fmt.Errorf("failed to validate bdba image tags: %w", err)
 	}
 	return nil
 }
 
-func (s *SecurityScanConfig) ValidateProtecodeImageTags() error {
-	filteredImages := make([]string, 0, len(s.Protecode))
-	for _, image := range s.Protecode {
+func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
+	filteredImages := make([]string, 0, len(s.BDBA))
+	for _, image := range s.BDBA {
 		_, tag, err := utils.GetImageNameAndTag(image)
 		if err != nil {
 			return fmt.Errorf("failed to get image name and tag: %w", err)
@@ -93,7 +93,7 @@ func (s *SecurityScanConfig) ValidateProtecodeImageTags() error {
 		}
 		filteredImages = append(filteredImages, image)
 	}
-	s.Protecode = filteredImages
+	s.BDBA = filteredImages
 	return nil
 }
 

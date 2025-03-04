@@ -90,8 +90,8 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.Co
 		return fmt.Errorf("failed to append security labels to sources: %w", err)
 	}
 
-	if err := AppendProtecodeImagesLayers(descriptor, securityConfig); err != nil {
-		return fmt.Errorf("failed to append protecode images layers: %w", err)
+	if err := AppendBDBAImagesLayers(descriptor, securityConfig); err != nil {
+		return fmt.Errorf("failed to append bdba images layers: %w", err)
 	}
 
 	return nil
@@ -132,11 +132,11 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 	return nil
 }
 
-func AppendProtecodeImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
+func AppendBDBAImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
 	securityScanConfig contentprovider.SecurityScanConfig,
 ) error {
-	protecodeImages := securityScanConfig.Protecode
-	for _, img := range protecodeImages {
+	imagesToScan := securityScanConfig.BDBA
+	for _, img := range imagesToScan {
 		imgName, imgTag, err := utils.GetImageNameAndTag(img)
 		if err != nil {
 			return fmt.Errorf("failed to get image name and tag: %w", err)

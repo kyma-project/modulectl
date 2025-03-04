@@ -58,48 +58,48 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T)
 	assert.Equal(t, convertedContent, result)
 }
 
-func Test_SecurityScanConfig_ValidateProtecodeImageTags_IgnoresLatestTag(t *testing.T) {
+func Test_SecurityScanConfig_ValidateBDBAImageTags_IgnoresLatestTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/dev/test-image:latest",
 		},
 	}
 
-	err := config.ValidateProtecodeImageTags()
+	err := config.ValidateBDBAImageTags()
 
 	require.NoError(t, err)
-	assert.Len(t, config.Protecode, 1)
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.Protecode[0])
+	assert.Len(t, config.BDBA, 1)
+	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.BDBA[0])
 }
 
-func Test_SecurityScanConfig_ValidateProtecodeImageTags_ReturnsError_WhenNonSemVerTag(t *testing.T) {
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenNonSemVerTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/dev/test-image:non-semver",
 		},
 	}
 
-	err := config.ValidateProtecodeImageTags()
+	err := config.ValidateBDBAImageTags()
 
 	require.ErrorIs(t, err, semver.ErrInvalidSemVer)
 }
 
-func Test_SecurityScanConfig_ValidateProtecodeImageTags_ReturnsNoError_WhenValidTagsProvided(t *testing.T) {
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsNoError_WhenValidTagsProvided(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6",
 		},
 	}
 
-	err := config.ValidateProtecodeImageTags()
+	err := config.ValidateBDBAImageTags()
 
 	require.NoError(t, err)
-	assert.Len(t, config.Protecode, 2)
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.Protecode[0])
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6", config.Protecode[1])
+	assert.Len(t, config.BDBA, 2)
+	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.BDBA[0])
+	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6", config.BDBA[1])
 }
 
 func TestIsWhitelistedNonSemVerTags(t *testing.T) {

@@ -20,20 +20,20 @@ func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
 	require.Nil(t, securityConfigService)
 }
 
-func Test_AppendProtecodeImagesLayers_ReturnCorrectResources(t *testing.T) {
+func Test_AppendBDBAImagesLayers_ReturnCorrectResources(t *testing.T) {
 	cd := &compdesc.ComponentDescriptor{}
 	cd.SetName("test.io/module/test")
 	cd.SetVersion("1.0.0")
 	cd.Provider = ocmv1.Provider{Name: "kyma"}
 
 	securityConfig := contentprovider.SecurityScanConfig{
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.0",
 			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
 		},
 	}
 
-	err := componentdescriptor.AppendProtecodeImagesLayers(cd, securityConfig)
+	err := componentdescriptor.AppendBDBAImagesLayers(cd, securityConfig)
 	require.NoError(t, err)
 
 	require.Equal(t, "template-operator", cd.Resources[0].Name)
