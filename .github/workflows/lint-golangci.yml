@@ -1,11 +1,14 @@
 name: Lint golangci
 
+permissions: { }
+
 on:
   pull_request:
     branches:
       - main
       - feat/**
   workflow_dispatch:
+
 jobs:
   golangci:
     name: lint
