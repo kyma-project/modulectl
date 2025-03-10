@@ -41,6 +41,7 @@ For example: `modulectl create -h`.
 
 Below are links to the detailed explanation of the commands, in case you want to know more about them without actually
 running the commands:
+- [modulectl](./docs/gen-docs/modulectl.md)
 - [Create Command](./docs/gen-docs/modulectl_create.md)
 - [Scaffold Command](./docs/gen-docs/modulectl_scaffold.md)
 - [Version Command](./docs/gen-docs/modulectl_version.md)
