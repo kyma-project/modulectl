@@ -1,28 +1,27 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/kyma-project/modulectl)](https://api.reuse.software/info/github.com/kyma-project/modulectl)
-# `modulectl`
+# modulectl
 
 ## Overview
-It is a command line tool which supports Module developers for Kyma. It provides a set of commands and flags which can
-be used to:
-- Create an empty scaffold for a new module
-- Build a module and push it to a remote repository
+modulectl is a command line tool that supports developers of Kyma modules. It provides a set of commands and flags to:
+* Create an empty scaffold for a new module
+* Build a module and push it to a remote repository
 
-## How to Install
+## Installation
 
-From the GitHub releases page (https://github.com/kyma-project/modulectl/releases), download the binary for your operating system and architecture.
-Then, move the binary to a directory in your PATH.
-Or go inside the directory where the binary is located, and you can run the binary from there.
-Don't forget to make the binary executable by running `chmod +x modulectl`.
+1. Download the binary for your operating system and architecture from the [GitHub releases page](https://github.com/kyma-project/modulectl/releases).
+2. Move the binary to a directory in your PATH or navigate to the directory where the binary is located.
+3. Make the binary executable by running `chmod +x modulectl`.
 
 ### Alternative
 You can build the binary from the source code.
+
 Clone the repository and run `make build` from the root directory of the repository.
-The binary will be created in the `bin` directory.
-> **Note**
+
+The binary is created in the `bin` directory.
+
+> [!NOTE]
 >
-> We also provide specific Makefile targets for MacOS (darwin) & Linux operating systems, with the options to compile
-> for x86 or ARM architectures.
-> You can use them to build the binary for your specific operating system and architecture.
+> You can use Makefile targets for MacOS (darwin) or Linux, with the option to compile for x86 or ARM architectures, to build the binary for your specific operating system and architecture.
 
 ## Usage
 ```
@@ -30,27 +29,17 @@ modulectl <command> [flags]
 ```
 
 ### Available Commands
-- `create` - Creates a module bundled as an OCI artifact. Detailed long explanation can be found here.
-- `scaffold` - Generates necessary files required for module creation.
-- `help` - Provides help about any command.
-- `version` - Print the version of the `modulectl` tool.
-- `completion` - Generate the autocompletion script for the specified shell.
+- `create` - Creates a module bundled as an OCI artifact. See [modulectl create](./docs/gen-docs/modulectl_create.md).
+- `scaffold` - Generates necessary files required for module creation. See [modulectl scaffold](./docs/gen-docs/modulectl_scaffold.md)
+- `help` - Provides help with any command.
+- `version` - Prints the current version of the modulectl tool. See [modulectl version](./docs/gen-docs/modulectl_version.md).
+- `completion` - Generates the autocompletion script for the specified shell.
 
-For detailed information about the commands, you can use the `-h` or `--help` flag with the command.
-For example: `modulectl create -h`.
-
-Below are links to the detailed explanation of the commands, in case you want to know more about them without actually
-running the commands:
-- [modulectl](./docs/gen-docs/modulectl.md)
-- [Create Command](./docs/gen-docs/modulectl_create.md)
-- [Scaffold Command](./docs/gen-docs/modulectl_scaffold.md)
-- [Version Command](./docs/gen-docs/modulectl_version.md)
+For detailed information about the commands, you can use the `-h` or `--help` flag with the command. For example: `modulectl create -h`.
 
 ## Development
 
-Before you start developing, a local test setup must be created.
-To make life easy, we have written some scripts, which automate most of the process.
-Please follow [this guide](./docs/contributor/local-test-setup.md) to know more.
+Before you start developing, create a local test setup. For more information, see [Configure and Run a Local Test Setup](./docs/contributor/local-test-setup.md).
 
 ## Contributing
 <!--- mandatory section - do not change this! --->
