@@ -1,6 +1,7 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -12,6 +13,8 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
+
+var ErrComponentVersionExists = errors.New("component version already exists")
 
 type ModuleConfigService interface {
 	ParseAndValidateModuleConfig(moduleConfigFile string) (*contentprovider.ModuleConfig, error)
@@ -44,9 +47,22 @@ type ComponentArchiveService interface {
 }
 
 type RegistryService interface {
-	PushComponentVersion(archive *comparch.ComponentArchive, insecure bool, credentials, registryURL string) error
-	GetComponentVersion(archive *comparch.ComponentArchive, insecure bool,
-		userPasswordCreds, registryURL string) (cpi.ComponentVersionAccess, error)
+	PushComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		overwrite bool,
+		credentials string,
+		registryURL string,
+	) error
+	GetComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		userPasswordCreds string,
+		registryURL string,
+	) (cpi.ComponentVersionAccess, error)
+	ExistsComponentVersion(archive *comparch.ComponentArchive,
+		insecure bool,
+		credentials string,
+		registryURL string,
+	) (bool, error)
 }
 
 type ModuleTemplateService interface {
@@ -139,6 +155,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
+//nolint:funlen // this is a straight down aggregation of the individual steps
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
@@ -204,27 +221,85 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)
 	}
 
-	if opts.RegistryURL != "" {
-		return s.pushImgAndCreateTemplate(archive, moduleConfig, manifestFilePath, defaultCRFilePath, opts)
+	opts.Out.Write("- Pushing component version\n")
+	if !opts.DryRun {
+		descriptor, err = s.pushComponentVersion(archive, opts)
+		if err != nil {
+			return fmt.Errorf("failed to push component version: %w", err)
+		}
+	} else {
+		opts.Out.Write("\tSkipping push due to dry-run mode\n")
+		if err = s.ensureComponentVersionDoesNotExist(archive, opts); err != nil {
+			return err
+		}
 	}
+
+	opts.Out.Write("- Generating ModuleTemplate\n")
+	if err = s.generateModuleTemplate(moduleConfig,
+		descriptor,
+		manifestFilePath,
+		defaultCRFilePath,
+		opts.TemplateOutput); err != nil {
+		return fmt.Errorf("failed to generate module template: %w", err)
+	}
+
 	return nil
 }
 
-func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, moduleConfig *contentprovider.ModuleConfig, manifestFilePath, defaultCRFilePath string, opts Options) error {
-	opts.Out.Write("- Pushing component version\n")
+func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.ComponentArchive, opts Options) error {
+	exists, err := s.registryService.ExistsComponentVersion(archive,
+		opts.Insecure,
+		opts.Credentials,
+		opts.RegistryURL)
+	if err != nil {
+		return fmt.Errorf("failed to check if component version exists: %w", err)
+	}
+
+	if !exists {
+		opts.Out.Write(
+			fmt.Sprintf("\tComponent %s in version %s does not exist yet\n", archive.GetName(), archive.GetVersion()))
+		return nil
+	}
+
+	if opts.OverwriteComponentVersion {
+		opts.Out.Write(
+			fmt.Sprintf("\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
+				archive.GetName(),
+				archive.GetVersion()))
+		return nil
+	}
+
+	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(), ErrComponentVersionExists)
+}
+
+func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor, error) {
+	if err := s.registryService.PushComponentVersion(archive,
+		opts.Insecure,
+		opts.OverwriteComponentVersion,
+		opts.Credentials,
+		opts.RegistryURL); err != nil {
+		return nil, fmt.Errorf("failed to push component archive: %w", err)
+	}
+
+	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials,
+		opts.RegistryURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get component version: %w", err)
+	}
+
+	return componentVersionAccess.GetDescriptor(), nil
+}
+
+func (s *Service) generateModuleTemplate(
+	moduleConfig *contentprovider.ModuleConfig,
+	descriptor *compdesc.ComponentDescriptor,
+	manifestFilePath string,
+	defaultCRFilePath string,
+	templateOutput string,
+) error {
 	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(defaultCRFilePath, manifestFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
-	}
-
-	if err := s.registryService.PushComponentVersion(archive, opts.Insecure, opts.Credentials,
-		opts.RegistryURL); err != nil {
-		return fmt.Errorf("failed to push component archive: %w", err)
-	}
-
-	componentVersionAccess, err := s.registryService.GetComponentVersion(archive, opts.Insecure, opts.Credentials, opts.RegistryURL)
-	if err != nil {
-		return fmt.Errorf("failed to get component version: %w", err)
 	}
 
 	var crData []byte
@@ -235,20 +310,29 @@ func (s *Service) pushImgAndCreateTemplate(archive *comparch.ComponentArchive, m
 		}
 	}
 
-	opts.Out.Write("- Generating ModuleTemplate\n")
-	descriptor := componentVersionAccess.GetDescriptor()
-	if err = s.moduleTemplateService.GenerateModuleTemplate(moduleConfig, descriptor,
-		crData, isCRDClusterScoped, opts.TemplateOutput); err != nil {
+	if err := s.moduleTemplateService.GenerateModuleTemplate(moduleConfig,
+		descriptor,
+		crData,
+		isCRDClusterScoped,
+		templateOutput); err != nil {
 		return fmt.Errorf("failed to generate module template: %w", err)
 	}
+
 	return nil
 }
 
-func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor, moduleConfig *contentprovider.ModuleConfig, opts Options) error {
+func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
+	moduleConfig *contentprovider.ModuleConfig, opts Options,
+) error {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
 	if err != nil {
 		return fmt.Errorf("failed to parse security config data: %w", err)
+	}
+
+	err = securityConfig.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate security config data: %w", err)
 	}
 
 	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {

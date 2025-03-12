@@ -9,17 +9,19 @@ import (
 
 	"ocm.software/ocm/api/credentials"
 	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
-	ocirepo "ocm.software/ocm/api/oci/extensions/repositories/ocireg"
+	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 	"ocm.software/ocm/api/utils/runtime"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/tools/ocirepo"
 )
 
 type OCIRepository interface {
 	GetComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository) (cpi.ComponentVersionAccess, error)
-	PushComponentVersionIfNotExist(archive *comparch.ComponentArchive, repo cpi.Repository) error
+	PushComponentVersion(archive *comparch.ComponentArchive, repo cpi.Repository, overwrite bool) error
+	ExistsComponentVersion(archive ocirepo.ComponentArchiveMeta, repo cpi.Repository) (bool, error)
 }
 
 type Service struct {
@@ -38,7 +40,25 @@ func NewService(ociRepository OCIRepository, repo cpi.Repository) (*Service, err
 	}, nil
 }
 
-func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure bool,
+func (s *Service) ExistsComponentVersion(archive *comparch.ComponentArchive,
+	insecure bool,
+	credentials string,
+	registryURL string,
+) (bool, error) {
+	repo, err := s.getRepository(insecure, credentials, registryURL)
+	if err != nil {
+		return false, fmt.Errorf("could not get repository: %w", err)
+	}
+
+	exists, err := s.ociRepository.ExistsComponentVersion(archive, repo)
+	if err != nil {
+		return false, fmt.Errorf("could not check if component version exists: %w", err)
+	}
+
+	return exists, nil
+}
+
+func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insecure, overwrite bool,
 	credentials, registryURL string,
 ) error {
 	repo, err := s.getRepository(insecure, credentials, registryURL)
@@ -46,7 +66,7 @@ func (s *Service) PushComponentVersion(archive *comparch.ComponentArchive, insec
 		return fmt.Errorf("could not get repository: %w", err)
 	}
 
-	if err = s.ociRepository.PushComponentVersionIfNotExist(archive, repo); err != nil {
+	if err = s.ociRepository.PushComponentVersion(archive, repo, overwrite); err != nil {
 		return fmt.Errorf("could not push component version: %w", err)
 	}
 
@@ -75,14 +95,14 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	}
 
 	ctx := cpi.DefaultContext()
-	repoType := ocirepo.Type
+	repoType := ocireg.Type
 	registryURL = NoSchemeURL(registryURL)
 	if insecure {
 		registryURL = "http://" + registryURL
 	}
 	creds := GetCredentials(ctx, insecure, userPasswordCreds, registryURL)
 
-	ociRepoSpec := &ocirepo.RepositorySpec{
+	ociRepoSpec := &ocireg.RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(repoType),
 		BaseURL:             registryURL,
 	}

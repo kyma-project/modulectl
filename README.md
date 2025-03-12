@@ -2,28 +2,44 @@
 # modulectl
 
 ## Overview
-`modulectl` is a command line tool which supports Kyma Module developers. It provides a set of commands and flags you can use to:
-- Create an emtpy scaffold for a new module
-- Build a module and push it to a remote repository
-
-## Prerequisites
-> List the requirements to run the project or example.
+modulectl is a command line tool that supports developers of Kyma modules. It provides a set of commands and flags to:
+* Create an empty scaffold for a new module
+* Build a module and push it to a remote repository
 
 ## Installation
 
-> Explain the steps to install your project. If there are multiple installation options, mention the recommended one and include others in a separate document. Create an ordered list for each installation task.
+1. Download the binary for your operating system and architecture from the [GitHub releases page](https://github.com/kyma-project/modulectl/releases).
+2. Move the binary to a directory in your PATH or navigate to the directory where the binary is located.
+3. Make the binary executable by running `chmod +x modulectl`.
+
+### Alternative
+You can build the binary from the source code.
+
+Clone the repository and run `make build` from the root directory of the repository.
+
+The binary is created in the `bin` directory.
+
+> [!NOTE]
 >
-> If it is an example README.md, describe how to build, run locally, and deploy the example. Format the example as code blocks and specify the language, highlighting where possible. Explain how you can validate that the example ran successfully. For example, define the expected output or commands to run which check a successful deployment.
->
-> Add subsections (H3) for better readability.
+> You can use Makefile targets for MacOS (darwin) or Linux, with the option to compile for x86 or ARM architectures, to build the binary for your specific operating system and architecture.
 
 ## Usage
+```
+modulectl <command> [flags]
+```
 
-> Explain how to use the project. You can create multiple subsections (H3). Include the instructions or provide links to the related documentation.
+### Available Commands
+- `create` - Creates a module bundled as an OCI artifact. See [modulectl create](./docs/gen-docs/modulectl_create.md).
+- `scaffold` - Generates necessary files required for module creation. See [modulectl scaffold](./docs/gen-docs/modulectl_scaffold.md)
+- `help` - Provides help with any command.
+- `version` - Prints the current version of the modulectl tool. See [modulectl version](./docs/gen-docs/modulectl_version.md).
+- `completion` - Generates the autocompletion script for the specified shell.
+
+For detailed information about the commands, you can use the `-h` or `--help` flag with the command. For example: `modulectl create -h`.
 
 ## Development
 
-> Add instructions on how to develop the project or example. It must be clear what to do and, for example, how to trigger the tests so that other contributors know how to make their pull requests acceptable. Include the instructions or provide links to related documentation.
+Before you start developing, create a local test setup. For more information, see [Configure and Run a Local Test Setup](./docs/contributor/local-test-setup.md).
 
 ## Contributing
 <!--- mandatory section - do not change this! --->

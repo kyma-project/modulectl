@@ -143,7 +143,7 @@ func (s *Service) GenerateModuleTemplate(
 	labels := generateLabels(moduleConfig)
 	annotations := generateAnnotations(moduleConfig, isCrdClusterScoped)
 
-	ref, err := oci.ParseRef(descriptor.Name)
+	ref, err := oci.ParseRef(moduleConfig.Name)
 	if err != nil {
 		return fmt.Errorf("failed to parse ref: %w", err)
 	}

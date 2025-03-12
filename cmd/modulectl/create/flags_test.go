@@ -7,7 +7,7 @@ import (
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 )
 
-func Test_ScaffoldFlagsDefaults(t *testing.T) {
+func Test_CreateFlagsDefaults(t *testing.T) {
 	tests := []struct {
 		name     string
 		value    string
@@ -23,6 +23,8 @@ func Test_ScaffoldFlagsDefaults(t *testing.T) {
 		{name: createcmd.TemplateOutputFlagName, value: createcmd.TemplateOutputFlagDefault, expected: "template.yaml"},
 		{name: createcmd.RegistryURLFlagName, value: createcmd.RegistryURLFlagDefault, expected: ""},
 		{name: createcmd.RegistryCredSelectorFlagName, value: createcmd.RegistryCredSelectorFlagDefault, expected: ""},
+		{name: createcmd.OverwriteComponentVersionFlagName, value: strconv.FormatBool(createcmd.OverwriteComponentVersionFlagDefault), expected: "false"},
+		{name: createcmd.DryRunFlagName, value: strconv.FormatBool(createcmd.DryRunFlagDefault), expected: "false"},
 	}
 
 	for _, testcase := range tests {

@@ -1,10 +1,14 @@
 name: Unit Test modulectl
+
+permissions: { }
+
 on:
   pull_request:
     branches:
       - main
       - 'release-**'
   workflow_dispatch:
+
 jobs:
   unit-test:
     name: Unit Test modulectl
