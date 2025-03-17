@@ -106,6 +106,12 @@ issues:
         - importas
       text: has alias "" which is not part of config # Ignore false positives that emerged due to https://github.com/julz/importas/issues/15.
     - linters:
+        - staticcheck
+      text: "SA1019:.*comparch.ComponentArchive" # disable the deprecation warnings here, will be fixed by issue: https://github.com/kyma-project/modulectl/issues/196
+    - linters:
+        - staticcheck
+      text: "SA1019:.*comparch.New" # disable the deprecation warnings here, will be fixed by issue: https://github.com/kyma-project/modulectl/issues/196
+    - linters:
         - lll # long lines starting with an url
       source: "^// http "
   max-issues-per-linter: 0

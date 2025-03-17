@@ -382,7 +382,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
 				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
 				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-tar"))
-
 			})
 		})
 	})
