@@ -6,6 +6,7 @@ linters:
     - exhaustruct   # too subjective and harms code readability
     - forbidigo     # temporarily disabled
     - godot         # not needed
+    - ireturn       # OCI lib interfaces returning a lot if interfaces, we are not the owner
     - lll
     - nlreturn      # too strict and mostly code is not more readable
     - sqlclosecheck # not needed for this project
@@ -98,7 +99,6 @@ issues:
         - err113 # Dynamic error creation in unit and integration tests is ok
         - gochecknoglobals # Does not apply to unit and integration tests
         - funlen # Table driven unit and integration tests exceed function length by design
-        - ireturn # In tests we sometimes return interfaces
         - maintidx # Table driven unit and integration tests exceed maintainability index by design
     - path: tests/e2e/
       linters: [gci] # Disable gci due to the test utilities dot import.
