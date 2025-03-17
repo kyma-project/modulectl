@@ -12,7 +12,7 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 GOLANG_CI_LINT = $(LOCALBIN)/golangci-lint
-GOLANG_CI_LINT_VERSION ?= v1.60.3
+GOLANG_CI_LINT_VERSION ?= v1.64.7
 
 lint:
 	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANG_CI_LINT_VERSION)
