@@ -334,7 +334,7 @@ require (
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	helm.sh/helm/v3 v3.17.2 // indirect
+	helm.sh/helm/v3 v3.17.3 // indirect
 	k8s.io/api v0.32.3 // indirect
 	k8s.io/cli-runtime v0.32.3 // indirect
 	k8s.io/client-go v0.32.3 // indirect
