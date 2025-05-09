@@ -52,11 +52,8 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 	if err != nil {
 		return fmt.Errorf("failed to get latest commit: %w", err)
 	}
-	commitOption := func(spec *github.AccessSpec) {
-		spec.Commit = latestCommit
-	}
 
-	access := github.New(gitRepoURL, "", commitOption)
+	access := github.New(gitRepoURL, "", github.WithCommit(latestCommit))
 
 	componentDescriptor.Sources = append(componentDescriptor.Sources, compdesc.Source{
 		SourceMeta: sourceMeta,
