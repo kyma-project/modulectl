@@ -8,8 +8,6 @@ It covers all necessary changes and deprecations to ensure a smooth transition.
 `modulectl` is the successor of the module developer-facing capabilities of Kyma CLI.
 It is already tailored for the updated ModuleTemplate metadata as discussed in [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681).
 
----
-
 ## 1. Tooling & Workflow Changes
 
 This section focuses on the `modulectl` CLI itself and the related submission, deployment, and migration workflows.
