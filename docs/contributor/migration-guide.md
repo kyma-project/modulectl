@@ -101,35 +101,44 @@ moduleRepo: https://github.com/kyma-project/<module-name>.git
 ```yaml
 # modules/<module-name>/<version>/module-config.yaml
 name: kyma-project.io/module/<module-name>
-repository: https://github.com/kyma-project/<module-name>.git
-version: <version>
-manifest: https://github.com/kyma-project/<module-name>/releases/download/<version>/<module-name>-manifest.yaml
-defaultCR: https://github.com/kyma-project/<module-name>/releases/download/<version>/<module-name>-default-cr.yaml
+repository: https://github.com/kyma-project/<module-manager-name>.git
+version: 1.34.0
+manifest: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-manager-name>.yaml
+defaultCR: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-name-default-cr>.yaml
 security: sec-scanners-config.yaml
 manager:
-  name: <module-name>-controller
-  namespace: kyma-system
-  group: apps
-  version: v1
-  kind: Deployment
+   name: <module-manager-name>
+   namespace: kyma-system
+   group: apps
+   version: v1
+   kind: Deployment
 associatedResources:
-  - group: operator.kyma-project.io
-    kind: <ResourceKind1>
-    version: <apiVersion1>
-  - group: operator.kyma-project.io
-    kind: <ResourceKind2>
-    version: <apiVersion2>
-  # ...additional CRs as needed
-documentation: https://help.sap.com/.../<module-name>-module
+   - group: operator.kyma-project.io
+     kind: <ModuleName>
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: LogParser
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: LogPipeline
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: MetricPipeline
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: TracePipeline
+     version: v1alpha1
+documentation: https://help.sap.com/docs/btp/sap-business-technology-platform/<kyma-module-name>
 icons:
-  - name: module-icon
-    link: https://raw.githubusercontent.com/.../logo_icon.svg
+   - name: module-icon
+      # TODO: provide <module-name> icon
+     link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
 
-### 2.3 Channel Mapping with ModuleReleaseMeta Channel Mapping with ModuleReleaseMeta
+### 2.3 Channel Mapping with ModuleReleaseMeta Example
 
 ```yaml
-# modules/telemetry/module-releases.yaml
+# modules/<module-name>/module-releases.yaml
 channels:
   - channel: regular
     version: 1.34.0
