@@ -26,12 +26,12 @@ modulectl scaffold -h       # help for 'scaffold'
 
 #### 1.2.1 Command Mapping
 
-| Operation                  | Kyma CLI                     | `modulectl`                      |
-| -------------------------- |------------------------------|----------------------------------|
-| Scaffold module template   | `kyma alpha module init ...` | `modulectl scaffold ...`         |
-| Create ModuleTemplate CR   | `kyma alpha module add ...`  | `modulectl create -c <config-file>` |
-| List templates or versions | `kyma alpha module list ...` |                                  |
-| Command-specific help      | `kyma alpha module <cmd> -h` | `modulectl <cmd> -h`             |
+| Operation                | Kyma CLI                       | `modulectl`                         |
+|--------------------------|--------------------------------|-------------------------------------|
+| Scaffold module template | N/A                            | `modulectl scaffold ...`            |
+| Create ModuleTemplate CR | `kyma alpha create module ...` | `modulectl create -c <config-file>` |
+| List installed modules   | `kyma alpha module list ...`   | N/A                                 |
+| Command-specific help    | `kyma alpha module <cmd> -h`   | `modulectl <cmd> -h`                |
 
 #### 1.2.2 Flag & Behavior Differences
 
