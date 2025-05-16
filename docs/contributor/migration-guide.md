@@ -13,7 +13,7 @@ It is already tailored for the updated ModuleTemplate metadata as discussed in [
 This section focuses on the `modulectl` CLI itself and the related submission, deployment, and migration workflows.
 
 ### 1.1 Use `modulectl`
-It is available for download from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
+Modulectl is available for download from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
 For an overview of the supported commands and flags, use `modulectl -h` or `modulectl <command> -h` to show the definitions.
 
 ```bash
@@ -47,7 +47,7 @@ modulectl scaffold -h       # help for 'scaffold'
 
 ### 1.3 Submission Process & Migration Period
 
-#### Submission Process
+#### Module Submission Process
 
 1. **Publish Artifacts**: Release module version assets (manifest, defaultCR) on GitHub.
 2. **Submit Version Config**: Add/update `/modules/<module>/<version>/module-config.yaml`.
@@ -167,5 +167,5 @@ On merge, the pipeline:
 
 - [`modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
 - [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
-- [ModuleTemplate CR Reference](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/03-moduletemplate.md)
-- [ModuleReleaseMeta CR Reference](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)
+- [ModuleTemplate Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/03-moduletemplate.md)
+- [ModuleReleaseMeta Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)
