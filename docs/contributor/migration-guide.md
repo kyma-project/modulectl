@@ -8,78 +8,158 @@ It covers all necessary changes and deprecations to ensure a smooth transition.
 `modulectl` is the successor of the module developer-facing capabilities of Kyma CLI.
 It is already tailored for the updated ModuleTemplate metadata as discussed in [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681).
 
-## Use `modulectl`
+---
 
+## 1. Tooling & Workflow Changes
+
+This section focuses on the `modulectl` CLI itself and the related submission, deployment, and migration workflows.
+
+### 1.1 Use `modulectl`
 It is available for download from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
 For an overview of the supported commands and flags, use `modulectl -h` or `modulectl <command> -h` to show the definitions.
 
-## Deprecations and Changes
+```bash
+modulectl -h                # general help
+modulectl create -h         # help for 'create'
+modulectl scaffold -h       # help for 'scaffold'
+modulectl list -h           # help for 'list'
+```
 
-Look at the key changes between Kyma CLI and `modulectl`.
+### 1.2 Command & Flag Differences
 
-1. **New Command**
+#### 1.2.1 Command Mapping
 
-   - The new command for module creation is `modulectl create`, use `modulectl create -h` for a detailed description. 
+| Operation                  | Kyma CLI                 | `modulectl`                              |
+| -------------------------- | ------------------------ |------------------------------------------|
+| Scaffold module template   | `kyma module init ...`   | `modulectl scaffold ...`                 |
+| Create ModuleTemplate CR   | `kyma module create ...` | `modulectl create -c <config-file>`      |
+| List templates or versions | `kyma module list ...`   | \`modulectl list \[templates releases]\` |
+| Command-specific help      | `kyma module <cmd> -h`   | `modulectl <cmd> -h`                     |
 
-2. **Release Channel Configuration**
+#### 1.2.2 Flag & Behavior Differences
 
-   - **Deprecated**: The **.channel** field is no longer required in the config file.
-   - **New Approach**: The release channel is configured separately in the [ModuleReleaseMeta CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md).
+| Feature                       | Deprecated in Kyma CLI                            | New in `modulectl`                                             |
+| ----------------------------- | ------------------------------------------------- | -------------------------------------------------------------- |
+| Config-file flag              | `--module-config-file`                            | `--config-file`, shortcut `-c` (all commands)                  |
+| Archive overwrite             | `--module-archive-version-overwrite`              | **Removed** (module versions are immutable)                    |
+| ModuleTemplate naming pattern | `.metadata.name = <module-name>-<channel>`        | `.metadata.name = <module-name>-<version>`                     |
+| Version label                 | `operator.kyma-project.io/module-version` label   | Populated in `.spec.version`                                   |
+| Documentation annotation      | `operator.kyma-project.io/doc-url` annotation     | Defined in `.spec.info.documentation` via `documentation:` key |
+| Manifest & DefaultCR source   | Local file references only                        | Fetched directly from GitHub release URLs                      |
+| Release channel in config     | Required `.channel` field in `module-config.yaml` | **Removed**; channel mapping managed by ModuleReleaseMeta CR   |
 
-3. **Manifest and Default CR data**
+### 1.3 Submission Process & Migration Period
 
-   - **Deprecated**: The Manifest and Default CR data cannot be read from a local file.
-   - **New Approach**: The Manifest and Default CR data is fetched directly from the GitHub release. See an example [here](https://github.com/kyma-project/modulectl/blob/91e01856b944fda0d5595843e040bca26416abdc/tests/e2e/create/testdata/moduleconfig/valid/with-defaultcr.yaml#L3-L4).
+#### Submission Process
 
-4. **Annotations and Labels**
+1. **Publish Artifacts**: Release module version assets (manifest, defaultCR) on GitHub.
+2. **Submit Version Config**: Add/update `/modules/<module>/<version>/module-config.yaml`.
+3. **Update Channel Mapping**: Edit `/modules/<module>/module-releases.yaml` to map channels to versions.
+4. **Trigger Pipeline**: On PR merge, the submission pipeline:
 
-   - **Deprecated**: The documentation link is not added as the `operator.kyma-project.io/doc-url` annotation.
-   - **New**: The documentation link is added as **.spec.info.documentation**. The value is configured in the module config file with key **.documentation**.
-   - **Deprecated**: The module version is not added as the `operator.kyma-project.io/module-version` label.
-   - **New**: The module version is added as **.spec.version**.
+   * Validates schema, FQDN, version uniqueness
+   * Builds via `modulectl`, pushes OCI image
+   * Generates ModuleTemplate and ModuleReleaseMeta in `/kyma/kyma-modules`
+5. **ArgoCD Sync**: Deploys ModuleTemplates and ModuleReleaseMeta to KCP landscapes.
+6. **Cleanup**: Remove obsolete channel-based configs when stable.
 
-5. **Command Flags**
+#### Migration Period & Coexistence
 
-   - **Deprecated**: Flag `--module-config-file` is deprecated.
-   - **New**: Flag `--config-file` with shortcut `-c` (applicable for both scaffold and create commands).
-   - **Deprecated**: Flag `--module-archive-version-overwrite` is deprecated.
-     - There is no successor, this feature has been sunset entirely. The reason is that module versions should be immutable once built and pushed. If a version needs to be rewritten, first it should be explicitly deleted from the registry.
+* Both channel-based (old) and version-based (new) metadata are supported during the transition.
+* KLM reads version-based templates first; falls back to channel-based if missing.
+* After full migration, legacy `<module>-<channel>` templates are rejected.
 
-6. **ModuleTemplate Naming Pattern**
+---
+## 2. Module Configuration & Metadata Changes
 
-   - **Deprecated**: **.metadata.name** is not written as `<module-name>-<channel>`.
-   - **New**: **.metadata.name** is written as `<module-name>-<version>`.
+This section covers the structure and content of `module-config.yaml` and `module-releases.yaml` files under the new version-based layout.
 
-7. **Mandatory ModuleTemplates**
+### 2.1 Directory Structure
 
-   - Mandatory modules can be created using `modulectl` by setting the **.mandatory** field to `true` in the module config. If multiple ModuleTemplates for the same mandatory module get deployed to the Kyma Control Plane, Lifecycle Manager picks up the ModuleTemplate with the highest version.
+* **Old Layout**: `/modules/<module-name>/<channel>/module-config.yaml`
+* **New Layout**: `/modules/<module-name>/<version>/module-config.yaml`
 
-8. **Beta and Internal Flags**
+### 2.2 `module-config.yaml` Schema Comparison Example
 
-   - **Deprecated**: Beta and Internal flags are not supported for ModuleTemplates.
-   - **New**: Beta and Intenral flags are configured as part of the ModuleReleaseMeta, see [ModuleReleaseMeta Configuration](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md#configuration).
+This comparison shows a generic module configuration. Replace `<module-name>`, `<channel>`, and `<version>` with your module’s actual values.
 
-## Migration Period
+##### Old Format
 
-**Support for Both Approaches Temporarily**: 
+```yaml
+name: kyma-project.io/module/<module-name>
+channel: <channel>
+version: <version>
+manifest: <module-name>-manifest.yaml
+defaultCR: <module-name>-default-cr.yaml
+annotations:
+  operator.kyma-project.io/doc-url: https://help.sap.com/.../<module-name>-module
+moduleRepo: https://github.com/kyma-project/<module-name>.git
+```
 
-- Both old and new approaches will be supported simultaneously by KLM during the migration period.
-- After the full migration to the new approach, KLM will no longer accept ModuleTemplate with the old naming pattern.
-- For testing, provide ModuleTemplate CRs in the new format accompanied by [ModuleReleaseMeta CRs](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. The ModuleReleaseMeta CR can be marked as internal and beta to avoid syncing it.
+##### New Format
 
-## Submission Process
+```yaml
+# modules/<module-name>/<version>/module-config.yaml
+name: kyma-project.io/module/<module-name>
+repository: https://github.com/kyma-project/<module-name>.git
+version: <version>
+manifest: https://github.com/kyma-project/<module-name>/releases/download/<version>/<module-name>-manifest.yaml
+defaultCR: https://github.com/kyma-project/<module-name>/releases/download/<version>/<module-name>-default-cr.yaml
+security: sec-scanners-config.yaml
+manager:
+  name: <module-name>-controller
+  namespace: kyma-system
+  group: apps
+  version: v1
+  kind: Deployment
+associatedResources:
+  - group: operator.kyma-project.io
+    kind: <ResourceKind1>
+    version: <apiVersion1>
+  - group: operator.kyma-project.io
+    kind: <ResourceKind2>
+    version: <apiVersion2>
+  # ...additional CRs as needed
+documentation: https://help.sap.com/.../<module-name>-module
+icons:
+  - name: module-icon
+    link: https://raw.githubusercontent.com/.../logo_icon.svg
+```
 
-The general submission process may look as follows:
+### 2.3 Channel Mapping with ModuleReleaseMeta Channel Mapping with ModuleReleaseMeta
 
-1. Module Team releases a new module version in the GitHub release.
-2. Module Team configures the version to be released in the module config (in the new format) in the internal module-manifest repo.
-3. Module Team updates the version in the related channel in ModuleReleaseMeta.
-4. The submission pipeline gets triggered.
-5. After certain quality gates are passed, the new version of ModuleTemplate gets provisioned into KCP first.
-6. The updated ModuleReleaseMeta gets provisioned into KCP.
-7. Outdated ModuleTemplate (the version not mentioned in ModuleReleaseMeta) should be removed. This step allows both outdated and new versions to coexist temporarily. KLM only handles the version defined in ModuleReleaseMeta.
+```yaml
+# modules/telemetry/module-releases.yaml
+channels:
+  - channel: regular
+    version: 1.34.0
+  - channel: fast
+    version: 1.34.0
+  - channel: experimental
+    version: 1.34.0-experimental
+  - channel: dev
+    version: 1.35.0-rc1
+```
+
+On merge, the pipeline:
+
+* Validates no downgrades and version existence
+* Generates ModuleReleaseMeta CRs per landscape
+* Updates landscape-specific kustomizations to reference only active versions
+
+### 2.4 Metadata Deprecations & New Practices
+
+| Deprecated Feature                | Replacement / New Location                                                    |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `.channel` field in module config | Moved to ModuleReleaseMeta CR (`module-releases.yaml`)                        |
+| `mandatory` on ModuleTemplate     | Set `mandatory: true` in module config; reconciler picks highest version      |
+| Beta/Internal flags on templates  | Configured in ModuleReleaseMeta via `.spec.info.beta` / `.spec.info.internal` |
+
+---
 
 ## Additional Resources
 
-- [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
 - [`modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
+- [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
+- [ModuleTemplate CR Reference](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/03-moduletemplate.md)
+- [ModuleReleaseMeta CR Reference](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)
