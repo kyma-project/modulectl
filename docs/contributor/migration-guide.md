@@ -20,19 +20,18 @@ For an overview of the supported commands and flags, use `modulectl -h` or `modu
 modulectl -h                # general help
 modulectl create -h         # help for 'create'
 modulectl scaffold -h       # help for 'scaffold'
-modulectl list -h           # help for 'list'
 ```
 
 ### 1.2 Command & Flag Differences
 
 #### 1.2.1 Command Mapping
 
-| Operation                  | Kyma CLI                 | `modulectl`                              |
-| -------------------------- | ------------------------ |------------------------------------------|
-| Scaffold module template   | `kyma module init ...`   | `modulectl scaffold ...`                 |
-| Create ModuleTemplate CR   | `kyma module create ...` | `modulectl create -c <config-file>`      |
-| List templates or versions | `kyma module list ...`   | \`modulectl list \[templates releases]\` |
-| Command-specific help      | `kyma module <cmd> -h`   | `modulectl <cmd> -h`                     |
+| Operation                  | Kyma CLI                     | `modulectl`                      |
+| -------------------------- |------------------------------|----------------------------------|
+| Scaffold module template   | `kyma alpha module init ...` | `modulectl scaffold ...`         |
+| Create ModuleTemplate CR   | `kyma alpha module add ...`  | `modulectl create -c <config-file>` |
+| List templates or versions | `kyma alpha module list ...` |                                  |
+| Command-specific help      | `kyma alpha module <cmd> -h` | `modulectl <cmd> -h`             |
 
 #### 1.2.2 Flag & Behavior Differences
 
