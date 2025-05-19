@@ -35,15 +35,15 @@ modulectl scaffold -h       # help for 'scaffold'
 
 #### 1.2.2 Flag & Behavior Differences
 
-| Feature                       | Deprecated in Kyma CLI                            | New in `modulectl`                                             |
-| ----------------------------- | ------------------------------------------------- | -------------------------------------------------------------- |
-| Config-file flag              | `--module-config-file`                            | `--config-file`, shortcut `-c` (all commands)                  |
-| Archive overwrite             | `--module-archive-version-overwrite`              | **Removed** (module versions are immutable)                    |
-| ModuleTemplate naming pattern | `.metadata.name = <module-name>-<channel>`        | `.metadata.name = <module-name>-<version>`                     |
-| Version label                 | `operator.kyma-project.io/module-version` label   | Populated in `.spec.version`                                   |
+| Feature                       | Deprecated in Kyma CLI                            | New in `modulectl`                     |
+| ----------------------------- | ------------------------------------------------- |----------------------------------------|
+| Config-file flag              | `--module-config-file`                            | `--config-file`, shortcut `-c`         |
+| Archive overwrite             | `--module-archive-version-overwrite`              | `--overwrite`, shortcut `-o`           |
+| ModuleTemplate naming pattern | `.metadata.name = <module-name>-<channel>`        | `.metadata.name = <module-name>`       |
+| Version label                 | `operator.kyma-project.io/module-version` label   | Populated in `.spec.version`           |
 | Documentation annotation      | `operator.kyma-project.io/doc-url` annotation     | Defined in `.spec.info.documentation` via `documentation:` key |
-| Manifest & DefaultCR source   | Local file references only                        | Fetched directly from GitHub release URLs                      |
-| Release channel in config     | Required `.channel` field in `module-config.yaml` | **Removed**; channel mapping managed by ModuleReleaseMeta CR   |
+| Manifest & DefaultCR source   | Local file references only                        | Fetched directly from GitHub release URLs |
+| Release channel in config     | Required `.channel` field in `module-config.yaml` | **Removed**; channel mapping managed by ModuleReleaseMeta CR |
 
 ### 1.3 Submission Process & Migration Period
 
@@ -71,12 +71,7 @@ modulectl scaffold -h       # help for 'scaffold'
 
 This section covers the structure and content of `module-config.yaml` and `module-releases.yaml` files under the new version-based layout.
 
-### 2.1 Directory Structure
-
-* **Old Layout**: `/modules/<module-name>/<channel>/module-config.yaml`
-* **New Layout**: `/modules/<module-name>/<version>/module-config.yaml`
-
-### 2.2 `module-config.yaml` Schema Comparison Example
+### 2.1 `module-config.yaml` Schema Comparison Example
 
 This comparison shows a generic module configuration. Replace `<module-name>`, `<channel>`, and `<version>` with your module’s actual values.
 
@@ -128,11 +123,10 @@ associatedResources:
 documentation: https://help.sap.com/docs/btp/sap-business-technology-platform/<kyma-module-name>
 icons:
    - name: module-icon
-      # TODO: provide <module-name> icon
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
 
-### 2.3 Channel Mapping with ModuleReleaseMeta Example
+### 2.2 Channel Mapping with ModuleReleaseMeta Example
 
 ```yaml
 # modules/<module-name>/module-releases.yaml
@@ -153,13 +147,13 @@ On merge, the pipeline:
 * Generates ModuleReleaseMeta CRs per landscape
 * Updates landscape-specific kustomizations to reference only active versions
 
-### 2.4 Metadata Deprecations & New Practices
+### 2.3 Metadata Deprecations & New Practices
 
-| Deprecated Feature                | Replacement / New Location                                                    |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| `.channel` field in module config | Moved to ModuleReleaseMeta CR (`module-releases.yaml`)                        |
-| `mandatory` on ModuleTemplate     | Set `mandatory: true` in module config; reconciler picks highest version      |
-| Beta/Internal flags on templates  | Configured in ModuleReleaseMeta via `.spec.info.beta` / `.spec.info.internal` |
+| Deprecated Feature                | Replacement / New Location                                                 |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `.channel` field in module config | Moved to ModuleReleaseMeta CR (`module-releases.yaml`)                     |
+| `mandatory` on ModuleTemplate     | Set `mandatory: true` in module config      |
+| Beta/Internal flags on templates  | Configured in ModuleReleaseMeta via `.spec.beta` / `.spec.internal` |
 
 ---
 
