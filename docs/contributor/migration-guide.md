@@ -57,7 +57,7 @@ modulectl scaffold -h       # help for 'scaffold'
    * Validates schema, FQDN, version uniqueness
    * Builds via `modulectl`, pushes OCI image
    * Generates ModuleTemplate and ModuleReleaseMeta in `/kyma/kyma-modules`
-5. **ArgoCD Sync**: Deploys ModuleTemplates and ModuleReleaseMeta to KCP landscapes.
+5. **ArgoCD Sync**: ArgoCD deploys ModuleTemplates and ModuleReleaseMeta to KCP landscapes.
 6. **Cleanup**: Remove obsolete channel-based configs when stable.
 
 #### Migration Period & Coexistence
