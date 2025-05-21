@@ -75,13 +75,32 @@ modulectl scaffold -h       # help for 'scaffold'
 
 ## 2. Module Configuration & Metadata Changes
 
-This section covers the structure and content of `module-config.yaml` and `module-releases.yaml` files under the new version-based layout.
+This section illustrates how the `module-config.yaml` looks in the **Kyma CLI** format versus the **ModuleCtl** format, with field-by-field mapping and examples.
 
-### 2.1 `module-config.yaml` Schema Comparison Example
+### 2.1 Field Mapping Differences
 
-This comparison shows a generic module configuration. Replace `<module-name>`, `<channel>`, and `<version>` with your module’s actual values.
+| Kyma CLI                                       | ModuleCtl (new)          | Description / Changes                                                                     |
+|------------------------------------------------|--------------------------|-------------------------------------------------------------------------------------------|
+| `name`                                         | `name`                   | Module identifier (unchanged)                                                             |
+| `channel`                                      | *removed*                | Release channel moved to `module-releases.yaml` (ReleaseMetadata)                         |
+| `version`                                      | `version`                | Explicit version in both configs                                                          |
+| `manifest`                                     | `manifest`               | Local file → must be a URL (e.g. GitHub release asset)                                    |
+| `defaultCR`                                    | `defaultCR`              | Local file → URL                                                                          |
+| `annotations.operator.kyma-project.io/doc-url` | `documentation`          | Moved from annotations map to top-level `documentation` key                               |
+| `moduleRepo`                                   | `repository`             | Renamed to `repository`                                                                   |
+| *n/a*                                          | `icons`                  | New required list: icons for UI, with `name`+`link`                                       |
+| *n/a*                                          | `mandatory`              | New boolean (default `false`) to mark mandatory modules                                   |
+| *n/a*                                          | `requiresDowntime`       | New boolean (default `false`) for maintenance windows                                     |
+| *n/a*                                          | `security`               | Path to security scanner config                                                           |
+| *n/a*                                          | `labels` / `annotations` | Pass-through for additional metadata                                                      |
+| *n/a*                                          | `manager`                | Defines the module’s controller resource (name, group, version, kind, optional namespace) |
+| *n/a*                                          | `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                |
+| *n/a*                                          | `resources`              | Additional artifacts (e.g., CRDs)                                                         |
+| *n/a*                                          | `namespace`              | Target namespace for the generated `ModuleTemplate` (default `kcp-system`)                |
 
-##### Old Format
+### 2.2 Example:
+
+#### 2.2.1 Module Config using Kyma CLI
 
 ```yaml
 name: kyma-project.io/module/<module-name>
@@ -90,11 +109,11 @@ version: <version>
 manifest: <module-name>-manifest.yaml
 defaultCR: <module-name>-default-cr.yaml
 annotations:
-  operator.kyma-project.io/doc-url: https://help.sap.com/.../<module-name>-module
-moduleRepo: https://github.com/kyma-project/<module-name>.git
+  operator.kyma-project.io/doc-url: https://help.sap.com/docs/btp/sap-business-technology-platform/kyma-telemetry-module
+moduleRepo: https://github.com/kyma-project/telemetry-manager.git
 ```
 
-##### New Format
+#### 2.2.2 Module Config using Kyma CLI
 
 ```yaml
 # modules/<module-name>/<version>/module-config.yaml
@@ -132,26 +151,10 @@ icons:
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
 
-### 2.2 Channel Mapping with ModuleReleaseMeta Example
+### 2.2 Channel Mapping with ModuleReleaseMeta
 
-```yaml
-# modules/<module-name>/module-releases.yaml
-channels:
-  - channel: regular
-    version: 1.34.0
-  - channel: fast
-    version: 1.34.0
-  - channel: experimental
-    version: 1.34.0-experimental
-  - channel: dev
-    version: 1.35.0-rc1
-```
-
-On merge, the pipeline:
-
-* Validates no downgrades and version existence
-* Generates ModuleReleaseMeta CRs per landscape
-* Updates landscape-specific kustomizations to reference only active versions
+The module-releases.yaml file defines how logical release channels (e.g. regular, fast, experimental, dev) map to concrete module versions.
+During the submission pipeline, each entry is turned into a ModuleReleaseMeta Custom Resource, which ensures that clients subscribing to a given channel always receive the correct version of your module.
 
 ### 2.3 Metadata Deprecations & New Practices
 
