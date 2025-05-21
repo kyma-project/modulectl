@@ -26,47 +26,53 @@ modulectl scaffold -h       # help for 'scaffold'
 
 #### 1.2.1 Command Mapping
 
-| Operation                | Kyma CLI                       | `modulectl`                         |
-|--------------------------|--------------------------------|-------------------------------------|
-| Scaffold module template | N/A                            | `modulectl scaffold ...`            |
-| Create ModuleTemplate CR | `kyma alpha create module ...` | `modulectl create -c <config-file>` |
-| List installed modules   | `kyma alpha module list ...`   | N/A                                 |
-| Command-specific help    | `kyma alpha module <cmd> -h`   | `modulectl <cmd> -h`                |
+| Operation                           | Kyma CLI                         | `modulectl`                         |
+|-------------------------------------|----------------------------------|-------------------------------------|
+| Scaffold module necessary files     | `kyma alpha create scaffold ...` | `modulectl scaffold ...`            |
+| Create Bundled Module(OCI artifact) | `kyma alpha create module ...`   | `modulectl create -c <config-file>` |
+| Command-specific help               | `kyma alpha module <cmd> -h`     | `modulectl <cmd> -h`                |
 
-#### 1.2.2 Flag & Behavior Differences
+#### 1.2.2 Flag & Behavior Differences by Command
 
-| Feature                       | Deprecated in Kyma CLI                            | New in `modulectl`                     |
-| ----------------------------- | ------------------------------------------------- |----------------------------------------|
-| Config-file flag              | `--module-config-file`                            | `--config-file`, shortcut `-c`         |
-| Archive overwrite             | `--module-archive-version-overwrite`              | `--overwrite`, shortcut `-o`           |
-| ModuleTemplate naming pattern | `.metadata.name = <module-name>-<channel>`        | `.metadata.name = <module-name>`       |
-| Version label                 | `operator.kyma-project.io/module-version` label   | Populated in `.spec.version`           |
-| Documentation annotation      | `operator.kyma-project.io/doc-url` annotation     | Defined in `.spec.info.documentation` via `documentation:` key |
-| Manifest & DefaultCR source   | Local file references only                        | Fetched directly from GitHub release URLs |
-| Release channel in config     | Required `.channel` field in `module-config.yaml` | **Removed**; channel mapping managed by ModuleReleaseMeta CR |
+##### 1.2.2.1 Scaffold Command Flags
 
-### 1.3 Submission Process & Migration Period
+| Flag (Kyma CLI v2.20.5)                                        | Flag (`modulectl scaffold`)    | Notes                                                                        |
+| -------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------- |
+| `-d, --directory string`                                       | `-d, --directory string`       | Target directory for generated scaffold files (default `./`)                 |
+| `--gen-default-cr string [=\"default-cr.yaml\"]`               | `--gen-default-cr string`      | Name of generated default CR (blank if missing; default `default-cr.yaml`)   |
+| `--gen-manifest string [=\"manifest.yaml\"]`                   | `--gen-manifest string`        | Name of generated manifest file (default `manifest.yaml`)                    |
+| `--gen-security-config string [=\"sec-scanners-config.yaml\"]` | `--gen-security-config string` | Name of generated security config (default `sec-scanners-config.yaml`)       |
+| `--module-channel string`                                      | *Removed*                      | Channel no longer set at scaffold time                                       |
+| `--module-config string [=\"scaffold-module-config.yaml\"]`    | `-c, --config-file string`     | Name of generated module config file (default `scaffold-module-config.yaml`) |
+| `--module-name string`                                         | `--module-name string`         | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
+| `--module-version string`                                      | `--module-version string`      | Module version in generated config (default `0.0.1`)                         |
+| `-o, --overwrite`                                              | `-o, --overwrite`              | Overwrite existing module config file                                        |
+| `-h, --help`                                                   | `-h, --help`                   | Show help for scaffold command                                               |
 
-#### Module Submission Process
+##### 1.2.2.2 Create Command Flags
 
-1. **Publish Artifacts**: Release module version assets (manifest, defaultCR) on GitHub.
-2. **Submit Version Config**: Add/update `/modules/<module>/<version>/module-config.yaml`.
-3. **Update Channel Mapping**: Edit `/modules/<module>/module-releases.yaml` to map channels to versions.
-4. **Trigger Pipeline**: On PR merge, the submission pipeline:
+| Flag (Kyma CLI v2.20.5)              | Flag (`modulectl create`)         | Notes                                                         |
+| ------------------------------------ | --------------------------------- | ------------------------------------------------------------- |
+| `--module-config-file string`        | `-c, --config-file string`        | Path to your `module-config.yaml`                             |
+| `--module-archive-path string`       | *Not supported*                   | Archive path for local module artifacts                       |
+| `--module-archive-persistence`       | *Not supported*                   | Persist module archive on host filesystem                     |
+| `--module-archive-version-overwrite` | `--overwrite`                     | Overwrite existing module OCI archive (testing only)          |
+| `--descriptor-version string`        | *Not supported*                   | Schema version for generated descriptor                       |
+| `--git-remote string`                | *Not supported*                   | Git remote name for module sources                            |
+| `--insecure`                         | `--insecure`                      | Allow insecure registry connections                           |
+| `--key string`                       | *Not supported*                   | Private key path for signing                                  |
+| `--kubebuilder-project`              | *Not supported*                   | Indicate Kubebuilder project                                  |
+| `-n, --name string`                  | `--name`                          | Override module name                                          |
+| `--name-mapping string`              | *Not supported*                   | OCM component name mapping                                    |
+| `--namespace string`                 | `--namespace`                     | Namespace for generated ModuleTemplate (default `kcp-system`) |
+| `-o, --output string`                | `-o, --output string`             | Output path for ModuleTemplate (default `template.yaml`)      |
+| `-p, --path string`                  | *Not supported*                   | Path to module contents                                       |
+| `-r, --registry string`              | `-r, --registry string`           | Context URL for OCI registry                                  |
+| `--registry-cred-selector string`    | `--registry-cred-selector string` | Label selector for existing `dockerconfigjson` Secret         |
+| `--registry-credentials string`      | `--registry-credentials string`   | Basic auth credentials in `<user:password>` format            |
+| `--dry-run`                          | `--dry-run`                       | Validate and skip pushing module descriptor                   |
+| `-h, --help`                         | `-h, --help`                      | Show help for create command                                  |
 
-   * Validates schema, FQDN, version uniqueness
-   * Builds via `modulectl`, pushes OCI image
-   * Generates ModuleTemplate and ModuleReleaseMeta in `/kyma/kyma-modules`
-5. **ArgoCD Sync**: ArgoCD deploys ModuleTemplates and ModuleReleaseMeta to KCP landscapes.
-6. **Cleanup**: Remove obsolete channel-based configs when stable.
-
-#### Migration Period & Coexistence
-
-* Both channel-based (old) and version-based (new) metadata are supported during the transition.
-* KLM reads version-based templates first; falls back to channel-based if missing.
-* After full migration, legacy `<module>-<channel>` templates are rejected.
-
----
 ## 2. Module Configuration & Metadata Changes
 
 This section covers the structure and content of `module-config.yaml` and `module-releases.yaml` files under the new version-based layout.
