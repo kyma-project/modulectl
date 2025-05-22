@@ -53,9 +53,9 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	}, result.Resources)
 	require.Equal(t, "manager-name", result.Manager.Name)
 	require.Equal(t, "manager-namespace", result.Manager.Namespace)
-	require.Equal(t, "apps", result.Manager.GroupVersionKind.Group)
-	require.Equal(t, "v1", result.Manager.GroupVersionKind.Version)
-	require.Equal(t, "Deployment", result.Manager.GroupVersionKind.Kind)
+	require.Equal(t, "apps", result.Manager.Group)
+	require.Equal(t, "v1", result.Manager.Version)
+	require.Equal(t, "Deployment", result.Manager.Kind)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {

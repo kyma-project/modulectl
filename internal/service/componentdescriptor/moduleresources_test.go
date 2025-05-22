@@ -61,7 +61,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	require.Equal(t, "module-image", resources[0].Name)
 	require.Equal(t, "ociArtifact", resources[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
-	require.Equal(t, "", resources[0].Path)
+	require.Empty(t, resources[0].Path)
 
 	require.Equal(t, "raw-manifest", resources[1].Name)
 	require.Equal(t, "directory", resources[1].Type)
@@ -99,7 +99,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 	require.Equal(t, "module-image", resources[0].Name)
 	require.Equal(t, "ociArtifact", resources[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
-	require.Equal(t, "", resources[0].Path)
+	require.Empty(t, resources[0].Path)
 
 	require.Equal(t, "raw-manifest", resources[1].Name)
 	require.Equal(t, "directory", resources[1].Type)
@@ -132,7 +132,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing
 	require.Equal(t, "module-image", resources[0].Name)
 	require.Equal(t, "ociArtifact", resources[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, resources[0].Relation)
-	require.Equal(t, "", resources[0].Path)
+	require.Empty(t, resources[0].Path)
 
 	require.Equal(t, "raw-manifest", resources[1].Name)
 	require.Equal(t, "directory", resources[1].Type)

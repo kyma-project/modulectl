@@ -1,122 +1,141 @@
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
-    - contextcheck  # too many false positives
-    - depguard      # checks if package imports are whitelisted
-    - exhaustruct   # too subjective and harms code readability
-    - forbidigo     # temporarily disabled
-    - godot         # not needed
-    - ireturn       # OCI lib interfaces returning a lot if interfaces, we are not the owner
+    - contextcheck
+    - depguard
+    - exhaustruct
+    - forbidigo
+    - godot
+    - ireturn
     - lll
-    - nlreturn      # too strict and mostly code is not more readable
-    - sqlclosecheck # not needed for this project
-    - tagalign      # TODO enable this and fix tags
-    - tagliatelle   # TODO enable this and fix tags
-    - tenv          # deprecated, feature already covered by another linter
-    - paralleltest  # should be enabled consciously for long-running tests
-    - wsl           # too strict and mostly code is not more readable
-linters-settings:
-  revive:
-    severity: error
+    - nlreturn
+    - paralleltest
+    - sqlclosecheck
+    - tagalign
+    - tagliatelle
+    - wsl
+  settings:
+    cyclop:
+      max-complexity: 20
+    funlen:
+      lines: 80
+      statements: 50
+      ignore-comments: true
+    importas:
+      alias:
+        - pkg: github.com/kyma-project/modulectl/tools/io
+          alias: iotools
+        - pkg: github.com/kyma-project/modulectl/internal/common/errors
+          alias: commonerrors
+        - pkg: github.com/kyma-project/modulectl/cmd/modulectl/scaffold
+          alias: scaffoldcmd
+        - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
+          alias: createcmd
+        - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/generator
+          alias: moduleconfiggenerator
+        - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
+          alias: moduleconfigreader
+        - pkg: ocm.software/ocm/api/ocm/compdesc/meta/v1
+          alias: ocmv1
+        - pkg: ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact
+          alias: ociartifacttypes
+        - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
+          alias: metav1
+        - pkg: github.com/mandelsoft/goutils/errors
+          alias: mandelsofterrors
+      no-unaliased: true
+      no-extra-aliases: true
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - vfs.FileSystem
+        - internal.BlobAccess
+        - internal.ComponentVersionAccess
+        - internal.Credentials
+        - internal.Repository
+    nestif:
+      min-complexity: 6
+    nolintlint:
+      require-explanation: true
+    revive:
+      severity: error
+      rules:
+        - name: comment-spacings
+          disabled: true
+        - name: dot-imports
+          severity: warning
+          disabled: true
+        - name: line-length-limit
+          arguments:
+            - 120
+          severity: warning
+          disabled: true
+    varnamelen:
+      ignore-names:
+        - ok
+      ignore-type-assert-ok: true
+      ignore-map-index-ok: true
+      ignore-chan-recv-ok: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      - name: comment-spacings
-        disabled: true
-      - name: dot-imports
-        severity: warning
-        disabled: true
-      - name: line-length-limit
-        severity: warning
-        disabled: true
-        arguments: [120]
-  funlen:
-    statements: 50
-    lines: 80
-    ignore-comments: true
-  cyclop:
-    max-complexity: 20
-  nestif:
-    min-complexity: 6
-  gci:
-    sections:
-      - standard                                    # Standard packages.
-      - default                                     # Imports that could not be matched to another section type.
-      - prefix(github.com/kyma-project/modulectl)   # Imports with the specified prefix.
-      - blank                                       # Blank imports.
-      - dot                                         # Dot imports.
-    custom-order: true
-    skip-generated: true
-  nolintlint:
-    require-explanation: true
-  importas:
-    no-unaliased: true
-    no-extra-aliases: true
-    alias:
-      - pkg: github.com/kyma-project/modulectl/tools/io
-        alias: iotools
-      - pkg: github.com/kyma-project/modulectl/internal/common/errors
-        alias: commonerrors
-      - pkg: github.com/kyma-project/modulectl/cmd/modulectl/scaffold
-        alias: scaffoldcmd
-      - pkg: github.com/kyma-project/modulectl/cmd/modulectl/create
-        alias: createcmd
-      - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/generator
-        alias: moduleconfiggenerator
-      - pkg: github.com/kyma-project/modulectl/internal/service/moduleconfig/reader
-        alias: moduleconfigreader
-      - pkg: ocm.software/ocm/api/ocm/compdesc/meta/v1
-        alias: ocmv1
-      - pkg: ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact
-        alias: ociartifacttypes
-      - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
-        alias: metav1
-      - pkg: github.com/mandelsoft/goutils/errors
-        alias: mandelsofterrors
-  ireturn:
-    allow:
-      - anon
-      - error
-      - empty
-      - stdlib
-      - vfs.FileSystem
-      - internal.BlobAccess
-      - internal.ComponentVersionAccess
-      - internal.Credentials
-      - internal.Repository
-  varnamelen:
-    ignore-names:
-      - ok
-    ignore-type-assert-ok: true
-    ignore-map-index-ok: true
-    ignore-chan-recv-ok: true
+      - linters:
+          - dupl
+          - err113
+          - funlen
+          - gochecknoglobals
+          - goconst
+          - maintidx
+          - varnamelen
+          - wrapcheck
+        path: _test\.go
+      - linters:
+          - importas
+        text: has alias "" which is not part of config
+      - linters:
+          - staticcheck
+        text: SA1019:.*comparch.ComponentArchive
+      - linters:
+          - staticcheck
+        text: SA1019:.*comparch.New
+      - linters:
+          - lll
+        source: '^// http '
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-rules:
-    - path: "_test\\.go"
-      linters:
-        - dupl # Table driven unit and integration tests are expected to have duplicate code
-        - goconst # To be descriptive in tests we sometimes don't extract constants
-        - varnamelen # Table driven unit and integration tests are expected to have short variable names
-        - wrapcheck # Errors do not need to be wrapped in unit and integration tests
-        - err113 # Dynamic error creation in unit and integration tests is ok
-        - gochecknoglobals # Does not apply to unit and integration tests
-        - funlen # Table driven unit and integration tests exceed function length by design
-        - maintidx # Table driven unit and integration tests exceed maintainability index by design
-    - path: tests/e2e/
-      linters: [gci] # Disable gci due to the test utilities dot import.
-    - linters:
-        - importas
-      text: has alias "" which is not part of config # Ignore false positives that emerged due to https://github.com/julz/importas/issues/15.
-    - linters:
-        - staticcheck
-      text: "SA1019:.*comparch.ComponentArchive" # disable the deprecation warnings here, will be fixed by issue: https://github.com/kyma-project/modulectl/issues/196
-    - linters:
-        - staticcheck
-      text: "SA1019:.*comparch.New" # disable the deprecation warnings here, will be fixed by issue: https://github.com/kyma-project/modulectl/issues/196
-    - linters:
-        - lll # long lines starting with an url
-      source: "^// http "
   max-issues-per-linter: 0
   max-same-issues: 0
-output:
-  sort-results: true
-run:
-  timeout: 15m
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/kyma-project/modulectl)
+        - blank
+        - dot
+      custom-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - tests/e2e/

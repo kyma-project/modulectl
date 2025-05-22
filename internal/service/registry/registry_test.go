@@ -119,12 +119,12 @@ func Test_UserPass_ReturnsCorrectUsernameAndPassword(t *testing.T) {
 func Test_UserPass_ReturnsCorrectUsername(t *testing.T) {
 	user, pass := registry.ParseUserPass("user1:")
 	require.Equal(t, "user1", user)
-	require.Equal(t, "", pass)
+	require.Empty(t, pass)
 }
 
 func Test_UserPass_ReturnsCorrectPassword(t *testing.T) {
 	user, pass := registry.ParseUserPass(":pass1")
-	require.Equal(t, "", user)
+	require.Empty(t, user)
 	require.Equal(t, "pass1", pass)
 }
 
