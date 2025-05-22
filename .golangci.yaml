@@ -103,10 +103,13 @@ linters:
         text: has alias "" which is not part of config
       - linters:
           - staticcheck
-        text: SA1019:.*comparch.ComponentArchive
+        text: "SA1019:.*comparch.ComponentArchive"
       - linters:
           - staticcheck
-        text: SA1019:.*comparch.New
+        text: "SA1019:.*comparch.New"
+      - linters:
+          - staticcheck
+        text: "QF1012: Use fmt.Fprintf"
       - linters:
           - lll
         source: '^// http '
