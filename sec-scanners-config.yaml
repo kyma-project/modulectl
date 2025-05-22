@@ -12,4 +12,3 @@ mend:
     - "**/test/**"
     - "**/*_test.go"
     - "**/mocks/**"
-
