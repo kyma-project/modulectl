@@ -5,15 +5,15 @@ It covers all necessary changes and deprecations to ensure a smooth transition.
 
 ## Overview
 
-`modulectl` is the successor of the module developer-facing capabilities of Kyma CLI.
+modulectl is the successor of the module developer-facing capabilities of Kyma CLI.
 It is already tailored for the updated ModuleTemplate metadata as discussed in [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681).
 
 ## 1. Tooling & Workflow Changes
 
-This section focuses on the `modulectl` CLI itself and the related submission, deployment, and migration workflows.
+This section focuses on the modulectl CLI itself and the related submission, deployment, and migration workflows.
 
-### 1.1 Use `modulectl`
-Modulectl is available for download from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
+### 1.1 Use modulectl
+You can download modulectl from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
 For an overview of the supported commands and flags, use `modulectl -h` or `modulectl <command> -h` to show the definitions.
 
 ```bash
@@ -26,9 +26,9 @@ modulectl scaffold -h       # help for 'scaffold'
 
 #### 1.2.1 Command Mapping
 
-This section illustrates how the commands from Kyma CLI are mapped to `modulectl` format.
+This section illustrates how the commands from Kyma CLI are mapped to the modulectl format.
 
-| Operation                           | Kyma CLI                         | `modulectl`                         |
+| Operation                           | Kyma CLI                         | modulectl                          |
 |-------------------------------------|----------------------------------|-------------------------------------|
 | Scaffold module necessary files     | `kyma alpha create scaffold ...` | `modulectl scaffold ...`            |
 | Create Bundled Module(OCI artifact) | `kyma alpha create module ...`   | `modulectl create -c <config-file>` |
@@ -36,11 +36,11 @@ This section illustrates how the commands from Kyma CLI are mapped to `modulectl
 
 #### 1.2.2 Flag Mapping
 
-This section illustrates how the command flags from Kyma CLI are mapped to `modulectl` format.
+This section illustrates how the `scaffold` and `create` command flags from Kyma CLI are mapped to the modulectl format.
 
-##### 1.2.2.1 Scaffold Flag Mapping
+**Scaffold Flag Mapping**
 
-| Flag (Kyma CLI v2.20.5)                                        | Flag (`modulectl`)                         | Notes                                                                        |
+| Kyma CLI v2.20.5 Flag                                          | modulectl Flag                           | Notes                                                                        |
 | -------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
 | `-d, --directory string`                                       | `-d, --directory string`                   | Target directory for generated scaffold files (default `./`)                 |
 | `--gen-default-cr string`                                      | `--gen-default-cr string`                  | Name of generated default CR (default `default-cr.yaml`)                     |
@@ -53,9 +53,9 @@ This section illustrates how the command flags from Kyma CLI are mapped to `modu
 | `-o, --overwrite`                                              | `-o, --overwrite`                          | Overwrite existing module config file                                        |
 | `-h, --help`                                                   | `-h, --help`                               | Show help for scaffold command                                               |
 
-##### 1.2.2.2 Create Flag Mapping
+**Create Flag Mapping**
 
-| Flag (Kyma CLI v2.20.5)              | Flag (`modulectl`)                            | Notes                                                         |
+| Kyma CLI v2.20.5 Flag                                         | modulectl Flag                           | Notes                                                                        |
 | ------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
 | `--module-config-file string`        | **Renamed** `-c, --config-file string`        | Path to your `module-config.yaml`                             |
 | `--module-archive-path string`       | **Removed**                                   | Archive path for local module artifacts                       |
@@ -79,23 +79,23 @@ This section illustrates how the command flags from Kyma CLI are mapped to `modu
 
 ## 2. Module Configuration (`module-config.yaml`) Differences
 
-This section illustrates how the `module-config.yaml` looks in the Kyma CLI format versus the `modulectl` format, with field-by-field mapping and examples.
+This section illustrates how the `module-config.yaml` looks in the Kyma CLI format versus the modulectl format, with field-by-field mapping and examples.
 
-## 2.1 Field Mapping Differences
+### 2.1 Field Mapping Differences
 
-| Kyma CLI                                       | ModuleCtl (new)                  | Description / Changes                                                                     |
+| Kyma CLI                                       | modulectl                        | Description / Changes                                                                     |
 |------------------------------------------------|--------------------------------- | ------------------------------------------------------------------------------------------|
 | `name`                                         | `name`                           | Name of the module                                                                                                                                                          |
 | `channel`                                      | **Removed**                      | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
 | `version`                                      | `version`                        | Version of the module                                                                                                                                                       |
 | `manifest`                                     | `manifest`                       | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
 | `defaultCR`                                    | `defaultCR`                      | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
-| `annotations.operator.kyma-project.io/doc-url` | `documentation`                  | Link to the module documentation. Moved from annotations map to top-level `documentation` key                                                                               |
+| `annotations.operator.kyma-project.io/doc-url` | `documentation`                  | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                               |
 | `moduleRepo`                                   | `repository`                     | Link to the repository of the module                                                                                                                                        |
 | *n/a*                                          | **New** `icons`                  | List of module icons for the UI with `name`+`link`                                                                                                                          |
 | `mandatory`                                    | `mandatory`                      | Marks the module as mandatory (default `false`)                                                                                                                             |
-| *n/a*                                          |  **New** `requiresDowntime`      | Marks the module to require a maintenance window to update from previoius version (default `false`)                                                                         |
-| `security`                                     | `security`                       | Path to security scanner config. Must be a local path and will be be resolved against the checked out version on Gitub                                                      |
+| *n/a*                                          |  **New** `requiresDowntime`      | Marks the module to require a maintenance window to update from the previous version (default `false`)                                                                      |
+| `security`                                     | `security`                       | Path to security scanner config. Must be a local path and will be resolved against the checked-out version in GitHub                                                         |
 | `labels` / `annotations`                       | `labels` / `annotations`         | Labels and annotations to put into the ModuleTemplate                                                                                                                       |
 | *n/a*                                          | **New** `manager`                | Controller resource of the module (GVK, name, optional namespace)                                                                                                           |
 | *n/a*                                          | **New** `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                                                                                                  |
@@ -106,9 +106,9 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | `internal`                                     | **Removed**                      | Marks the module as internal. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                    |
 
 
-## 2.2 Example:
+### 2.2 Example:
 
-### 2.2.1 Module Config using Kyma CLI
+**Module Config using Kyma CLI**
 
 ```yaml
 # modules/<module-name>/<channel>/module-config.yaml
@@ -122,7 +122,7 @@ annotations:
 moduleRepo: https://github.com/kyma-project/module-manager.git
 ```
 
-### 2.2.2 Module Config using `modulectl`
+**Module Config using modulectl**
 
 ```yaml
 # modules/<module-name>/<version>/module-config.yaml
@@ -160,11 +160,10 @@ icons:
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
 
-# 3. ModuleTemplate Differences 
+## 3. ModuleTemplate Differences 
 
-## 3.1  ModuleTemplate Comparison
 
-Below is a side-by-side comparison of the key fields in the `ModuleTemplate` YAML generated by Kyma CLI vs. modulectl:
+The following table compares the key fields in the `ModuleTemplate` YAML generated by Kyma CLI vs. modulectl.
 
 | Field / Path                                                        | Kyma CLI–Generated (`kyma alpha create module`)      | modulectl–Generated (`modulectl create`)                    |
 |---------------------------------------------------------------------|------------------------------------------------------|-------------------------------------------------------------|
@@ -188,9 +187,9 @@ Below is a side-by-side comparison of the key fields in the `ModuleTemplate` YAM
 | **spec.descriptor.component**                                       | Present                                              | Unchanged                                                   |
 | **spec.resources**                                                  | *n/a*                                                | **New**                                                     |
 
-The following shows the `ModuleTemplate` YAML generated for TemplateOperator by Kyma CLI vs. `modulectl`.
+See the following examples of `ModuleTemplate` YAML files generated for TemplateOperator by Kyma CLI vs. modulectl.
 
-## 3.1 Kyma CLI–Generated ModuleTemplate (channel-based)
+**Kyma CLI–generated ModuleTemplate (channel-based)**
 
 ```yaml
 apiVersion: operator.kyma-project.io/v1beta2
@@ -219,7 +218,7 @@ spec:
       schemaVersion: v2
 ```
 
-## 3.2 `modulectl`–Generated ModuleTemplate (version-based)
+**modulectl–generated ModuleTemplate (version-based)**
 
 ```yaml
 apiVersion: operator.kyma-project.io/v1beta2
@@ -277,7 +276,7 @@ spec:
 
 ## Additional Resources
 
-- [`modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
+- [`/modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
 - [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
 - [ModuleTemplate Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/03-moduletemplate.md)
 - [ModuleReleaseMeta Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)
