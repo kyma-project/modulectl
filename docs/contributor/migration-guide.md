@@ -40,42 +40,42 @@ This section illustrates how the command flags from Kyma CLI are mapped to `modu
 
 ##### 1.2.2.1 Scaffold Flag Mapping
 
-| Flag (Kyma CLI v2.20.5)                                        | Flag (`modulectl`)    | Notes                                                                        |
-| -------------------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------- |
-| `-d, --directory string`                                       | `-d, --directory string`       | Target directory for generated scaffold files (default `./`)                 |
-| `--gen-default-cr string`                                      | `--gen-default-cr string`      | Name of generated default CR (default `default-cr.yaml`)                     |
-| `--gen-manifest string`                                        | `--gen-manifest string`        | Name of generated manifest file (default `manifest.yaml`)                    |
-| `--gen-security-config string`                                 | `--gen-security-config string` | Name of generated security config (default `sec-scanners-config.yaml`)       |
-| `--module-channel string`                                      | **Removed**                    | Channel no longer set at scaffold time                                       |
-| `--module-config string`                                       | `-c, --config-file string`     | Name of generated module config file (default `scaffold-module-config.yaml`) |
-| `--module-name string`                                         | `--module-name string`         | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
-| `--module-version string`                                      | `--module-version string`      | Module version in generated config (default `0.0.1`)                         |
-| `-o, --overwrite`                                              | `-o, --overwrite`              | Overwrite existing module config file                                        |
-| `-h, --help`                                                   | `-h, --help`                   | Show help for scaffold command                                               |
+| Flag (Kyma CLI v2.20.5)                                        | Flag (`modulectl`)                         | Notes                                                                        |
+| -------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `-d, --directory string`                                       | `-d, --directory string`                   | Target directory for generated scaffold files (default `./`)                 |
+| `--gen-default-cr string`                                      | `--gen-default-cr string`                  | Name of generated default CR (default `default-cr.yaml`)                     |
+| `--gen-manifest string`                                        | `--gen-manifest string`                    | Name of generated manifest file (default `manifest.yaml`)                    |
+| `--gen-security-config string`                                 | `--gen-security-config string`             | Name of generated security config (default `sec-scanners-config.yaml`)       |
+| `--module-channel string`                                      | **Removed**                                | Channel no longer set at scaffold time                                       |
+| `--module-config string`                                       | **Renamed** `-c, --config-file string`     | Name of generated module config file (default `scaffold-module-config.yaml`) |
+| `--module-name string`                                         | `--module-name string`                     | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
+| `--module-version string`                                      | `--module-version string`                  | Module version in generated config (default `0.0.1`)                         |
+| `-o, --overwrite`                                              | `-o, --overwrite`                          | Overwrite existing module config file                                        |
+| `-h, --help`                                                   | `-h, --help`                               | Show help for scaffold command                                               |
 
 ##### 1.2.2.2 Create Flag Mapping
 
-| Flag (Kyma CLI v2.20.5)              | Flag (`modulectl`)         | Notes                                                         |
-| ------------------------------------ | --------------------------------- | ------------------------------------------------------------- |
-| `--module-config-file string`        | `-c, --config-file string`        | Path to your `module-config.yaml`                             |
-| `--module-archive-path string`       | **Removed**                       | Archive path for local module artifacts                       |
-| `--module-archive-persistence`       | **Removed**                       | Persist module archive on host filesystem                     |
-| `--module-archive-version-overwrite` | `--overwrite`                     | Overwrite existing module OCI archive (**for testing only**)  |
-| `--descriptor-version string`        | **Removed**                       | Schema version for generated descriptor                       |
-| `--git-remote string`                | **Removed**                       | Git remote name for module sources                            |
-| `--insecure`                         | `--insecure`                      | Allow insecure registry connections                           |
-| `--key string`                       | **Removed**                       | Private key path for signing                                  |
-| `--kubebuilder-project`              | **Removed**                       | Indicate Kubebuilder project                                  |
-| `-n, --name string`                  | `--name`                          | Override module name                                          |
-| `--name-mapping string`              | **Removed**                       | OCM component name mapping                                    |
-| `--namespace string`                 | `--namespace`                     | Namespace for generated ModuleTemplate (default `kcp-system`) |
-| `-o, --output string`                | `-o, --output string`             | Output path for ModuleTemplate (default `template.yaml`)      |
-| `-p, --path string`                  | **Removed**                       | Path to module contents                                       |
-| `-r, --registry string`              | `-r, --registry string`           | Context URL for OCI registry                                  |
-| `--registry-cred-selector string`    | `--registry-cred-selector string` | Label selector for existing `dockerconfigjson` Secret         |
-| `--registry-credentials string`      | `--registry-credentials string`   | Basic auth credentials in `<user:password>` format            |
-| `--dry-run`                          | `--dry-run`                       | Validate and skip pushing module descriptor                   |
-| `-h, --help`                         | `-h, --help`                      | Show help for create command                                  |
+| Flag (Kyma CLI v2.20.5)              | Flag (`modulectl`)                            | Notes                                                         |
+| ------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
+| `--module-config-file string`        | **Renamed** `-c, --config-file string`        | Path to your `module-config.yaml`                             |
+| `--module-archive-path string`       | **Removed**                                   | Archive path for local module artifacts                       |
+| `--module-archive-persistence`       | **Removed**                                   | Persist module archive on host filesystem                     |
+| `--module-archive-version-overwrite` | **Renamed** `--overwrite`                     | Overwrite existing module OCI archive (**for testing only**)  |
+| `--descriptor-version string`        | **Removed**                                   | Schema version for generated descriptor                       |
+| `--git-remote string`                | **Removed**                                   | Git remote name for module sources                            |
+| `--insecure`                         | `--insecure`                                  | Allow insecure registry connections                           |
+| `--key string`                       | **Removed**                                   | Private key path for signing                                  |
+| `--kubebuilder-project`              | **Removed**                                   | Indicate Kubebuilder project                                  |
+| `-n, --name string`                  | `--name`                                      | Override module name                                          |
+| `--name-mapping string`              | **Removed**                                   | OCM component name mapping                                    |
+| `--namespace string`                 | `--namespace`                                 | Namespace for generated ModuleTemplate (default `kcp-system`) |
+| `-o, --output string`                | `-o, --output string`                         | Output path for ModuleTemplate (default `template.yaml`)      |
+| `-p, --path string`                  | **Removed**                                   | Path to module contents                                       |
+| `-r, --registry string`              | `-r, --registry string`                       | Context URL for OCI registry                                  |
+| `--registry-cred-selector string`    | `--registry-cred-selector string`             | Label selector for existing `dockerconfigjson` Secret         |
+| `--registry-credentials string`      | `--registry-credentials string`               | Basic auth credentials in `<user:password>` format            |
+| `--dry-run`                          | `--dry-run`                                   | Validate and skip pushing module descriptor                   |
+| `-h, --help`                         | `-h, --help`                                  | Show help for create command                                  |
 
 ## 2. Module Configuration (`module-config.yaml`) Differences
 
