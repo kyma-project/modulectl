@@ -43,6 +43,11 @@ func TestValidateModuleName(t *testing.T) {
 			moduleName: "module-name/bar",
 			wantErr:    true,
 		},
+		{
+			name:       "valid module name",
+			moduleName: "kyma-project.io/Module-name",
+			wantErr:    true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
