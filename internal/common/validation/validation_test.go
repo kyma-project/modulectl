@@ -44,7 +44,7 @@ func TestValidateModuleName(t *testing.T) {
 			wantErr:    true,
 		},
 		{
-			name:       "valid module name",
+			name:       "invalid module name - uppercase letters",
 			moduleName: "kyma-project.io/Module-name",
 			wantErr:    true,
 		},
