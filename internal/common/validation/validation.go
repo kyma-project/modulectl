@@ -28,6 +28,10 @@ func ValidateModuleName(name string) error {
 		return fmt.Errorf("opts.ModuleName length must not exceed %q characters: %w", moduleNameMaxLength, commonerrors.ErrInvalidOption)
 	}
 
+	if name != strings.ToLower(name) {
+		return fmt.Errorf("opts.ModuleName must not contain uppercase letters: %w", commonerrors.ErrInvalidOption)
+	}
+
 	if matched, err := regexp.MatchString(moduleNamePattern, name); err != nil {
 		return fmt.Errorf("failed to evaluate regex pattern for opts.ModuleName: %w", commonerrors.ErrInvalidOption)
 	} else if !matched {
