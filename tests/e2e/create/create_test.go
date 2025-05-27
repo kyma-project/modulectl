@@ -367,15 +367,29 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(repo.Object["type"]).To(Equal(ocireg.Type))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(1))
+				Expect(descriptor.Resources).To(HaveLen(2))
 				resource := descriptor.Resources[0]
+				Expect(resource.Name).To(Equal("metadata"))
+				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
+				Expect(resource.Type).To(Equal("plainText"))
+				Expect(resource.Version).To(Equal("1.0.0"))
+				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directory"))
 				Expect(resource.Version).To(Equal("1.0.0"))
 
 				By("And descriptor.component.resources[0].access should be correct")
-				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
+				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
+				Expect(err).ToNot(HaveOccurred())
+				localBlobAccessSpec, ok := resourceAccessSpec0.(*localblob.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
+				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
+				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-yaml"))
+
+				By("And descriptor.component.resources[1].access should be correct")
+				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
 				Expect(err).ToNot(HaveOccurred())
 				localBlobAccessSpec, ok := resourceAccessSpec1.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -535,15 +549,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(template.Spec.Version).To(Equal("1.0.2"))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(2))
-				resource := descriptor.Resources[1]
+				Expect(descriptor.Resources).To(HaveLen(3))
+				resource := descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directory"))
 				Expect(resource.Version).To(Equal("1.0.2"))
 
 				By("And descriptor.component.resources[1].access should be correct")
-				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
+				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -581,7 +595,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(template.Spec.Version).To(Equal("1.0.3"))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(3))
+				Expect(descriptor.Resources).To(HaveLen(4))
 				resource := descriptor.Resources[0]
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
@@ -595,6 +609,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Version).To(Equal("2.0.0"))
 
 				resource = descriptor.Resources[2]
+				Expect(resource.Name).To(Equal("metadata"))
+				Expect(resource.Version).To(Equal("1.0.3"))
+
+				resource = descriptor.Resources[3]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Version).To(Equal("1.0.3"))
 
@@ -618,6 +636,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
 				Expect(err).ToNot(HaveOccurred())
 				localBlobAccessSpec, ok := resourceAccessSpec2.(*localblob.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
+				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
+				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-yaml"))
+
+				By("And descriptor.component.resources[3].access should be correct")
+				resourceAccessSpec3, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[3].Access)
+				Expect(err).ToNot(HaveOccurred())
+				localBlobAccessSpec, ok := resourceAccessSpec3.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
 				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
