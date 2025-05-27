@@ -11,6 +11,7 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
@@ -43,7 +44,7 @@ type ComponentArchiveService interface {
 	CreateComponentArchive(componentDescriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
 		error)
 	AddModuleResourcesToArchive(componentArchive componentarchive.ComponentArchive,
-		moduleResources []componentdescriptor.Resource) error
+		moduleResources []resources.Resource) error
 }
 
 type RegistryService interface {
@@ -194,12 +195,6 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
-	moduleResources, err := componentdescriptor.GenerateModuleResources(moduleConfig.Version, manifestFilePath,
-		defaultCRFilePath, opts.RegistryCredSelector)
-	if err != nil {
-		return fmt.Errorf("failed to generate module resources: %w", err)
-	}
-
 	if err = s.gitSourcesService.AddGitSources(descriptor, moduleConfig.Repository,
 		moduleConfig.Version); err != nil {
 		return fmt.Errorf("failed to add git sources: %w", err)
@@ -216,6 +211,13 @@ func (s *Service) Run(opts Options) error {
 	if err != nil {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
+
+	moduleResources, err := resources.GenerateModuleResources(moduleConfig, manifestFilePath,
+		defaultCRFilePath, opts.RegistryCredSelector)
+	if err != nil {
+		return fmt.Errorf("failed to generate module resources: %w", err)
+	}
+
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(archive,
 		moduleResources); err != nil {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)

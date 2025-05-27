@@ -12,7 +12,7 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
@@ -247,7 +247,7 @@ func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.Component
 }
 
 func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ componentarchive.ComponentArchive,
-	_ []componentdescriptor.Resource,
+	_ []resources.Resource,
 ) error {
 	return nil
 }
