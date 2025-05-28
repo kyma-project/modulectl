@@ -14,6 +14,16 @@ import (
 )
 
 func TestGenerateMetadataResource(t *testing.T) {
+	t.Run("should return error when module config is nil", func(t *testing.T) {
+		// when
+		resource, err := resources.GenerateMetadataResource(nil)
+
+		// then
+		require.Error(t, err)
+		require.Equal(t, resources.ErrNilModuleConfig, err)
+		require.Equal(t, resources.Resource{}, resource)
+	})
+
 	t.Run("should generate metadata resource with all fields", func(t *testing.T) {
 		// given
 		config := &contentprovider.ModuleConfig{

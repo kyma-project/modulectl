@@ -191,3 +191,37 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing
 		require.Empty(t, resource.Labels)
 	}
 }
+
+func TestResourceGenerators(t *testing.T) {
+	t.Run("module image resource", func(t *testing.T) {
+		resource := resources.GenerateModuleImageResource()
+		require.Equal(t, "module-image", resource.Name)
+		require.Equal(t, "ociArtifact", resource.Type)
+		require.Equal(t, ocmv1.ExternalRelation, resource.Relation)
+		require.Nil(t, resource.AccessHandler)
+	})
+
+	t.Run("raw manifest resource", func(t *testing.T) {
+		manifestPath := "test/path"
+		resource := resources.GenerateRawManifestResource(manifestPath)
+		require.Equal(t, "raw-manifest", resource.Name)
+		require.Equal(t, "directory", resource.Type)
+		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
+
+		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
+		require.True(t, ok)
+		require.Equal(t, manifestPath, handler.Path)
+	})
+
+	t.Run("default CR resource", func(t *testing.T) {
+		crPath := "test/cr/path"
+		resource := resources.GenerateDefaultCRResource(crPath)
+		require.Equal(t, "default-cr", resource.Name)
+		require.Equal(t, "directory", resource.Type)
+		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
+
+		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
+		require.True(t, ok)
+		require.Equal(t, crPath, handler.Path)
+	})
+}

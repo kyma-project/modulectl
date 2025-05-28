@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -15,6 +14,10 @@ import (
 
 const (
 	metadataResourceName = "metadata"
+)
+
+var (
+	ErrNilModuleConfig = fmt.Errorf("module config must not be nil")
 )
 
 type MetadataResource struct {
@@ -32,6 +35,10 @@ type MetadataResource struct {
 }
 
 func GenerateMetadataResource(config *contentprovider.ModuleConfig) (Resource, error) {
+	if config == nil {
+		return Resource{}, ErrNilModuleConfig
+	}
+
 	metadataResource := MetadataResource{}
 	metadataResource.Spec.Mandatory = config.Mandatory
 	metadataResource.Spec.Manager = config.Manager

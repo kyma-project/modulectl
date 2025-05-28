@@ -35,15 +35,15 @@ func GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifes
 	defaultCRPath, registryCredSelector string) ([]Resource,
 	error,
 ) {
-	moduleImageResource := generateModuleImageResource()
+	moduleImageResource := GenerateModuleImageResource()
 	metadataResource, err := GenerateMetadataResource(moduleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate metadata resource: %w", err)
 	}
-	rawManifestResource := generateRawManifestResource(manifestPath)
+	rawManifestResource := GenerateRawManifestResource(manifestPath)
 	resources := []Resource{moduleImageResource, metadataResource, rawManifestResource}
 	if defaultCRPath != "" {
-		defaultCRResource := generateDefaultCRResource(defaultCRPath)
+		defaultCRResource := GenerateDefaultCRResource(defaultCRPath)
 		resources = append(resources, defaultCRResource)
 	}
 
@@ -66,7 +66,7 @@ func GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifes
 	return resources, nil
 }
 
-func generateModuleImageResource() Resource {
+func GenerateModuleImageResource() Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -80,7 +80,7 @@ func generateModuleImageResource() Resource {
 	}
 }
 
-func generateRawManifestResource(manifestPath string) Resource {
+func GenerateRawManifestResource(manifestPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -97,7 +97,7 @@ func generateRawManifestResource(manifestPath string) Resource {
 	}
 }
 
-func generateDefaultCRResource(defaultCRPath string) Resource {
+func GenerateDefaultCRResource(defaultCRPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
