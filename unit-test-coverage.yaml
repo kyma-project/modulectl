@@ -10,9 +10,9 @@ packages:
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 79
   internal/service/create: 37.8
-  internal/service/componentdescriptor: 80
+  internal/service/componentdescriptor: 76.7
   internal/service/templategenerator: 85
   internal/service/crdparser: 73
   internal/service/registry: 56
-  internal/service/componentarchive: 41
+  internal/service/componentarchive: 37.5
   tools/ocirepo: 23

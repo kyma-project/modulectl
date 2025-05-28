@@ -20,14 +20,14 @@ const (
 type MetadataResource struct {
 	Spec struct {
 		Mandatory bool                     `yaml:"mandatory,omitempty"`
-		Manager   *contentprovider.Manager `yaml:"manager"`
+		Manager   *contentprovider.Manager `yaml:"manager,omitempty"`
 		Info      struct {
 			Repository    string                `yaml:"repository"`
 			Documentation string                `yaml:"documentation"`
 			Icons         contentprovider.Icons `yaml:"icons"`
 		} `yaml:"info"`
-		Resources           contentprovider.Resources  `yaml:"resources"`
-		AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources"`
+		Resources           contentprovider.Resources  `yaml:"resources,omitempty"`
+		AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources,omitempty"`
 	} `yaml:"spec"`
 }
 
