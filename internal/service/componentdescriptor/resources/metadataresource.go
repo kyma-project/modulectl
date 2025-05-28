@@ -1,7 +1,9 @@
 package resources
 
 import (
+	"errors"
 	"fmt"
+
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -16,9 +18,7 @@ const (
 	metadataResourceName = "metadata"
 )
 
-var (
-	ErrNilModuleConfig = fmt.Errorf("module config must not be nil")
-)
+var ErrNilModuleConfig = errors.New("module config must not be nil")
 
 type MetadataResource struct {
 	Spec struct {
