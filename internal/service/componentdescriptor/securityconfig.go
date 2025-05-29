@@ -108,7 +108,7 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 		}
 
 		if err := appendLabelToAccessor(src, languageLabelKey,
-			securityScanConfig.WhiteSource.Language, secScanBaseLabelKey); err != nil {
+			securityScanConfig.Mend.Language, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
@@ -118,13 +118,13 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 		}
 
 		if err := appendLabelToAccessor(src, subProjectsLabelKey,
-			securityScanConfig.WhiteSource.SubProjects, secScanBaseLabelKey); err != nil {
+			securityScanConfig.Mend.SubProjects, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		excludeWhiteSourceProjects := strings.Join(securityScanConfig.WhiteSource.Exclude, ",")
+		excludeMendProjects := strings.Join(securityScanConfig.Mend.Exclude, ",")
 		if err := appendLabelToAccessor(src, excludeLabelKey,
-			excludeWhiteSourceProjects, secScanBaseLabelKey); err != nil {
+			excludeMendProjects, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 	}
