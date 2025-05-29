@@ -63,11 +63,11 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 }
 
 type SecurityScanConfig struct {
-	ModuleName  string               `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
-	BDBA        []string             `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
-	Mend MendSecConfig               `json:"mend" yaml:"mend" comment:"Mend security scanner specific configuration"`
-	DevBranch   string               `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
-	RcTag       string               `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
+	ModuleName string        `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
+	BDBA       []string      `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
+	Mend       MendSecConfig `json:"mend" yaml:"mend" comment:"Mend security scanner specific configuration"`
+	DevBranch  string        `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
+	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
 func (s *SecurityScanConfig) Validate() error {
