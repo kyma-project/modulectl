@@ -14,9 +14,7 @@ func TestYaml_GenerateBlobAccess(t *testing.T) {
 	t.Run("should generate blob access successfully", func(t *testing.T) {
 		// given
 		yamlContent := "key: value"
-		yaml := &accesshandler.Yaml{
-			String: yamlContent,
-		}
+		yaml := accesshandler.NewYaml(yamlContent)
 
 		// when
 		blobAccess, err := yaml.GenerateBlobAccess()

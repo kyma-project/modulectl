@@ -37,10 +37,7 @@ func TestTar_GenerateBlobAccess(t *testing.T) {
 
 	t.Run("should return error when file system is nil", func(t *testing.T) {
 		// given
-		tar := &accesshandler.Tar{
-			FileSystem: nil,
-			Path:       "test/path",
-		}
+		tar := accesshandler.NewTar(nil, "test/path")
 
 		// when
 		blobAccess, err := tar.GenerateBlobAccess()
@@ -60,10 +57,7 @@ func TestTar_GenerateBlobAccess(t *testing.T) {
 			},
 		}
 
-		tar := &accesshandler.Tar{
-			FileSystem: mockFS,
-			Path:       "test/path",
-		}
+		tar := accesshandler.NewTar(mockFS, "test/path")
 
 		// when
 		blobAccess, err := tar.GenerateBlobAccess()
