@@ -63,8 +63,6 @@ func GenerateMetadataResource(config *contentprovider.ModuleConfig) (Resource, e
 				Relation: ocmv1.LocalRelation,
 			},
 		},
-		AccessHandler: &accesshandler.Yaml{
-			String: string(data),
-		},
+		AccessHandler: accesshandler.NewYaml(string(data)),
 	}, nil
 }

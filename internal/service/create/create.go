@@ -78,6 +78,11 @@ type CRDParserService interface {
 	IsCRDClusterScoped(crPath, manifestPath string) (bool, error)
 }
 
+type ModuleResourceService interface {
+	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath,
+		registryCredSelector string) ([]resources.Resource, error)
+}
+
 type Service struct {
 	moduleConfigService     ModuleConfigService
 	gitSourcesService       GitSourcesService
@@ -86,6 +91,7 @@ type Service struct {
 	registryService         RegistryService
 	moduleTemplateService   ModuleTemplateService
 	crdParserService        CRDParserService
+	moduleResourceService   ModuleResourceService
 	manifestFileResolver    FileResolver
 	defaultCRFileResolver   FileResolver
 	fileSystem              FileSystem
@@ -98,6 +104,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	registryService RegistryService,
 	moduleTemplateService ModuleTemplateService,
 	crdParserService CRDParserService,
+	moduleResourceService ModuleResourceService,
 	manifestFileResolver FileResolver,
 	defaultCRFileResolver FileResolver,
 	fileSystem FileSystem,
@@ -130,6 +137,10 @@ func NewService(moduleConfigService ModuleConfigService,
 		return nil, fmt.Errorf("crdParserService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
+	if moduleResourceService == nil {
+		return nil, fmt.Errorf("moduleResourceService must not be nil: %w", commonerrors.ErrInvalidArg)
+	}
+
 	if manifestFileResolver == nil {
 		return nil, fmt.Errorf("manifestFileResolver must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
@@ -150,6 +161,7 @@ func NewService(moduleConfigService ModuleConfigService,
 		registryService:         registryService,
 		moduleTemplateService:   moduleTemplateService,
 		crdParserService:        crdParserService,
+		moduleResourceService:   moduleResourceService,
 		manifestFileResolver:    manifestFileResolver,
 		defaultCRFileResolver:   defaultCRFileResolver,
 		fileSystem:              fileSystem,
@@ -212,7 +224,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
-	moduleResources, err := resources.GenerateModuleResources(moduleConfig, manifestFilePath,
+	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
 		defaultCRFilePath, opts.RegistryCredSelector)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)

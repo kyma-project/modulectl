@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"errors"
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +22,22 @@ const (
 	ociRegistryCredLabel    = "oci-registry-cred" //nolint:gosec // it's a label
 )
 
+var ErrNilArchiveFileSystem = errors.New("archiveFileSystem must not be nil")
+
+type Service struct {
+	archiveFileSystem accesshandler.ArchiveFileSystem
+}
+
+func NewService(archiveFileSystem accesshandler.ArchiveFileSystem) (*Service, error) {
+	if archiveFileSystem == nil {
+		return nil, ErrNilArchiveFileSystem
+	}
+
+	return &Service{
+		archiveFileSystem: archiveFileSystem,
+	}, nil
+}
+
 type AccessHandler interface {
 	GenerateBlobAccess() (cpi.BlobAccess, error)
 }
@@ -30,19 +47,18 @@ type Resource struct {
 	AccessHandler AccessHandler
 }
 
-func GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath,
-	defaultCRPath, registryCredSelector string) ([]Resource,
-	error,
-) {
+func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath,
+	registryCredSelector string,
+) ([]Resource, error) {
 	moduleImageResource := GenerateModuleImageResource()
 	metadataResource, err := GenerateMetadataResource(moduleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate metadata resource: %w", err)
 	}
-	rawManifestResource := GenerateRawManifestResource(manifestPath)
+	rawManifestResource := GenerateRawManifestResource(s.archiveFileSystem, manifestPath)
 	resources := []Resource{moduleImageResource, metadataResource, rawManifestResource}
 	if defaultCRPath != "" {
-		defaultCRResource := GenerateDefaultCRResource(defaultCRPath)
+		defaultCRResource := GenerateDefaultCRResource(s.archiveFileSystem, defaultCRPath)
 		resources = append(resources, defaultCRResource)
 	}
 
@@ -79,7 +95,7 @@ func GenerateModuleImageResource() Resource {
 	}
 }
 
-func GenerateRawManifestResource(manifestPath string) Resource {
+func GenerateRawManifestResource(archiveFileSystem accesshandler.ArchiveFileSystem, manifestPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -90,13 +106,11 @@ func GenerateRawManifestResource(manifestPath string) Resource {
 				Relation: ocmv1.LocalRelation,
 			},
 		},
-		AccessHandler: &accesshandler.Tar{
-			Path: manifestPath,
-		},
+		AccessHandler: accesshandler.NewTar(archiveFileSystem, manifestPath),
 	}
 }
 
-func GenerateDefaultCRResource(defaultCRPath string) Resource {
+func GenerateDefaultCRResource(archiveFileSystem accesshandler.ArchiveFileSystem, defaultCRPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -107,9 +121,7 @@ func GenerateDefaultCRResource(defaultCRPath string) Resource {
 				Relation: ocmv1.LocalRelation,
 			},
 		},
-		AccessHandler: &accesshandler.Tar{
-			Path: defaultCRPath,
-		},
+		AccessHandler: accesshandler.NewTar(archiveFileSystem, defaultCRPath),
 	}
 }
 

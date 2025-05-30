@@ -18,6 +18,13 @@ type Tar struct {
 	Path       string
 }
 
+func NewTar(fs ArchiveFileSystem, path string) *Tar {
+	return &Tar{
+		FileSystem: fs,
+		Path:       path,
+	}
+}
+
 func (tarAccessHandler *Tar) GenerateBlobAccess() (cpi.BlobAccess, error) {
 	if tarAccessHandler.FileSystem == nil {
 		return nil, ErrNilFileSystem

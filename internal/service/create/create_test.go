@@ -21,7 +21,7 @@ import (
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	require.Contains(t, err.Error(), "moduleConfigService")
@@ -30,7 +30,7 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
@@ -44,7 +44,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
@@ -58,7 +58,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withCredentials("user").build()
@@ -72,7 +72,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
@@ -87,7 +87,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
 		&securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -101,7 +101,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverErrorStub{}, &fileResolverStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverErrorStub{}, &fileResolverStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -115,7 +115,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t 
 func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&fileResolverStub{}, &fileResolverErrorStub{}, &fileExistsStub{})
+		&ModuleResourceServiceStub{}, &fileResolverStub{}, &fileResolverErrorStub{}, &fileExistsStub{})
 	require.NoError(t, err)
 
 	opts := newCreateOptionsBuilder().build()
@@ -286,4 +286,12 @@ type CRDParserServiceStub struct{}
 
 func (*CRDParserServiceStub) IsCRDClusterScoped(_, _ string) (bool, error) {
 	return false, nil
+}
+
+type ModuleResourceServiceStub struct{}
+
+func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig, _ string,
+	_ string, _ string,
+) ([]resources.Resource, error) {
+	return []resources.Resource{}, nil
 }
