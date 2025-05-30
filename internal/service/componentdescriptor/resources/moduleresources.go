@@ -8,6 +8,7 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -17,8 +18,6 @@ const (
 	moduleImageResourceName = "module-image"
 	rawManifestResourceName = "raw-manifest"
 	defaultCRResourceName   = "default-cr"
-	ociArtifactType         = "ociArtifact"
-	directoryType           = "directory"
 	ociRegistryCredLabel    = "oci-registry-cred" //nolint:gosec // it's a label
 )
 
@@ -73,7 +72,7 @@ func GenerateModuleImageResource() Resource {
 				ElementMeta: compdesc.ElementMeta{
 					Name: moduleImageResourceName,
 				},
-				Type:     ociArtifactType,
+				Type:     artifacttypes.OCI_ARTIFACT,
 				Relation: ocmv1.ExternalRelation,
 			},
 		},
@@ -87,7 +86,7 @@ func GenerateRawManifestResource(manifestPath string) Resource {
 				ElementMeta: compdesc.ElementMeta{
 					Name: rawManifestResourceName,
 				},
-				Type:     directoryType,
+				Type:     artifacttypes.DIRECTORY_TREE,
 				Relation: ocmv1.LocalRelation,
 			},
 		},
@@ -104,7 +103,7 @@ func GenerateDefaultCRResource(defaultCRPath string) Resource {
 				ElementMeta: compdesc.ElementMeta{
 					Name: defaultCRResourceName,
 				},
-				Type:     directoryType,
+				Type:     artifacttypes.DIRECTORY_TREE,
 				Relation: ocmv1.LocalRelation,
 			},
 		},

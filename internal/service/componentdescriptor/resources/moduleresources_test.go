@@ -78,14 +78,14 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	require.NotEmpty(t, metadataResourceHandler.String)
 
 	require.Equal(t, "raw-manifest", resources[2].Name)
-	require.Equal(t, "directory", resources[2].Type)
+	require.Equal(t, "directoryTree", resources[2].Type)
 	require.Equal(t, ocmv1.LocalRelation, resources[2].Relation)
 	manifestResourceHandler, ok := resources[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
 
 	require.Equal(t, "default-cr", resources[3].Name)
-	require.Equal(t, "directory", resources[3].Type)
+	require.Equal(t, "directoryTree", resources[3].Type)
 	require.Equal(t, ocmv1.LocalRelation, resources[3].Relation)
 	defaultCRResourceHandler, ok := resources[3].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
@@ -129,7 +129,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 	require.NotEmpty(t, metadataResourceHandler.String)
 
 	require.Equal(t, "raw-manifest", resources[2].Name)
-	require.Equal(t, "directory", resources[2].Type)
+	require.Equal(t, "directoryTree", resources[2].Type)
 	require.Equal(t, ocmv1.LocalRelation, resources[2].Relation)
 	manifestResourceHandler, ok := resources[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
@@ -173,14 +173,14 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing
 	require.NotEmpty(t, metadataResourceHandler.String)
 
 	require.Equal(t, "raw-manifest", resources[2].Name)
-	require.Equal(t, "directory", resources[2].Type)
+	require.Equal(t, "directoryTree", resources[2].Type)
 	require.Equal(t, ocmv1.LocalRelation, resources[2].Relation)
 	manifestResourceHandler, ok := resources[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
 
 	require.Equal(t, "default-cr", resources[3].Name)
-	require.Equal(t, "directory", resources[3].Type)
+	require.Equal(t, "directoryTree", resources[3].Type)
 	require.Equal(t, ocmv1.LocalRelation, resources[3].Relation)
 	defaultCRResourceHandler, ok := resources[3].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
@@ -205,7 +205,7 @@ func TestResourceGenerators(t *testing.T) {
 		manifestPath := "test/path"
 		resource := resources.GenerateRawManifestResource(manifestPath)
 		require.Equal(t, "raw-manifest", resource.Name)
-		require.Equal(t, "directory", resource.Type)
+		require.Equal(t, "directoryTree", resource.Type)
 		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
 
 		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
@@ -217,7 +217,7 @@ func TestResourceGenerators(t *testing.T) {
 		crPath := "test/cr/path"
 		resource := resources.GenerateDefaultCRResource(crPath)
 		require.Equal(t, "default-cr", resource.Name)
-		require.Equal(t, "directory", resource.Type)
+		require.Equal(t, "directoryTree", resource.Type)
 		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
 
 		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
