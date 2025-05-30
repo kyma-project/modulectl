@@ -66,7 +66,7 @@ func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
 	securityConfig := contentprovider.SecurityScanConfig{
 		RcTag:     "1.0.0",
 		DevBranch: "main",
-		WhiteSource: contentprovider.WhiteSourceSecConfig{
+		Mend: contentprovider.MendSecConfig{
 			Exclude:     []string{"**/test/**", "**/*_test.go"},
 			SubProjects: "false",
 			Language:    "golang-mod",
@@ -108,9 +108,9 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *tes
 
 	require.Equal(t, securityConfig.RcTag, returned.RcTag)
 	require.Equal(t, securityConfig.DevBranch, returned.DevBranch)
-	require.Equal(t, securityConfig.WhiteSource.Exclude, returned.WhiteSource.Exclude)
-	require.Equal(t, securityConfig.WhiteSource.SubProjects, returned.WhiteSource.SubProjects)
-	require.Equal(t, securityConfig.WhiteSource.Language, returned.WhiteSource.Language)
+	require.Equal(t, securityConfig.Mend.Exclude, returned.Mend.Exclude)
+	require.Equal(t, securityConfig.Mend.SubProjects, returned.Mend.SubProjects)
+	require.Equal(t, securityConfig.Mend.Language, returned.Mend.Language)
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileExistenceCheckError(t *testing.T) {
@@ -151,7 +151,7 @@ func (*fileReaderStub) ReadFile(_ string) ([]byte, error) {
 var securityConfig = contentprovider.SecurityScanConfig{
 	RcTag:     "1.0.0",
 	DevBranch: "main",
-	WhiteSource: contentprovider.WhiteSourceSecConfig{
+	Mend: contentprovider.MendSecConfig{
 		Exclude:     []string{"**/test/**", "**/*_test.go"},
 		SubProjects: "false",
 		Language:    "golang-mod",

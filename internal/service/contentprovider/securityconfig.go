@@ -56,18 +56,18 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 			"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
 		},
-		WhiteSource: WhiteSourceSecConfig{
+		Mend: MendSecConfig{
 			Exclude: []string{"**/test/**", "**/*_test.go"},
 		},
 	}
 }
 
 type SecurityScanConfig struct {
-	ModuleName  string               `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
-	BDBA        []string             `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
-	WhiteSource WhiteSourceSecConfig `json:"whitesource" yaml:"whitesource" comment:"whitesource (aka. Mend) security scanner specific configuration"`
-	DevBranch   string               `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
-	RcTag       string               `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
+	ModuleName string        `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
+	BDBA       []string      `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
+	Mend       MendSecConfig `json:"mend" yaml:"mend" comment:"Mend security scanner specific configuration"`
+	DevBranch  string        `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
+	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
 func (s *SecurityScanConfig) Validate() error {
@@ -107,7 +107,7 @@ func IsWhitelistedNonSemVerTags(tag string) bool {
 	return false
 }
 
-type WhiteSourceSecConfig struct {
+type MendSecConfig struct {
 	Language    string   `json:"language" yaml:"language" comment:"string, indicating the programming language the scanner has to analyze"`
 	SubProjects string   `json:"subprojects" yaml:"subprojects" comment:"string, specifying any subprojects"`
 	Exclude     []string `json:"exclude" yaml:"exclude" comment:"list, directories within the repository which should not be scanned"`
