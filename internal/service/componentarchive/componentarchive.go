@@ -12,7 +12,6 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 )
 
 const (
@@ -84,10 +83,6 @@ func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive,
 	for _, resource := range moduleResources {
 		if resource.AccessHandler != nil {
 			accessHandler := resource.AccessHandler
-
-			if tarHandler, ok := accessHandler.(*accesshandler.Tar); ok {
-				tarHandler.FileSystem = s.fileSystem
-			}
 
 			access, err := accessHandler.GenerateBlobAccess()
 			if err != nil {
