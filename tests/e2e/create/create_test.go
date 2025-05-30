@@ -376,7 +376,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
-				Expect(resource.Type).To(Equal("directory"))
+				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal("1.0.0"))
 
 				By("And descriptor.component.resources[0].access should be correct")
@@ -553,7 +553,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				resource := descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
-				Expect(resource.Type).To(Equal("directory"))
+				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal("1.0.2"))
 
 				By("And descriptor.component.resources[1].access should be correct")
