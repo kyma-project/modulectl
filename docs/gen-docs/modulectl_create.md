@@ -19,30 +19,31 @@ Provide the `--config-file` flag with a config file path.
 The module config file is a YAML file used to configure the following attributes for the module:
 
 ```yaml
-- name:             a string, required, the name of the module
-- version:          a string, required, the version of the module
-- manifest:         a string, required, reference to the manifest, must be a URL
-- repository:       a string, required, reference to the repository, must be a URL
-- documentation:    a string, required, reference to the documentation, must be a URL
-- icons:            a map with string keys and values, required, icons used for UI
-    - name:         a string, required, the name of the icon
-      link:         a URL, required, the link to the icon
-- defaultCR:        a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
-- mandatory:        a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
-- security:         a string, optional, reference to a YAML file containing the security scanners config, must be a local file path
-- labels:           a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
-- annotations:      a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
-- manager:          # an object, optional, module resource that indicates the installation readiness of the module
-    name:           a string, required, the name of the module resource
-    namespace:      a string, optional, the namespace of the module resource
-    group:          a string, required, the API group of the module resource
-    version:        a string, required, the API version of the module resource
-    kind:           a string, required, the API kind of the module resource
-- associatedResources: a list of Group-Version-Kind(GVK), optional, resources that should be cleaned up with the module deletion
-- resources:        # a map with string keys and values, optional, additional resources of the module that may be fetched
-    - name:         a string, required, the name of the resource
-      link:         a URL, required, the link to the resource
-- requiresDowntime: a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
+- name:                 a string, required, the name of the module
+- version:              a string, required, the version of the module
+- manifest:             a string, required, reference to the manifest, must be a URL
+- repository:           a string, required, reference to the repository, must be a URL
+- documentation:        a string, required, reference to the documentation, must be a URL
+- icons:                a map with string keys and values, required, icons used for UI
+    - name:             a string, required, the name of the icon
+      link:             a URL, required, the link to the icon
+- defaultCR:            a string, optional, reference to a YAML file containing the default CR for the module, must be a URL
+- mandatory:            a boolean, optional, default=false, indicates whether the module is mandatory to be installed on all clusters
+- security:             a string, optional, reference to a YAML file containing the security scanners config, must be a local file path
+- labels:               a map with string keys and values, optional, additional labels for the generated ModuleTemplate CR
+- annotations:          a map with string keys and values, optional, additional annotations for the generated ModuleTemplate CR
+- manager:              an object, optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module
+    name:               a string, required, the name of the module resource
+    namespace:          a string, optional, the namespace of the module resource
+    group:              a string, required, the API group of the module resource
+    version:            a string, required, the API version of the module resource
+    kind:               a string, required, the API kind of the module resource
+- associatedResources:  a list of Group-Version-Kind(GVK), optional, resources that should be cleaned up with the module deletion
+- resources:            a map with string keys and values, optional, additional resources of the module that may be fetched
+    - name:             a string, required, the name of the resource
+      link:             a URL, required, the link to the resource
+- requiresDowntime:     a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
+- namespace:            a string, optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed
 ```
 
 The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated.
@@ -73,9 +74,11 @@ Build a simple module and push it to a remote registry
 
 ```bash
 -c, --config-file string              Specifies the path to the module configuration file.
+    --dry-run                         Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true.
 -h, --help                            Provides help for the create command.
     --insecure                        Uses an insecure connection to access the registry.
 -o, --output string                   Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").
+    --overwrite                       Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes.
 -r, --registry string                 Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
     --registry-cred-selector string   Label selector to identify an externally created Secret of type "kubernetes.io/dockerconfigjson". It allows the image to be accessed in private image registries. It can be used when you push your module to a registry with authenticated access. For example, "label1=value1,label2=value2".
     --registry-credentials string     Basic authentication credentials for the given repository in the <user:password> format.

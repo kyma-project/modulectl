@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/modulectl/cmd/modulectl/version"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/kyma-project/modulectl/internal/service/create"
@@ -124,6 +125,10 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create component archive service: %w", err)
 	}
+	moduleResourceService, err := resources.NewService(archiveFileSystemService)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create module resource service: %w", err)
+	}
 
 	ociRepo := &ocirepo.OCIRepo{}
 	registryService, err := registry.NewService(ociRepo, nil)
@@ -140,7 +145,7 @@ func buildModuleService() (*create.Service, error) {
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
 		securityConfigService, componentArchiveService, registryService, moduleTemplateService,
-		crdParserService, manifestFileResolver, defaultCRFileResolver, fileSystemUtil)
+		crdParserService, moduleResourceService, manifestFileResolver, defaultCRFileResolver, fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}

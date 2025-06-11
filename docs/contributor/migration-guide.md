@@ -5,81 +5,282 @@ It covers all necessary changes and deprecations to ensure a smooth transition.
 
 ## Overview
 
-`modulectl` is the successor of the module developer-facing capabilities of Kyma CLI.
+modulectl is the successor of the module developer-facing capabilities of Kyma CLI.
 It is already tailored for the updated ModuleTemplate metadata as discussed in [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681).
 
-## Use `modulectl`
+## 1. Tooling & Workflow Changes
 
-It is available for download from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
+This section focuses on the modulectl CLI itself and the related submission, deployment, and migration workflows.
+
+### 1.1 Use modulectl
+You can download modulectl from the [GitHub Releases](https://github.com/kyma-project/modulectl/releases).
 For an overview of the supported commands and flags, use `modulectl -h` or `modulectl <command> -h` to show the definitions.
 
-## Deprecations and Changes
+```bash
+modulectl -h                # general help
+modulectl create -h         # help for 'create'
+modulectl scaffold -h       # help for 'scaffold'
+```
 
-Look at the key changes between Kyma CLI and `modulectl`.
+### 1.2 Command & Flag Differences
 
-1. **New Command**
+#### 1.2.1 Command Mapping
 
-   - The new command for module creation is `modulectl create`, use `modulectl create -h` for a detailed description. 
+This section illustrates how the commands from Kyma CLI are mapped to the modulectl format.
 
-2. **Release Channel Configuration**
+| Operation                           | Kyma CLI                         | modulectl                          |
+|-------------------------------------|----------------------------------|-------------------------------------|
+| Scaffold module necessary files     | `kyma alpha create scaffold ...` | `modulectl scaffold ...`            |
+| Create Bundled Module(OCI artifact) | `kyma alpha create module ...`   | `modulectl create -c <config-file>` |
+| Command-specific help               | `kyma alpha module <cmd> -h`     | `modulectl <cmd> -h`                |
 
-   - **Deprecated**: The **.channel** field is no longer required in the config file.
-   - **New Approach**: The release channel is configured separately in the [ModuleReleaseMeta CR](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md).
+#### 1.2.2 Flag Mapping
 
-3. **Manifest and Default CR data**
+This section illustrates how the `scaffold` and `create` command flags from Kyma CLI are mapped to the modulectl format.
 
-   - **Deprecated**: The Manifest and Default CR data cannot be read from a local file.
-   - **New Approach**: The Manifest and Default CR data is fetched directly from the GitHub release. See an example [here](https://github.com/kyma-project/modulectl/blob/91e01856b944fda0d5595843e040bca26416abdc/tests/e2e/create/testdata/moduleconfig/valid/with-defaultcr.yaml#L3-L4).
+**Scaffold Flag Mapping**
 
-4. **Annotations and Labels**
+| Kyma CLI v2.20.5 Flag                                          | modulectl Flag                           | Notes                                                                        |
+| -------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `-d, --directory string`                                       | `-d, --directory string`                   | Target directory for generated scaffold files (default `./`)                 |
+| `--gen-default-cr string`                                      | `--gen-default-cr string`                  | Name of generated default CR (default `default-cr.yaml`)                     |
+| `--gen-manifest string`                                        | `--gen-manifest string`                    | Name of generated manifest file (default `manifest.yaml`)                    |
+| `--gen-security-config string`                                 | `--gen-security-config string`             | Name of generated security config (default `sec-scanners-config.yaml`)       |
+| `--module-channel string`                                      | **Removed**                                | Channel no longer set at scaffold time                                       |
+| `--module-config string`                                       | **Renamed** `-c, --config-file string`     | Name of generated module config file (default `scaffold-module-config.yaml`) |
+| `--module-name string`                                         | `--module-name string`                     | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
+| `--module-version string`                                      | `--module-version string`                  | Module version in generated config (default `0.0.1`)                         |
+| `-o, --overwrite`                                              | `-o, --overwrite`                          | Overwrite existing module config file                                        |
+| `-h, --help`                                                   | `-h, --help`                               | Show help for scaffold command                                               |
 
-   - **Deprecated**: The documentation link is not added as the `operator.kyma-project.io/doc-url` annotation.
-   - **New**: The documentation link is added as **.spec.info.documentation**. The value is configured in the module config file with key **.documentation**.
-   - **Deprecated**: The module version is not added as the `operator.kyma-project.io/module-version` label.
-   - **New**: The module version is added as **.spec.version**.
+**Create Flag Mapping**
 
-5. **Command Flags**
+| Kyma CLI v2.20.5 Flag                                         | modulectl Flag                           | Notes                                                                        |
+| ------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
+| `--module-config-file string`        | **Renamed** `-c, --config-file string`        | Path to your `module-config.yaml`                             |
+| `--module-archive-path string`       | **Removed**                                   | Archive path for local module artifacts                       |
+| `--module-archive-persistence`       | **Removed**                                   | Persist module archive on host filesystem                     |
+| `--module-archive-version-overwrite` | **Renamed** `--overwrite`                     | Overwrite existing module OCI archive (**for testing only**)  |
+| `--descriptor-version string`        | **Removed**                                   | Schema version for generated descriptor                       |
+| `--git-remote string`                | **Removed**                                   | Git remote name for module sources                            |
+| `--insecure`                         | `--insecure`                                  | Allow insecure registry connections                           |
+| `--key string`                       | **Removed**                                   | Private key path for signing                                  |
+| `--kubebuilder-project`              | **Removed**                                   | Indicate Kubebuilder project                                  |
+| `-n, --name string`                  | `--name`                                      | Override module name                                          |
+| `--name-mapping string`              | **Removed**                                   | OCM component name mapping                                    |
+| `--namespace string`                 | `--namespace`                                 | Namespace for generated ModuleTemplate (default `kcp-system`) |
+| `-o, --output string`                | `-o, --output string`                         | Output path for ModuleTemplate (default `template.yaml`)      |
+| `-p, --path string`                  | **Removed**                                   | Path to module contents                                       |
+| `-r, --registry string`              | `-r, --registry string`                       | Context URL for OCI registry                                  |
+| `--registry-cred-selector string`    | `--registry-cred-selector string`             | Label selector for existing `dockerconfigjson` Secret         |
+| `--registry-credentials string`      | `--registry-credentials string`               | Basic auth credentials in `<user:password>` format            |
+| `--dry-run`                          | `--dry-run`                                   | Validate and skip pushing module descriptor                   |
+| `-h, --help`                         | `-h, --help`                                  | Show help for create command                                  |
 
-   - **Deprecated**: Flag `--module-config-file` is deprecated.
-   - **New**: Flag `--config-file` with shortcut `-c` (applicable for both scaffold and create commands).
-   - **Deprecated**: Flag `--module-archive-version-overwrite` is deprecated.
-     - There is no successor, this feature has been sunset entirely. The reason is that module versions should be immutable once built and pushed. If a version needs to be rewritten, first it should be explicitly deleted from the registry.
+## 2. Module Configuration (`module-config.yaml`) Differences
 
-6. **ModuleTemplate Naming Pattern**
+This section illustrates how the `module-config.yaml` looks in the Kyma CLI format versus the modulectl format, with field-by-field mapping and examples.
 
-   - **Deprecated**: **.metadata.name** is not written as `<module-name>-<channel>`.
-   - **New**: **.metadata.name** is written as `<module-name>-<version>`.
+### 2.1 Field Mapping Differences
 
-7. **Mandatory ModuleTemplates**
+| Kyma CLI                                       | modulectl                        | Description / Changes                                                                     |
+|------------------------------------------------|--------------------------------- | ------------------------------------------------------------------------------------------|
+| `name`                                         | `name`                           | Name of the module                                                                                                                                                          |
+| `channel`                                      | **Removed**                      | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
+| `version`                                      | `version`                        | Version of the module                                                                                                                                                       |
+| `manifest`                                     | `manifest`                       | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
+| `defaultCR`                                    | `defaultCR`                      | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
+| `annotations.operator.kyma-project.io/doc-url` | `documentation`                  | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                               |
+| `moduleRepo`                                   | `repository`                     | Link to the repository of the module                                                                                                                                        |
+| *n/a*                                          | **New** `icons`                  | List of module icons for the UI with `name`+`link`                                                                                                                          |
+| `mandatory`                                    | `mandatory`                      | Marks the module as mandatory (default `false`)                                                                                                                             |
+| *n/a*                                          |  **New** `requiresDowntime`      | Marks the module to require a maintenance window to update from the previous version (default `false`)                                                                      |
+| `security`                                     | `security`                       | Path to security scanner config. Must be a local path and will be resolved against the checked-out version in GitHub                                                         |
+| `labels` / `annotations`                       | `labels` / `annotations`         | Labels and annotations to put into the ModuleTemplate                                                                                                                       |
+| *n/a*                                          | **New** `manager`                | Controller resource of the module (GVK, name, optional namespace)                                                                                                           |
+| *n/a*                                          | **New** `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                                                                                                  |
+| *n/a*                                          | **New** `resources`              | Additional artifacts for the UI (e.g., CRDs)                                                                                                                                |
+| `namespace`                                    | `namespace`                      | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                                    |
+| `moduleRepoTag`                                | `moduleRepoTag`                  | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                                          |
+| `beta`                                         | **Removed**                      | Marks the module as beta. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                                |
+| `internal`                                     | **Removed**                      | Marks the module as internal. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                    |
 
-   - Mandatory modules can be created using `modulectl` by setting the **.mandatory** field to `true` in the module config. If multiple ModuleTemplates for the same mandatory module get deployed to the Kyma Control Plane, Lifecycle Manager picks up the ModuleTemplate with the highest version.
 
-8. **Beta and Internal Flags**
+### 2.2 Examples
 
-   - **Deprecated**: Beta and Internal flags are not supported for ModuleTemplates.
-   - **New**: Beta and Intenral flags are configured as part of the ModuleReleaseMeta, see [ModuleReleaseMeta Configuration](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md#configuration).
+**Module Config using Kyma CLI**
 
-## Migration Period
+```yaml
+# modules/<module-name>/<channel>/module-config.yaml
+name: kyma-project.io/module/<module-name>
+channel: <channel>
+version: <version>
+manifest: <module-name>-manifest.yaml
+defaultCR: <module-name>-default-cr.yaml
+annotations:
+  operator.kyma-project.io/doc-url: https://help.sap.com/docs/btp/sap-business-technology-platform/kyma-module-name
+moduleRepo: https://github.com/kyma-project/module-manager.git
+```
 
-**Support for Both Approaches Temporarily**: 
+**Module Config using modulectl**
 
-- Both old and new approaches will be supported simultaneously by KLM during the migration period.
-- After the full migration to the new approach, KLM will no longer accept ModuleTemplate with the old naming pattern.
-- For testing, provide ModuleTemplate CRs in the new format accompanied by [ModuleReleaseMeta CRs](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md). KLM will attempt to use the new approach and fall back to the old approach if the new format is not found. The ModuleReleaseMeta CR can be marked as internal and beta to avoid syncing it.
+```yaml
+# modules/<module-name>/<version>/module-config.yaml
+name: kyma-project.io/module/<module-name>
+repository: https://github.com/kyma-project/<module-manager-name>.git
+version: 1.34.0
+manifest: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-manager-name>.yaml
+defaultCR: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-name-default-cr>.yaml
+security: sec-scanners-config.yaml
+manager:
+   name: <module-manager-name>
+   namespace: kyma-system
+   group: apps
+   version: v1
+   kind: Deployment
+associatedResources:
+   - group: operator.kyma-project.io
+     kind: <ModuleName>
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: LogParser
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: LogPipeline
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: MetricPipeline
+     version: v1alpha1
+   - group: operator.kyma-project.io
+     kind: TracePipeline
+     version: v1alpha1
+documentation: https://help.sap.com/docs/btp/sap-business-technology-platform/<kyma-module-name>
+icons:
+   - name: module-icon
+     link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
+```
 
-## Submission Process
+## 3. ModuleTemplate Differences 
 
-The general submission process may look as follows:
 
-1. Module Team releases a new module version in the GitHub release.
-2. Module Team configures the version to be released in the module config (in the new format) in the internal module-manifest repo.
-3. Module Team updates the version in the related channel in ModuleReleaseMeta.
-4. The submission pipeline gets triggered.
-5. After certain quality gates are passed, the new version of ModuleTemplate gets provisioned into KCP first.
-6. The updated ModuleReleaseMeta gets provisioned into KCP.
-7. Outdated ModuleTemplate (the version not mentioned in ModuleReleaseMeta) should be removed. This step allows both outdated and new versions to coexist temporarily. KLM only handles the version defined in ModuleReleaseMeta.
+### 3.1 Field Mapping Differences
+
+The following table compares the key fields in the `ModuleTemplate` YAML generated by Kyma CLI vs. modulectl.
+
+| Field / Path                                                        | Kyma CLI–Generated (`kyma alpha create module`)      | modulectl–Generated (`modulectl create`)                    |
+|---------------------------------------------------------------------|------------------------------------------------------|-------------------------------------------------------------|
+| **metadata.name**                                                   | Present `<module-name>-<channel>`                    | **Changed** `<module-name>-<version>`                       |
+| **metadata.namespace**                                              | Present                                              | Unchanged                                                   |
+| **metadata.labels.operator.kyma-project.io/module-name**            | Present                                              | Unchanged                                                   |
+| **metadata.annotations.operator.kyma-project.io/doc-url**           | Present                                              | **Removed**                                                 |
+| **metadata.annotations.operator.kyma-project.io/is-cluster-scoped** | Present                                              | Unchanged                                                   |
+| **metadata.annotations.operator.kyma-project.io/module-version**    | Present                                              | **Removed**                                                 |
+| **spec.channel**                                                    | Present                                              | **Removed**                                                 |
+| **spec.moduleName**                                                 | *n/a*                                                | **New**                                                     |
+| **spec.version**                                                    | *n/a*                                                | **New**                                                     |
+| **spec.mandatory**                                                  | Present                                              | Unchanged                                                   |
+| **spec.requiresDowntime**                                           | *n/a*                                                | **New**                                                     |
+| **spec.manager.name**                                               | *n/a*                                                | **New**                                                     |
+| **spec.manager.namespace**                                          | *n/a*                                                | **New**                                                     |
+| **spec.manager.group**                                              | *n/a*                                                | **New**                                                     |
+| **spec.manager.version**                                            | *n/a*                                                | **New**                                                     |
+| **spec.data**                                                       | Present                                              | Unchanged                                                   |
+| **spec.info**                                                       | *n/a*                                                | **New**                                                     |
+| **spec.descriptor.component**                                       | Present                                              | Unchanged                                                   |
+| **spec.resources**                                                  | *n/a*                                                | **New**                                                     |
+
+### 3.2 Examples
+
+See the following examples of `ModuleTemplate` YAML files generated for TemplateOperator by Kyma CLI vs. modulectl.
+
+**Kyma CLI–generated ModuleTemplate (channel-based)**
+
+```yaml
+apiVersion: operator.kyma-project.io/v1beta2
+kind: ModuleTemplate
+metadata:
+  name: template-operator-regular
+  namespace: kcp-system
+  labels:
+    "operator.kyma-project.io/module-name": "template-operator"
+  annotations:
+    "operator.kyma-project.io/module-version": "0.0.1"
+spec:
+  mandatory: false
+  channel: regular
+  data:
+    apiVersion: operator.kyma-project.io/v1alpha1
+    kind: Sample
+    metadata:
+      name: sample-yaml
+    spec:
+      resourceFilePath: "./module-data/yaml"
+  descriptor:
+    component:
+      # ... component descriptor
+    meta:
+      schemaVersion: v2
+```
+
+**modulectl–generated ModuleTemplate (version-based)**
+
+```yaml
+apiVersion: operator.kyma-project.io/v1beta2
+kind: ModuleTemplate
+metadata:
+  annotations:
+    operator.kyma-project.io/is-cluster-scoped: "false"
+    operator.kyma-project.io/module-version: 0.0.1
+  creationTimestamp: "2024-11-14T13:33:08Z"
+  generation: 3
+  labels:
+    operator.kyma-project.io/module-name: template-operator
+  name: template-operator-0.0.1
+  namespace: kcp-system
+  resourceVersion: "4369227537"
+  uid: b00c8fcc-aaa2-43ce-bdab-ba82365e11b7
+spec:
+  associatedResources:
+  - group: operator.kyma-project.io
+    kind: Managed
+    version: v1alpha1
+  data:
+    apiVersion: operator.kyma-project.io/v1alpha1
+    kind: Sample
+    metadata:
+      name: sample-yaml
+    spec:
+      resourceFilePath: ./module-data/yaml
+  descriptor:
+    component:
+      # ... component descriptor
+    meta:
+      schemaVersion: v2
+  info:
+    documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
+    icons:
+    - link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
+      name: module-icon
+    repository: https://github.com/kyma-project/template-operator
+  manager:
+    group: apps
+    kind: Deployment
+    name: template-operator-controller-manager
+    namespace: template-operator-system
+    version: v1
+  mandatory: false
+  moduleName: template-operator
+  resources:
+  - link: https://github.com/kyma-project/template-operator/releases/download/0.0.1/template-operator.yaml
+    name: rawManifest
+  version: 0.0.1
+```
+
+
 
 ## Additional Resources
 
+- [`/modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
 - [ADR: Iteratively moving forward with module requirements and aligning responsibilities](https://github.com/kyma-project/lifecycle-manager/issues/1681)
-- [`modulectl` GitHub Repository](https://github.com/kyma-project/modulectl)
+- [ModuleTemplate Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/03-moduletemplate.md)
+- [ModuleReleaseMeta Custom Resource](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)

@@ -67,6 +67,18 @@ func Test_Validate_Options(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "RegistryURL is empty",
+			options: create.Options{
+				Out:            iotools.NewDefaultOut(io.Discard),
+				ConfigFile:     "config.yaml",
+				Credentials:    "username:password",
+				TemplateOutput: "output",
+				RegistryURL:    "",
+			},
+			wantErr: true,
+			errMsg:  "opts.RegistryURL must not be empty",
+		},
+		{
 			name: "RegistryURL does not start with http",
 			options: create.Options{
 				Out:            iotools.NewDefaultOut(io.Discard),

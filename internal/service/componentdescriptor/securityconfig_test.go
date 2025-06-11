@@ -20,78 +20,20 @@ func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
 	require.Nil(t, securityConfigService)
 }
 
-func Test_GetImageNameAndTag(t *testing.T) {
-	tests := []struct {
-		name              string
-		imageURL          string
-		expectedImageName string
-		expectedImageTag  string
-		expectedError     error
-	}{
-		{
-			name:              "valid image URL",
-			imageURL:          "docker.io/template-operator/test:latest",
-			expectedImageName: "test",
-			expectedImageTag:  "latest",
-			expectedError:     nil,
-		},
-		{
-			name:              "invalid image URL - no tag",
-			imageURL:          "docker.io/template-operator/test",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - multiple tags",
-			imageURL:          "docker.io/template-operator/test:latest:latest",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - no slashes",
-			imageURL:          "docker.io",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - empty URL",
-			imageURL:          "",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			imgName, imgTag, err := componentdescriptor.GetImageNameAndTag(test.imageURL)
-			if test.expectedError != nil {
-				require.ErrorContains(t, err, test.expectedError.Error())
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, test.expectedImageName, imgName)
-				require.Equal(t, test.expectedImageTag, imgTag)
-			}
-		})
-	}
-}
-
-func Test_AppendProtecodeImagesLayers_ReturnCorrectResources(t *testing.T) {
+func Test_AppendBDBAImagesLayers_ReturnCorrectResources(t *testing.T) {
 	cd := &compdesc.ComponentDescriptor{}
 	cd.SetName("test.io/module/test")
 	cd.SetVersion("1.0.0")
 	cd.Provider = ocmv1.Provider{Name: "kyma"}
 
 	securityConfig := contentprovider.SecurityScanConfig{
-		Protecode: []string{
+		BDBA: []string{
 			"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.0",
 			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
 		},
 	}
 
-	err := componentdescriptor.AppendProtecodeImagesLayers(cd, securityConfig)
+	err := componentdescriptor.AppendBDBAImagesLayers(cd, securityConfig)
 	require.NoError(t, err)
 
 	require.Equal(t, "template-operator", cd.Resources[0].Name)
@@ -124,7 +66,7 @@ func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
 	securityConfig := contentprovider.SecurityScanConfig{
 		RcTag:     "1.0.0",
 		DevBranch: "main",
-		WhiteSource: contentprovider.WhiteSourceSecConfig{
+		Mend: contentprovider.MendSecConfig{
 			Exclude:     []string{"**/test/**", "**/*_test.go"},
 			SubProjects: "false",
 			Language:    "golang-mod",
@@ -166,9 +108,9 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *tes
 
 	require.Equal(t, securityConfig.RcTag, returned.RcTag)
 	require.Equal(t, securityConfig.DevBranch, returned.DevBranch)
-	require.Equal(t, securityConfig.WhiteSource.Exclude, returned.WhiteSource.Exclude)
-	require.Equal(t, securityConfig.WhiteSource.SubProjects, returned.WhiteSource.SubProjects)
-	require.Equal(t, securityConfig.WhiteSource.Language, returned.WhiteSource.Language)
+	require.Equal(t, securityConfig.Mend.Exclude, returned.Mend.Exclude)
+	require.Equal(t, securityConfig.Mend.SubProjects, returned.Mend.SubProjects)
+	require.Equal(t, securityConfig.Mend.Language, returned.Mend.Language)
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileExistenceCheckError(t *testing.T) {
@@ -197,11 +139,11 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileDoesNotExi
 
 type fileReaderStub struct{}
 
-func (*fileReaderStub) FileExists(path string) (bool, error) {
+func (*fileReaderStub) FileExists(_ string) (bool, error) {
 	return true, nil
 }
 
-func (*fileReaderStub) ReadFile(path string) ([]byte, error) {
+func (*fileReaderStub) ReadFile(_ string) ([]byte, error) {
 	securityConfigBytes, _ := yaml.Marshal(securityConfig)
 	return securityConfigBytes, nil
 }
@@ -209,7 +151,7 @@ func (*fileReaderStub) ReadFile(path string) ([]byte, error) {
 var securityConfig = contentprovider.SecurityScanConfig{
 	RcTag:     "1.0.0",
 	DevBranch: "main",
-	WhiteSource: contentprovider.WhiteSourceSecConfig{
+	Mend: contentprovider.MendSecConfig{
 		Exclude:     []string{"**/test/**", "**/*_test.go"},
 		SubProjects: "false",
 		Language:    "golang-mod",
@@ -218,30 +160,30 @@ var securityConfig = contentprovider.SecurityScanConfig{
 
 type fileReaderFileExistsErrorStub struct{}
 
-func (*fileReaderFileExistsErrorStub) FileExists(path string) (bool, error) {
+func (*fileReaderFileExistsErrorStub) FileExists(_ string) (bool, error) {
 	return false, errors.New("error while checking file existence")
 }
 
-func (*fileReaderFileExistsErrorStub) ReadFile(path string) ([]byte, error) {
+func (*fileReaderFileExistsErrorStub) ReadFile(_ string) ([]byte, error) {
 	return nil, errors.New("error while reading file")
 }
 
 type fileReaderReadFileErrorStub struct{}
 
-func (*fileReaderReadFileErrorStub) FileExists(path string) (bool, error) {
+func (*fileReaderReadFileErrorStub) FileExists(_ string) (bool, error) {
 	return true, nil
 }
 
-func (*fileReaderReadFileErrorStub) ReadFile(path string) ([]byte, error) {
+func (*fileReaderReadFileErrorStub) ReadFile(_ string) ([]byte, error) {
 	return nil, errors.New("error while reading file")
 }
 
 type fileReaderFileExistsFalseStub struct{}
 
-func (*fileReaderFileExistsFalseStub) FileExists(path string) (bool, error) {
+func (*fileReaderFileExistsFalseStub) FileExists(_ string) (bool, error) {
 	return false, nil
 }
 
-func (*fileReaderFileExistsFalseStub) ReadFile(path string) ([]byte, error) {
+func (*fileReaderFileExistsFalseStub) ReadFile(_ string) ([]byte, error) {
 	return nil, nil
 }

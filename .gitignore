@@ -24,7 +24,6 @@
 atlassian-ide-plugin.xml
 
 ## VSCode
-**/*.vscode
 **/*.devcontainer*
 
 ### OSX template

@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 )
 
 const (
@@ -78,13 +78,15 @@ type ComponentArchive interface {
 }
 
 func (s *Service) AddModuleResourcesToArchive(archive ComponentArchive,
-	moduleResources []componentdescriptor.Resource,
+	moduleResources []resources.Resource,
 ) error {
 	for _, resource := range moduleResources {
-		if resource.Path != "" {
-			access, err := s.fileSystem.GenerateTarFileSystemAccess(resource.Path)
+		if resource.AccessHandler != nil {
+			accessHandler := resource.AccessHandler
+
+			access, err := accessHandler.GenerateBlobAccess()
 			if err != nil {
-				return fmt.Errorf("failed to generate tar file access, %w", err)
+				return fmt.Errorf("failed to generate access for resource %s: %w", resource.Name, err)
 			}
 
 			blobAccess, err := archive.AddBlob(access, access.MimeType(), resource.Name, nil)

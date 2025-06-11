@@ -1,0 +1,255 @@
+//nolint:gosec // some registry var names are used in tests
+package resources_test
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+	"ocm.software/ocm/api/ocm/cpi"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+)
+
+func TestCreateCredMatchLabels_ReturnCorrectLabels(t *testing.T) {
+	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
+	label, err := resources.CreateCredMatchLabels(registryCredSelector)
+
+	expectedLabel := map[string]string{
+		"operator.kyma-project.io/oci-registry-cred": "test-operator",
+	}
+	var returnedLabel map[string]string
+
+	require.NoError(t, err)
+
+	err = json.Unmarshal(label, &returnedLabel)
+	require.NoError(t, err)
+	assert.Equal(t, expectedLabel, returnedLabel)
+}
+
+func TestCreateCredMatchLabels_ReturnErrorOnInvalidSelector(t *testing.T) {
+	registryCredSelector := "@test2"
+	_, err := resources.CreateCredMatchLabels(registryCredSelector)
+	assert.ErrorContains(t, err, "failed to parse label selector")
+}
+
+func TestCreateCredMatchLabels_ReturnEmptyLabelWhenEmptySelector(t *testing.T) {
+	registryCredSelector := ""
+	label, err := resources.CreateCredMatchLabels(registryCredSelector)
+
+	require.NoError(t, err)
+	assert.Empty(t, label)
+}
+
+func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
+	_, err := resources.NewService(nil)
+	require.ErrorIs(t, err, resources.ErrNilArchiveFileSystem)
+}
+
+func TestGenerateModuleResources_ReturnErrorWhenInvalidSelector(t *testing.T) {
+	moduleConfig := &contentprovider.ModuleConfig{
+		Version: "1.0.0",
+	}
+	mockFs := &fileSystemStub{}
+	moduleResourceService, err := resources.NewService(mockFs)
+	require.NoError(t, err)
+
+	_, err = moduleResourceService.GenerateModuleResources(moduleConfig, "path", "path",
+		"@test2")
+	require.ErrorContains(t, err, "failed to create credentials label")
+}
+
+func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *testing.T) {
+	moduleConfig := &contentprovider.ModuleConfig{
+		Version: "1.0.0",
+	}
+	mockFs := &fileSystemStub{}
+	moduleResourceService, err := resources.NewService(mockFs)
+	require.NoError(t, err)
+	manifestPath := "path/to/manifest"
+	defaultCRPath := "path/to/defaultCR"
+	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
+
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath,
+		registryCredSelector)
+	require.NoError(t, err)
+	require.Len(t, res, 4)
+
+	require.Equal(t, "module-image", res[0].Name)
+	require.Equal(t, "ociArtifact", res[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
+	require.Nil(t, res[0].AccessHandler)
+
+	require.Equal(t, "metadata", res[1].Name)
+	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
+	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
+	require.True(t, ok)
+	require.NotEmpty(t, metadataResourceHandler.String)
+
+	require.Equal(t, "raw-manifest", res[2].Name)
+	require.Equal(t, "directoryTree", res[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
+	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	require.True(t, ok)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+
+	require.Equal(t, "default-cr", res[3].Name)
+	require.Equal(t, "directoryTree", res[3].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
+	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
+	require.True(t, ok)
+	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.Path)
+
+	for _, resource := range res {
+		require.Equal(t, "1.0.0", resource.Version)
+		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
+		var returnedLabel map[string]string
+		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
+		require.NoError(t, err)
+		expectedLabel := map[string]string{
+			"operator.kyma-project.io/oci-registry-cred": "test-operator",
+		}
+		require.Equal(t, expectedLabel, returnedLabel)
+	}
+}
+
+func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *testing.T) {
+	moduleConfig := &contentprovider.ModuleConfig{
+		Version: "1.0.0",
+	}
+	mockFs := &fileSystemStub{}
+	moduleResourceService, err := resources.NewService(mockFs)
+	require.NoError(t, err)
+	manifestPath := "path/to/manifest"
+	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
+
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, "",
+		registryCredSelector)
+	require.NoError(t, err)
+	require.Len(t, res, 3)
+
+	require.Equal(t, "module-image", res[0].Name)
+	require.Equal(t, "ociArtifact", res[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
+	require.Nil(t, res[0].AccessHandler)
+
+	require.Equal(t, "metadata", res[1].Name)
+	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
+	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
+	require.True(t, ok)
+	require.NotEmpty(t, metadataResourceHandler.String)
+
+	require.Equal(t, "raw-manifest", res[2].Name)
+	require.Equal(t, "directoryTree", res[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
+	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	require.True(t, ok)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+
+	for _, resource := range res {
+		require.Equal(t, "1.0.0", resource.Version)
+		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
+		var returnedLabel map[string]string
+		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
+		expectedLabel := map[string]string{
+			"operator.kyma-project.io/oci-registry-cred": "test-operator",
+		}
+		require.NoError(t, err)
+		require.Equal(t, expectedLabel, returnedLabel)
+	}
+}
+
+func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing.T) {
+	moduleConfig := &contentprovider.ModuleConfig{
+		Version: "1.0.0",
+	}
+	mockFs := &fileSystemStub{}
+	moduleResourceService, err := resources.NewService(mockFs)
+	require.NoError(t, err)
+	manifestPath := "path/to/manifest"
+	defaultCRPath := "path/to/defaultCR"
+
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath,
+		"")
+	require.NoError(t, err)
+	require.Len(t, res, 4)
+
+	require.Equal(t, "module-image", res[0].Name)
+	require.Equal(t, "ociArtifact", res[0].Type)
+	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
+	require.Nil(t, res[0].AccessHandler)
+
+	require.Equal(t, "metadata", res[1].Name)
+	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
+	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
+	require.True(t, ok)
+	require.NotEmpty(t, metadataResourceHandler.String)
+
+	require.Equal(t, "raw-manifest", res[2].Name)
+	require.Equal(t, "directoryTree", res[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
+	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	require.True(t, ok)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+
+	require.Equal(t, "default-cr", res[3].Name)
+	require.Equal(t, "directoryTree", res[3].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
+	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
+	require.True(t, ok)
+	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.Path)
+
+	for _, resource := range res {
+		require.Equal(t, "1.0.0", resource.Version)
+		require.Empty(t, resource.Labels)
+	}
+}
+
+func TestResourceGenerators(t *testing.T) {
+	t.Run("module image resource", func(t *testing.T) {
+		resource := resources.GenerateModuleImageResource()
+		require.Equal(t, "module-image", resource.Name)
+		require.Equal(t, "ociArtifact", resource.Type)
+		require.Equal(t, ocmv1.ExternalRelation, resource.Relation)
+		require.Nil(t, resource.AccessHandler)
+	})
+
+	t.Run("raw manifest resource", func(t *testing.T) {
+		mockFs := &fileSystemStub{}
+		manifestPath := "test/path"
+		resource := resources.GenerateRawManifestResource(mockFs, manifestPath)
+		require.Equal(t, "raw-manifest", resource.Name)
+		require.Equal(t, "directoryTree", resource.Type)
+		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
+
+		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
+		require.True(t, ok)
+		require.Equal(t, manifestPath, handler.Path)
+	})
+
+	t.Run("default CR resource", func(t *testing.T) {
+		mockFs := &fileSystemStub{}
+		crPath := "test/cr/path"
+		resource := resources.GenerateDefaultCRResource(mockFs, crPath)
+		require.Equal(t, "default-cr", resource.Name)
+		require.Equal(t, "directoryTree", resource.Type)
+		require.Equal(t, ocmv1.LocalRelation, resource.Relation)
+
+		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
+		require.True(t, ok)
+		require.Equal(t, crPath, handler.Path)
+	})
+}
+
+type fileSystemStub struct{}
+
+func (m fileSystemStub) GenerateTarFileSystemAccess(_ string) (cpi.BlobAccess, error) {
+	return nil, nil //nolint:nilnil // Stub implementation for testing
+}
