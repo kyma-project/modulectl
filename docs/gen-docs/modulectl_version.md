@@ -20,6 +20,5 @@ modulectl version [flags]
 
 ## See also
 
-* [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI.
-
+* [modulectl](modulectl.md)	 - Command line tool for creating Kyma modules.
 

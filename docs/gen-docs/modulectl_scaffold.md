@@ -81,6 +81,5 @@ Generate a scaffold with a manifest file, default CR and security-scanners confi
 
 ## See also
 
-* [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI.
-
+* [modulectl](modulectl.md)	 - Command line tool for creating Kyma modules.
 

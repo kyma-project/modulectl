@@ -13,11 +13,7 @@ modulectl is a command line tool that supports developers of Kyma modules. It pr
 3. Make the binary executable by running `chmod +x modulectl`.
 
 ### Alternative
-You can build the binary from the source code.
-
-Clone the repository and run `make build` from the root directory of the repository.
-
-The binary is created in the `bin` directory.
+You can build the binary from the source code by cloning the repository and run `make build` from the root directory of the repository. The binary is created in the `bin` directory.
 
 > [!NOTE]
 >
@@ -31,8 +27,8 @@ modulectl <command> [flags]
 ### Available Commands
 - `create` - Creates a module bundled as an OCI artifact. See [modulectl create](./docs/gen-docs/modulectl_create.md).
 - `scaffold` - Generates necessary files required for module creation. See [modulectl scaffold](./docs/gen-docs/modulectl_scaffold.md)
-- `help` - Provides help with any command.
 - `version` - Prints the current version of the modulectl tool. See [modulectl version](./docs/gen-docs/modulectl_version.md).
+- `help` - Provides help with any command.
 - `completion` - Generates the autocompletion script for the specified shell.
 
 For detailed information about the commands, you can use the `-h` or `--help` flag with the command. For example: `modulectl create -h`.
