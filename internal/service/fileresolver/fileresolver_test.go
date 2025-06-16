@@ -2,14 +2,15 @@ package fileresolver_test
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 )
 
@@ -34,101 +35,145 @@ func TestCleanupTempFiles_CalledWithNoTempFiles_ReturnsNoErrors(t *testing.T) {
 	assert.Empty(t, errs)
 }
 
-func Test_Resolve_Returns_CorrectPath(t *testing.T) {
+func urlOrFileRef(urlString string) contentprovider.UrlOrLocalFile {
+	return contentprovider.MustUrlOrLocalFile(urlString)
+}
+
+func Test_Resolve_WhenURL_Returns_CorrectPath(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
-	result, err := resolver.Resolve("https://example.com/path")
+	fileRef := urlOrFileRef("https://example.com/path")
+	require.True(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a URL")
+	result, err := resolver.Resolve(fileRef, "")
 
 	require.NoError(t, err)
 	require.Equal(t, "file.yaml", result)
 }
 
-func Test_Resolve_Returns_Error_WhenFailingToDownload(t *testing.T) {
+func Test_Resolve_WhenURL_Returns_Error_WhenFailingToDownload(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tempfileSystemErrorStub{})
-	result, err := resolver.Resolve("https://example.com/path")
+	fileRef := urlOrFileRef("https://example.com/path")
+	require.True(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a URL")
+	result, err := resolver.Resolve(fileRef, "")
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to download file")
 	assert.Empty(t, result)
 }
 
-func Test_Resolve_Returns_Error_When_AbsolutePath(t *testing.T) {
+func Test_Resolve_WhenLocalFile_WithJustFilename(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
-	result, err := resolver.Resolve("/path/to/manifest.yaml")
+	fileRef := urlOrFileRef("manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a file name")
+	result, err := resolver.Resolve(fileRef, "")
 
-	require.Error(t, err)
-	assert.Empty(t, result)
-	assert.Equal(t, "failed to parse URL: failed to parse url /path/to/manifest.yaml: invalid argument", err.Error())
+	require.NoError(t, err)
+	assert.Equal(t, "manifest.yaml", result)
 }
 
-func Test_Resolve_Returns_Error_When_Relative(t *testing.T) {
+func Test_Resolve_WhenLocalFile_WithAbsolutePath(t *testing.T) {
 	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
-	result, err := resolver.Resolve("./path/to/manifest.yaml")
+	fileRef := urlOrFileRef("/path/to/manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	result, err := resolver.Resolve(fileRef, "")
 
-	require.Error(t, err)
-	assert.Empty(t, result)
-	assert.Equal(t, "failed to parse URL: failed to parse url ./path/to/manifest.yaml: invalid argument", err.Error())
+	require.NoError(t, err)
+	assert.Equal(t, "/path/to/manifest.yaml", result)
 }
 
-func TestService_ParseURL(t *testing.T) {
-	tests := []struct {
-		name          string
-		urlString     string
-		want          *url.URL
-		expectedError error
-	}{
-		{
-			name:      "valid URL",
-			urlString: "https://example.com/path",
-			want: &url.URL{
-				Scheme: "https",
-				Host:   "example.com",
-				Path:   "/path",
-			},
-			expectedError: nil,
-		},
-		{
-			name:          "invalid URL",
-			urlString:     "invalid-url",
-			want:          nil,
-			expectedError: fmt.Errorf("failed to parse url invalid-url: %w", commonerrors.ErrInvalidArg),
-		},
-		{
-			name:          "URL without Scheme",
-			urlString:     "example.com/path",
-			want:          nil,
-			expectedError: fmt.Errorf("failed to parse url example.com/path: %w", commonerrors.ErrInvalidArg),
-		},
-		{
-			name:          "URL without Host",
-			urlString:     "https://",
-			want:          nil,
-			expectedError: fmt.Errorf("failed to parse url https://: %w", commonerrors.ErrInvalidArg),
-		},
-		{
-			name:          "Empty URL",
-			urlString:     "",
-			want:          nil,
-			expectedError: fmt.Errorf("failed to parse url : %w", commonerrors.ErrInvalidArg),
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
-			got, err := resolver.ParseURL(test.urlString)
+func Test_Resolve_WhenLocalFile_WithRelativePath(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("path/to/manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	result, err := resolver.Resolve(fileRef, "")
 
-			if test.expectedError != nil {
-				require.EqualError(t, err, test.expectedError.Error())
-				return
-			}
-			require.Equalf(t, test.want, got, "ParseURL(%v)", test.urlString)
-		})
-	}
+	require.NoError(t, err)
+	assert.Equal(t, "path/to/manifest.yaml", result)
+}
+
+func Test_Resolve_WhenLocalFile_RelativeToCurrentDir(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("./path/to/manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	result, err := resolver.Resolve(fileRef, "")
+
+	require.NoError(t, err)
+	assert.Equal(t, "path/to/manifest.yaml", result)
+}
+
+func Test_Resolve_WhenLocalFile_IsEmpty(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	_, err := resolver.Resolve(fileRef, "")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "file reference is empty: invalid argument")
+}
+
+func Test_Resolve_WhenLocalFile_WithRelativePath_WithRelativeBasePath(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("path/to/manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+
+	result, err := resolver.Resolve(fileRef, "relative/base")
+	require.NoError(t, err)
+	assert.Equal(t, "relative/base/path/to/manifest.yaml", result)
+
+	result, err = resolver.Resolve(fileRef, "relative/base/")
+	require.NoError(t, err)
+	assert.Equal(t, "relative/base/path/to/manifest.yaml", result)
+}
+
+func Test_Resolve_WhenLocalFile_WithRelativePath_WithAbsoluteBasePath(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("path/to/manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+
+	result, err := resolver.Resolve(fileRef, "/absolute/base")
+	require.NoError(t, err)
+	assert.Equal(t, "/absolute/base/path/to/manifest.yaml", result)
+
+	result, err = resolver.Resolve(fileRef, "/absolute/base/")
+	require.NoError(t, err)
+	assert.Equal(t, "/absolute/base/path/to/manifest.yaml", result)
+}
+
+func Test_Resolve_WhenLocalFile_WithJustFilename_WithSimpleBasePath(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tmpfileSystemStub{})
+	fileRef := urlOrFileRef("manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+
+	result, err := resolver.Resolve(fileRef, "base")
+	require.NoError(t, err)
+	assert.Equal(t, "base/manifest.yaml", result)
+
+	result, err = resolver.Resolve(fileRef, "base/")
+	require.NoError(t, err)
+	assert.Equal(t, "base/manifest.yaml", result)
+}
+
+func Test_Resolve_WhenLocalFile_Returns_Error_WhenFailingToCheckIfExists(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tempfileSystemErrorStub{})
+	fileRef := urlOrFileRef("manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	result, err := resolver.Resolve(fileRef, "")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "error checking if file exists")
+	assert.Empty(t, result)
 }
 
 type tmpfileSystemStub struct{}
 
 func (*tmpfileSystemStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
 	return "file.yaml", nil
+}
+
+func (s *tmpfileSystemStub) FileExists(filePath string) (bool, error) {
+	if strings.Contains(filePath, "path/to/manifest.yaml") || strings.Contains(filePath, "manifest.yaml") {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (s *tmpfileSystemStub) RemoveTempFiles() []error {
@@ -139,6 +184,10 @@ type tempfileSystemErrorStub struct{}
 
 func (*tempfileSystemErrorStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
 	return "", errors.New("error downloading file")
+}
+
+func (s *tempfileSystemErrorStub) FileExists(filePath string) (bool, error) {
+	return false, errors.New("error checking if file exists")
 }
 
 func (s *tempfileSystemErrorStub) RemoveTempFiles() []error {

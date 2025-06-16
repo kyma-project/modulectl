@@ -177,11 +177,13 @@ func (s *Service) GenerateModuleTemplate(
 		Annotations:         annotations,
 		Mandatory:           moduleConfig.Mandatory,
 		AssociatedResources: moduleConfig.AssociatedResources,
-		Resources: contentprovider.Resources{
-			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
-		},
-		Manager:          moduleConfig.Manager,
-		RequiresDowntime: moduleConfig.RequiresDowntime,
+		Manager:             moduleConfig.Manager,
+		RequiresDowntime:    moduleConfig.RequiresDowntime,
+	}
+	if moduleConfig.Manifest.IsURL() {
+		mtData.Resources = contentprovider.Resources{
+			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+		}
 	}
 
 	if len(data) > 0 {

@@ -15,7 +15,11 @@ import (
 )
 
 const (
-	moduleConfigFile = "config.yaml"
+	moduleConfigFile     = "config.yaml"
+	exampleRepository    = "https://example.com/path/to/repository"
+	exampleDocumentation = "https://example.com/path/to/documentation"
+	exampleIcon          = "https://example.com/path/to/some-icon"
+	exampleRawManifest   = "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"
 )
 
 func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T) {
@@ -31,13 +35,13 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "github.com/module-name", result.Name)
 	require.Equal(t, "0.0.1", result.Version)
-	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest)
-	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR)
-	require.Equal(t, "https://example.com/path/to/repository", result.Repository)
-	require.Equal(t, "https://example.com/path/to/documentation", result.Documentation)
+	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest.String())
+	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR.String())
+	require.Equal(t, exampleRepository, result.Repository)
+	require.Equal(t, exampleDocumentation, result.Documentation)
 	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, contentprovider.Icons{
-		"module-icon": "https://example.com/path/to/some-icon",
+		"module-icon": exampleIcon,
 	}, result.Icons)
 	require.False(t, result.Mandatory)
 	require.False(t, result.RequiresDowntime)
@@ -49,7 +53,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "v1alpha3", result.AssociatedResources[0].Version)
 	require.Equal(t, "Gateway", result.AssociatedResources[0].Kind)
 	require.Equal(t, contentprovider.Resources{
-		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		"rawManifest": exampleRawManifest,
 	}, result.Resources)
 	require.Equal(t, "manager-name", result.Manager.Name)
 	require.Equal(t, "manager-namespace", result.Manager.Namespace)
@@ -64,6 +68,9 @@ func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
 }
 
 func Test_ValidateModuleConfig(t *testing.T) {
+	exampleManifest := contentprovider.MustUrlOrLocalFile("https://example.com/path/to/manifest")
+	emptyManifest := contentprovider.MustUrlOrLocalFile("")
+
 	tests := []struct {
 		name          string
 		moduleConfig  *contentprovider.ModuleConfig
@@ -75,16 +82,47 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			expectedError: nil,
 		},
 		{
+			name: "manifest file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      contentprovider.MustUrlOrLocalFile("./test"), // valid local file path
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+			},
+			expectedError: nil,
+		},
+		{
+			name: "default CR file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+				DefaultCR: contentprovider.MustUrlOrLocalFile("/test"), // valid local file path
+			},
+			expectedError: nil,
+		},
+		{
 			name: "invalid module name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "invalid name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
@@ -96,11 +134,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "invalid version",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("opts.ModuleVersion failed to be parsed as semantic version: %w",
@@ -112,11 +150,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "invalid namespace",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
@@ -128,47 +166,14 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      emptyManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate manifest: must not be empty: %w",
-				commonerrors.ErrInvalidOption),
-		},
-		{
-			name: "manifest file path",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:          "github.com/module-name",
-				Version:       "0.0.1",
-				Namespace:     "kcp-system",
-				Manifest:      "./test",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
-				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
-				},
-			},
-			expectedError: fmt.Errorf("failed to validate manifest: './test' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
-		},
-		{
-			name: "default CR file path",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:          "github.com/module-name",
-				Version:       "0.0.1",
-				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
-				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
-				},
-				DefaultCR: "/test",
-			},
-			expectedError: fmt.Errorf("failed to validate default CR: '/test' is not using https scheme: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
@@ -177,11 +182,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
+				Manifest:      exampleManifest,
 				Repository:    "",
-				Documentation: "https://example.com/path/to/documentation",
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate repository: must not be empty: %w",
@@ -193,11 +198,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
+				Manifest:      exampleManifest,
 				Repository:    "some repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate repository: 'some repository' is not using https scheme: %w",
@@ -209,11 +214,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
 				Documentation: "",
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate documentation: must not be empty: %w",
@@ -225,11 +230,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
 				Documentation: "some documentation",
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate documentation: 'some documentation' is not using https scheme: %w",
@@ -241,9 +246,9 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons:         contentprovider.Icons{},
 			},
 			expectedError: fmt.Errorf("failed to validate module icons: must contain at least one icon: %w",
@@ -255,11 +260,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"": "https://example.com/path/to/some-icon",
+					"": exampleIcon,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate module icons: name must not be empty: %w",
@@ -271,9 +276,9 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": "",
 				},
@@ -287,9 +292,9 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": "this is not a URL",
 				},
@@ -303,11 +308,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 				Resources: contentprovider.Resources{
 					"key": "%% not a URL",
@@ -322,14 +327,14 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 				Resources: contentprovider.Resources{
-					"": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+					"": exampleRawManifest,
 				},
 			},
 			expectedError: fmt.Errorf("failed to validate resources: name must not be empty: %w",
@@ -341,11 +346,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Namespace:     "kcp-system",
-				Manifest:      "https://example.com/path/to/manifest",
-				Repository:    "https://example.com/path/to/repository",
-				Documentation: "https://example.com/path/to/documentation",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
-					"module-icon": "https://example.com/path/to/some-icon",
+					"module-icon": exampleIcon,
 				},
 				Resources: contentprovider.Resources{
 					"name": "",
@@ -528,15 +533,15 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Name:          "github.com/module-name",
 	Version:       "0.0.1",
-	Manifest:      "https://example.com/path/to/manifests",
-	Repository:    "https://example.com/path/to/repository",
-	Documentation: "https://example.com/path/to/documentation",
+	Manifest:      contentprovider.MustUrlOrLocalFile("https://example.com/path/to/manifests"),
+	Repository:    exampleRepository,
+	Documentation: exampleDocumentation,
 	Icons: contentprovider.Icons{
-		"module-icon": "https://example.com/path/to/some-icon",
+		"module-icon": exampleIcon,
 	},
 	Mandatory:        false,
 	RequiresDowntime: false,
-	DefaultCR:        "https://example.com/path/to/defaultCR",
+	DefaultCR:        contentprovider.MustUrlOrLocalFile("https://example.com/path/to/defaultCR"),
 	Namespace:        "kcp-system",
 	Security:         "path/to/securityConfig",
 	Labels:           map[string]string{"label1": "value1"},
@@ -558,7 +563,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 		},
 	},
 	Resources: contentprovider.Resources{
-		"rawManifest": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+		"rawManifest": exampleRawManifest,
 	},
 }
 
