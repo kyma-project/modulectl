@@ -16,7 +16,7 @@ import (
 const (
 	moduleImageResourceName = "module-image"
 	rawManifestResourceName = "raw-manifest"
-	defaultCRResourceName   = "default-cr" //nolint:gosec // it's a label
+	defaultCRResourceName   = "default-cr"
 )
 
 var ErrNilArchiveFileSystem = errors.New("archiveFileSystem must not be nil")

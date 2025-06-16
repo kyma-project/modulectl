@@ -79,8 +79,7 @@ type CRDParserService interface {
 }
 
 type ModuleResourceService interface {
-	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath,
-		registryCredSelector string) ([]resources.Resource, error)
+	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath string) ([]resources.Resource, error)
 }
 
 type Service struct {
@@ -224,8 +223,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
-		defaultCRFilePath, opts.RegistryCredSelector)
+	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath, defaultCRFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
