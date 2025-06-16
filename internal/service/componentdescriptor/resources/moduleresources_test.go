@@ -2,10 +2,8 @@
 package resources_test
 
 import (
-	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -15,52 +13,9 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
-func TestCreateCredMatchLabels_ReturnCorrectLabels(t *testing.T) {
-	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
-	label, err := resources.CreateCredMatchLabels(registryCredSelector)
-
-	expectedLabel := map[string]string{
-		"operator.kyma-project.io/oci-registry-cred": "test-operator",
-	}
-	var returnedLabel map[string]string
-
-	require.NoError(t, err)
-
-	err = json.Unmarshal(label, &returnedLabel)
-	require.NoError(t, err)
-	assert.Equal(t, expectedLabel, returnedLabel)
-}
-
-func TestCreateCredMatchLabels_ReturnErrorOnInvalidSelector(t *testing.T) {
-	registryCredSelector := "@test2"
-	_, err := resources.CreateCredMatchLabels(registryCredSelector)
-	assert.ErrorContains(t, err, "failed to parse label selector")
-}
-
-func TestCreateCredMatchLabels_ReturnEmptyLabelWhenEmptySelector(t *testing.T) {
-	registryCredSelector := ""
-	label, err := resources.CreateCredMatchLabels(registryCredSelector)
-
-	require.NoError(t, err)
-	assert.Empty(t, label)
-}
-
 func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
 	_, err := resources.NewService(nil)
 	require.ErrorIs(t, err, resources.ErrNilArchiveFileSystem)
-}
-
-func TestGenerateModuleResources_ReturnErrorWhenInvalidSelector(t *testing.T) {
-	moduleConfig := &contentprovider.ModuleConfig{
-		Version: "1.0.0",
-	}
-	mockFs := &fileSystemStub{}
-	moduleResourceService, err := resources.NewService(mockFs)
-	require.NoError(t, err)
-
-	_, err = moduleResourceService.GenerateModuleResources(moduleConfig, "path", "path",
-		"@test2")
-	require.ErrorContains(t, err, "failed to create credentials label")
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *testing.T) {
@@ -72,10 +27,8 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"
-	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath,
-		registryCredSelector)
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath)
 	require.NoError(t, err)
 	require.Len(t, res, 4)
 
@@ -107,14 +60,6 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 
 	for _, resource := range res {
 		require.Equal(t, "1.0.0", resource.Version)
-		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
-		var returnedLabel map[string]string
-		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
-		require.NoError(t, err)
-		expectedLabel := map[string]string{
-			"operator.kyma-project.io/oci-registry-cred": "test-operator",
-		}
-		require.Equal(t, expectedLabel, returnedLabel)
 	}
 }
 
@@ -126,10 +71,8 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
-	registryCredSelector := "operator.kyma-project.io/oci-registry-cred=test-operator"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, "",
-		registryCredSelector)
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, "")
 	require.NoError(t, err)
 	require.Len(t, res, 3)
 
@@ -154,18 +97,10 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 
 	for _, resource := range res {
 		require.Equal(t, "1.0.0", resource.Version)
-		require.Equal(t, "oci-registry-cred", resource.Labels[0].Name)
-		var returnedLabel map[string]string
-		err = json.Unmarshal(resource.Labels[0].Value, &returnedLabel)
-		expectedLabel := map[string]string{
-			"operator.kyma-project.io/oci-registry-cred": "test-operator",
-		}
-		require.NoError(t, err)
-		require.Equal(t, expectedLabel, returnedLabel)
 	}
 }
 
-func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing.T) {
+func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
 	moduleConfig := &contentprovider.ModuleConfig{
 		Version: "1.0.0",
 	}
@@ -175,8 +110,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithNoSelector(t *testing
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath,
-		"")
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath)
 	require.NoError(t, err)
 	require.Len(t, res, 4)
 
