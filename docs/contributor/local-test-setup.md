@@ -2,11 +2,11 @@
 
 ## Context
 
-This tutorial shows how to set up and run local e2e tests.
+This tutorial shows how to set up and run local e2e tests on macOS.
 
 ## Prerequisites
 
-Install the following tooling in the versions defined in [`versions.yaml`](https://github.com/kyma-project/lifecycle-manager/blob/main/versions.yaml):
+Install the following tooling in the versions defined in [`versions.yaml`](https://github.com/kyma-project/lifecycle-manager/blob/main/versions.yaml) of lifecycle-manager:
 
 - [Go](https://go.dev/)
 - [k3d](https://k3d.io/stable/)
