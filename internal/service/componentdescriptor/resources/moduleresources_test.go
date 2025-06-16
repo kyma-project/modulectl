@@ -1,4 +1,3 @@
-//nolint:gosec // some registry var names are used in tests
 package resources_test
 
 import (

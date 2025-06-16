@@ -290,8 +290,6 @@ func (*CRDParserServiceStub) IsCRDClusterScoped(_, _ string) (bool, error) {
 
 type ModuleResourceServiceStub struct{}
 
-func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig, _ string,
-	_ string, _ string,
-) ([]resources.Resource, error) {
+func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig, _, _ string) ([]resources.Resource, error) {
 	return []resources.Resource{}, nil
 }
