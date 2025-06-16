@@ -86,6 +86,5 @@ Build a simple module and push it to a remote registry
 
 ## See also
 
-* [modulectl](modulectl.md)	 - This is the Kyma Module Controller CLI.
-
+* [modulectl](modulectl.md)	 - Command line tool for creating Kyma modules.
 
