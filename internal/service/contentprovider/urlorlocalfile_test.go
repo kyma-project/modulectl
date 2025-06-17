@@ -16,6 +16,8 @@ func Test_UrlOrLocalFile_FromString_Succeeds_WhenCorrectURL(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.True(t, res.IsURL())
+	assert.False(t, res.IsEmpty())
+	assert.Equal(t, "https", res.URL().Scheme)
 }
 
 func Test_UrlOrLocalFile_FromString_Fails_When_IncorrectURL(t *testing.T) {
@@ -23,4 +25,17 @@ func Test_UrlOrLocalFile_FromString_Fails_When_IncorrectURL(t *testing.T) {
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
 	assert.Contains(t, err.Error(), "Missing host")
+}
+
+func Test_UrlOrLocalFile_MustUrlOrLocalFile_Succeeds_WhenLocalFile(t *testing.T) {
+	localFileRef := contentprovider.MustUrlOrLocalFile("manifest.yaml")
+
+	assert.Equal(t, "manifest.yaml", localFileRef.String())
+}
+
+func Test_UrlOrLocalFile_MustUrlOrLocalFile_Panics_WhenInvalidURL(t *testing.T) {
+	willPanicFn := func() {
+		contentprovider.MustUrlOrLocalFile("\\\\https://example.com/manifest.yaml")
+	}
+	require.Panics(t, willPanicFn, "MustUrlOrLocalFile should panic on invalid URL")
 }
