@@ -72,7 +72,6 @@ This section illustrates how the `scaffold` and `create` command flags from Kyma
 | `-o, --output string`                | `-o, --output string`                         | Output path for ModuleTemplate (default `template.yaml`)      |
 | `-p, --path string`                  | **Removed**                                   | Path to module contents                                       |
 | `-r, --registry string`              | `-r, --registry string`                       | Context URL for OCI registry                                  |
-| `--registry-cred-selector string`    | `--registry-cred-selector string`             | Label selector for existing `dockerconfigjson` Secret         |
 | `--registry-credentials string`      | `--registry-credentials string`               | Basic auth credentials in `<user:password>` format            |
 | `--dry-run`                          | `--dry-run`                                   | Validate and skip pushing module descriptor                   |
 | `-h, --help`                         | `-h, --help`                                  | Show help for create command                                  |
