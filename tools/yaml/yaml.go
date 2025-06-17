@@ -18,7 +18,7 @@ func (*ObjectToYAMLConverter) ConvertToYaml(obj interface{}) string {
 // generateYamlWithComments uses a "comment" tag in the struct definition to generate YAML with comments on corresponding lines.
 // Note 1: Map support is missing!
 // Note 2: There is very basic support for structs that implement the MarshalYAML() method, it should directly return a string. More complex scenarios are not implemented fully yet.
-func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, indentLevel int, commentPrefix string) {
+func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, indentLevel int, commentPrefix string) { //nolint: gocognit //yes, it's too big - refactoring would require introducing a fully-fledged YAML serializer, which is not the goal of this code.
 	objType := obj.Type()
 
 	indentPrefix := strings.Repeat("  ", indentLevel)
@@ -48,7 +48,15 @@ func generateYamlWithComments(yamlBuilder *strings.Builder, obj reflect.Value, i
 				generateYamlWithComments(yamlBuilder, reflect.ValueOf(marshalRes), indentLevel+1, commentPrefix)
 				continue
 			}
-			// Fallback to the recursive processing of the struct
+
+			// Serialize the struct entry in YAML output (no value here, just the name and tags, if any)
+			if commentTag == "" {
+				yamlBuilder.WriteString(fmt.Sprintf("%s%s%s: \n", commentPrefix, indentPrefix, yamlTag))
+			} else {
+				yamlBuilder.WriteString(fmt.Sprintf("%s%s%s: # %s\n", commentPrefix, indentPrefix, yamlTag, commentTag))
+			}
+
+			// Recursively serialize nested struct fields
 			generateYamlWithComments(yamlBuilder, value, indentLevel+1, commentPrefix)
 			continue
 		}
