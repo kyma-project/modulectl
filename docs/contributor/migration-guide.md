@@ -87,8 +87,8 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | `name`                                         | `name`                           | Name of the module                                                                                                                                                          |
 | `channel`                                      | **Removed**                      | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
 | `version`                                      | `version`                        | Version of the module                                                                                                                                                       |
-| `manifest`                                     | `manifest`                       | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
-| `defaultCR`                                    | `defaultCR`                      | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
+| `manifest`                                     | `manifest`                       | Manifest of the module. May be either a URL (e.g. GitHub release asset) or a local file.                                                                                    |
+| `defaultCR`                                    | `defaultCR`                      | Default Module CR of the module. May be either a URL (e.g. GitHub release asset) or a local file.                                                                           |
 | `annotations.operator.kyma-project.io/doc-url` | `documentation`                  | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                           |
 | `moduleRepo`                                   | `repository`                     | Link to the repository of the module                                                                                                                                        |
 | *n/a*                                          | **New** `icons`                  | List of module icons for the UI with `name`+`link`                                                                                                                          |
@@ -98,7 +98,7 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | `labels` / `annotations`                       | `labels` / `annotations`         | Labels and annotations to put into the ModuleTemplate                                                                                                                       |
 | *n/a*                                          | **New** `manager`                | Controller resource of the module (GVK, name, optional namespace)                                                                                                           |
 | *n/a*                                          | **New** `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                                                                                                  |
-| *n/a*                                          | **New** `resources`              | Additional artifacts for the UI (e.g., CRDs). Note that a "rawManifest" resource is automatically generated if the provided manifest is a URL.                                     |
+| *n/a*                                          | **New** `resources`              | Additional artifacts for the UI (e.g., CRDs). Note that a "rawManifest" resource is automatically generated if the provided manifest is a URL.                              |
 | `namespace`                                    | `namespace`                      | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                                    |
 | `moduleRepoTag`                                | `moduleRepoTag`                  | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                                          |
 | `beta`                                         | **Removed**                      | Marks the module as beta. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                                |
@@ -129,7 +129,7 @@ name: kyma-project.io/module/<module-name>
 repository: https://github.com/kyma-project/<module-manager-name>.git
 version: 1.34.0
 manifest: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-manager-name>.yaml
-defaultCR: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-name-default-cr>.yaml
+defaultCR: <module-name-default-cr>.yaml
 security: sec-scanners-config.yaml
 manager:
    name: <module-manager-name>
@@ -158,6 +158,8 @@ icons:
    - name: module-icon
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
+
+Note: The `manifest` and `defaultCR` fields in the modulectl config can be either a public URL (e.g., GitHub release asset) or a local file path. If they are local files (i.e: not URLs), their location is resolved relative to the module config file location.
 
 ## 3. ModuleTemplate Differences 
 
