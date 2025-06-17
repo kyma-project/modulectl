@@ -36,8 +36,6 @@ const (
 	resourceWithoutName        = invalidConfigs + "resource-without-name.yaml"
 	iconsWithoutLink           = invalidConfigs + "icons-without-link.yaml"
 	iconsWithoutName           = invalidConfigs + "icons-without-name.yaml"
-	manifestFileref            = invalidConfigs + "manifest-fileref.yaml"
-	defaultCRFileref           = invalidConfigs + "defaultcr-fileref.yaml"
 	invalidSecurityConfig      = invalidConfigs + "not-existing-security.yaml"
 
 	validConfigs                  = testdataDir + "valid/"
@@ -52,6 +50,8 @@ const (
 	withManagerConfig             = validConfigs + "with-manager.yaml"
 	withNoNamespaceManagerConfig  = validConfigs + "with-manager-no-namespace.yaml"
 	withRequiresDowntimeConfig    = validConfigs + "with-requiresDowntime.yaml"
+	manifestFileref               = validConfigs + "manifest-fileref.yaml"
+	defaultCRFileref              = validConfigs + "defaultcr-fileref.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"
