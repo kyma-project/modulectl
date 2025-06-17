@@ -36,7 +36,7 @@ func (s *ModuleConfigProvider) GetDefaultContent(args types.KeyValueArgs) (strin
 		return "", fmt.Errorf("failed to get module config: %w", err)
 	}
 
-	return s.yamlConverter.ConvertToYaml(moduleConfig), nil
+	return s.yamlConverter.ConvertToYaml(*moduleConfig), nil
 }
 
 func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) (*ModuleConfig, error) {
