@@ -117,7 +117,7 @@ additionalInfo: # optional, additional information about the module
 	assert.YAMLEq(t, expectedYAML, ymlData, "YAML output should match the expected format")
 }
 
-// Helper function to remove leading newlines
+// Helper function to (s)trip (l)eading (n)ew(l)ines
 func slnl(s string) string {
 	return strings.TrimPrefix(s, "\n")
 }
