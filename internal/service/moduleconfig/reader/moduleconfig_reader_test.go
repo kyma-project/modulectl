@@ -97,7 +97,22 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name: "default CR file path",
+			name: "invalid manifest absolute file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate manifest: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "default CR file name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
@@ -108,9 +123,25 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
 				},
-				DefaultCR: contentprovider.MustUrlOrLocalFile("/test"), // valid local file path
+				DefaultCR: contentprovider.MustUrlOrLocalFile("test"), // valid local file path
 			},
 			expectedError: nil,
+		},
+		{
+			name: "invalid default CR absolute file path",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+				DefaultCR: contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
+			},
+			expectedError: fmt.Errorf("failed to validate default CR: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
 		},
 		{
 			name: "invalid module name",

@@ -159,7 +159,7 @@ icons:
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
 
-Note: The `manifest` and `defaultCR` fields in the modulectl config can be either a public URL (e.g., GitHub release asset) or a local file path. If they are local files (i.e: not URLs), their location is resolved relative to the module config file location.
+Note: The `manifest` and `defaultCR` fields in the modulectl config can be either a public URL (e.g., GitHub release asset) or a local file path. If they are local files (i.e: not URLs), their location is resolved relative to the module config file location. For that reason they can't be absolute paths.
 
 ## 3. ModuleTemplate Differences 
 
