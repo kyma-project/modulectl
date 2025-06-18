@@ -195,7 +195,9 @@ func (s *Service) GenerateModuleTemplate(
 		mtData.Data = string(crData)
 	}
 
-	mtData.Resources = copyEntries(mtData.Resources, moduleConfig.Resources)
+	if len(moduleConfig.Resources) > 0 {
+		mtData.Resources = copyEntries(mtData.Resources, moduleConfig.Resources)
+	}
 
 	w := &bytes.Buffer{}
 	if err = moduleTemplate.Execute(w, mtData); err != nil {
