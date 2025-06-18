@@ -38,8 +38,8 @@ The module config file is a YAML file used to configure the following attributes
 - namespace:            a string, optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed
 ```
 
-The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated. If the **manifest** is a local file, modulectl resolves its location relative to the module config file location. If it is a URL, it must be accessible from the machine where the command is executed.
-The **defaultCR** file contains a default custom resource for the module that is installed along with the module. It is additionally schema-validated against the Custom Resource Definition. If the **defaultCR** is a local file, modulectl resolves its location relative to the module config file location. If it is a URL, it must be accessible from the machine where the command is executed.
+The **manifest** file contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated. If the **manifest** is a local file, modulectl resolves its location relative to the module config file location. For that reason it must not be an absolute path. If it is a URL, it must be accessible from the machine where the command is executed.
+The **defaultCR** file contains a default custom resource for the module that is installed along with the module. It is additionally schema-validated against the Custom Resource Definition. If the **defaultCR** is a local file, modulectl resolves its location relative to the module config file location. For that reason it must not be an absolute path. If it is a URL, it must be accessible from the machine where the command is executed.
 The CRD used for the validation must exist in the set of the module's resources.
 The **resources** are copied to the ModuleTemplate **spec.resources**. If it does not have an entry named 'raw-manifest', the ModuleTemplate **spec.resources** populates this entry from the **manifest** field specified in the module config file.
 
