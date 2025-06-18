@@ -83,6 +83,8 @@ type ModuleConfig struct {
 	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the module that may be fetched"`
 	RequiresDowntime    bool                       `yaml:"requiresDowntime" comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"`
 	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
+	Internal            bool                       `yaml:"internal" comment:"optional, default=false, indicates whether the module is internal"`
+	Beta                bool                       `yaml:"beta" comment:"optional, default=false, indicates whether the module is beta"`
 }
 
 type Manager struct {
