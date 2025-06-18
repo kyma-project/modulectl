@@ -48,7 +48,7 @@ func (u *UrlOrLocalFile) FromString(val string) error {
 		return nil
 	}
 
-	// Check if the string is a valid URL. url.Parse is very permissive - so we just check if the scheme is present.
+	// Check if the string is a valid URL. url.Parse is very permissive - so we just check if the scheme and host is present.
 	parsedURL, err := url.Parse(val)
 	if err != nil {
 		return fmt.Errorf("'%s' is not a valid URL: %w", val, commonerrors.ErrInvalidOption)
