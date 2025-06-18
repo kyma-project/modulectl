@@ -7,7 +7,7 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
-// UrlOrLocalFile is a struct that represents eithera URL or a local file path.
+// UrlOrLocalFile is a struct that represents either a URL or a local file path.
 //
 //nolint:recvcheck // This is a value type, not a pointer type.
 type UrlOrLocalFile struct {
