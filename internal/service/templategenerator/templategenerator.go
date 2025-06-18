@@ -280,9 +280,11 @@ func trimShortNameFromRef(ref oci.RefSpec) string {
 
 // copyEntries copies entries from src map to dst map, allocating dst if it is nil.
 func copyEntries(dst map[string]string, src map[string]string) map[string]string {
-	if dst == nil {
-		dst = make(map[string]string)
+	if len(src) > 0 {
+		if dst == nil {
+			dst = make(map[string]string)
+		}
+		maps.Copy(dst, src)
 	}
-	maps.Copy(dst, src)
 	return dst
 }
