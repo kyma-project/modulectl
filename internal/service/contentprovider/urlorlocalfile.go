@@ -3,7 +3,6 @@ package contentprovider
 import (
 	"fmt"
 	"net/url"
-	"strings"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
@@ -49,7 +48,7 @@ func (u *UrlOrLocalFile) FromString(val string) error {
 		return nil
 	}
 
-	// Check if the string is a valid URL. url.Parse is very permissive - so we just check if the scheme and host is present.
+	// Check if the string is a valid URL. url.Parse is very permissive - so we just check if the scheme is present.
 	parsedURL, err := url.Parse(val)
 	if err != nil {
 		return fmt.Errorf("'%s' is not a valid URL: %w", val, commonerrors.ErrInvalidOption)
@@ -57,10 +56,6 @@ func (u *UrlOrLocalFile) FromString(val string) error {
 
 	if len(parsedURL.Scheme) > 0 && len(parsedURL.Host) == 0 {
 		return fmt.Errorf("'%s' is not a valid URL: Missing host: %w", val, commonerrors.ErrInvalidArg)
-	}
-
-	if len(parsedURL.Scheme) == 0 && strings.HasPrefix(val, "/") {
-		return fmt.Errorf("'%s' is not a valid path: Absolute paths are not supported: %w", val, commonerrors.ErrInvalidArg)
 	}
 	u.value = val
 	u.url = parsedURL
