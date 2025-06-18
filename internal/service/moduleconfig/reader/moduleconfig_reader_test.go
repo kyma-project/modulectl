@@ -359,6 +359,39 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			expectedError: fmt.Errorf("failed to validate resources: link must not be empty: %w",
 				commonerrors.ErrInvalidOption),
 		},
+		{
+			name: "invalid module manifest - schema is not https",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      contentprovider.MustUrlOrLocalFile("file://path/to/manifest"),
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate manifest: 'file://path/to/manifest' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption),
+		},
+		{
+			name: "invalid module defaultCR - schema is not https",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Namespace:     "kcp-system",
+				Manifest:      exampleManifest,
+				DefaultCR:     contentprovider.MustUrlOrLocalFile("file://path/to/defaultCR"),
+				Repository:    exampleRepository,
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate default CR: 'file://path/to/defaultCR' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

@@ -163,6 +163,17 @@ func Test_Resolve_WhenLocalFile_Returns_Error_WhenFailingToCheckIfExists(t *test
 	assert.Empty(t, result)
 }
 
+func Test_Resolve_WhenLocalFile_Returns_Error_WhenFileDoesNotExist(t *testing.T) {
+	resolver, _ := fileresolver.NewFileResolver(filePattern, &tempfileSystemErrorStub{})
+	fileRef := urlOrFileRef("notexists-manifest.yaml")
+	require.False(t, fileRef.IsURL(), "Expected UrlOrLocalFile to be a local file path")
+	result, err := resolver.Resolve(fileRef, "")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "file does not exist: notexists-manifest.yaml: invalid argument")
+	assert.Empty(t, result)
+}
+
 type tmpfileSystemStub struct{}
 
 func (*tmpfileSystemStub) DownloadTempFile(_ string, _ string, _ *url.URL) (string, error) {
@@ -187,6 +198,9 @@ func (*tempfileSystemErrorStub) DownloadTempFile(_ string, _ string, _ *url.URL)
 }
 
 func (s *tempfileSystemErrorStub) FileExists(filePath string) (bool, error) {
+	if strings.HasPrefix(filePath, "notexist") {
+		return false, nil
+	}
 	return false, errors.New("error checking if file exists")
 }
 
