@@ -27,6 +27,13 @@ func Test_UrlOrLocalFile_FromString_Fails_When_IncorrectURL(t *testing.T) {
 	assert.Contains(t, err.Error(), "Missing host")
 }
 
+func Test_UrlOrLocalFile_FromString_Fails_When_AbsolutePath(t *testing.T) {
+	err := (&contentprovider.UrlOrLocalFile{}).FromString("/some/path/file.yaml")
+
+	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
+	assert.Contains(t, err.Error(), "not a valid path: Absolute paths are not supported")
+}
+
 func Test_UrlOrLocalFile_MustUrlOrLocalFile_Succeeds_WhenLocalFile(t *testing.T) {
 	localFileRef := contentprovider.MustUrlOrLocalFile("manifest.yaml")
 

@@ -27,8 +27,8 @@ type FileSystem interface {
 }
 
 type FileResolver interface {
-	// Resolve resolves a file reference, which can be either a URL or a local file path.
-	// For local file paths, it will resolve the path relative to the provided basePath (absolute or relative).
+	// Resolve resolves a file reference, which can be either a URL or a relative file path (may be just a file name).
+	// For local file paths, it will resolve the file location relative to the provided basePath (absolute or relative).
 	Resolve(fileRef contentprovider.UrlOrLocalFile, basePath string) (string, error)
 	CleanupTempFiles() []error
 }
