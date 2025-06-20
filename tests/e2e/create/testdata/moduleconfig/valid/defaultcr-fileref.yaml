@@ -1,7 +1,7 @@
 name: kyma-project.io/module/template-operator
 version: 1.0.12
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
-defaultCR: local-defaultcr.yaml
+defaultCR: ../../local-files-for-create-cmd/test-defaultcr.yaml
 repository: https://github.com/kyma-project/template-operator
 documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
 icons:
