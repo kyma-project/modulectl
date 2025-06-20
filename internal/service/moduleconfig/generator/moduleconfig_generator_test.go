@@ -117,13 +117,16 @@ func (*fileExistsStub) FileExists(_ string) (bool, error) {
 }
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
+	manifest := contentprovider.MustUrlOrLocalFile("path/to/manifests")
+	defaultCR := contentprovider.MustUrlOrLocalFile("path/to/defaultCR")
+
 	moduleConfig := contentprovider.ModuleConfig{
 		Name:             "module-name",
 		Version:          "0.0.1",
-		Manifest:         "path/to/manifests",
+		Manifest:         manifest,
 		Mandatory:        false,
 		RequiresDowntime: false,
-		DefaultCR:        "path/to/defaultCR",
+		DefaultCR:        defaultCR,
 		Namespace:        "kcp-system",
 		Security:         "path/to/securityConfig",
 		Labels:           map[string]string{"label1": "value1"},

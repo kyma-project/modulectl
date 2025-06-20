@@ -41,6 +41,18 @@ func (fs *TempFileSystem) DownloadTempFile(dir, pattern string, url *url.URL) (s
 	return tmpFile.Name(), nil
 }
 
+// FileExists checks if a file exists at the given filePath and is a regular file.
+func (fs *TempFileSystem) FileExists(filePath string) (bool, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil // File does not exist
+		}
+		return false, fmt.Errorf("failed to stat file %s: %w", filePath, err)
+	}
+	return info.Mode().IsRegular(), nil
+}
+
 func (fs *TempFileSystem) RemoveTempFiles() []error {
 	var errs []error
 	for _, file := range fs.files {

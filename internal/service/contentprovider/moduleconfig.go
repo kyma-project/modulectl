@@ -31,19 +31,32 @@ func (s *ModuleConfigProvider) GetDefaultContent(args types.KeyValueArgs) (strin
 		return "", err
 	}
 
-	moduleConfig := s.getModuleConfig(args)
+	moduleConfig, err := s.getModuleConfig(args)
+	if err != nil {
+		return "", fmt.Errorf("failed to get module config: %w", err)
+	}
 
-	return s.yamlConverter.ConvertToYaml(moduleConfig), nil
+	return s.yamlConverter.ConvertToYaml(*moduleConfig), nil
 }
 
-func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) ModuleConfig {
-	return ModuleConfig{
+func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) (*ModuleConfig, error) {
+	var manifest UrlOrLocalFile
+	var defaultCR UrlOrLocalFile
+
+	if err := manifest.FromString(args[ArgManifestFile]); err != nil {
+		return nil, fmt.Errorf("invalid manifest file: %w", err)
+	}
+	if err := defaultCR.FromString(args[ArgDefaultCRFile]); err != nil {
+		return nil, fmt.Errorf("invalid default CR file: %w", err)
+	}
+
+	return &ModuleConfig{
 		Name:      args[ArgModuleName],
 		Version:   args[ArgModuleVersion],
-		Manifest:  args[ArgManifestFile],
+		Manifest:  manifest,
 		Security:  args[ArgSecurityConfigFile],
-		DefaultCR: args[ArgDefaultCRFile],
-	}
+		DefaultCR: defaultCR,
+	}, nil
 }
 
 func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
@@ -69,11 +82,11 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 type ModuleConfig struct {
 	Name                string                     `yaml:"name" comment:"required, the name of the module"`
 	Version             string                     `yaml:"version" comment:"required, the version of the module"`
-	Manifest            string                     `yaml:"manifest" comment:"required, reference to the manifest, must be a URL"`
+	Manifest            UrlOrLocalFile             `yaml:"manifest" comment:"required, reference to the manifest, must be a URL or a local file path"`
 	Repository          string                     `yaml:"repository" comment:"required, reference to the repository, must be a URL"`
 	Documentation       string                     `yaml:"documentation" comment:"required, reference to the documentation, must be a URL"`
 	Icons               Icons                      `yaml:"icons,omitempty" comment:"required, icons used for UI"`
-	DefaultCR           string                     `yaml:"defaultCR" comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL"`
+	DefaultCR           UrlOrLocalFile             `yaml:"defaultCR" comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL or a local file path"`
 	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
 	Security            string                     `yaml:"security" comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"`
 	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the generated ModuleTemplate CR"`

@@ -556,7 +556,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal("1.0.2"))
 
-				By("And descriptor.component.resources[1].access should be correct")
+				By("And descriptor.component.resources[2].access should be correct")
 				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
@@ -900,16 +900,29 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with manifest being a fileref", func() {
+		It("When invoked with manifest being a local file reference", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
 				moduleConfigFile: manifestFileref,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: './template-operator.yaml' is not using https scheme: invalid Option"))
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("And the module template should contain the expected content", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				validateTemplateWithFileReference(template, descriptor, "1.0.11")
+
+				By("And template's spec.resources should NOT contain rawManifest")
+				Expect(template.Spec.Resources).To(HaveLen(0))
+			})
 		})
 	})
 
@@ -917,14 +930,29 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		It("When invoked with default CR being a fileref", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
 				moduleConfigFile: defaultCRFileref,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should fail", func() {
-			err := cmd.execute()
-			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate default CR: '/tmp/default-sample-cr.yaml' is not using https scheme: invalid Option"))
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("And the module template should contain the expected content", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				validateTemplateWithFileReference(template, descriptor, "1.0.12")
+
+				By("And template's spec.resources should contain rawManifest")
+				Expect(template.Spec.Resources).To(HaveLen(1))
+				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+				Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+			})
 		})
 	})
 
@@ -1062,4 +1090,51 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 
 	By("And spec.requiresDowntime should be set to false")
 	Expect(template.Spec.RequiresDowntime).To(BeFalse())
+}
+
+func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor, version string) {
+	Expect(descriptor).ToNot(BeNil())
+	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
+
+	Expect(template).ToNot(BeNil())
+	Expect(template.Name).To(Equal("template-operator-" + version))
+	Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+	Expect(template.Spec.Version).To(Equal(version))
+
+	By("And descriptor.component.resources should be correct")
+	Expect(descriptor.Resources).To(HaveLen(3))
+
+	By("And descriptor.component.resources for manifest should be correct")
+	resource := descriptor.Resources[1]
+	Expect(resource.Name).To(Equal("raw-manifest"))
+	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
+	Expect(resource.Type).To(Equal("directoryTree"))
+	Expect(resource.Version).To(Equal(version))
+
+	By("And descriptor.component.resources.access for raw-manifest should be correct")
+	manifestResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+	Expect(err).ToNot(HaveOccurred())
+	manifestAccessSpec, ok := manifestResourceAccessSpec.(*localblob.AccessSpec)
+	Expect(ok).To(BeTrue())
+	Expect(manifestAccessSpec.GetType()).To(Equal(localblob.Type))
+	Expect(manifestAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
+	Expect(manifestAccessSpec.MediaType).To(Equal("application/x-tar"))
+	Expect(manifestAccessSpec.ReferenceName).To(Equal("raw-manifest"))
+
+	By("And descriptor.component.resources for default CR should be correct")
+	resource = descriptor.Resources[2]
+	Expect(resource.Name).To(Equal("default-cr"))
+	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
+	Expect(resource.Type).To(Equal("directoryTree"))
+	Expect(resource.Version).To(Equal(version))
+
+	By("And descriptor.component.resources.access for default-cr should be correct")
+	defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+	Expect(err).ToNot(HaveOccurred())
+	defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
+	Expect(ok).To(BeTrue())
+	Expect(defaultCRAccessSpec.GetType()).To(Equal(localblob.Type))
+	Expect(defaultCRAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
+	Expect(defaultCRAccessSpec.MediaType).To(Equal("application/x-tar"))
+	Expect(defaultCRAccessSpec.ReferenceName).To(Equal("default-cr"))
 }

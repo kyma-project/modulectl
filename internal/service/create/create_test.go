@@ -184,7 +184,7 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 
 type fileResolverStub struct{}
 
-func (*fileResolverStub) Resolve(_ string) (string, error) {
+func (*fileResolverStub) Resolve(_ contentprovider.UrlOrLocalFile, _ string) (string, error) {
 	return "/tmp/some-file.yaml", nil
 }
 
@@ -194,7 +194,7 @@ func (*fileResolverStub) CleanupTempFiles() []error {
 
 type fileResolverErrorStub struct{}
 
-func (*fileResolverErrorStub) Resolve(_ string) (string, error) {
+func (*fileResolverErrorStub) Resolve(_ contentprovider.UrlOrLocalFile, _ string) (string, error) {
 	return "", errors.New("failed to resolve file")
 }
 
@@ -205,8 +205,12 @@ func (*fileResolverErrorStub) CleanupTempFiles() []error {
 type moduleConfigServiceStub struct{}
 
 func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
+	var fileRef contentprovider.UrlOrLocalFile
+	if err := fileRef.FromString("default-cr.yaml"); err != nil {
+		return nil, err
+	}
 	return &contentprovider.ModuleConfig{
-		DefaultCR: "default-cr.yaml",
+		DefaultCR: fileRef,
 	}, nil
 }
 

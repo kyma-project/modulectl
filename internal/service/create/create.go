@@ -3,6 +3,7 @@ package create
 import (
 	"errors"
 	"fmt"
+	"path"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
@@ -26,7 +27,9 @@ type FileSystem interface {
 }
 
 type FileResolver interface {
-	Resolve(file string) (string, error)
+	// Resolve resolves a file reference, which can be either a URL or a local file path (may be just a file name).
+	// For local file paths, it will resolve the path relative to the provided basePath (absolute or relative).
+	Resolve(fileRef contentprovider.UrlOrLocalFile, basePath string) (string, error)
 	CleanupTempFiles() []error
 }
 
@@ -188,14 +191,17 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to parse module config: %w", err)
 	}
 
-	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest)
+	configFilePath := path.Dir(opts.ConfigFile)
+	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest, configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to resolve manifest file: %w", err)
 	}
 
-	defaultCRFilePath := moduleConfig.DefaultCR
-	if moduleConfig.DefaultCR != "" {
-		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR)
+	var defaultCRFilePath string
+	if !moduleConfig.DefaultCR.IsEmpty() {
+		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR, configFilePath)
 		if err != nil {
 			return fmt.Errorf("failed to resolve default CR file: %w", err)
 		}
