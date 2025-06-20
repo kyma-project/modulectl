@@ -42,7 +42,7 @@ func (u UrlOrLocalFile) String() string {
 
 func (u *UrlOrLocalFile) FromString(val string) error {
 	if val == "" {
-		// treat the empty val as it is a local file. For optional file references an empty val is expected.
+		// treat the empty val as it is a local file.
 		u.value = ""
 		u.url = nil
 		return nil
