@@ -25,7 +25,7 @@ func MustUrlOrLocalFile(val string) UrlOrLocalFile {
 }
 
 func (u UrlOrLocalFile) IsURL() bool {
-	return u.url != nil && len(u.url.Scheme) > 0 && len(u.url.Host) > 0
+	return u.url != nil
 }
 
 func (u UrlOrLocalFile) URL() *url.URL {
@@ -54,11 +54,18 @@ func (u *UrlOrLocalFile) FromString(val string) error {
 		return fmt.Errorf("'%s' is not a valid URL: %w", val, commonerrors.ErrInvalidOption)
 	}
 
-	if len(parsedURL.Scheme) > 0 && len(parsedURL.Host) == 0 {
-		return fmt.Errorf("'%s' is not a valid URL: Missing host: %w", val, commonerrors.ErrInvalidArg)
+	if len(parsedURL.Scheme) > 0 {
+		// If the scheme is present, we treat it as a URL.
+		if len(parsedURL.Host) == 0 {
+			return fmt.Errorf("'%s' is not a valid URL: Missing host: %w", val, commonerrors.ErrInvalidArg)
+		}
+		u.url = parsedURL
+		u.value = val // the original string value for the String() method (to avoid any automatic URL encoding done by url.Parse)
+		return nil
 	}
+	// If the scheme is not present, we treat it as a local file path.
+	u.url = nil
 	u.value = val
-	u.url = parsedURL
 	return nil
 }
 
