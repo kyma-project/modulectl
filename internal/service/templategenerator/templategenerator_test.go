@@ -299,6 +299,44 @@ spec:
 				require.NotContains(t, mockFS.writtenTemplate, "kind: Sample")
 			},
 		},
+		{
+			name: "Internal Module",
+			data: nil,
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
+				Namespace:   "default",
+				Version:     "1.0.0",
+				Labels:      map[string]string{"key": "value"},
+				Annotations: map[string]string{"annotation": "value"},
+				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Internal:    true,
+			},
+			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
+				require.NotContains(t, mockFS.writtenTemplate, "kind: Sample")
+				require.Contains(t, mockFS.writtenTemplate, "\"operator.kyma-project.io/internal\": \"true\"")
+			},
+		},
+		{
+			name: "Beta Module",
+			data: nil,
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
+				Namespace:   "default",
+				Version:     "1.0.0",
+				Labels:      map[string]string{"key": "value"},
+				Annotations: map[string]string{"annotation": "value"},
+				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Beta:        true,
+			},
+			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
+				require.NotContains(t, mockFS.writtenTemplate, "kind: Sample")
+				require.Contains(t, mockFS.writtenTemplate, "\"operator.kyma-project.io/beta\": \"true\"")
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -341,4 +379,6 @@ func assertCommonTemplateProperties(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "name: sample-yaml")
 	require.Contains(t, mockFS.writtenTemplate, "spec:")
 	require.Contains(t, mockFS.writtenTemplate, "resourceFilePath: ./module-data.yaml")
+	require.NotContains(t, mockFS.writtenTemplate, "operator.kyma-project.io/beta")
+	require.NotContains(t, mockFS.writtenTemplate, "operator.kyma-project.io/internal")
 }

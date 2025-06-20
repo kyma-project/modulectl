@@ -52,6 +52,8 @@ const (
 	withManagerConfig             = validConfigs + "with-manager.yaml"
 	withNoNamespaceManagerConfig  = validConfigs + "with-manager-no-namespace.yaml"
 	withRequiresDowntimeConfig    = validConfigs + "with-requiresDowntime.yaml"
+	withInternalConfig            = validConfigs + "with-internal.yaml"
+	withBetaConfig                = validConfigs + "with-beta.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"
