@@ -987,7 +987,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And module template should have operator.kyma-project.io/internal label set to true")
 				val, ok := template.Labels[shared.InternalLabel]
-				Expect(val).To(BeTrue())
+				Expect(val).To(Equal("true"))
 				Expect(ok).To(BeTrue())
 			})
 		})
@@ -1020,7 +1020,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And module template should have operator.kyma-project.io/beta label set to true")
 				val, ok := template.Labels[shared.BetaLabel]
-				Expect(val).To(BeTrue())
+				Expect(val).To(Equal("true"))
 				Expect(ok).To(BeTrue())
 			})
 		})
