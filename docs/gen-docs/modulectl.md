@@ -6,7 +6,7 @@ Command line tool for creating Kyma modules.
 
 ## Synopsis
 
-modulectl is a command line tool that supports developers of Kyma modules. It provides a set of commands and flags to create an empty scaffold for a new module and to build a module and push it to a remote repository.
+modulectl is a command-line tool that supports developers of Kyma modules. It provides a set of commands and flags to create an empty scaffold for a new module, build it, and push it to a remote repository.
 
 ## Flags
 
