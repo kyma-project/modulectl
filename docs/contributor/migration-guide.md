@@ -55,27 +55,26 @@ This section illustrates how the `scaffold` and `create` command flags from Kyma
 
 `create`:
 
-| Kyma CLI v2.20.5                                         | modulectl                           | Notes                                                                        |
-| ------------------------------------ | -------------------------------------------- | ------------------------------------------------------------- |
-| `--module-config-file string`        | **Renamed** `-c, --config-file string`       | Path to your `module-config.yaml`                             |
-| `--module-archive-path string`       | **Removed**                                  | Archive path for local module artifacts                       |
-| `--module-archive-persistence`       | **Removed**                                  | Persist module archive on host filesystem                     |
-| `--module-archive-version-overwrite` | **Renamed** `--overwrite`                    | Overwrite existing module OCI archive (**for testing only**)  |
-| `--descriptor-version string`        | **Removed**                                  | Schema version for generated descriptor                       |
-| `--git-remote string`                | **Removed**                                  | Git remote name for module sources                            |
-| `--insecure`                         | `--insecure`                                 | Allow insecure registry connections                           |
-| `--key string`                       | **Removed**                                  | Private key path for signing                                  |
-| `--kubebuilder-project`              | **Removed**                                  | Indicate Kubebuilder project                                  |
-| `-n, --name string`                  | `--name`                                     | Override module name                                          |
-| `--name-mapping string`              | **Removed**                                  | OCM component name mapping                                    |
-| `--namespace string`                 | `--namespace`                                | Namespace for generated ModuleTemplate (default `kcp-system`) |
-| `-o, --output string`                | `-o, --output string`                        | Output path for ModuleTemplate (default `template.yaml`)      |
-| `-p, --path string`                  | **Removed**                                  | Path to module contents                                       |
-| `-r, --registry string`              | `-r, --registry string`                      | Context URL for OCI registry                                  |
-| `--registry-cred-selector string`    | `--registry-cred-selector string`            | Label selector for existing `dockerconfigjson` Secret         |
-| `--registry-credentials string`      | `--registry-credentials string`              | Basic auth credentials in `<user:password>` format            |
-| `--dry-run`                          | `--dry-run`                                  | Validate and skip pushing module descriptor                   |
-| `-h, --help`                         | `-h, --help`                                 | Show help for create command                                  |
+| Kyma CLI v2.20.5                     | modulectl                              | Notes                                                         |
+|--------------------------------------|----------------------------------------|---------------------------------------------------------------|
+| `--module-config-file string`        | **Renamed** `-c, --config-file string` | Path to your `module-config.yaml`                             |
+| `--module-archive-path string`       | **Removed**                            | Archive path for local module artifacts                       |
+| `--module-archive-persistence`       | **Removed**                            | Persist module archive on host filesystem                     |
+| `--module-archive-version-overwrite` | **Renamed** `--overwrite`              | Overwrite existing module OCI archive (**for testing only**)  |
+| `--descriptor-version string`        | **Removed**                            | Schema version for generated descriptor                       |
+| `--git-remote string`                | **Removed**                            | Git remote name for module sources                            |
+| `--insecure`                         | `--insecure`                           | Allow insecure registry connections                           |
+| `--key string`                       | **Removed**                            | Private key path for signing                                  |
+| `--kubebuilder-project`              | **Removed**                            | Indicate Kubebuilder project                                  |
+| `-n, --name string`                  | `--name`                               | Override module name                                          |
+| `--name-mapping string`              | **Removed**                            | OCM component name mapping                                    |
+| `--namespace string`                 | `--namespace`                          | Namespace for generated ModuleTemplate (default `kcp-system`) |
+| `-o, --output string`                | `-o, --output string`                  | Output path for ModuleTemplate (default `template.yaml`)      |
+| `-p, --path string`                  | **Removed**                            | Path to module contents                                       |
+| `-r, --registry string`              | `-r, --registry string`                | Context URL for OCI registry                                  |
+| `--registry-credentials string`      | `--registry-credentials string`        | Basic auth credentials in `<user:password>` format            |
+| `--dry-run`                          | `--dry-run`                            | Validate and skip pushing module descriptor                   |
+| `-h, --help`                         | `-h, --help`                           | Show help for create command                                  |
 
 ## 2. Module Configuration (`module-config.yaml`) Differences
 
@@ -83,27 +82,27 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 
 ### 2.1 Field Mapping Differences
 
-| Kyma CLI                                       | modulectl                        | Description / Changes                                                                     |
-|------------------------------------------------|--------------------------------- | ------------------------------------------------------------------------------------------|
-| `name`                                         | `name`                           | Name of the module                                                                                                                                                          |
-| `channel`                                      | **Removed**                      | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
-| `version`                                      | `version`                        | Version of the module                                                                                                                                                       |
-| `manifest`                                     | `manifest`                       | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
-| `defaultCR`                                    | `defaultCR`                      | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
-| `annotations.operator.kyma-project.io/doc-url` | `documentation`                  | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                               |
-| `moduleRepo`                                   | `repository`                     | Link to the repository of the module                                                                                                                                        |
-| *n/a*                                          | **New** `icons`                  | List of module icons for the UI with `name`+`link`                                                                                                                          |
-| `mandatory`                                    | `mandatory`                      | Marks the module as mandatory (default `false`)                                                                                                                             |
-| *n/a*                                          |  **New** `requiresDowntime`      | Marks the module to require a maintenance window to update from the previous version (default `false`)                                                                      |
-| `security`                                     | `security`                       | Path to security scanner config. Must be a local path and will be resolved against the checked-out version in GitHub                                                         |
-| `labels` / `annotations`                       | `labels` / `annotations`         | Labels and annotations to put into the ModuleTemplate                                                                                                                       |
-| *n/a*                                          | **New** `manager`                | Controller resource of the module (GVK, name, optional namespace)                                                                                                           |
-| *n/a*                                          | **New** `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                                                                                                  |
-| *n/a*                                          | **New** `resources`              | Additional artifacts for the UI (e.g., CRDs)                                                                                                                                |
-| `namespace`                                    | `namespace`                      | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                                    |
-| `moduleRepoTag`                                | `moduleRepoTag`                  | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                                          |
-| `beta`                                         | **Removed**                      | Marks the module as beta. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                                |
-| `internal`                                     | **Removed**                      | Marks the module as internal. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)                                                                                                                    |
+| Kyma CLI                                       | modulectl                     | Description / Changes                                                                                                                                                       |
+|------------------------------------------------|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                                         | `name`                        | Name of the module                                                                                                                                                          |
+| `channel`                                      | **Removed**                   | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
+| `version`                                      | `version`                     | Version of the module                                                                                                                                                       |
+| `manifest`                                     | `manifest`                    | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
+| `defaultCR`                                    | `defaultCR`                   | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
+| `annotations.operator.kyma-project.io/doc-url` | `documentation`               | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                           |
+| `moduleRepo`                                   | `repository`                  | Link to the repository of the module                                                                                                                                        |
+| *n/a*                                          | **New** `icons`               | List of module icons for the UI with `name`+`link`                                                                                                                          |
+| `mandatory`                                    | `mandatory`                   | Marks the module as mandatory (default `false`)                                                                                                                             |
+| *n/a*                                          | **New** `requiresDowntime`    | Marks the module to require a maintenance window to update from the previous version (default `false`)                                                                      |
+| `security`                                     | `security`                    | Path to security scanner config. Must be a local path and will be resolved against the checked-out version in GitHub                                                        |
+| `labels` / `annotations`                       | `labels` / `annotations`      | Labels and annotations to put into the ModuleTemplate                                                                                                                       |
+| *n/a*                                          | **New** `manager`             | Controller resource of the module (GVK, name, optional namespace)                                                                                                           |
+| *n/a*                                          | **New** `associatedResources` | List of GVKs to be cleaned up on uninstall                                                                                                                                  |
+| *n/a*                                          | **New** `resources`           | Additional artifacts for the UI (e.g., CRDs). Note that a "rawManifest" resource is automatically generated if the provided manifest is a URL.                              |
+| `namespace`                                    | `namespace`                   | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                                    |
+| `moduleRepoTag`                                | `moduleRepoTag`               | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                                          |
+| `beta`                                         | **Removed**                   | Marks the module as beta. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)      |
+| `internal`                                     | **Removed**                   | Marks the module as internal. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)  |
 
 
 ### 2.2 Examples

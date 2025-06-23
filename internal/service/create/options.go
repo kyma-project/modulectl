@@ -16,7 +16,6 @@ type Options struct {
 	Insecure                  bool
 	TemplateOutput            string
 	RegistryURL               string
-	RegistryCredSelector      string
 	OverwriteComponentVersion bool
 	DryRun                    bool
 }

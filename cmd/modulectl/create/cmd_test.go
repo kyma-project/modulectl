@@ -51,7 +51,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	insecure := "true"
 	templateOutput := testutils.RandomName(10)
 	registryURL := testutils.RandomName(10)
-	credSelector := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
@@ -60,7 +59,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 		"--output", templateOutput,
 		"--registry", registryURL,
 		"--registry-credentials", credentials,
-		"--registry-cred-selector", credSelector,
 	}
 
 	svc := &moduleServiceStub{}
@@ -77,7 +75,6 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	assert.Equal(t, insecureFlagSet, svc.opts.Insecure)
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
 	assert.Equal(t, registryURL, svc.opts.RegistryURL)
-	assert.Equal(t, credSelector, svc.opts.RegistryCredSelector)
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
@@ -119,7 +116,6 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 	assert.Equal(t, createcmd.InsecureFlagDefault, svc.opts.Insecure)
 	assert.Equal(t, createcmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
 	assert.Equal(t, createcmd.RegistryURLFlagDefault, svc.opts.RegistryURL)
-	assert.Equal(t, createcmd.RegistryCredSelectorFlagDefault, svc.opts.RegistryCredSelector)
 }
 
 // Test Stubs
