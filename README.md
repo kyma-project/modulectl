@@ -13,7 +13,7 @@ modulectl is a command line tool that supports developers of Kyma modules. It pr
 3. Make the binary executable by running `chmod +x modulectl`.
 
 ### Alternative
-You can build the binary from the source code by cloning the repository and run `make build` from the root directory of the repository. The binary is created in the `bin` directory.
+You can build the binary from the source code by cloning the repository and running `make build` from the root directory of the repository. The binary is created in the `bin` directory.
 
 > [!NOTE]
 >
