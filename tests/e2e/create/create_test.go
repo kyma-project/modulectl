@@ -919,7 +919,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.11")
+				validateTemplateWithFileReference(template, descriptor, "1.0.13")
 
 				By("And template's spec.resources should NOT contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(0))
@@ -947,7 +947,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.12")
+				validateTemplateWithFileReference(template, descriptor, "1.0.14")
 
 				By("And template's spec.resources should contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(1))
