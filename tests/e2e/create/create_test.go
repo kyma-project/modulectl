@@ -437,16 +437,17 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag", func() {
-			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-				overwrite:        true,
-				dryRun:           true,
-			}
-		})
+		It("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag",
+			func() {
+				cmd = createCmd{
+					moduleConfigFile: minimalConfig,
+					registry:         ociRegistry,
+					insecure:         true,
+					output:           templateOutputPath,
+					overwrite:        true,
+					dryRun:           true,
+				}
+			})
 		It("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
@@ -986,6 +987,72 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			})
 		})
 	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing internal true and different version", func() {
+			cmd = createCmd{
+				moduleConfigFile: withInternalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("Then module template should contain the expected content", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+				Expect(template.Name).To(Equal("template-operator-1.0.11"))
+				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+				Expect(template.Spec.Version).To(Equal("1.0.11"))
+
+				By("And module template should have operator.kyma-project.io/internal label set to true")
+				val, ok := template.Labels[shared.InternalLabel]
+				Expect(val).To(Equal("true"))
+				Expect(ok).To(BeTrue())
+			})
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		It("When invoked with valid module-config containing beta true and different version", func() {
+			cmd = createCmd{
+				moduleConfigFile: withBetaConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("Then module template should contain the expected content", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+				Expect(template.Name).To(Equal("template-operator-1.0.12"))
+				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+				Expect(template.Spec.Version).To(Equal("1.0.12"))
+
+				By("And module template should have operator.kyma-project.io/beta label set to true")
+				val, ok := template.Labels[shared.BetaLabel]
+				Expect(val).To(Equal("true"))
+				Expect(ok).To(BeTrue())
+			})
+		})
+	})
 })
 
 // Test helper functions
@@ -1090,6 +1157,16 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 
 	By("And spec.requiresDowntime should be set to false")
 	Expect(template.Spec.RequiresDowntime).To(BeFalse())
+
+	By("And module template should not have operator.kyma-project.io/internal label")
+	val, ok = template.Labels[shared.InternalLabel]
+	Expect(val).To(BeEmpty())
+	Expect(ok).To(BeFalse())
+
+	By("And module template should not have operator.kyma-project.io/beta label")
+	val, ok = template.Labels[shared.BetaLabel]
+	Expect(val).To(BeEmpty())
+	Expect(ok).To(BeFalse())
 }
 
 func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor, version string) {

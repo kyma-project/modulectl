@@ -60,6 +60,8 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "apps", result.Manager.Group)
 	require.Equal(t, "v1", result.Manager.Version)
 	require.Equal(t, "Deployment", result.Manager.Kind)
+	require.False(t, result.Internal)
+	require.False(t, result.Beta)
 }
 
 func TestNew_CalledWithNilDependencies_ReturnsErr(t *testing.T) {
@@ -629,6 +631,8 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Resources: contentprovider.Resources{
 		"rawManifest": exampleRawManifest,
 	},
+	Internal: false,
+	Beta:     false,
 }
 
 func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {

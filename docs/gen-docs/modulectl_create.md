@@ -44,6 +44,8 @@ The module config file is a YAML file used to configure the following attributes
       link:             a URL, required, the link to the resource
 - requiresDowntime:     a boolean, optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades
 - namespace:            a string, optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed
+- internal:             a boolean, optional, default=false, indicates whether the module is internal
+- beta:                 a boolean, optional, default=false, indicates whether the module is beta
 ```
 
 The file referenced by the **manifest** attribute contains all the module's resources in a single, multi-document YAML file. These resources will be created in the Kyma cluster when the module is activated. If the attribute is a file name or a relative path, modulectl resolves its location relative to the module config file location. If it is a URL, it must be accessible from the machine where the command is executed.
