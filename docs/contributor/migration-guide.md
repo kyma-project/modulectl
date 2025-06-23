@@ -28,7 +28,7 @@ modulectl scaffold -h       # help for 'scaffold'
 
 This section illustrates how the commands from Kyma CLI are mapped to the modulectl format.
 
-| Operation                           | Kyma CLI                         | modulectl                          |
+| Operation                           | Kyma CLI                         | modulectl                           |
 |-------------------------------------|----------------------------------|-------------------------------------|
 | Scaffold module necessary files     | `kyma alpha create scaffold ...` | `modulectl scaffold ...`            |
 | Create Bundled Module(OCI artifact) | `kyma alpha create module ...`   | `modulectl create -c <config-file>` |
@@ -40,18 +40,18 @@ This section illustrates how the `scaffold` and `create` command flags from Kyma
 
 `scaffold`:
 
-| Kyma CLI v2.20.5                                          | modulectl                           | Notes                                                                        |
-| --------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------- |
-| `-d, --directory string`                                  | `-d, --directory string`                  | Target directory for generated scaffold files (default `./`)                 |
-| `--gen-default-cr string`                                 | `--gen-default-cr string`                 | Name of generated default CR (default `default-cr.yaml`)                     |
-| `--gen-manifest string`                                   | `--gen-manifest string`                   | Name of generated manifest file (default `manifest.yaml`)                    |
-| `--gen-security-config string`                            | `--gen-security-config string`            | Name of generated security config (default `sec-scanners-config.yaml`)       |
-| `--module-channel string`                                 | **Removed**                               | Channel no longer set at scaffold time                                       |
-| `--module-config string`                                  | **Renamed** `-c, --config-file string`    | Name of generated module config file (default `scaffold-module-config.yaml`) |
-| `--module-name string`                                    | `--module-name string`                    | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
-| `--module-version string`                                 | `--module-version string`                 | Module version in generated config (default `0.0.1`)                         |
-| `-o, --overwrite`                                         | `-o, --overwrite`                         | Overwrite existing module config file                                        |
-| `-h, --help`                                              | `-h, --help`                              | Show help for scaffold command                                               |
+| Kyma CLI v2.20.5               | modulectl                              | Notes                                                                        |
+|--------------------------------|----------------------------------------|------------------------------------------------------------------------------|
+| `-d, --directory string`       | `-d, --directory string`               | Target directory for generated scaffold files (default `./`)                 |
+| `--gen-default-cr string`      | `--gen-default-cr string`              | Name of generated default CR (default `default-cr.yaml`)                     |
+| `--gen-manifest string`        | `--gen-manifest string`                | Name of generated manifest file (default `manifest.yaml`)                    |
+| `--gen-security-config string` | `--gen-security-config string`         | Name of generated security config (default `sec-scanners-config.yaml`)       |
+| `--module-channel string`      | **Removed**                            | Channel no longer set at scaffold time                                       |
+| `--module-config string`       | **Renamed** `-c, --config-file string` | Name of generated module config file (default `scaffold-module-config.yaml`) |
+| `--module-name string`         | `--module-name string`                 | Module name in generated config (default `kyma-project.io/module/mymodule`)  |
+| `--module-version string`      | `--module-version string`              | Module version in generated config (default `0.0.1`)                         |
+| `-o, --overwrite`              | `-o, --overwrite`                      | Overwrite existing module config file                                        |
+| `-h, --help`                   | `-h, --help`                           | Show help for scaffold command                                               |
 
 `create`:
 
@@ -87,8 +87,8 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | `name`                                         | `name`                        | Name of the module                                                                                                                                                          |
 | `channel`                                      | **Removed**                   | Version to channel mapping moved to [ModuleReleaseMetadata](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md) |
 | `version`                                      | `version`                     | Version of the module                                                                                                                                                       |
-| `manifest`                                     | `manifest`                    | Manifest of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                               |
-| `defaultCR`                                    | `defaultCR`                   | Default Module CR of the module. Previously local file → now must be a URL (e.g. GitHub release asset)                                                                      |
+| `manifest`                                     | `manifest`                    | Manifest of the module. May be either a URL (e.g. GitHub release asset) or a local file.                                                                                    |
+| `defaultCR`                                    | `defaultCR`                   | Default Module CR of the module. May be either a URL (e.g. GitHub release asset) or a local file.                                                                           |
 | `annotations.operator.kyma-project.io/doc-url` | `documentation`               | Link to the module documentation. Moved from the annotations map to top-level `documentation` key                                                                           |
 | `moduleRepo`                                   | `repository`                  | Link to the repository of the module                                                                                                                                        |
 | *n/a*                                          | **New** `icons`               | List of module icons for the UI with `name`+`link`                                                                                                                          |
@@ -129,7 +129,7 @@ name: kyma-project.io/module/<module-name>
 repository: https://github.com/kyma-project/<module-manager-name>.git
 version: 1.34.0
 manifest: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-manager-name>.yaml
-defaultCR: https://github.com/kyma-project/<module-manager>/releases/download/1.34.0/<module-name-default-cr>.yaml
+defaultCR: <module-name-default-cr>.yaml
 security: sec-scanners-config.yaml
 manager:
    name: <module-manager-name>
@@ -158,6 +158,8 @@ icons:
    - name: module-icon
      link: https://raw.githubusercontent.com/kyma-project/kyma/refs/heads/main/docs/assets/logo_icon.svg
 ```
+
+Note: The `manifest` and `defaultCR` fields in the modulectl config can be either a public URL (e.g., GitHub release asset) or a local file path. If they are local files (i.e: not URLs), their location is resolved relative to the module config file location. For that reason they can't be absolute paths.
 
 ## 3. ModuleTemplate Differences 
 

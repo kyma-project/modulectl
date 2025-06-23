@@ -1,0 +1,16 @@
+# Sample for the tests!
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/component: template-operator.kyma-project.io
+  name: template-operator-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: template-operator.kyma-project.io
+  name: template-operator-controller-manager
+  namespace: template-operator-system
+

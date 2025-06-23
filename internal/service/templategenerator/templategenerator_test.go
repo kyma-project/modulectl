@@ -39,6 +39,9 @@ func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *test
 }
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {
+	commonManifestValue := "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"
+	commonManifest := contentprovider.MustUrlOrLocalFile(commonManifestValue)
+
 	defaultData := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
 kind: Sample
 metadata:
@@ -63,7 +66,7 @@ spec:
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    commonManifest,
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -71,8 +74,7 @@ spec:
 				assertCommonTemplateProperties(t, mockFS)
 				require.Equal(t, "output.yaml", mockFS.path)
 
-				require.Contains(t, mockFS.writtenTemplate,
-					"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+				require.Contains(t, mockFS.writtenTemplate, commonManifest.String())
 				require.Contains(t, mockFS.writtenTemplate, "someResource")
 				require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
 			},
@@ -94,7 +96,7 @@ spec:
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    commonManifest,
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -106,14 +108,13 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:      "example.com/component",
-				Manifest:  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:  commonManifest,
 				Resources: contentprovider.Resources{"rawManifest": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
 				require.Contains(t, mockFS.writtenTemplate, "https://some.other/location/template-operator.yaml")
-				require.NotContains(t, mockFS.writtenTemplate,
-					"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml")
+				require.NotContains(t, mockFS.writtenTemplate, commonManifest.String())
 			},
 		},
 		{
@@ -136,7 +137,7 @@ spec:
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
-				assertCommonTemplateProperties(t, mockFS)
+				assertCommonTemplatePropertiesWithoutRawManifest(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "associatedResources")
 				require.Contains(t, mockFS.writtenTemplate, "networking.istio.io")
 				require.Contains(t, mockFS.writtenTemplate, "v1alpha3")
@@ -165,7 +166,7 @@ spec:
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
-				assertCommonTemplateProperties(t, mockFS)
+				assertCommonTemplatePropertiesWithoutRawManifest(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "manager-name")
 				require.Contains(t, mockFS.writtenTemplate, "manager-ns")
 				require.Contains(t, mockFS.writtenTemplate, "apps")
@@ -195,7 +196,7 @@ spec:
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
-				assertCommonTemplateProperties(t, mockFS)
+				assertCommonTemplatePropertiesWithoutRawManifest(t, mockFS)
 				require.Contains(t, mockFS.writtenTemplate, "manager-name")
 				require.Contains(t, mockFS.writtenTemplate, "apps")
 				require.Contains(t, mockFS.writtenTemplate, "v1")
@@ -213,7 +214,7 @@ spec:
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   false,
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    commonManifest,
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -233,7 +234,7 @@ spec:
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    commonManifest,
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -254,7 +255,7 @@ spec:
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
 				RequiresDowntime: true,
-				Manifest:         "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:         commonManifest,
 				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -273,7 +274,7 @@ spec:
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
 				RequiresDowntime: false,
-				Manifest:         "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:         commonManifest,
 				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -291,7 +292,7 @@ spec:
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    commonManifest,
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -308,7 +309,7 @@ spec:
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    contentprovider.MustUrlOrLocalFile("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"),
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 				Internal:    true,
 			},
@@ -327,7 +328,7 @@ spec:
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
-				Manifest:    "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				Manifest:    contentprovider.MustUrlOrLocalFile("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"),
 				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
 				Beta:        true,
 			},
@@ -366,12 +367,23 @@ func (m *mockFileSystem) WriteFile(path, content string) error {
 
 func assertCommonTemplateProperties(t *testing.T, mockFS *mockFileSystem) {
 	t.Helper()
+	assertCommon(t, mockFS)
+	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
+}
+
+func assertCommonTemplatePropertiesWithoutRawManifest(t *testing.T, mockFS *mockFileSystem) {
+	t.Helper()
+	assertCommon(t, mockFS)
+	require.NotContains(t, mockFS.writtenTemplate, "rawManifest")
+}
+
+func assertCommon(t *testing.T, mockFS *mockFileSystem) {
+	t.Helper()
 	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "default")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
-	require.Contains(t, mockFS.writtenTemplate, "rawManifest")
 	require.NotContains(t, mockFS.writtenTemplate, "---")
 	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
 	require.Contains(t, mockFS.writtenTemplate, "kind: Sample")

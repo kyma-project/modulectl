@@ -3,12 +3,15 @@ package fileresolver
 import (
 	"fmt"
 	"net/url"
+	"path"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 type TempFileSystem interface {
 	DownloadTempFile(dir, pattern string, url *url.URL) (string, error)
+	FileExists(filePath string) (bool, error)
 	RemoveTempFiles() []error
 }
 
@@ -32,25 +35,27 @@ func NewFileResolver(filePattern string, tempFileSystem TempFileSystem) (*FileRe
 	}, nil
 }
 
-func (r *FileResolver) Resolve(fileName string) (string, error) {
-	parsedURL, err := r.ParseURL(fileName)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse URL: %w", err)
+func (r *FileResolver) Resolve(fileRef contentprovider.UrlOrLocalFile, basePath string) (string, error) {
+	if fileRef.IsEmpty() {
+		return "", fmt.Errorf("file reference is empty: %w", commonerrors.ErrInvalidArg)
 	}
-
-	tempFilePath, err := r.tempFileSystem.DownloadTempFile("", r.filePattern, parsedURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to download file: %w", err)
+	if fileRef.IsURL() {
+		tempFilePath, err := r.tempFileSystem.DownloadTempFile("", r.filePattern, fileRef.URL())
+		if err != nil {
+			return "", fmt.Errorf("failed to download file: %w", err)
+		}
+		return tempFilePath, nil
+	} else {
+		finalPath := path.Join(basePath, fileRef.String())
+		exists, err := r.tempFileSystem.FileExists(finalPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to check if file exists %s: %w", finalPath, err)
+		}
+		if !exists {
+			return "", fmt.Errorf("file does not exist: %s: %w", finalPath, commonerrors.ErrInvalidArg)
+		}
+		return finalPath, nil
 	}
-	return tempFilePath, nil
-}
-
-func (r *FileResolver) ParseURL(urlString string) (*url.URL, error) {
-	urlParsed, err := url.Parse(urlString)
-	if err == nil && urlParsed.Scheme != "" && urlParsed.Host != "" {
-		return urlParsed, nil
-	}
-	return nil, fmt.Errorf("failed to parse url %s: %w", urlString, commonerrors.ErrInvalidArg)
 }
 
 func (r *FileResolver) CleanupTempFiles() []error {

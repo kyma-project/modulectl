@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"text/template"
 
@@ -177,11 +178,13 @@ func (s *Service) GenerateModuleTemplate(
 		Annotations:         annotations,
 		Mandatory:           moduleConfig.Mandatory,
 		AssociatedResources: moduleConfig.AssociatedResources,
-		Resources: contentprovider.Resources{
-			"rawManifest": moduleConfig.Manifest, // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
-		},
-		Manager:          moduleConfig.Manager,
-		RequiresDowntime: moduleConfig.RequiresDowntime,
+		Manager:             moduleConfig.Manager,
+		RequiresDowntime:    moduleConfig.RequiresDowntime,
+	}
+	if moduleConfig.Manifest.IsURL() {
+		mtData.Resources = contentprovider.Resources{
+			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+		}
 	}
 
 	if len(data) > 0 {
@@ -192,8 +195,8 @@ func (s *Service) GenerateModuleTemplate(
 		mtData.Data = string(crData)
 	}
 
-	for name, link := range moduleConfig.Resources {
-		mtData.Resources[name] = link
+	if len(moduleConfig.Resources) > 0 {
+		mtData.Resources = copyEntries(mtData.Resources, moduleConfig.Resources)
 	}
 
 	w := &bytes.Buffer{}
@@ -283,4 +286,15 @@ func trimShortNameFromRef(ref oci.RefSpec) string {
 		return ""
 	}
 	return t[len(t)-1]
+}
+
+// copyEntries copies entries from src map to dst map, allocating dst if it is nil.
+func copyEntries(dst map[string]string, src map[string]string) map[string]string {
+	if len(src) > 0 {
+		if dst == nil {
+			dst = make(map[string]string)
+		}
+		maps.Copy(dst, src)
+	}
+	return dst
 }
