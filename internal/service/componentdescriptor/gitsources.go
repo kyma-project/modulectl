@@ -13,7 +13,7 @@ import (
 )
 
 type GitService interface {
-	GetLatestCommit(repoURL string) (string, error)
+	GetLatestCommit(repoPath string) (string, error)
 	GetRemoteGitFileContent(repoURL, commit, filePath string) (string, error)
 }
 
@@ -48,7 +48,7 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 		},
 	}
 
-	latestCommit, err := s.gitService.GetLatestCommit(gitRepoURL)
+	latestCommit, err := s.gitService.GetLatestCommit(".")
 	if err != nil {
 		return fmt.Errorf("failed to get latest commit: %w", err)
 	}
