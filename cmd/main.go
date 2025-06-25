@@ -8,6 +8,9 @@ import (
 )
 
 func main() {
+
+	fmt.Println("[=- Using beta version of modulectl. Please report any issues you encounter. -=]\n")
+
 	cmd, err := modulectl.NewCmd()
 	if err != nil {
 		fmt.Println(fmt.Errorf("failed to build modulectl command: %w", err))

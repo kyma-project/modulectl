@@ -1,1 +1,1 @@
-A CLI from the Kyma Module Controller. Wonderful to use.
+modulectl is a command-line tool that supports developers of Kyma modules. It provides a set of commands and flags to create an empty scaffold for a new module, build it, and push it to a remote repository.
