@@ -104,6 +104,7 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | `beta`                                         | `beta`                        | Marks the module as beta.                                                                                                                                                   |
 | `internal`                                     | `internal`                    | Marks the module as internal.                                                                                                                                               |
 
+
 ### 2.2 Examples
 
 **Module Config using Kyma CLI**
