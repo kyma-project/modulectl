@@ -101,8 +101,8 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | *n/a*                                          | **New** `resources`           | Additional artifacts for the UI (e.g., CRDs). Note that a "rawManifest" resource is automatically generated if the provided manifest is a URL.                              |
 | `namespace`                                    | `namespace`                   | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                                    |
 | `moduleRepoTag`                                | `moduleRepoTag`               | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                                          |
-| `beta`                                         | **Removed**                   | Marks the module as beta. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)      |
-| `internal`                                     | **Removed**                   | Marks the module as internal. Moved to [ModuleReleaseMeta](https://github.com/kyma-project/lifecycle-manager/blob/main/docs/contributor/resources/05-modulereleasemeta.md)  |
+| `beta`                                         | `beta`                        | Marks the module as beta.                                                                                                                                                   |
+| `internal`                                     | `internal`                    | Marks the module as internal.                                                                                                                                               |
 
 
 ### 2.2 Examples
