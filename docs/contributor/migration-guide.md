@@ -100,7 +100,7 @@ This section illustrates how the `module-config.yaml` looks in the Kyma CLI form
 | *n/a*                                          | **New** `associatedResources`    | List of GVKs to be cleaned up on uninstall                                                                                                                       |
 | *n/a*                                          | **New** `resources`              | Additional artifacts for the UI (e.g., CRDs). Note that a "rawManifest" resource is automatically generated if the provided manifest is a URL.                   |
 | `namespace`                                    | `namespace`                      | Target namespace for the generated ModuleTemplate (default `kcp-system`)                                                                                         |
-| `repositoryTag`                                | `repositoryTag`                  | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                               |
+| `moduleRepoTag`                                | `repositoryTag`                  | Indicator for the pipeline to checkout the provided tag (default tag to checkout is the `version`)                                                               |
 | `beta`                                         | `beta`                      | Marks the module as beta.                                                                                                                               |
 | `internal`                                     | `internal`                     | Marks the module as internal.                                                                    |
 
