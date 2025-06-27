@@ -60,12 +60,20 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 }
 
 func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
-	fileInfo, err := s.OsFileSystem.Stat(filePath)
+	tarData, err := generateTarData(s.OsFileSystem, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return blobaccess.ForData(tarMediaType, tarData), nil
+}
+
+func generateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error) {
+	fileInfo, err := filesystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
 	}
 
-	inputFile, err := s.OsFileSystem.Open(filePath)
+	inputFile, err := filesystem.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
 	}
@@ -75,25 +83,24 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 	if err != nil {
 		return nil, fmt.Errorf("unable to create header for file %q: %w", filePath, err)
 	}
-	header.Name = fileInfo.Name()
-	data := bytes.Buffer{}
-	tarWriter := tar.NewWriter(&data)
-	defer tarWriter.Close()
+	outputBuffer := bytes.Buffer{}
+	tarWriter := tar.NewWriter(&outputBuffer)
 
-	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
 		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
 	}
 
-	if _, err := inputFile.Seek(0, io.SeekStart); err != nil {
-		return nil, fmt.Errorf("unable to reset input file: %w", err)
+	if _, err = io.Copy(tarWriter, inputFile); err != nil {
+		return nil, fmt.Errorf("unable to copy file data: %w", err)
 	}
 
-	if _, err := io.Copy(tarWriter, inputFile); err != nil {
-		return nil, fmt.Errorf("unable to copy file: %w", err)
+	// Close the tar writer to flush the data.
+	// I am not using defer for closing, because Close() on tarWriter appends a final padding to the tar archive, which is then not directly visible for the caller.
+	// To make it visible to the caller the function return value must be re-assigned in the deferred code, which requires usage of named returns. The technique works, but the code is harder to understand.
+	if err := tarWriter.Close(); err != nil {
+		return nil, fmt.Errorf("unable to close tar writer: %w", err)
 	}
-
-	return blobaccess.ForData(tarMediaType, data.Bytes()), nil
+	return outputBuffer.Bytes(), nil
 }
 
 func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
