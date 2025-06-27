@@ -1,4 +1,5 @@
-package filesystem_test
+//nolint:testpackage //There is nothing wrong with testing non-exported functions using tests residing in the same package: https://pkg.go.dev/testing
+package filesystem
 
 import (
 	"archive/tar"
@@ -11,8 +12,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/kyma-project/modulectl/tools/filesystem"
 )
 
 func TestGenerateTarData(t *testing.T) {
@@ -31,7 +30,7 @@ func TestGenerateTarData(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		tarData, err := filesystem.GenerateTarData(memFs, "test/path/file.txt")
+		tarData, err := generateTarData(memFs, "test/path/file.txt")
 		require.NoError(t, err)
 
 		// then verify the tar archive is created correctly, including the padding etc.
