@@ -1,4 +1,4 @@
-package filesystem
+package filesystem_test
 
 import (
 	"archive/tar"
@@ -11,6 +11,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/modulectl/tools/filesystem"
 )
 
 func TestGenerateTarData(t *testing.T) {
@@ -19,7 +21,7 @@ func TestGenerateTarData(t *testing.T) {
 		expectedData := []byte("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
 
 		memFs := memoryfs.New()
-		err := memFs.MkdirAll("test/path", 0755)
+		err := memFs.MkdirAll("test/path", 0o755)
 		require.NoError(t, err)
 		inputFile, err := memFs.Create("test/path/file.txt")
 		require.NoError(t, err)
@@ -29,7 +31,8 @@ func TestGenerateTarData(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		tarData, err := GenerateTarData(memFs, "test/path/file.txt")
+		tarData, err := filesystem.GenerateTarData(memFs, "test/path/file.txt")
+		require.NoError(t, err)
 
 		// then verify the tar archive is created correctly, including the padding etc.
 		err = verifyTar(tarData)
@@ -65,8 +68,8 @@ func verifyTar(data []byte) error {
 		if err != nil {
 			return fmt.Errorf("tar parse error: %w", err)
 		}
-		// Optional: read contents to ensure full consumption
-		if _, err := io.Copy(io.Discard, tr); err != nil {
+		// read contents to ensure full consumption
+		if _, err := io.Copy(io.Discard, io.LimitReader(tr, 200)); err != nil {
 			return fmt.Errorf("tar content read error: %w", err)
 		}
 	}

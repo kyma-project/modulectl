@@ -67,7 +67,7 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 	return blobaccess.ForData(tarMediaType, tarData), nil
 }
 
-func GenerateTarData(filesystem vfs.FileSystem, filePath string) (res []byte, err error) {
+func GenerateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error) {
 	fileInfo, err := filesystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
@@ -87,12 +87,6 @@ func GenerateTarData(filesystem vfs.FileSystem, filePath string) (res []byte, er
 	data := bytes.Buffer{}
 	tarWriter := tar.NewWriter(&data)
 
-	closeTarStream := func() {
-		err = tarWriter.Close()
-		res = data.Bytes() // Close() causes re-allocation of the underlying buffer, so we capture the data here
-	}
-	defer closeTarStream()
-
 	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
 		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
@@ -106,7 +100,13 @@ func GenerateTarData(filesystem vfs.FileSystem, filePath string) (res []byte, er
 		return nil, fmt.Errorf("unable to copy file: %w", err)
 	}
 
-	return 
+	// Close the tar writer to flush the data.
+	// I am not using defer for closing, because Close() on tarWriter usually causes re-allocation of the internal array of the output buffer.
+	// As a consequence the function return value must be then re-assigned (as it points to an "old" slice). This re-assignment in defer works, but the code is harder to read.
+	if err := tarWriter.Close(); err != nil {
+		return nil, fmt.Errorf("unable to close tar writer: %w", err)
+	}
+	return data.Bytes(), nil
 }
 
 func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
