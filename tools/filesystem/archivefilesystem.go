@@ -60,14 +60,14 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 }
 
 func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
-	tarData, err := GenerateTarData(s.OsFileSystem, filePath)
+	tarData, err := generateTarData(s.OsFileSystem, filePath)
 	if err != nil {
 		return nil, err
 	}
 	return blobaccess.ForData(tarMediaType, tarData), nil
 }
 
-func GenerateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error) {
+func generateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error) {
 	fileInfo, err := filesystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
@@ -87,7 +87,6 @@ func GenerateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error)
 	data := bytes.Buffer{}
 	tarWriter := tar.NewWriter(&data)
 
-	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
 		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
 	}
