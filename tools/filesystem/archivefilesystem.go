@@ -60,12 +60,20 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 }
 
 func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
-	fileInfo, err := s.OsFileSystem.Stat(filePath)
+	tarData, err := GenerateTarData(s.OsFileSystem, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return blobaccess.ForData(tarMediaType, tarData), nil
+}
+
+func GenerateTarData(filesystem vfs.FileSystem, filePath string) (res []byte, err error) {
+	fileInfo, err := filesystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
 	}
 
-	inputFile, err := s.OsFileSystem.Open(filePath)
+	inputFile, err := filesystem.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
 	}
@@ -78,7 +86,12 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 	header.Name = fileInfo.Name()
 	data := bytes.Buffer{}
 	tarWriter := tar.NewWriter(&data)
-	defer tarWriter.Close()
+
+	closeTarStream := func() {
+		err = tarWriter.Close()
+		res = data.Bytes() // Close() causes re-allocation of the underlying buffer, so we capture the data here
+	}
+	defer closeTarStream()
 
 	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
@@ -89,11 +102,11 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 		return nil, fmt.Errorf("unable to reset input file: %w", err)
 	}
 
-	if _, err := io.Copy(tarWriter, inputFile); err != nil {
+	if _, err = io.Copy(tarWriter, inputFile); err != nil {
 		return nil, fmt.Errorf("unable to copy file: %w", err)
 	}
 
-	return blobaccess.ForData(tarMediaType, data.Bytes()), nil
+	return 
 }
 
 func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
