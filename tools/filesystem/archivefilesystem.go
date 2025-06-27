@@ -83,29 +83,24 @@ func generateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create header for file %q: %w", filePath, err)
 	}
-	header.Name = fileInfo.Name()
-	data := bytes.Buffer{}
-	tarWriter := tar.NewWriter(&data)
+	outputBuffer := bytes.Buffer{}
+	tarWriter := tar.NewWriter(&outputBuffer)
 
 	if err := tarWriter.WriteHeader(header); err != nil {
 		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
 	}
 
-	if _, err := inputFile.Seek(0, io.SeekStart); err != nil {
-		return nil, fmt.Errorf("unable to reset input file: %w", err)
-	}
-
 	if _, err = io.Copy(tarWriter, inputFile); err != nil {
-		return nil, fmt.Errorf("unable to copy file: %w", err)
+		return nil, fmt.Errorf("unable to copy file data: %w", err)
 	}
 
 	// Close the tar writer to flush the data.
-	// I am not using defer for closing, because Close() on tarWriter usually causes re-allocation of the internal array of the output buffer.
-	// As a consequence the function return value must be then re-assigned (as it points to an "old" slice). This re-assignment in defer works, but the code is harder to read.
+	// I am not using defer for closing, because Close() on tarWriter appends a final padding to the tar archive, which is then not directly visible for the caller.
+	// To make it visible to the caller the function return value must be re-assigned in the deferred code, which requires usage of named returns. The technique works, but the code is harder to understand.
 	if err := tarWriter.Close(); err != nil {
 		return nil, fmt.Errorf("unable to close tar writer: %w", err)
 	}
-	return data.Bytes(), nil
+	return outputBuffer.Bytes(), nil
 }
 
 func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {

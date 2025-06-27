@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -48,6 +49,64 @@ func TestGenerateTarData(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, expectedData, data)
 	})
+	t.Run("should return an error on file not found", func(t *testing.T) {
+		// given
+		memFs := memoryfs.New()
+		err := memFs.MkdirAll("test/path", 0o755)
+		require.NoError(t, err)
+
+		// when
+		tarData, err := generateTarData(memFs, "test/path/file.txt")
+		require.Error(t, err, "expected error when file does not exist")
+		require.ErrorContains(t, err, "unable to get file info for", "error should be specific enough to identify it's origin")
+		require.ErrorContains(t, err, "file does not exist", "error should contain additional details from the underlying file system")
+		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
+	})
+	t.Run("should return an error when file can't be open", func(t *testing.T) {
+		// given
+		memFs := memoryfs.New()
+		err := memFs.MkdirAll("test/path", 0o755)
+		require.NoError(t, err)
+		_, err = memFs.Create("test/path/file.txt")
+		require.NoError(t, err)
+
+		errorFs := &mockFileSystem{
+			FileSystem: memFs,
+			openError:  errors.New("hard drive joined the resistance"),
+		}
+
+		// when
+		tarData, err := generateTarData(errorFs, "test/path/file.txt")
+		require.Error(t, err, "expected error when file does not exist")
+		require.ErrorContains(t, err, "unable to open file", "error should be specific enough to identify it's origin")
+		require.ErrorContains(t, err, "hard drive joined the resistance", "error should contain additional details from the underlying file system")
+		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
+	})
+
+	t.Run("should return an error when error occurs during input file reading", func(t *testing.T) {
+		// given
+		memFs := memoryfs.New()
+		err := memFs.MkdirAll("test/path", 0o755)
+		require.NoError(t, err)
+		_, err = memFs.Create("test/path/file.txt")
+		require.NoError(t, err)
+
+		errorFile := &mockFile{
+			readError: errors.New("file decided to take a vacation"),
+		}
+
+		errorFs := &mockFileSystem{
+			FileSystem: memFs,
+			mockFile:   errorFile,
+		}
+
+		// when
+		tarData, err := generateTarData(errorFs, "test/path/file.txt")
+		require.Error(t, err, "expected error when file does not exist")
+		require.ErrorContains(t, err, "unable to copy file data", "error should be specific enough to identify it's origin")
+		require.ErrorContains(t, err, "file decided to take a vacation", "error should contain additional details from the underlying file system")
+		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
+	})
 }
 
 // VerifyTar inspects the tar archive in data[] and performs basic checks for GNU tar compliance:
@@ -84,4 +143,39 @@ func verifyTar(data []byte) error {
 		}
 	}
 	return nil
+}
+
+// A wrapper around vfs.File that allows to simulate read errors when a value of mockFile is used as a source in io.Copy().
+type mockFile struct {
+	vfs.File
+	readError error
+}
+
+// This method will be used by io.Copy if a mockFile value is used as a source.
+func (m *mockFile) WriteTo(w io.Writer) (int64, error) {
+	if m.readError != nil {
+		return 0, m.readError
+	}
+	panic("mockFile is intended to be used only when readError is set")
+}
+
+// If Close() is overridden like this it works even if the mockFile.File is nil
+func (m *mockFile) Close() error {
+	return nil
+}
+
+type mockFileSystem struct {
+	vfs.FileSystem
+	openError error
+	mockFile  *mockFile
+}
+
+func (m *mockFileSystem) Open(name string) (vfs.File, error) {
+	if m.openError != nil {
+		return nil, m.openError
+	}
+	if m.mockFile != nil {
+		return m.mockFile, nil
+	}
+	return m.FileSystem.Open(name)
 }
