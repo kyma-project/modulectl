@@ -19,19 +19,19 @@ const (
 	defaultCRResourceName   = "default-cr"
 )
 
-var ErrNilArchiveFileSystem = errors.New("archiveFileSystem must not be nil")
+var ErrNilTarGenerator = errors.New("tarGenerator must not be nil")
 
 type Service struct {
-	archiveFileSystem accesshandler.ArchiveFileSystem
+	tarGenerator accesshandler.TarGenerator
 }
 
-func NewService(archiveFileSystem accesshandler.ArchiveFileSystem) (*Service, error) {
-	if archiveFileSystem == nil {
-		return nil, ErrNilArchiveFileSystem
+func NewService(tarGen accesshandler.TarGenerator) (*Service, error) {
+	if tarGen == nil {
+		return nil, ErrNilTarGenerator
 	}
 
 	return &Service{
-		archiveFileSystem: archiveFileSystem,
+		tarGenerator: tarGen,
 	}, nil
 }
 
@@ -50,10 +50,10 @@ func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleCo
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate metadata resource: %w", err)
 	}
-	rawManifestResource := GenerateRawManifestResource(s.archiveFileSystem, manifestPath)
+	rawManifestResource := GenerateRawManifestResource(s.tarGenerator, manifestPath)
 	resources := []Resource{moduleImageResource, metadataResource, rawManifestResource}
 	if defaultCRPath != "" {
-		defaultCRResource := GenerateDefaultCRResource(s.archiveFileSystem, defaultCRPath)
+		defaultCRResource := GenerateDefaultCRResource(s.tarGenerator, defaultCRPath)
 		resources = append(resources, defaultCRResource)
 	}
 
@@ -77,7 +77,7 @@ func GenerateModuleImageResource() Resource {
 	}
 }
 
-func GenerateRawManifestResource(archiveFileSystem accesshandler.ArchiveFileSystem, manifestPath string) Resource {
+func GenerateRawManifestResource(tarGen accesshandler.TarGenerator, manifestPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -88,11 +88,11 @@ func GenerateRawManifestResource(archiveFileSystem accesshandler.ArchiveFileSyst
 				Relation: ocmv1.LocalRelation,
 			},
 		},
-		AccessHandler: accesshandler.NewTar(archiveFileSystem, manifestPath),
+		AccessHandler: accesshandler.NewTar(tarGen, manifestPath),
 	}
 }
 
-func GenerateDefaultCRResource(archiveFileSystem accesshandler.ArchiveFileSystem, defaultCRPath string) Resource {
+func GenerateDefaultCRResource(tarGen accesshandler.TarGenerator, defaultCRPath string) Resource {
 	return Resource{
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
@@ -103,6 +103,6 @@ func GenerateDefaultCRResource(archiveFileSystem accesshandler.ArchiveFileSystem
 				Relation: ocmv1.LocalRelation,
 			},
 		},
-		AccessHandler: accesshandler.NewTar(archiveFileSystem, defaultCRPath),
+		AccessHandler: accesshandler.NewTar(tarGen, defaultCRPath),
 	}
 }

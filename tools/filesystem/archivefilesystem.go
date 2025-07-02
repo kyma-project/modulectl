@@ -8,17 +8,13 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils/blobaccess"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
-const tarMediaType = "application/x-tar"
-
 type ArchiveFileSystem struct {
-	MemoryFileSystem vfs.FileSystem
-	OsFileSystem     vfs.FileSystem
+	memoryFileSystem vfs.FileSystem
+	osFileSystem     vfs.FileSystem
 }
 
 func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) (*ArchiveFileSystem, error) {
@@ -31,13 +27,13 @@ func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.File
 	}
 
 	return &ArchiveFileSystem{
-		MemoryFileSystem: memoryFileSystem,
-		OsFileSystem:     osFileSystem,
+		memoryFileSystem: memoryFileSystem,
+		osFileSystem:     osFileSystem,
 	}, nil
 }
 
 func (s *ArchiveFileSystem) CreateArchiveFileSystem(path string) error {
-	if err := s.MemoryFileSystem.MkdirAll(path, os.ModePerm); err != nil {
+	if err := s.memoryFileSystem.MkdirAll(path, os.ModePerm); err != nil {
 		return fmt.Errorf("unable to create directory %q: %w", path, err)
 	}
 
@@ -45,7 +41,7 @@ func (s *ArchiveFileSystem) CreateArchiveFileSystem(path string) error {
 }
 
 func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
-	file, err := s.MemoryFileSystem.Create(fileName)
+	file, err := s.memoryFileSystem.Create(fileName)
 	if err != nil {
 		return fmt.Errorf("unable to create file %q: %w", fileName, err)
 	}
@@ -59,21 +55,19 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 	return nil
 }
 
-func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
-	tarData, err := generateTarData(s.OsFileSystem, filePath)
-	if err != nil {
-		return nil, err
-	}
-	return blobaccess.ForData(tarMediaType, tarData), nil
+func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
+	return s.memoryFileSystem
 }
 
-func generateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error) {
-	fileInfo, err := filesystem.Stat(filePath)
+type TarData = []byte
+
+func (s *ArchiveFileSystem) ArchiveFile(filePath string) (TarData, error) {
+	fileInfo, err := s.osFileSystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
 	}
 
-	inputFile, err := filesystem.Open(filePath)
+	inputFile, err := s.osFileSystem.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
 	}
@@ -101,8 +95,4 @@ func generateTarData(filesystem vfs.FileSystem, filePath string) ([]byte, error)
 		return nil, fmt.Errorf("unable to close tar writer: %w", err)
 	}
 	return outputBuffer.Bytes(), nil
-}
-
-func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
-	return s.MemoryFileSystem
 }

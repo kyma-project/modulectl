@@ -1,5 +1,4 @@
-//nolint:testpackage //There is nothing wrong with testing non-exported functions using tests residing in the same package: https://pkg.go.dev/testing
-package filesystem
+package filesystem_test
 
 import (
 	"archive/tar"
@@ -13,25 +12,30 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/modulectl/tools/filesystem"
 )
 
-func TestGenerateTarData(t *testing.T) {
+func TestGenerateTarArchive(t *testing.T) {
 	t.Run("should generate tar data successfully", func(t *testing.T) {
 		// given
 		expectedData := []byte("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
 
-		memFs := memoryfs.New()
-		err := memFs.MkdirAll("test/path", 0o755)
+		mockFs := memoryfs.New()
+		err := mockFs.MkdirAll("test/path", 0o755)
 		require.NoError(t, err)
-		inputFile, err := memFs.Create("test/path/file.txt")
+		inputFile, err := mockFs.Create("test/path/file.txt")
 		require.NoError(t, err)
 		_, err = inputFile.Write(expectedData)
 		require.NoError(t, err)
 		err = inputFile.Close()
 		require.NoError(t, err)
 
+		afs, err := filesystem.NewArchiveFileSystem(memoryfs.New(), mockFs)
+		require.NoError(t, err)
+
 		// when
-		tarData, err := generateTarData(memFs, "test/path/file.txt")
+		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.NoError(t, err)
 
 		// then verify the tar archive is created correctly, including the padding etc.
@@ -51,12 +55,15 @@ func TestGenerateTarData(t *testing.T) {
 	})
 	t.Run("should return an error on file not found", func(t *testing.T) {
 		// given
-		memFs := memoryfs.New()
-		err := memFs.MkdirAll("test/path", 0o755)
+		mockFs := memoryfs.New()
+		err := mockFs.MkdirAll("test/path", 0o755)
+		require.NoError(t, err)
+
+		afs, err := filesystem.NewArchiveFileSystem(memoryfs.New(), mockFs)
 		require.NoError(t, err)
 
 		// when
-		tarData, err := generateTarData(memFs, "test/path/file.txt")
+		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
 		require.ErrorContains(t, err, "unable to get file info for", "error should be specific enough to identify it's origin")
 		require.ErrorContains(t, err, "file does not exist", "error should contain additional details from the underlying file system")
@@ -75,8 +82,11 @@ func TestGenerateTarData(t *testing.T) {
 			openError:  errors.New("hard drive joined the resistance"),
 		}
 
+		afs, err := filesystem.NewArchiveFileSystem(memoryfs.New(), errorFs)
+		require.NoError(t, err)
+
 		// when
-		tarData, err := generateTarData(errorFs, "test/path/file.txt")
+		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
 		require.ErrorContains(t, err, "unable to open file", "error should be specific enough to identify it's origin")
 		require.ErrorContains(t, err, "hard drive joined the resistance", "error should contain additional details from the underlying file system")
@@ -100,8 +110,11 @@ func TestGenerateTarData(t *testing.T) {
 			mockFile:   errorFile,
 		}
 
+		afs, err := filesystem.NewArchiveFileSystem(memoryfs.New(), errorFs)
+		require.NoError(t, err)
+
 		// when
-		tarData, err := generateTarData(errorFs, "test/path/file.txt")
+		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
 		require.ErrorContains(t, err, "unable to copy file data", "error should be specific enough to identify it's origin")
 		require.ErrorContains(t, err, "file decided to take a vacation", "error should contain additional details from the underlying file system")

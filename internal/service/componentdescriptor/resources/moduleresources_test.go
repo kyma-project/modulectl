@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/cpi"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
@@ -14,7 +13,7 @@ import (
 
 func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
 	_, err := resources.NewService(nil)
-	require.ErrorIs(t, err, resources.ErrNilArchiveFileSystem)
+	require.ErrorIs(t, err, resources.ErrNilTarGenerator)
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *testing.T) {
@@ -48,14 +47,14 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
 	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
-	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
 	require.Equal(t, "default-cr", res[3].Name)
 	require.Equal(t, "directoryTree", res[3].Type)
 	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
 	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
-	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.Path)
+	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.GetPath())
 
 	for _, resource := range res {
 		require.Equal(t, "1.0.0", resource.Version)
@@ -92,7 +91,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
 	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
-	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
 	for _, resource := range res {
 		require.Equal(t, "1.0.0", resource.Version)
@@ -130,14 +129,14 @@ func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
 	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
 	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
-	require.Equal(t, "path/to/manifest", manifestResourceHandler.Path)
+	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
 	require.Equal(t, "default-cr", res[3].Name)
 	require.Equal(t, "directoryTree", res[3].Type)
 	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
 	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
-	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.Path)
+	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.GetPath())
 
 	for _, resource := range res {
 		require.Equal(t, "1.0.0", resource.Version)
@@ -164,7 +163,7 @@ func TestResourceGenerators(t *testing.T) {
 
 		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
 		require.True(t, ok)
-		require.Equal(t, manifestPath, handler.Path)
+		require.Equal(t, manifestPath, handler.GetPath())
 	})
 
 	t.Run("default CR resource", func(t *testing.T) {
@@ -177,12 +176,12 @@ func TestResourceGenerators(t *testing.T) {
 
 		handler, ok := resource.AccessHandler.(*accesshandler.Tar)
 		require.True(t, ok)
-		require.Equal(t, crPath, handler.Path)
+		require.Equal(t, crPath, handler.GetPath())
 	})
 }
 
 type fileSystemStub struct{}
 
-func (m fileSystemStub) GenerateTarFileSystemAccess(_ string) (cpi.BlobAccess, error) {
-	return nil, nil //nolint:nilnil // Stub implementation for testing
+func (m fileSystemStub) ArchiveFile(_ string) ([]byte, error) {
+	return nil, nil
 }
