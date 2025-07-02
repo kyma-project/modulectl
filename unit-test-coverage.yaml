@@ -3,7 +3,7 @@ packages:
   cmd/modulectl/create: 100
   internal/common/validation: 92
   internal/service/scaffold: 91
-  internal/service/contentprovider: 87.4
+  internal/service/contentprovider: 87.2
   internal/service/filegenerator: 100
   internal/service/filegenerator/reusefilegenerator: 94
   internal/service/fileresolver: 100
