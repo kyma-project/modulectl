@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
@@ -16,22 +15,22 @@ func Test_UrlOrLocalFile_FromString_Succeeds_WhenCorrectURL(t *testing.T) {
 	err := res.FromString("https://example.com/config.yaml")
 
 	require.NoError(t, err)
-	assert.True(t, res.IsURL())
-	assert.False(t, res.IsEmpty())
-	assert.Equal(t, "https", res.URL().Scheme)
+	require.True(t, res.IsURL())
+	require.False(t, res.IsEmpty())
+	require.Equal(t, "https", res.URL().Scheme)
 }
 
 func Test_UrlOrLocalFile_FromString_Fails_When_IncorrectURL(t *testing.T) {
 	err := (&contentprovider.UrlOrLocalFile{}).FromString("https:///config.yaml")
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
-	assert.Contains(t, err.Error(), "Missing host")
+	require.Contains(t, err.Error(), "Missing host")
 }
 
 func Test_UrlOrLocalFile_MustUrlOrLocalFile_Succeeds_WhenLocalFile(t *testing.T) {
 	localFileRef := contentprovider.MustUrlOrLocalFile("manifest.yaml")
 
-	assert.Equal(t, "manifest.yaml", localFileRef.String())
+	require.Equal(t, "manifest.yaml", localFileRef.String())
 }
 
 func Test_UrlOrLocalFile_MustUrlOrLocalFile_Panics_WhenInvalidURL(t *testing.T) {
@@ -50,6 +49,6 @@ func Test_UrlOrLocalFile_UnmarshalYAMLReturnsError_WhenMarshallingError(t *testi
 	var urlOrLocalFile contentprovider.UrlOrLocalFile
 	err := urlOrLocalFile.UnmarshalYAML(unmarshal)
 
-	assert.ErrorIs(t, err, testErr)
-	assert.Empty(t, urlOrLocalFile.String())
+	require.ErrorIs(t, err, testErr)
+	require.Empty(t, urlOrLocalFile.String())
 }
