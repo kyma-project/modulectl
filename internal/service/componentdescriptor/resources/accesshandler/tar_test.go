@@ -24,6 +24,8 @@ func TestTar_GenerateBlobAccess(t *testing.T) {
 
 		tar := accesshandler.NewTar(mockFS, "test/path")
 
+		assert.Equal(t, "test/path", tar.GetPath())
+
 		// when
 		blobAccess, err := tar.GenerateBlobAccess()
 
