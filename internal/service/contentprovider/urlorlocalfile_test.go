@@ -1,6 +1,7 @@
 package contentprovider_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,4 +39,17 @@ func Test_UrlOrLocalFile_MustUrlOrLocalFile_Panics_WhenInvalidURL(t *testing.T) 
 		contentprovider.MustUrlOrLocalFile("\\\\https://example.com/manifest.yaml")
 	}
 	require.Panics(t, willPanicFn, "MustUrlOrLocalFile should panic on invalid URL")
+}
+
+func Test_UrlOrLocalFile_UnmarshalYAMLReturnsError_WhenMarshallingError(t *testing.T) {
+	testErr := errors.New("unmarshal error")
+	unmarshal := func(any) error {
+		return testErr
+	}
+
+	var urlOrLocalFile contentprovider.UrlOrLocalFile
+	err := urlOrLocalFile.UnmarshalYAML(unmarshal)
+
+	assert.ErrorIs(t, err, testErr)
+	assert.Empty(t, urlOrLocalFile.String())
 }

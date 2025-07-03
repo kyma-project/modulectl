@@ -58,6 +58,19 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T)
 	assert.Equal(t, convertedContent, result)
 }
 
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenImageNameAndTagInvalid(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"invalid-image-format",
+		},
+	}
+
+	err := config.ValidateBDBAImageTags()
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to get image name and tag")
+}
+
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenLatestTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{

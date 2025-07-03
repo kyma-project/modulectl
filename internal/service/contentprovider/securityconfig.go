@@ -70,13 +70,6 @@ type SecurityScanConfig struct {
 	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
-func (s *SecurityScanConfig) Validate() error {
-	if err := s.ValidateBDBAImageTags(); err != nil {
-		return fmt.Errorf("failed to validate bdba image tags: %w", err)
-	}
-	return nil
-}
-
 func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
 	filteredImages := make([]string, 0, len(s.BDBA))
 	for _, image := range s.BDBA {
