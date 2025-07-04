@@ -3,14 +3,18 @@ package resources
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	apiappsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/cli-runtime/pkg/resource"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
-
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -44,7 +48,8 @@ type Resource struct {
 	AccessHandler AccessHandler
 }
 
-func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath string) ([]Resource, error) {
+func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
+	manifestPath, defaultCRPath string) ([]Resource, error) {
 	moduleImageResource := GenerateModuleImageResource()
 	metadataResource, err := GenerateMetadataResource(moduleConfig)
 	if err != nil {
@@ -61,6 +66,70 @@ func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleCo
 		resources[idx].Version = moduleConfig.Version
 	}
 	return resources, nil
+}
+
+func (s *Service) VerifyModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath string) error {
+	resources, err := parseRawManifest(manifestPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse raw manifest: %w", err)
+	}
+	if err := verifyModuleImageVersion(resources, moduleConfig.Version, moduleConfig.Manager); err != nil {
+		return fmt.Errorf("failed to verify module image version: %w", err)
+	}
+	return nil
+}
+
+func verifyModuleImageVersion(resources []*unstructured.Unstructured, version string,
+	manager *contentprovider.Manager) error {
+	for _, res := range resources {
+		if res.GetKind() == "Deployment" {
+			var deploy apiappsv1.Deployment
+			err := runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &deploy)
+			if err != nil {
+				return fmt.Errorf("failed to convert unstructured to Deployment: %w", err)
+			}
+			for _, c := range deploy.Spec.Template.Spec.Containers {
+				if strings.Contains(c.Image, manager.Name) {
+					imageParts := strings.Split(c.Image, ":")
+					if len(imageParts) != 2 || imageParts[1] != version {
+						return fmt.Errorf("container %s image tag %q does not match version %q", c.Name, c.Image,
+							version)
+					}
+					return nil // found and matched
+				}
+			}
+
+			// Now you can use deploy.Spec.Template.Spec.Containers, etc.
+		}
+	}
+}
+
+func parseRawManifest(path string) ([]*unstructured.Unstructured, error) {
+	var objects []*unstructured.Unstructured
+	builder := resource.NewLocalBuilder().
+		Unstructured().
+		Path(false, path).
+		Flatten().
+		ContinueOnError()
+
+	result := builder.Do()
+
+	if err := result.Err(); err != nil {
+		return nil, fmt.Errorf("parse manifest: %w", err)
+	}
+	items, err := result.Infos()
+	if err != nil {
+		return nil, fmt.Errorf("parse manifest to resource infos: %w", err)
+	}
+	for _, item := range items {
+		unstructuredItem, ok := item.Object.(*unstructured.Unstructured)
+		if !ok {
+			continue
+		}
+
+		objects = append(objects, unstructuredItem)
+	}
+	return objects, nil
 }
 
 func GenerateModuleImageResource() Resource {

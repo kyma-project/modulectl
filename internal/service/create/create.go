@@ -82,7 +82,9 @@ type CRDParserService interface {
 }
 
 type ModuleResourceService interface {
-	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath string) ([]resources.Resource, error)
+	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
+		manifestPath, defaultCRPath string) ([]resources.Resource, error)
+	VerifyModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath string) error
 }
 
 type Service struct {
@@ -229,7 +231,8 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath, defaultCRFilePath)
+	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
+		defaultCRFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
@@ -287,10 +290,12 @@ func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.Component
 		return nil
 	}
 
-	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(), ErrComponentVersionExists)
+	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(),
+		ErrComponentVersionExists)
 }
 
-func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor, error) {
+func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor,
+	error) {
 	if err := s.registryService.PushComponentVersion(archive,
 		opts.Insecure,
 		opts.OverwriteComponentVersion,
