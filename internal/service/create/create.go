@@ -231,6 +231,10 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
+	if err := s.moduleResourceService.VerifyModuleResources(moduleConfig, manifestFilePath); err != nil {
+		return fmt.Errorf("failed to verify module resources: %w", err)
+	}
+
 	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
 		defaultCRFilePath)
 	if err != nil {
