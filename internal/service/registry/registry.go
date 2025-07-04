@@ -2,13 +2,9 @@ package registry
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"regexp"
-	"strings"
 
 	"ocm.software/ocm/api/credentials"
-	"ocm.software/ocm/api/credentials/extensions/repositories/dockerconfig"
 	"ocm.software/ocm/api/oci/extensions/repositories/ocireg"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
@@ -24,19 +20,26 @@ type OCIRepository interface {
 	ExistsComponentVersion(archive ocirepo.ComponentArchiveMeta, repo cpi.Repository) (bool, error)
 }
 
+type CredResolverFunc func(ctx cpi.Context, userPasswordCreds, registryURL string) (credentials.Credentials, error)
+
 type Service struct {
 	ociRepository OCIRepository
 	repo          cpi.Repository
+	credResolver  CredResolverFunc
 }
 
-func NewService(ociRepository OCIRepository, repo cpi.Repository) (*Service, error) {
+func NewService(ociRepository OCIRepository, repo cpi.Repository, credResolverFunc CredResolverFunc) (*Service, error) {
 	if ociRepository == nil {
 		return nil, fmt.Errorf("ociRepository must not be nil: %w", commonerrors.ErrInvalidArg)
+	}
+	if credResolverFunc == nil {
+		return nil, fmt.Errorf("credResolverFunc must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	return &Service{
 		ociRepository: ociRepository,
 		repo:          repo,
+		credResolver:  credResolverFunc,
 	}, nil
 }
 
@@ -100,7 +103,10 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	if insecure {
 		registryURL = "http://" + registryURL
 	}
-	creds := GetCredentials(ctx, insecure, userPasswordCreds, registryURL)
+	creds, err := s.credResolver(ctx, userPasswordCreds, registryURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve credentials: %w", err)
+	}
 
 	ociRepoSpec := &ocireg.RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(repoType),
@@ -122,45 +128,7 @@ func (s *Service) getRepository(insecure bool, userPasswordCreds, registryURL st
 	return repo, nil
 }
 
-func GetCredentials(ctx cpi.Context, insecure bool, userPasswordCreds, registryURL string) credentials.Credentials {
-	if insecure {
-		return credentials.NewCredentials(nil)
-	}
-
-	var creds credentials.Credentials
-	user, pass := ParseUserPass(userPasswordCreds)
-
-	if user != "" && pass != "" {
-		creds = credentials.DirectCredentials{
-			"username": user,
-			"password": pass,
-		}
-
-		return creds
-	}
-
-	if home, err := os.UserHomeDir(); err == nil {
-		path := filepath.Join(home, ".docker", "config.json")
-		if repo, err := dockerconfig.NewRepository(ctx.CredentialsContext(), path, nil, true); err == nil {
-			hostNameInDockerConfig := strings.Split(registryURL, "/")[0]
-			if creds, err = repo.LookupCredentials(hostNameInDockerConfig); err != nil {
-				creds = nil
-			}
-		}
-	}
-
-	return creds
-}
-
 func NoSchemeURL(url string) string {
 	regex := regexp.MustCompile(`^https?://`)
 	return regex.ReplaceAllString(url, "")
-}
-
-func ParseUserPass(credentials string) (string, string) {
-	u, p, found := strings.Cut(credentials, ":")
-	if !found {
-		return "", ""
-	}
-	return u, p
 }
