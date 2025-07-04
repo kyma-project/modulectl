@@ -70,22 +70,12 @@ type SecurityScanConfig struct {
 	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
-func (s *SecurityScanConfig) Validate() error {
-	if err := s.ValidateBDBAImageTags(); err != nil {
-		return fmt.Errorf("failed to validate bdba image tags: %w", err)
-	}
-	return nil
-}
-
 func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
 	filteredImages := make([]string, 0, len(s.BDBA))
 	for _, image := range s.BDBA {
 		_, tag, err := utils.GetImageNameAndTag(image)
 		if err != nil {
 			return fmt.Errorf("failed to get image name and tag: %w", err)
-		}
-		if IsWhitelistedNonSemVerTags(tag) {
-			continue
 		}
 		_, err = semver.NewVersion(tag)
 		if err != nil {
@@ -95,16 +85,6 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
 	}
 	s.BDBA = filteredImages
 	return nil
-}
-
-func IsWhitelistedNonSemVerTags(tag string) bool {
-	whitelistedNonSemVerTags := []string{"latest"}
-	for _, whitelistedTag := range whitelistedNonSemVerTags {
-		if tag == whitelistedTag {
-			return true
-		}
-	}
-	return false
 }
 
 type MendSecConfig struct {

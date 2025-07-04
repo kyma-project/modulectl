@@ -23,7 +23,6 @@ type ArchiveFileSystem interface {
 	CreateArchiveFileSystem(path string) error
 	WriteFile(data []byte, fileName string) error
 	GetArchiveFileSystem() vfs.FileSystem
-	GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error)
 }
 
 type Service struct {

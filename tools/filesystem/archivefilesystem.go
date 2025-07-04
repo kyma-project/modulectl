@@ -8,17 +8,13 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/utils/blobaccess"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 )
 
-const tarMediaType = "application/x-tar"
-
 type ArchiveFileSystem struct {
-	MemoryFileSystem vfs.FileSystem
-	OsFileSystem     vfs.FileSystem
+	memoryFileSystem vfs.FileSystem
+	osFileSystem     vfs.FileSystem
 }
 
 func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.FileSystem) (*ArchiveFileSystem, error) {
@@ -31,13 +27,13 @@ func NewArchiveFileSystem(memoryFileSystem vfs.FileSystem, osFileSystem vfs.File
 	}
 
 	return &ArchiveFileSystem{
-		MemoryFileSystem: memoryFileSystem,
-		OsFileSystem:     osFileSystem,
+		memoryFileSystem: memoryFileSystem,
+		osFileSystem:     osFileSystem,
 	}, nil
 }
 
 func (s *ArchiveFileSystem) CreateArchiveFileSystem(path string) error {
-	if err := s.MemoryFileSystem.MkdirAll(path, os.ModePerm); err != nil {
+	if err := s.memoryFileSystem.MkdirAll(path, os.ModePerm); err != nil {
 		return fmt.Errorf("unable to create directory %q: %w", path, err)
 	}
 
@@ -45,7 +41,7 @@ func (s *ArchiveFileSystem) CreateArchiveFileSystem(path string) error {
 }
 
 func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
-	file, err := s.MemoryFileSystem.Create(fileName)
+	file, err := s.memoryFileSystem.Create(fileName)
 	if err != nil {
 		return fmt.Errorf("unable to create file %q: %w", fileName, err)
 	}
@@ -59,13 +55,19 @@ func (s *ArchiveFileSystem) WriteFile(data []byte, fileName string) error {
 	return nil
 }
 
-func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
-	fileInfo, err := s.OsFileSystem.Stat(filePath)
+func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
+	return s.memoryFileSystem
+}
+
+type TarData = []byte
+
+func (s *ArchiveFileSystem) ArchiveFile(filePath string) (TarData, error) {
+	fileInfo, err := s.osFileSystem.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get file info for %q: %w", filePath, err)
 	}
 
-	inputFile, err := s.OsFileSystem.Open(filePath)
+	inputFile, err := s.osFileSystem.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open file %q: %w", filePath, err)
 	}
@@ -75,27 +77,22 @@ func (s *ArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.Bl
 	if err != nil {
 		return nil, fmt.Errorf("unable to create header for file %q: %w", filePath, err)
 	}
-	header.Name = fileInfo.Name()
-	data := bytes.Buffer{}
-	tarWriter := tar.NewWriter(&data)
-	defer tarWriter.Close()
+	outputBuffer := bytes.Buffer{}
+	tarWriter := tar.NewWriter(&outputBuffer)
 
-	// Write the header to the tar
 	if err := tarWriter.WriteHeader(header); err != nil {
 		return nil, fmt.Errorf("unable to write header for %q: %w", filePath, err)
 	}
 
-	if _, err := inputFile.Seek(0, io.SeekStart); err != nil {
-		return nil, fmt.Errorf("unable to reset input file: %w", err)
+	if _, err = io.Copy(tarWriter, inputFile); err != nil {
+		return nil, fmt.Errorf("unable to copy file data: %w", err)
 	}
 
-	if _, err := io.Copy(tarWriter, inputFile); err != nil {
-		return nil, fmt.Errorf("unable to copy file: %w", err)
+	// Close the tar writer to flush the data.
+	// I am not using defer for closing, because Close() on tarWriter appends a final padding to the tar archive, which is then not directly visible for the caller.
+	// To make it visible to the caller the function return value must be re-assigned in the deferred code, which requires usage of named returns. The technique works, but the code is harder to understand.
+	if err := tarWriter.Close(); err != nil {
+		return nil, fmt.Errorf("unable to close tar writer: %w", err)
 	}
-
-	return blobaccess.ForData(tarMediaType, data.Bytes()), nil
-}
-
-func (s *ArchiveFileSystem) GetArchiveFileSystem() vfs.FileSystem {
-	return s.MemoryFileSystem
+	return outputBuffer.Bytes(), nil
 }
