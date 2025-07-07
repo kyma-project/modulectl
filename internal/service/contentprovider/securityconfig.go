@@ -104,6 +104,7 @@ type MendSecConfig struct {
 	Exclude     []string `json:"exclude" yaml:"exclude" comment:"list, directories within the repository which should not be scanned"`
 }
 
+// TODO: revert this again with https://github.com/kyma-project/modulectl/issues/269
 func isCorrectManagerVersion(image, moduleVersion string) bool {
 	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)
 	matched, err := regexp.MatchString(regex, image)
