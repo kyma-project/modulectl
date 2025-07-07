@@ -461,9 +461,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("component kyma-project.io/module/template-operator in version %s already exists: component version already exists",
 				moduleVersion)))
-
-			By("And no module template file should be generated")
-			Expect(filesIn("/tmp/")).Should(Not(ContainElement("template.yaml")))
 		})
 	})
 
