@@ -38,6 +38,10 @@ func (s *Service) VerifyModuleResources(moduleConfig *contentprovider.ModuleConf
 	if err != nil {
 		return fmt.Errorf("failed to parse raw manifest: %w", err)
 	}
+	if moduleConfig.Manager == nil {
+		return nil
+	}
+
 	if err := verifyModuleImageVersion(resources, moduleConfig.Version, moduleConfig.Manager.Name); err != nil {
 		return fmt.Errorf("failed to verify module image version: %w", err)
 	}

@@ -37,7 +37,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 		name      string
 		resources []*unstructured.Unstructured
 		version   string
-		manager   string
+		manager   *contentprovider.Manager
 		wantErr   bool
 	}{
 		{
@@ -59,7 +59,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 				}),
 			},
 			version: "1.2.3",
-			manager: "test-manager",
+			manager: &contentprovider.Manager{Name: "test-manager"},
 			wantErr: false,
 		},
 		{
@@ -81,7 +81,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 				}),
 			},
 			version: "1.2.3",
-			manager: "test-manager",
+			manager: &contentprovider.Manager{Name: "test-manager"},
 			wantErr: true,
 		},
 		{
@@ -103,7 +103,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 				}),
 			},
 			version: "1.2.3",
-			manager: "test-manager",
+			manager: &contentprovider.Manager{Name: "test-manager"},
 			wantErr: false,
 		},
 		{
@@ -125,15 +125,22 @@ func TestService_VerifyModuleResources(t *testing.T) {
 				}),
 			},
 			version: "1.2.3",
-			manager: "test-manager",
+			manager: &contentprovider.Manager{Name: "test-manager"},
 			wantErr: true,
 		},
 		{
 			name:      "No Deployment or StatefulSet",
 			resources: []*unstructured.Unstructured{},
 			version:   "1.2.3",
-			manager:   "test-manager",
+			manager:   &contentprovider.Manager{Name: "test-manager"},
 			wantErr:   true,
+		},
+		{
+			name:      "No manager in config",
+			resources: []*unstructured.Unstructured{},
+			version:   "1.2.3",
+			manager:   nil,
+			wantErr:   false,
 		},
 	}
 
@@ -143,7 +150,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			svc := verifier.NewService(&parser)
 			cfg := &contentprovider.ModuleConfig{
 				Version: tt.version,
-				Manager: &contentprovider.Manager{Name: tt.manager},
+				Manager: tt.manager,
 			}
 			err := svc.VerifyModuleResources(cfg, "dummy.yaml")
 			if (err != nil) != tt.wantErr {
