@@ -295,10 +295,12 @@ func (*CRDParserServiceStub) IsCRDClusterScoped(_, _ string) (bool, error) {
 type ModuleResourceServiceStub struct{}
 
 func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig,
-	_, _ string) ([]resources.Resource, error) {
+	_, _ string,
+) ([]resources.Resource, error) {
 	return []resources.Resource{}, nil
 }
 
-func (*ModuleResourceServiceStub) VerifyModuleResources(_ *contentprovider.ModuleConfig, _ string) error {
+func (*ModuleResourceServiceStub) VerifyModuleResources(moduleConfig *contentprovider.ModuleConfig,
+	filePath string) error {
 	return nil
 }

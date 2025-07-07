@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/verifier"
 )
 
@@ -22,7 +23,17 @@ func makeUnstructuredFromObj(obj interface{}) *unstructured.Unstructured {
 	return u
 }
 
-func TestImageVersionVerifier_VerifyModuleImageVersion(t *testing.T) {
+type fakeParser struct {
+	resources []*unstructured.Unstructured
+}
+
+// Implement the Parse method to satisfy manifestparser.Service
+func (f *fakeParser) Parse(_ string) ([]*unstructured.Unstructured, error) {
+	return f.resources, nil
+}
+
+func TestService_VerifyModuleResources(t *testing.T) {
+
 	tests := []struct {
 		name      string
 		resources []*unstructured.Unstructured
@@ -129,10 +140,15 @@ func TestImageVersionVerifier_VerifyModuleImageVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			i := verifier.NewImageVersionVerifier(tt.version, tt.manager)
-			err := i.VerifyModuleImageVersion(tt.resources)
+			parser := fakeParser{resources: tt.resources}
+			svc := verifier.NewService(&parser)
+			cfg := &contentprovider.ModuleConfig{
+				Version: tt.version,
+				Manager: &contentprovider.Manager{Name: tt.manager},
+			}
+			err := svc.VerifyModuleResources(cfg, "dummy.yaml")
 			if (err != nil) != tt.wantErr {
-				t.Errorf("VerifyModuleImageVersion() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("verifyModuleImageVersion() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -1,6 +1,7 @@
 package modulectl
 
 import (
+	_ "embed"
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -20,16 +21,16 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 	"github.com/kyma-project/modulectl/internal/service/git"
+	"github.com/kyma-project/modulectl/internal/service/manifestparser"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
 	"github.com/kyma-project/modulectl/internal/service/registry"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
+	"github.com/kyma-project/modulectl/internal/service/verifier"
 	"github.com/kyma-project/modulectl/tools/filesystem"
 	"github.com/kyma-project/modulectl/tools/ocirepo"
 	"github.com/kyma-project/modulectl/tools/yaml"
-
-	_ "embed"
 )
 
 const (
@@ -130,6 +131,9 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create module resource service: %w", err)
 	}
 
+	manifestParserService := manifestparser.NewService()
+	imageVersionVerifierService := verifier.NewService(manifestParserService)
+
 	ociRepo := &ocirepo.OCIRepo{}
 	registryService, err := registry.NewService(ociRepo, nil)
 	if err != nil {
@@ -145,7 +149,8 @@ func buildModuleService() (*create.Service, error) {
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
 		securityConfigService, componentArchiveService, registryService, moduleTemplateService,
-		crdParserService, moduleResourceService, manifestFileResolver, defaultCRFileResolver, fileSystemUtil)
+		crdParserService, moduleResourceService, imageVersionVerifierService, manifestFileResolver,
+		defaultCRFileResolver, fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
 	}
