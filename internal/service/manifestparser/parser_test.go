@@ -1,4 +1,4 @@
-package manifestparser
+package manifestparser_test
 
 import (
 	"os"
@@ -7,6 +7,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
+
+	"github.com/kyma-project/modulectl/internal/service/manifestparser"
 )
 
 func TestService_Parse(t *testing.T) {
@@ -25,7 +27,8 @@ spec:
 `
 	tmpDir := t.TempDir()
 	tmpFile := filepath.Join(tmpDir, "deploy.yaml")
-	if err := os.WriteFile(tmpFile, []byte(manifest), 0644); err != nil {
+	//nolint:gosec // This is a test, so we can ignore the file permissions
+	if err := os.WriteFile(tmpFile, []byte(manifest), 0o644); err != nil {
 		t.Fatalf("failed to write temp manifest: %v", err)
 	}
 
@@ -57,7 +60,7 @@ spec:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &Service{}
+			s := &manifestparser.Service{}
 			got, err := s.Parse(tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)

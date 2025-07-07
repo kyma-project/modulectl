@@ -12,7 +12,7 @@ import (
 )
 
 func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
-	_, err := resources.NewService(nil, nil)
+	_, err := resources.NewService(nil)
 	require.ErrorIs(t, err, resources.ErrNilTarGenerator)
 }
 
@@ -21,7 +21,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 		Version: "1.0.0",
 	}
 	mockFs := &fileSystemStub{}
-	moduleResourceService, err := resources.NewService(mockFs, nil)
+	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"
@@ -66,7 +66,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 		Version: "1.0.0",
 	}
 	mockFs := &fileSystemStub{}
-	moduleResourceService, err := resources.NewService(mockFs, nil)
+	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 
@@ -103,7 +103,7 @@ func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
 		Version: "1.0.0",
 	}
 	mockFs := &fileSystemStub{}
-	moduleResourceService, err := resources.NewService(mockFs, nil)
+	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"

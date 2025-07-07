@@ -1,7 +1,6 @@
 package modulectl
 
 import (
-	_ "embed"
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -31,6 +30,8 @@ import (
 	"github.com/kyma-project/modulectl/tools/filesystem"
 	"github.com/kyma-project/modulectl/tools/ocirepo"
 	"github.com/kyma-project/modulectl/tools/yaml"
+
+	_ "embed"
 )
 
 const (

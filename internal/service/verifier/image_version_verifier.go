@@ -45,7 +45,8 @@ func (s *Service) VerifyModuleResources(moduleConfig *contentprovider.ModuleConf
 }
 
 func verifyModuleImageVersion(resources []*unstructured.Unstructured, version string,
-	managerName string) error {
+	managerName string,
+) error {
 	for _, res := range resources {
 		if res.GetKind() == "Deployment" {
 			var deploy appsv1.Deployment
@@ -73,7 +74,8 @@ func verifyModuleImageVersion(resources []*unstructured.Unstructured, version st
 }
 
 func foundMatchedVersionInContainers(containers []corev1.Container, version string,
-	managerName string) bool {
+	managerName string,
+) bool {
 	for _, c := range containers {
 		if strings.Contains(c.Image, managerName) {
 			imageTag, err := getImageTag(c.Image)
@@ -89,12 +91,14 @@ func foundMatchedVersionInContainers(containers []corev1.Container, version stri
 }
 
 func foundMatchedVersionInDeployment(deploy appsv1.Deployment, version string,
-	managerName string) bool {
+	managerName string,
+) bool {
 	return foundMatchedVersionInContainers(deploy.Spec.Template.Spec.Containers, version, managerName)
 }
 
 func foundMatchedVersionInStatefulSet(statefulSet appsv1.StatefulSet, version string,
-	managerName string) bool {
+	managerName string,
+) bool {
 	return foundMatchedVersionInContainers(statefulSet.Spec.Template.Spec.Containers, version, managerName)
 }
 

@@ -33,7 +33,6 @@ func (f *fakeParser) Parse(_ string) ([]*unstructured.Unstructured, error) {
 }
 
 func TestService_VerifyModuleResources(t *testing.T) {
-
 	tests := []struct {
 		name      string
 		resources []*unstructured.Unstructured
