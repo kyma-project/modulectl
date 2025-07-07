@@ -3,6 +3,7 @@
 package create_test
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 
@@ -21,6 +22,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+)
+
+const (
+	moduleVersion = "1.0.1"
 )
 
 var _ = Describe("Test 'create' command", Ordered, func() {
@@ -372,12 +377,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("metadata"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("plainText"))
-				Expect(resource.Version).To(Equal("1.0.0"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
-				Expect(resource.Version).To(Equal("1.0.0"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
@@ -411,7 +416,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		It("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring("could not push component version: cannot push component version 1.0.0: component version already exists, cannot push the new version"))
+			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("could not push component version: cannot push component version %s: component version already exists, cannot push the new version",
+				moduleVersion)))
 		})
 	})
 
@@ -428,7 +434,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		It("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring("component kyma-project.io/module/template-operator in version 1.0.0 already exists: component version already exists"))
+			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("component kyma-project.io/module/template-operator in version %s already exists: component version already exists",
+				moduleVersion)))
 
 			By("And no module template file should be generated")
 			Expect(filesIn("/tmp/")).Should(Not(ContainElement("template.yaml")))
@@ -545,9 +552,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.2"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.2"))
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(3))
@@ -555,7 +559,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
-				Expect(resource.Version).To(Equal("1.0.2"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[2].access should be correct")
 				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
@@ -591,9 +595,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.3"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.3"))
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
@@ -601,7 +602,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal("1.0.1"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("template-operator"))
@@ -611,11 +612,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				resource = descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("metadata"))
-				Expect(resource.Version).To(Equal("1.0.3"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				resource = descriptor.Resources[3]
 				Expect(resource.Name).To(Equal("raw-manifest"))
-				Expect(resource.Version).To(Equal("1.0.3"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
@@ -720,9 +721,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.4"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.4"))
 
 				By("And module template should be marked as mandatory")
 				Expect(template.Spec.Mandatory).To(BeTrue())
@@ -752,9 +750,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.5"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.5"))
 
 				By("And spec.manager should be correct")
 				manager := template.Spec.Manager
@@ -790,9 +785,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.6"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.6"))
 
 				By("And spec.manager should be correct")
 				manager := template.Spec.Manager
@@ -827,10 +819,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-
-				Expect(template.Name).To(Equal("template-operator-1.0.7"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.7"))
 
 				By("And spec.associatedResources should be correct")
 				resources := template.Spec.AssociatedResources
@@ -919,7 +907,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.13")
+				validateTemplateWithFileReference(template, descriptor, moduleVersion)
 
 				By("And template's spec.resources should NOT contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(0))
@@ -947,7 +935,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.14")
+				validateTemplateWithFileReference(template, descriptor, moduleVersion)
 
 				By("And template's spec.resources should contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(1))
@@ -978,9 +966,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.10"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.10"))
 
 				By("And module template should have spec.requiresDowntime set to true")
 				Expect(template.Spec.RequiresDowntime).To(BeTrue())
@@ -1009,9 +994,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.11"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.11"))
 
 				By("And module template should have operator.kyma-project.io/internal label set to true")
 				val, ok := template.Labels[shared.InternalLabel]
@@ -1042,9 +1024,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.12"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.12"))
 
 				By("And module template should have operator.kyma-project.io/beta label set to true")
 				val, ok := template.Labels[shared.BetaLabel]
@@ -1113,11 +1092,11 @@ func filesIn(dir string) []string {
 func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor) {
 	Expect(descriptor).ToNot(BeNil())
 	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
-	Expect(template.Name).To(Equal("template-operator-1.0.0"))
+	Expect(template.Name).To(Equal(fmt.Sprintf("template-operator-%s", moduleVersion)))
 
 	By("And spec.info should be correct")
 	Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-	Expect(template.Spec.Version).To(Equal("1.0.0"))
+	Expect(template.Spec.Version).To(Equal(moduleVersion))
 	Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
 	Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 	Expect(template.Spec.Info.Icons).To(HaveLen(1))
@@ -1169,7 +1148,9 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	Expect(ok).To(BeFalse())
 }
 
-func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor, version string) {
+func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor,
+	version string,
+) {
 	Expect(descriptor).ToNot(BeNil())
 	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
 

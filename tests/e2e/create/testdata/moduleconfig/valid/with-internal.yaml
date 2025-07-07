@@ -1,5 +1,5 @@
 name: kyma-project.io/module/template-operator
-version: 1.0.11
+version: 1.0.1
 internal: true
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
 repository: https://github.com/kyma-project/template-operator
