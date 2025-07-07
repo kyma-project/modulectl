@@ -2,6 +2,7 @@ package contentprovider
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/Masterminds/semver/v3"
 
@@ -70,7 +71,8 @@ type SecurityScanConfig struct {
 	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
 }
 
-func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
+func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
+	foundCorrectManagerVersion := false
 	filteredImages := make([]string, 0, len(s.BDBA))
 	for _, image := range s.BDBA {
 		_, tag, err := utils.GetImageNameAndTag(image)
@@ -82,7 +84,16 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags() error {
 			return fmt.Errorf("failed to parse image tag [%s] as semantic version: %w", tag, err)
 		}
 		filteredImages = append(filteredImages, image)
+
+		if !foundCorrectManagerVersion {
+			foundCorrectManagerVersion = isCorrectManagerVersion(image, moduleVersion)
+		}
 	}
+
+	if !foundCorrectManagerVersion {
+		return fmt.Errorf("no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:%s', %w", moduleVersion, commonerrors.ErrInvalidArg)
+	}
+
 	s.BDBA = filteredImages
 	return nil
 }
@@ -91,4 +102,13 @@ type MendSecConfig struct {
 	Language    string   `json:"language" yaml:"language" comment:"string, indicating the programming language the scanner has to analyze"`
 	SubProjects string   `json:"subprojects" yaml:"subprojects" comment:"string, specifying any subprojects"`
 	Exclude     []string `json:"exclude" yaml:"exclude" comment:"list, directories within the repository which should not be scanned"`
+}
+
+func isCorrectManagerVersion(image, moduleVersion string) bool {
+	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)
+	matched, err := regexp.MatchString(regex, image)
+	if err != nil {
+		return false
+	}
+	return matched
 }
