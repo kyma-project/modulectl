@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
@@ -36,6 +37,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 			}
 		}
+
+		_, err := exec.Command("k3d", "registry", "delete", "--all").CombinedOutput()
+		Expect(err).ToNot(HaveOccurred())
+		_, err = exec.Command("k3d", "registry", "create", "oci.localhost", "--port",
+			"5001").CombinedOutput()
+		Expect(err).ToNot(HaveOccurred())
 	})
 
 	Context("Given 'modulectl create' command", func() {
@@ -407,7 +414,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with same version that already exists in the registry", func() {
+		It("When invoked with minimal valid module-config", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+			Expect(cmd.execute()).To(Succeed())
+		})
+		It("Then invoked with same version that already exists in the registry", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
@@ -423,6 +439,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with minimal valid module-config", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+			Expect(cmd.execute()).To(Succeed())
+		})
 		It("When invoked with same version that already exists in the registry and dry-run flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
