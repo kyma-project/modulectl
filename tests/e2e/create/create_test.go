@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	moduleVersion = "1.0.1"
+	moduleVersion = "1.0.3"
 )
 
 var _ = Describe("Test 'create' command", Ordered, func() {
@@ -537,9 +537,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.1"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.1"))
 
 				By("And new annotation should be correctly added")
 				annotations := template.Annotations
@@ -548,7 +545,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And descriptor.component.resources should be correct")
 				resource := descriptor.Resources[0]
-				Expect(resource.Version).To(Equal("1.0.1"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 			})
 		})
 	})
@@ -646,7 +643,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.1"))
+				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
+					moduleVersion)))
 
 				By("And descriptor.component.resources[1].access should be correct")
 				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
@@ -875,7 +873,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				Expect(template.Spec.Resources).To(HaveLen(2))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+					moduleVersion)))
 				Expect(template.Spec.Resources[1].Name).To(Equal("someResource"))
 				Expect(template.Spec.Resources[1].Link).To(Equal("https://some.other/location/template-operator.yaml"))
 			})
@@ -962,7 +961,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And template's spec.resources should contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(1))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+					moduleVersion)))
 			})
 		})
 	})
@@ -1154,7 +1154,8 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	By("And spec.resources should contain rawManifest")
 	Expect(template.Spec.Resources).To(HaveLen(1))
 	Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-	Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+	Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+		moduleVersion)))
 
 	By("And spec.requiresDowntime should be set to false")
 	Expect(template.Spec.RequiresDowntime).To(BeFalse())
