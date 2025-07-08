@@ -34,11 +34,11 @@ func (f *fakeParser) Parse(_ string) ([]*unstructured.Unstructured, error) {
 
 func TestService_VerifyModuleResources(t *testing.T) {
 	tests := []struct {
-		name      string
-		resources []*unstructured.Unstructured
-		version   string
-		manager   *contentprovider.Manager
-		wantErr   bool
+		name            string
+		resources       []*unstructured.Unstructured
+		version         string
+		containsManager bool
+		wantErr         bool
 	}{
 		{
 			name: "Deployment with matching image tag",
@@ -51,16 +51,16 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:1.2.3"},
+									{Image: "repo/test-manager:1.2.3", Name: "manager"},
 								},
 							},
 						},
 					},
 				}),
 			},
-			version: "1.2.3",
-			manager: &contentprovider.Manager{Name: "test-manager"},
-			wantErr: false,
+			version:         "1.2.3",
+			containsManager: true,
+			wantErr:         false,
 		},
 		{
 			name: "Deployment with non-matching image tag",
@@ -73,16 +73,16 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:2.0.0"},
+									{Image: "repo/test-manager:2.0.0", Name: "manager"},
 								},
 							},
 						},
 					},
 				}),
 			},
-			version: "1.2.3",
-			manager: &contentprovider.Manager{Name: "test-manager"},
-			wantErr: true,
+			version:         "1.2.3",
+			containsManager: true,
+			wantErr:         true,
 		},
 		{
 			name: "StatefulSet with matching image tag",
@@ -95,16 +95,16 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:1.2.3"},
+									{Image: "repo/test-manager:1.2.3", Name: "manager"},
 								},
 							},
 						},
 					},
 				}),
 			},
-			version: "1.2.3",
-			manager: &contentprovider.Manager{Name: "test-manager"},
-			wantErr: false,
+			version:         "1.2.3",
+			containsManager: true,
+			wantErr:         false,
 		},
 		{
 			name: "No matching container name",
@@ -117,30 +117,30 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/other:1.2.3"},
+									{Image: "repo/other:1.2.3", Name: "other-container"},
 								},
 							},
 						},
 					},
 				}),
 			},
-			version: "1.2.3",
-			manager: &contentprovider.Manager{Name: "test-manager"},
-			wantErr: true,
+			version:         "1.2.3",
+			containsManager: true,
+			wantErr:         true,
 		},
 		{
-			name:      "No Deployment or StatefulSet",
-			resources: []*unstructured.Unstructured{},
-			version:   "1.2.3",
-			manager:   &contentprovider.Manager{Name: "test-manager"},
-			wantErr:   true,
+			name:            "No Deployment or StatefulSet",
+			resources:       []*unstructured.Unstructured{},
+			version:         "1.2.3",
+			containsManager: true,
+			wantErr:         true,
 		},
 		{
-			name:      "No manager in config",
-			resources: []*unstructured.Unstructured{},
-			version:   "1.2.3",
-			manager:   nil,
-			wantErr:   false,
+			name:            "No manager in config",
+			resources:       []*unstructured.Unstructured{},
+			version:         "1.2.3",
+			containsManager: false,
+			wantErr:         false,
 		},
 	}
 
@@ -150,7 +150,11 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			svc := verifier.NewService(&parser)
 			cfg := &contentprovider.ModuleConfig{
 				Version: tt.version,
-				Manager: tt.manager,
+			}
+			if tt.containsManager {
+				cfg.Manager = &contentprovider.Manager{
+					Name: "test-manager",
+				}
 			}
 			err := svc.VerifyModuleResources(cfg, "dummy.yaml")
 			if (err != nil) != tt.wantErr {
