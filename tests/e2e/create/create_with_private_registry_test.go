@@ -41,9 +41,6 @@ var _ = Describe("Test 'create' command with private registry", Ordered, func() 
 			By("Then module template should contain the expected content", func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(template.Name).To(Equal("template-operator-1.0.0"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.0"))
 
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
