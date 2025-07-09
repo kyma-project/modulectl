@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
@@ -16,7 +15,7 @@ func Test_SecurityConfig_NewSecurityConfig_ReturnsError_WhenYamlConverterIsNil(t
 	_, err := contentprovider.NewSecurityConfig(nil)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
-	assert.Contains(t, err.Error(), "yamlConverter")
+	require.Contains(t, err.Error(), "yamlConverter")
 }
 
 func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenArgsIsNil(t *testing.T) {
@@ -25,8 +24,8 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenArgsIsNil(t *testing
 	result, err := svc.GetDefaultContent(nil)
 
 	require.ErrorIs(t, err, contentprovider.ErrInvalidArg)
-	assert.Empty(t, result)
-	assert.Contains(t, err.Error(), "args")
+	require.Empty(t, result)
+	require.Contains(t, err.Error(), "args")
 }
 
 func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenModuleNameArgMissing(t *testing.T) {
@@ -35,8 +34,8 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenModuleNameArgMissing
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{})
 
 	require.ErrorIs(t, err, contentprovider.ErrMissingArg)
-	assert.Empty(t, result)
-	assert.Contains(t, err.Error(), "moduleName")
+	require.Empty(t, result)
+	require.Contains(t, err.Error(), "moduleName")
 }
 
 func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenModuleNameArgIsEmpty(t *testing.T) {
@@ -45,8 +44,8 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsError_WhenModuleNameArgIsEmpty
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: ""})
 
 	require.ErrorIs(t, err, contentprovider.ErrInvalidArg)
-	assert.Empty(t, result)
-	assert.Contains(t, err.Error(), "moduleName")
+	require.Empty(t, result)
+	require.Contains(t, err.Error(), "moduleName")
 }
 
 func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T) {
@@ -55,81 +54,74 @@ func Test_SecurityConfig_GetDefaultContent_ReturnsConvertedContent(t *testing.T)
 	result, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: "module-name"})
 
 	require.NoError(t, err)
-	assert.Equal(t, convertedContent, result)
+	require.Equal(t, convertedContent, result)
 }
 
-func Test_SecurityScanConfig_ValidateBDBAImageTags_IgnoresLatestTag(t *testing.T) {
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenImageNameAndTagInvalid(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:latest",
+			"invalid-image-format",
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
-	require.NoError(t, err)
-	assert.Len(t, config.BDBA, 1)
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.BDBA[0])
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to get image name and tag")
+}
+
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenLatestTag(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:latest",
+		},
+	}
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.ErrorIs(t, err, semver.ErrInvalidSemVer)
 }
 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenNonSemVerTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:non-semver",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:non-semver",
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.ErrorIs(t, err, semver.ErrInvalidSemVer)
+}
+
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenInvalidManagerImageProvided(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.4",
+			"europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6",
+		},
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:1.2.3'")
 }
 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsNoError_WhenValidTagsProvided(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6",
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.NoError(t, err)
-	assert.Len(t, config.BDBA, 2)
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.BDBA[0])
-	assert.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6", config.BDBA[1])
-}
-
-func TestIsWhitelistedNonSemVerTags(t *testing.T) {
-	tests := []struct {
-		name string
-		tag  string
-		want bool
-	}{
-		{
-			name: "tag is latest",
-			tag:  "latest",
-			want: true,
-		},
-		{
-			name: "tag is other text",
-			tag:  "rc-1",
-			want: false,
-		},
-		{
-			name: "tag is empty",
-			tag:  "",
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, contentprovider.IsWhitelistedNonSemVerTags(tt.tag),
-				"IsWhitelistedNonSemVerTags(%v)", tt.tag)
-		})
-	}
+	require.Len(t, config.BDBA, 2)
+	require.Equal(t, "europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3", config.BDBA[0])
+	require.Equal(t, "europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6", config.BDBA[1])
 }
 
 // Test Stubs

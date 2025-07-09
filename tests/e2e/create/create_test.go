@@ -417,6 +417,22 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	Context("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		It("When invoked with valid module-config but sec-scanners-config not containing correct module manager image", func() {
+			cmd = createCmd{
+				moduleConfigFile: invalidSecurityConfigImage,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		It("Then the command should fail with invalid sec scanners config image", func() {
+			err := cmd.execute()
+			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to validate security config images: no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:0.0.1'"))
+		})
+	})
+
+	Context("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		It("When invoked with same version that already exists in the registry and dry-run flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
@@ -601,7 +617,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal("1.0.1"))
+				Expect(resource.Version).To(Equal("1.0.3"))
 
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("template-operator"))
@@ -623,7 +639,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.1"))
+				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3"))
 
 				By("And descriptor.component.resources[1].access should be correct")
 				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
@@ -670,7 +686,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And security scan labels should be correct")
 				secScanLabels := flatten(descriptor.Sources[0].Labels)
 				Expect(secScanLabels).To(HaveKeyWithValue("git.kyma-project.io/ref", "HEAD"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", "1.0.1"))
+				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", "1.0.3"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/language", "golang-mod"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/dev-branch", "main"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/subprojects", "false"))

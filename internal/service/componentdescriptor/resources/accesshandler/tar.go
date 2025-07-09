@@ -5,35 +5,41 @@ import (
 	"fmt"
 
 	"ocm.software/ocm/api/ocm/cpi"
+	"ocm.software/ocm/api/utils/blobaccess"
 )
+
+const tarMediaType = "application/x-tar"
 
 var ErrNilFileSystem = errors.New("file system must not be nil")
 
-type ArchiveFileSystem interface {
-	GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error)
+type TarGenerator interface {
+	ArchiveFile(filePath string) ([]byte, error)
 }
 
 type Tar struct {
-	FileSystem ArchiveFileSystem
-	Path       string
+	generator TarGenerator
+	path      string
 }
 
-func NewTar(fs ArchiveFileSystem, path string) *Tar {
+func NewTar(fs TarGenerator, path string) *Tar {
 	return &Tar{
-		FileSystem: fs,
-		Path:       path,
+		generator: fs,
+		path:      path,
 	}
+}
+
+func (tarAccessHandler *Tar) GetPath() string {
+	return tarAccessHandler.path
 }
 
 func (tarAccessHandler *Tar) GenerateBlobAccess() (cpi.BlobAccess, error) {
-	if tarAccessHandler.FileSystem == nil {
+	if tarAccessHandler.generator == nil {
 		return nil, ErrNilFileSystem
 	}
 
-	access, err := tarAccessHandler.FileSystem.GenerateTarFileSystemAccess(tarAccessHandler.Path)
+	tarData, err := tarAccessHandler.generator.ArchiveFile(tarAccessHandler.path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate tar file access, %w", err)
 	}
-
-	return access, nil
+	return blobaccess.ForData(tarMediaType, tarData), nil
 }

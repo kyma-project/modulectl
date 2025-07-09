@@ -2,11 +2,11 @@ package accesshandler_test
 
 import (
 	"errors"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"ocm.software/ocm/api/ocm/cpi"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 )
@@ -14,25 +14,29 @@ import (
 func TestTar_GenerateBlobAccess(t *testing.T) {
 	t.Run("should generate blob access successfully", func(t *testing.T) {
 		// given
-		expectedBlobAccess := &mockBlobAccess{}
+		expectedBytes := []byte{1, 2, 3, 4, 5, 0, 0, 0, 0}
 		mockFS := &mockArchiveFileSystem{
-			generateTarFunc: func(path string) (cpi.BlobAccess, error) {
+			generateTarFunc: func(path string) ([]byte, error) {
 				assert.Equal(t, "test/path", path)
-				return expectedBlobAccess, nil
+				return expectedBytes, nil
 			},
 		}
 
-		tar := &accesshandler.Tar{
-			FileSystem: mockFS,
-			Path:       "test/path",
-		}
+		tar := accesshandler.NewTar(mockFS, "test/path")
+
+		assert.Equal(t, "test/path", tar.GetPath())
 
 		// when
 		blobAccess, err := tar.GenerateBlobAccess()
 
 		// then
 		require.NoError(t, err)
-		require.Equal(t, expectedBlobAccess, blobAccess)
+		rdr, err := blobAccess.Reader()
+		require.NoError(t, err)
+		defer rdr.Close()
+		actualData, err := io.ReadAll(rdr)
+		require.NoError(t, err)
+		require.Equal(t, expectedBytes, actualData)
 	})
 
 	t.Run("should return error when file system is nil", func(t *testing.T) {
@@ -52,7 +56,7 @@ func TestTar_GenerateBlobAccess(t *testing.T) {
 		// given
 		expectedError := errors.New("generation failed")
 		mockFS := &mockArchiveFileSystem{
-			generateTarFunc: func(path string) (cpi.BlobAccess, error) {
+			generateTarFunc: func(path string) ([]byte, error) {
 				return nil, expectedError
 			},
 		}
@@ -71,13 +75,9 @@ func TestTar_GenerateBlobAccess(t *testing.T) {
 }
 
 type mockArchiveFileSystem struct {
-	generateTarFunc func(path string) (cpi.BlobAccess, error)
+	generateTarFunc func(path string) ([]byte, error)
 }
 
-func (m *mockArchiveFileSystem) GenerateTarFileSystemAccess(filePath string) (cpi.BlobAccess, error) {
+func (m *mockArchiveFileSystem) ArchiveFile(filePath string) ([]byte, error) {
 	return m.generateTarFunc(filePath)
-}
-
-type mockBlobAccess struct {
-	cpi.BlobAccess
 }
