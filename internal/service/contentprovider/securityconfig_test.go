@@ -64,7 +64,7 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenImageNameAnd
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to get image name and tag")
@@ -73,10 +73,10 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenImageNameAnd
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenLatestTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:latest",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:latest",
 		},
 	}
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.ErrorIs(t, err, semver.ErrInvalidSemVer)
 }
@@ -84,30 +84,44 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenLatestTag(t 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenNonSemVerTag(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:non-semver",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:non-semver",
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.ErrorIs(t, err, semver.ErrInvalidSemVer)
+}
+
+func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenInvalidManagerImageProvided(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.4",
+			"europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6",
+		},
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:1.2.3'")
 }
 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsNoError_WhenValidTagsProvided(t *testing.T) {
 	config := contentprovider.SecurityScanConfig{
 		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3",
-			"europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6",
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6",
 		},
 	}
 
-	err := config.ValidateBDBAImageTags()
+	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.NoError(t, err)
 	require.Len(t, config.BDBA, 2)
-	require.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/test-image:1.2.3", config.BDBA[0])
-	require.Equal(t, "europe-docker.pkg.dev/kyma-project/dev/another-image:4.5.6", config.BDBA[1])
+	require.Equal(t, "europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3", config.BDBA[0])
+	require.Equal(t, "europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6", config.BDBA[1])
 }
 
 // Test Stubs

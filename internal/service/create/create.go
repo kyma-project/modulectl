@@ -348,7 +348,7 @@ func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescript
 		return fmt.Errorf("failed to parse security config data: %w", err)
 	}
 
-	err = securityConfig.ValidateBDBAImageTags()
+	err = securityConfig.ValidateBDBAImageTags(moduleConfig.Version)
 	if err != nil {
 		return fmt.Errorf("failed to validate security config images: %w", err)
 	}
