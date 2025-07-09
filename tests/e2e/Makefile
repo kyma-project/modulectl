@@ -17,4 +17,7 @@ test-scaffold-cmd:
 	go test -tags=e2e ./scaffold -ginkgo.v -ginkgo.focus "Test 'scaffold' command"
 
 test-create-cmd:
-	go test -tags=e2e ./create -ginkgo.v -ginkgo.focus "Test 'create' command"
+	go test -tags=e2e ./create -ginkgo.v -ginkgo.focus "Test 'create' command" -ginkgo.skip "Test 'create' command with private registry"
+
+test-create-cmd-with-private-registry:
+	go test -tags=e2e ./create -ginkgo.v -ginkgo.focus "Test 'create' command with private registry"

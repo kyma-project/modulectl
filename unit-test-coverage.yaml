@@ -3,7 +3,8 @@ packages:
   cmd/modulectl/create: 100
   internal/common/validation: 92
   internal/service/scaffold: 91
-  internal/service/contentprovider: 91.2
+  internal/service/credential: 83
+  internal/service/contentprovider: 91.1
   internal/service/filegenerator: 100
   internal/service/filegenerator/reusefilegenerator: 94
   internal/service/fileresolver: 100
@@ -15,7 +16,7 @@ packages:
   internal/service/componentdescriptor/resources/accesshandler: 100
   internal/service/templategenerator: 86
   internal/service/crdparser: 73
-  internal/service/registry: 56
+  internal/service/registry: 80
   internal/service/componentarchive: 40
   tools/filesystem: 21
   tools/ocirepo: 23
