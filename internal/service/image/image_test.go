@@ -493,7 +493,7 @@ func (m *mockManifestParser) Return(manifests []*unstructured.Unstructured, err 
 }
 
 func (m *mockManifestParser) AssertExpectations(t *testing.T) {
-	// Simple assertion - could be enhanced as needed
+	t.Helper()
 	if m.expectedPath != "" {
 		require.Equal(t, m.expectedPath, m.calledWith)
 	}
