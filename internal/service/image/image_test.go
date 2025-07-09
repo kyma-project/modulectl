@@ -32,15 +32,18 @@ func TestParseManifest_WhenCalledWithNilParser_ReturnsError(t *testing.T) {
 }
 
 func TestParseManifest_WhenParserReturnsError_ReturnsError(t *testing.T) {
+	mockParser := &mockManifestParser{}
 	service := image.NewService()
-	mockParser := &mockManifestParser{
-		err: errors.New("parser error"),
-	}
 
-	_, err := service.ManifestParse("test.yaml", mockParser)
+	expectedError := errors.New("parser error")
+	mockParser.On("Parse", "test.yaml").Return(nil, expectedError)
+
+	result, err := service.ManifestParse("test.yaml", mockParser)
 
 	require.Error(t, err)
-	require.Equal(t, "parser error", err.Error())
+	require.Nil(t, result)
+	require.Contains(t, err.Error(), "failed to parse manifest at test.yaml: parser error")
+	mockParser.AssertExpectations(t)
 }
 
 func TestParseManifest_WhenParserSucceeds_ReturnsManifests(t *testing.T) {
@@ -460,16 +463,40 @@ func TestGetImageNameAndTag(t *testing.T) {
 
 // Mock parser implementation with call tracking
 type mockManifestParser struct {
-	manifests  []*unstructured.Unstructured
-	err        error
-	calledWith string
-	callCount  int
+	manifests     []*unstructured.Unstructured
+	err           error
+	calledWith    string
+	callCount     int
+	expectedPath  string
+	expectedError error
 }
 
 func (m *mockManifestParser) Parse(path string) ([]*unstructured.Unstructured, error) {
 	m.calledWith = path
 	m.callCount++
+
+	if m.expectedError != nil {
+		return nil, m.expectedError
+	}
+
 	return m.manifests, m.err
+}
+
+func (m *mockManifestParser) On(method, path string) *mockManifestParser {
+	m.expectedPath = path
+	return m
+}
+
+func (m *mockManifestParser) Return(manifests []*unstructured.Unstructured, err error) {
+	m.manifests = manifests
+	m.expectedError = err
+}
+
+func (m *mockManifestParser) AssertExpectations(t *testing.T) {
+	// Simple assertion - could be enhanced as needed
+	if m.expectedPath != "" {
+		require.Equal(t, m.expectedPath, m.calledWith)
+	}
 }
 
 // Helper types and functions for creating test data
