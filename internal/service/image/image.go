@@ -13,12 +13,15 @@ import (
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 )
 
-var errInvalidURL = errors.New("invalid image URL")
+var (
+	ErrParserNil   = errors.New("parser cannot be nil")
+	ErrInvalidPath = errors.New("invalid path provided")
+	ErrInvalidURL  = errors.New("invalid image URL")
+)
 
 const (
 	deploymentKind    = "Deployment"
 	statefulSetKind   = "StatefulSet"
-	moduleImageType   = "module-image"
 	manifestImageType = "manifest-image"
 
 	secScanBaseLabelKey  = "scan.security.kyma-project.io"
@@ -39,11 +42,19 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) ManifestParse(path string, parser ManifestParser) ([]*unstructured.Unstructured, error) {
-	if parser == nil {
-		return nil, errors.New("parser cannot be nil")
+func (s *Service) ManifestParse(path string, manifestParser ManifestParser) ([]*unstructured.Unstructured, error) {
+	if path == "" {
+		return nil, fmt.Errorf("path cannot be empty: %w", ErrInvalidPath)
 	}
-	return parser.Parse(path)
+	if manifestParser == nil {
+		return nil, ErrParserNil
+	}
+	manifest, err := manifestParser.Parse(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse manifest at %s: %w", path, err)
+	}
+
+	return manifest, nil
 }
 
 func (s *Service) GetAllImages(manifests []*unstructured.Unstructured) []string {
@@ -58,6 +69,21 @@ func (s *Service) GetAllImages(manifests []*unstructured.Unstructured) []string 
 	}
 
 	return s.setToSlice(imageSet)
+}
+
+func (s *Service) AppendManifestImages(descriptor *compdesc.ComponentDescriptor, images []string) error {
+	for _, img := range images {
+		if err := s.appendImageResource(descriptor, img); err != nil {
+			return fmt.Errorf("failed to append image %s: %w", img, err)
+		}
+	}
+
+	compdesc.DefaultResources(descriptor)
+	if err := compdesc.Validate(descriptor); err != nil {
+		return fmt.Errorf("failed to validate component descriptor: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Service) isSupportedWorkload(manifest *unstructured.Unstructured) bool {
@@ -118,22 +144,6 @@ func (s *Service) setToSlice(imageSet map[string]struct{}) []string {
 	return images
 }
 
-// AppendManifestImages follows the same pattern as AppendBDBAImagesLayers
-func (s *Service) AppendManifestImages(descriptor *compdesc.ComponentDescriptor, images []string) error {
-	for _, img := range images {
-		if err := s.appendImageResource(descriptor, img); err != nil {
-			return fmt.Errorf("failed to append image %s: %w", img, err)
-		}
-	}
-
-	compdesc.DefaultResources(descriptor)
-	if err := compdesc.Validate(descriptor); err != nil {
-		return fmt.Errorf("failed to validate component descriptor: %w", err)
-	}
-
-	return nil
-}
-
 func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, img string) error {
 	imgName, imgTag, err := GetImageNameAndTag(img)
 	if err != nil {
@@ -167,18 +177,22 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 
 func (s *Service) createImageTypeLabel() (*ocmv1.Label, error) {
 	imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-	return ocmv1.NewLabel(imageTypeLabelKey, manifestImageType, ocmv1.WithVersion(ocmVersion))
+	label, err := ocmv1.NewLabel(imageTypeLabelKey, manifestImageType, ocmv1.WithVersion(ocmVersion))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OCM label: %w", err)
+	}
+	return label, nil
 }
 
 func GetImageNameAndTag(imageURL string) (string, string, error) {
 	imageTag := strings.Split(imageURL, ":")
 	if len(imageTag) != imageTagSlicesLength {
-		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
+		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, ErrInvalidURL)
 	}
 
 	imageName := strings.Split(imageTag[0], "/")
 	if len(imageName) == 0 {
-		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, errInvalidURL)
+		return "", "", fmt.Errorf("image URL: %s: %w", imageURL, ErrInvalidURL)
 	}
 
 	return imageName[len(imageName)-1], imageTag[len(imageTag)-1], nil

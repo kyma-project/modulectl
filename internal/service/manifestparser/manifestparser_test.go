@@ -317,10 +317,11 @@ spec:
 }
 
 func createTempFile(t *testing.T, content string) string {
+	t.Helper()
 	tmpDir := t.TempDir()
 	tmpFile := filepath.Join(tmpDir, "test.yaml")
 
-	err := os.WriteFile(tmpFile, []byte(content), 0o644)
+	err := os.WriteFile(tmpFile, []byte(content), 0o600)
 	require.NoError(t, err)
 
 	return tmpFile
