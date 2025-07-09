@@ -58,6 +58,8 @@ const (
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
 	templateOutputPath = "/tmp/template.yaml"
+	privateOciRegistry = "http://k3d-private-oci.localhost:5002"
+	ociRegistryCreds   = "k3duser:k3dpass"
 )
 
 // Command wrapper for `modulectl create`
@@ -66,6 +68,7 @@ type createCmd struct {
 	registry         string
 	output           string
 	moduleConfigFile string
+	registryCreds    string
 	insecure         bool
 	overwrite        bool
 	dryRun           bool
@@ -86,6 +89,10 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.output != "" {
 		args = append(args, "--output="+cmd.output)
+	}
+
+	if cmd.registryCreds != "" {
+		args = append(args, "--registry-credentials="+cmd.registryCreds)
 	}
 
 	if cmd.insecure {

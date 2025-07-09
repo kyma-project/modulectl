@@ -16,6 +16,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/kyma-project/modulectl/internal/service/create"
+	"github.com/kyma-project/modulectl/internal/service/credential"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
@@ -131,7 +132,7 @@ func buildModuleService() (*create.Service, error) {
 	}
 
 	ociRepo := &ocirepo.OCIRepo{}
-	registryService, err := registry.NewService(ociRepo, nil)
+	registryService, err := registry.NewService(ociRepo, nil, credential.ResolveCredentials)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create registry service: %w", err)
 	}
