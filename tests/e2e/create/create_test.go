@@ -691,7 +691,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And security scan labels should be correct")
 				secScanLabels := flatten(descriptor.Sources[0].Labels)
 				Expect(secScanLabels).To(HaveKeyWithValue("git.kyma-project.io/ref", "HEAD"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", "1.0.1"))
+				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", moduleVersion))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/language", "golang-mod"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/dev-branch", "main"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/subprojects", "false"))
