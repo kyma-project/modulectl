@@ -1,8 +1,10 @@
 package verifier_test
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -162,4 +164,30 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestService_VerifyModuleResources_ParseError(t *testing.T) {
+	parser := &fakeParserWithError{}
+	svc := verifier.NewService(parser)
+	configWithManager := &contentprovider.ModuleConfig{
+		Version: "1.2.3",
+		Manager: &contentprovider.Manager{Name: "test-manager"},
+	}
+	err := svc.VerifyModuleResources(configWithManager, "dummy.yaml")
+	require.ErrorIs(t, err, errParse)
+
+	configWithoutManager := &contentprovider.ModuleConfig{
+		Version: "1.2.3",
+		Manager: nil,
+	}
+	err = svc.VerifyModuleResources(configWithoutManager, "dummy.yaml")
+	require.ErrorIs(t, err, errParse)
+}
+
+type fakeParserWithError struct{}
+
+var errParse = errors.New("parse error")
+
+func (f *fakeParserWithError) Parse(_ string) ([]*unstructured.Unstructured, error) {
+	return nil, errParse
 }
