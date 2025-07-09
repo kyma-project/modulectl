@@ -43,28 +43,34 @@ func (s *Service) VerifyModuleResources(moduleConfig *contentprovider.ModuleConf
 		return nil
 	}
 
-	if err := verifyModuleImageVersion(resources, moduleConfig.Version); err != nil {
+	if err := verifyModuleImageVersion(resources, moduleConfig.Version, moduleConfig.Manager); err != nil {
 		return fmt.Errorf("failed to verify module image version: %w", err)
 	}
 	return nil
 }
 
-func verifyModuleImageVersion(resources []*unstructured.Unstructured, version string) error {
+func verifyModuleImageVersion(resources []*unstructured.Unstructured, version string,
+	manager *contentprovider.Manager,
+) error {
 	for _, res := range resources {
-		if res.GetKind() == "Deployment" {
+		kind := res.GetKind()
+		name := res.GetName()
+		if name != manager.Name || kind != manager.Kind {
+			continue
+		}
+
+		switch kind {
+		case "Deployment":
 			var deploy appsv1.Deployment
-			err := runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &deploy)
-			if err != nil {
+			if err := runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &deploy); err != nil {
 				return fmt.Errorf("failed to convert unstructured to Deployment: %w", err)
 			}
 			if foundMatchedVersionInDeployment(deploy, version) {
 				return nil
 			}
-		}
-		if res.GetKind() == "StatefulSet" {
+		case "StatefulSet":
 			var statefulSet appsv1.StatefulSet
-			err := runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &statefulSet)
-			if err != nil {
+			if err := runtime.DefaultUnstructuredConverter.FromUnstructured(res.Object, &statefulSet); err != nil {
 				return fmt.Errorf("failed to convert unstructured to StatefulSet: %w", err)
 			}
 			if foundMatchedVersionInStatefulSet(statefulSet, version) {
