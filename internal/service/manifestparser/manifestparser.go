@@ -1,6 +1,7 @@
 package manifestparser
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -82,7 +83,7 @@ func (p *ManifestParser) parseYAMLDocument(content []byte) (*unstructured.Unstru
 
 	var rawObj map[string]interface{}
 	if err := decoder.Decode(&rawObj); err != nil {
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to decode YAML: %w", err)

@@ -1,6 +1,7 @@
 package image_test
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -8,10 +9,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
-	"encoding/json"
-	"github.com/kyma-project/modulectl/internal/service/image"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 // Ensure mock implements the interface at compile time

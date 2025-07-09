@@ -1,16 +1,16 @@
 package image
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
-	"regexp"
-	"strings"
-
-	"errors"
 )
 
 var errInvalidURL = errors.New("invalid image URL")
@@ -41,7 +41,7 @@ func NewService() *Service {
 
 func (s *Service) ManifestParse(path string, parser ManifestParser) ([]*unstructured.Unstructured, error) {
 	if parser == nil {
-		return nil, fmt.Errorf("parser cannot be nil")
+		return nil, errors.New("parser cannot be nil")
 	}
 	return parser.Parse(path)
 }
