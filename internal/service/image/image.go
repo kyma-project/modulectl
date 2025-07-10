@@ -164,36 +164,12 @@ func (s *Service) extractEnvironmentImages(container map[string]interface{}, ima
 }
 
 func (s *Service) isImageReference(imageValue string) bool {
-	// Early exit optimizations
 	vLen := len(imageValue)
-	if vLen < 3 || vLen > 256 {
+	if vLen < 3 || vLen > 256 || hasInvalidCharacters(imageValue) {
 		return false
 	}
 
-	var (
-		hasColon    bool
-		hasDot      bool
-		hasSlash    bool
-		dotCount    int
-		firstDotPos = -1
-	)
-
-	for index, char := range imageValue {
-		switch char {
-		case ':':
-			hasColon = true
-		case '.':
-			if !hasDot {
-				firstDotPos = index
-				hasDot = true
-			}
-			dotCount++
-		case '/':
-			hasSlash = true
-		case ' ', '\t', '\n', '\r':
-			return false // Early reject on invalid chars
-		}
-	}
+	hasColon, hasDot, hasSlash, dotCount, firstDotPos := analyzeImageParts(imageValue)
 
 	if !hasColon && !hasDot {
 		return false
@@ -265,6 +241,41 @@ func (s *Service) createImageTypeLabel() (*ocmv1.Label, error) {
 		return nil, fmt.Errorf("failed to create OCM label: %w", err)
 	}
 	return label, nil
+}
+
+func analyzeImageParts(character string) (bool, bool, bool, int, int) {
+	hasColon := false
+	hasDot := false
+	hasSlash := false
+	dotCount := 0
+	firstDotPos := -1
+
+	for index, char := range character {
+		switch char {
+		case ':':
+			hasColon = true
+		case '.':
+			if !hasDot {
+				firstDotPos = index
+				hasDot = true
+			}
+			dotCount++
+		case '/':
+			hasSlash = true
+		}
+	}
+
+	return hasColon, hasDot, hasSlash, dotCount, firstDotPos
+}
+
+func hasInvalidCharacters(character string) bool {
+	for _, char := range character {
+		switch char {
+		case ' ', '\t', '\n', '\r':
+			return true
+		}
+	}
+	return false
 }
 
 func GetImageNameAndTag(imageURL string) (string, string, error) {
