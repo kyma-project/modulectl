@@ -18,7 +18,7 @@ const (
 
 	InsecureFlagName    = "insecure"
 	InsecureFlagDefault = false
-	insecureFlagUsage   = "Uses an insecure connection to access the registry."
+	insecureFlagUsage   = "Allows to use a less secure (non-tls) connection for registry access, e.g. localhost when testing. Should only be used in dev scenarios."
 
 	TemplateOutputFlagName    = "output"
 	templateOutputFlagShort   = "o"

@@ -1,0 +1,63 @@
+name: E2E test - create command with private registry
+
+permissions: { }
+
+on:
+  push:
+    branches:
+      - main
+      - 'release-**'
+  pull_request:
+    branches:
+      - main
+      - 'release-**'
+
+jobs:
+  test-create-cmd-with-private-registry:
+    runs-on: ubuntu-latest
+    env:
+      K3D_VERSION: v5.4.7
+      MODULE_TEMPLATE_VERSION: 1.0.0
+      OCI_REPOSITORY_URL: http://k3d-oci.localhost:5001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Go setup
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: 'go.sum'
+      - name: Build
+        run: |
+          make build-linux
+          chmod +x ./bin/modulectl-linux
+          ls -la ./bin
+          mv ./bin/modulectl-linux /usr/local/bin/modulectl
+        timeout-minutes: 5
+      - name: Setup private OCI registry
+        run: |
+          # install k3d
+          wget -qO - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=$K3D_VERSION bash
+          
+          # generate credentials
+          mkdir -p ~/registry-auth
+          docker run --rm httpd:2.4-alpine htpasswd -Bbn k3duser k3dpass > ~/registry-auth/htpasswd
+          
+          # run a new auth registry
+          docker run -d \
+          --restart=always \
+          -p [::]:5002:5000 \
+          --name private-oci.localhost \
+          -v ~/registry-auth:/auth \
+          -e "REGISTRY_AUTH=htpasswd" \
+          -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
+          -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" \
+          registry:2
+          
+          # connect registry to k3d network
+          k3d cluster create cluster
+          docker network connect k3d-cluster private-oci.localhost
+      - name: Run tests
+        run: |
+          make -C tests/e2e test-create-cmd-with-private-registry
+        timeout-minutes: 3

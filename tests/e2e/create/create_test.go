@@ -1185,7 +1185,8 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	Expect(ok).To(BeFalse())
 }
 
-func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor, version string) {
+func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor,
+	version string) {
 	Expect(descriptor).ToNot(BeNil())
 	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
 
