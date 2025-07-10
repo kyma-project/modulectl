@@ -238,6 +238,7 @@ func (*securityConfigServiceStub) ParseSecurityConfigData(_ string) (*contentpro
 
 func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *compdesc.ComponentDescriptor,
 	_ contentprovider.SecurityScanConfig,
+	_ string,
 ) error {
 	return nil
 }

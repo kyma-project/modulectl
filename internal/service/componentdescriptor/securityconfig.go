@@ -8,12 +8,9 @@ import (
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
-	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/kyma-project/modulectl/internal/utils"
 )
 
 const (
@@ -40,17 +37,27 @@ type FileReader interface {
 	ReadFile(path string) ([]byte, error)
 }
 
-type SecurityConfigService struct {
-	fileReader FileReader
+type ImageService interface {
+	ExtractImagesFromManifest(manifestPath string) ([]string, error)
+	AddImagesToOcmDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error
 }
 
-func NewSecurityConfigService(fileReader FileReader) (*SecurityConfigService, error) {
+type SecurityConfigService struct {
+	fileReader   FileReader
+	imageService ImageService
+}
+
+func NewSecurityConfigService(fileReader FileReader, service ImageService) (*SecurityConfigService, error) {
 	if fileReader == nil {
 		return nil, fmt.Errorf("fileReader must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
+	if service == nil {
+		return nil, fmt.Errorf("imageService must not be nil: %w", commonerrors.ErrInvalidArg)
+	}
 	return &SecurityConfigService{
-		fileReader: fileReader,
+		fileReader:   fileReader,
+		imageService: service,
 	}, nil
 }
 
@@ -81,17 +88,31 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 
 func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
 	securityConfig contentprovider.SecurityScanConfig,
+	manifestPath string,
 ) error {
 	if err := appendLabelToAccessor(descriptor, scanLabelKey, secScanEnabled, secBaseLabelKey); err != nil {
-		return fmt.Errorf("failed to append security label to descriptor: %w", err)
+		return fmt.Errorf("failed to append scan label: %w", err)
 	}
 
 	if err := AppendSecurityLabelsToSources(securityConfig, descriptor.Sources); err != nil {
 		return fmt.Errorf("failed to append security labels to sources: %w", err)
 	}
 
-	if err := AppendBDBAImagesLayers(descriptor, securityConfig); err != nil {
-		return fmt.Errorf("failed to append bdba images layers: %w", err)
+	// NEW: Extract and merge images from both sources
+	manifestImages, err := s.imageService.ExtractImagesFromManifest(manifestPath)
+	if err != nil {
+		return fmt.Errorf("failed to extract images from manifest: %w", err)
+	}
+
+	allImages := s.mergeAndDeduplicateImages(securityConfig.BDBA, manifestImages)
+
+	if err := s.imageService.AddImagesToOcmDescriptor(descriptor, allImages); err != nil {
+		return fmt.Errorf("failed to add images to component descriptor: %w", err)
+	}
+
+	// Add security scan configuration as labels
+	if err := s.addSecurityScanLabels(descriptor, securityConfig); err != nil {
+		return fmt.Errorf("failed to add security scan labels: %w", err)
 	}
 
 	return nil
@@ -132,42 +153,53 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 	return nil
 }
 
-func AppendBDBAImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
-	securityScanConfig contentprovider.SecurityScanConfig,
-) error {
-	imagesToScan := securityScanConfig.BDBA
-	for _, img := range imagesToScan {
-		imgName, imgTag, err := utils.GetImageNameAndTag(img)
-		if err != nil {
-			return fmt.Errorf("failed to get image name and tag: %w", err)
-		}
+func (s *SecurityConfigService) mergeAndDeduplicateImages(securityImages, manifestImages []string) []string {
+	imageSet := make(map[string]struct{})
 
-		imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-		imageTypeLabel, err := ocmv1.NewLabel(imageTypeLabelKey, thirdPartyImageLabelValue,
-			ocmv1.WithVersion(ocmVersion))
-		if err != nil {
-			return fmt.Errorf("failed to create security label: %w", err)
+	// Add security config images
+	for _, img := range securityImages {
+		if img != "" {
+			imageSet[img] = struct{}{}
 		}
-
-		access := ociartifact.New(img)
-		access.SetType(ociartifact.Type)
-		proteccodeImageLayer := compdesc.Resource{
-			ResourceMeta: compdesc.ResourceMeta{
-				Type:     ociartifacttypes.TYPE,
-				Relation: ocmv1.ExternalRelation,
-				ElementMeta: compdesc.ElementMeta{
-					Name:    imgName,
-					Labels:  []ocmv1.Label{*imageTypeLabel},
-					Version: imgTag,
-				},
-			},
-			Access: access,
-		}
-		componentDescriptor.Resources = append(componentDescriptor.Resources, proteccodeImageLayer)
 	}
-	compdesc.DefaultResources(componentDescriptor)
-	if err := compdesc.Validate(componentDescriptor); err != nil {
-		return fmt.Errorf("failed to validate component descriptor: %w", err)
+
+	// Add manifest images
+	for _, img := range manifestImages {
+		if img != "" {
+			imageSet[img] = struct{}{}
+		}
+	}
+
+	// Convert back to slice
+	result := make([]string, 0, len(imageSet))
+	for img := range imageSet {
+		result = append(result, img)
+	}
+
+	return result
+}
+
+func (s *SecurityConfigService) addSecurityScanLabels(
+	descriptor *compdesc.ComponentDescriptor,
+	securityConfig contentprovider.SecurityScanConfig,
+) error {
+	// Add security scan configuration as labels to the component descriptor
+	if securityConfig.DevBranch != "" {
+		label, err := ocmv1.NewLabel(fmt.Sprintf("%s/%s", secBaseLabelKey, devBranchLabelKey),
+			securityConfig.DevBranch, ocmv1.WithVersion(ocmVersion))
+		if err != nil {
+			return fmt.Errorf("failed to create dev-branch label: %w", err)
+		}
+		descriptor.Labels = append(descriptor.Labels, *label)
+	}
+
+	if securityConfig.RcTag != "" {
+		label, err := ocmv1.NewLabel(fmt.Sprintf("%s/%s", secBaseLabelKey, rcTagLabelKey),
+			securityConfig.RcTag, ocmv1.WithVersion(ocmVersion))
+		if err != nil {
+			return fmt.Errorf("failed to create rc-tag label: %w", err)
+		}
+		descriptor.Labels = append(descriptor.Labels, *label)
 	}
 
 	return nil

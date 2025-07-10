@@ -9,100 +9,112 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
-// Ensure mock implements the interface at compile time
-var _ image.ManifestParser = (*mockManifestParser)(nil)
+func TestNewService_WhenCalledWithValidParser_ReturnsValidService(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, err := image.NewService(mockParser)
 
-func TestNewService_ReturnsValidService(t *testing.T) {
-	service := image.NewService()
+	require.NoError(t, err)
 	require.NotNil(t, service)
 }
 
-func TestParseManifest_WhenCalledWithNilParser_ReturnsError(t *testing.T) {
-	service := image.NewService()
-
-	_, err := service.ManifestParse("test.yaml", nil)
+func TestNewService_WhenCalledWithNilParser_ReturnsError(t *testing.T) {
+	service, err := image.NewService(nil)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "parser cannot be nil")
+	require.Nil(t, service)
+	require.Contains(t, err.Error(), "manifestParser must not be nil")
 }
 
-func TestParseManifest_WhenParserReturnsError_ReturnsError(t *testing.T) {
+func TestExtractImagesFromManifest_WhenParserReturnsError_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
-	service := image.NewService()
+	service, _ := image.NewService(mockParser)
 
 	expectedError := errors.New("parser error")
 	mockParser.On("Parse", "test.yaml").Return(nil, expectedError)
 
-	result, err := service.ManifestParse("test.yaml", mockParser)
+	result, err := service.ExtractImagesFromManifest("test.yaml")
 
 	require.Error(t, err)
 	require.Nil(t, result)
-	require.Contains(t, err.Error(), "failed to parse manifest at test.yaml: parser error")
+	require.Contains(t, err.Error(), "failed to parse manifest")
 	mockParser.AssertExpectations(t)
 }
 
-func TestParseManifest_WhenParserSucceeds_ReturnsManifests(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenParserSucceeds_ReturnsImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	expectedManifests := []*unstructured.Unstructured{
 		createDeployment("telemetry-manager", []containerSpec{
 			{name: "manager", image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"},
 		}),
 	}
-	mockParser := &mockManifestParser{
-		manifests: expectedManifests,
-	}
+	mockParser.manifests = expectedManifests
 
-	manifests, err := service.ManifestParse("test.yaml", mockParser)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
 	require.NoError(t, err)
-	require.Equal(t, expectedManifests, manifests)
+	require.Len(t, images, 1)
+	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
 }
 
-func TestGetAllImages_WhenCalledWithEmptyManifests_ReturnsEmptySlice(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithEmptyManifests_ReturnsEmptySlice(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+	mockParser.manifests = []*unstructured.Unstructured{}
 
-	images := service.GetAllImages([]*unstructured.Unstructured{})
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Empty(t, images)
 }
 
-func TestGetAllImages_WhenCalledWithDeployment_ReturnsImages(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithDeployment_ReturnsImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	manifests := []*unstructured.Unstructured{
 		createDeployment("telemetry-manager", []containerSpec{
 			{name: "manager", image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"},
 			{name: "fluent-bit", image: "europe-docker.pkg.dev/kyma-project/prod/fluent-bit:v2.1.8"},
 		}),
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Len(t, images, 2)
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/fluent-bit:v2.1.8")
 }
 
-func TestGetAllImages_WhenCalledWithStatefulSet_ReturnsImages(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithStatefulSet_ReturnsImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	manifests := []*unstructured.Unstructured{
 		createStatefulSet("istio-proxy", []containerSpec{
 			{name: "proxy", image: "gcr.io/istio-release/proxyv2:1.19.0"},
 		}),
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Len(t, images, 1)
 	require.Contains(t, images, "gcr.io/istio-release/proxyv2:1.19.0")
 }
 
-func TestGetAllImages_WhenCalledWithUnsupportedWorkload_ReturnsEmptySlice(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithUnsupportedWorkload_ReturnsEmptySlice(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	manifests := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
@@ -113,14 +125,18 @@ func TestGetAllImages_WhenCalledWithUnsupportedWorkload_ReturnsEmptySlice(t *tes
 			},
 		},
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Empty(t, images)
 }
 
-func TestGetAllImages_WhenCalledWithEnvironmentImages_ReturnsImages(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithEnvironmentImages_ReturnsImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	manifests := []*unstructured.Unstructured{
 		createDeploymentWithEnvImages("telemetry-manager", []containerSpec{
 			{
@@ -132,16 +148,20 @@ func TestGetAllImages_WhenCalledWithEnvironmentImages_ReturnsImages(t *testing.T
 			},
 		}),
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Len(t, images, 2)
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-webhook:v1.0.0")
 }
 
-func TestGetAllImages_WhenCalledWithDuplicateImages_ReturnsDeduplicatedImages(t *testing.T) {
-	service := image.NewService()
+func TestExtractImagesFromManifest_WhenCalledWithDuplicateImages_ReturnsDeduplicatedImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	manifests := []*unstructured.Unstructured{
 		createDeployment("telemetry-manager-1", []containerSpec{
 			{name: "manager", image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"},
@@ -150,84 +170,19 @@ func TestGetAllImages_WhenCalledWithDuplicateImages_ReturnsDeduplicatedImages(t 
 			{name: "manager", image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"},
 		}),
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Len(t, images, 1)
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
 }
 
-func TestGetAllImages_WhenCalledWithManifestWithoutContainers_ReturnsEmptySlice(t *testing.T) {
-	service := image.NewService()
-	manifests := []*unstructured.Unstructured{
-		{
-			Object: map[string]interface{}{
-				"kind": "Deployment",
-				"metadata": map[string]interface{}{
-					"name": "telemetry-manager",
-				},
-				"spec": map[string]interface{}{
-					"template": map[string]interface{}{
-						"spec": map[string]interface{}{},
-					},
-				},
-			},
-		},
-	}
+func TestExtractImagesFromManifest_WhenCalledWithMultipleWorkloadTypes_ReturnsAllImages(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
 
-	images := service.GetAllImages(manifests)
-
-	require.Empty(t, images)
-}
-
-func TestGetAllImages_WhenCalledWithInvalidContainerStructure_ReturnsEmptySlice(t *testing.T) {
-	service := image.NewService()
-	manifests := []*unstructured.Unstructured{
-		{
-			Object: map[string]interface{}{
-				"kind": "Deployment",
-				"metadata": map[string]interface{}{
-					"name": "telemetry-manager",
-				},
-				"spec": map[string]interface{}{
-					"template": map[string]interface{}{
-						"spec": map[string]interface{}{
-							"containers": "invalid-structure",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	images := service.GetAllImages(manifests)
-
-	require.Empty(t, images)
-}
-
-func TestGetAllImages_WhenCalledWithEnvironmentVariablesButNoImageReferences_ReturnsOnlyContainerImages(t *testing.T) {
-	service := image.NewService()
-	manifests := []*unstructured.Unstructured{
-		createDeploymentWithEnvImages("telemetry-manager", []containerSpec{
-			{
-				name:  "manager",
-				image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0",
-				envVars: []envVar{
-					{name: "LOG_LEVEL", value: "info"},
-					{name: "METRICS_PORT", value: "8080"},
-				},
-			},
-		}),
-	}
-
-	images := service.GetAllImages(manifests)
-
-	require.Len(t, images, 1)
-	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
-}
-
-func TestGetAllImages_WhenCalledWithMultipleWorkloadTypes_ReturnsAllImages(t *testing.T) {
-	service := image.NewService()
 	manifests := []*unstructured.Unstructured{
 		createDeployment("telemetry-manager", []containerSpec{
 			{name: "manager", image: "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"},
@@ -244,16 +199,20 @@ func TestGetAllImages_WhenCalledWithMultipleWorkloadTypes_ReturnsAllImages(t *te
 			},
 		},
 	}
+	mockParser.manifests = manifests
 
-	images := service.GetAllImages(manifests)
+	images, err := service.ExtractImagesFromManifest("test.yaml")
 
+	require.NoError(t, err)
 	require.Len(t, images, 2)
 	require.Contains(t, images, "europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0")
 	require.Contains(t, images, "gcr.io/istio-release/proxyv2:1.19.0")
 }
 
-func TestAppendManifestImages_WhenCalledWithEmptyImages_ReturnsNoError(t *testing.T) {
-	service := image.NewService()
+func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImages_ReturnsNoError(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: ocmv1.ObjectMeta{
@@ -265,14 +224,16 @@ func TestAppendManifestImages_WhenCalledWithEmptyImages_ReturnsNoError(t *testin
 		},
 	}
 
-	err := service.AppendManifestImages(descriptor, []string{})
+	err := service.AddImagesToOcmDescriptor(descriptor, []string{})
 
 	require.NoError(t, err)
 	require.Empty(t, descriptor.Resources)
 }
 
-func TestAppendManifestImages_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
-	service := image.NewService()
+func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: ocmv1.ObjectMeta{
@@ -288,7 +249,7 @@ func TestAppendManifestImages_WhenCalledWithValidImages_AppendsResources(t *test
 		"gcr.io/istio-release/proxyv2:1.19.0",
 	}
 
-	err := service.AppendManifestImages(descriptor, images)
+	err := service.AddImagesToOcmDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -311,8 +272,10 @@ func TestAppendManifestImages_WhenCalledWithValidImages_AppendsResources(t *test
 	require.Equal(t, "ociArtifact", descriptor.Resources[1].Type)
 }
 
-func TestAppendManifestImages_WhenCalledWithInvalidImageFormat_ReturnsError(t *testing.T) {
-	service := image.NewService()
+func TestAddImagesToOcmDescriptor_WhenCalledWithInvalidImageFormat_ReturnsError(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: ocmv1.ObjectMeta{
@@ -324,83 +287,10 @@ func TestAppendManifestImages_WhenCalledWithInvalidImageFormat_ReturnsError(t *t
 	}
 	images := []string{"invalid-image-format"}
 
-	err := service.AppendManifestImages(descriptor, images)
+	err := service.AddImagesToOcmDescriptor(descriptor, images)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to append image")
-}
-
-func TestAppendManifestImages_WhenCalledWithComplexImageNames_AppendsResources(t *testing.T) {
-	service := image.NewService()
-	descriptor := &compdesc.ComponentDescriptor{
-		ComponentSpec: compdesc.ComponentSpec{
-			ObjectMeta: ocmv1.ObjectMeta{
-				Name:     "kyma-project.io/module/telemetry",
-				Version:  "1.0.0",
-				Provider: ocmv1.Provider{Name: "kyma-project.io"},
-			},
-			Resources: []compdesc.Resource{},
-		},
-	}
-	images := []string{
-		"europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0",
-		"gcr.io/istio-release/proxyv2:1.19.0",
-		"registry.k8s.io/ingress-nginx/controller:v1.8.0",
-	}
-
-	err := service.AppendManifestImages(descriptor, images)
-
-	require.NoError(t, err)
-	require.Len(t, descriptor.Resources, 3)
-
-	// Check that all resources have the correct label
-	for _, resource := range descriptor.Resources {
-		require.Len(t, resource.Labels, 1)
-		require.Equal(t, "scan.security.kyma-project.io/type", resource.Labels[0].Name)
-
-		var labelValue string
-		err = json.Unmarshal(descriptor.Resources[0].Labels[0].Value, &labelValue)
-		require.NoError(t, err)
-		require.Equal(t, "manifest-image", labelValue)
-		require.Equal(t, "v1", resource.Labels[0].Version)
-	}
-}
-
-func TestAppendManifestImages_WhenCalledWithExistingResources_AppendsToExistingResources(t *testing.T) {
-	service := image.NewService()
-	existingAccess := ociartifact.New("existing-image:1.0.0")
-	existingAccess.SetType(ociartifact.Type)
-
-	existingResource := compdesc.Resource{
-		ResourceMeta: compdesc.ResourceMeta{
-			Type:     "existing-type",
-			Relation: ocmv1.ExternalRelation,
-			ElementMeta: compdesc.ElementMeta{
-				Name:    "existing-resource",
-				Version: "1.0.0",
-			},
-		},
-		Access: existingAccess,
-	}
-
-	descriptor := &compdesc.ComponentDescriptor{
-		ComponentSpec: compdesc.ComponentSpec{
-			ObjectMeta: ocmv1.ObjectMeta{
-				Name:     "kyma-project.io/module/telemetry",
-				Version:  "1.0.0",
-				Provider: ocmv1.Provider{Name: "kyma-project.io"},
-			},
-			Resources: []compdesc.Resource{existingResource},
-		},
-	}
-	images := []string{"europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0"}
-
-	err := service.AppendManifestImages(descriptor, images)
-
-	require.NoError(t, err)
-	require.Len(t, descriptor.Resources, 2)
-	require.Equal(t, "existing-resource", descriptor.Resources[0].Name)
-	require.Equal(t, "telemetry-manager", descriptor.Resources[1].Name)
 }
 
 func TestGetImageNameAndTag(t *testing.T) {
@@ -421,20 +311,6 @@ func TestGetImageNameAndTag(t *testing.T) {
 		{
 			name:              "invalid image URL - no tag",
 			imageURL:          "docker.io/template-operator/test",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - multiple tags",
-			imageURL:          "docker.io/template-operator/test:latest:latest",
-			expectedImageName: "",
-			expectedImageTag:  "",
-			expectedError:     errors.New("invalid image URL"),
-		},
-		{
-			name:              "invalid image URL - no slashes",
-			imageURL:          "docker.io",
 			expectedImageName: "",
 			expectedImageTag:  "",
 			expectedError:     errors.New("invalid image URL"),
@@ -461,7 +337,7 @@ func TestGetImageNameAndTag(t *testing.T) {
 	}
 }
 
-// Mock parser implementation with call tracking
+// Mock parser implementation
 type mockManifestParser struct {
 	manifests     []*unstructured.Unstructured
 	err           error

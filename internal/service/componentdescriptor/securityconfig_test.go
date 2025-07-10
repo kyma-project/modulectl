@@ -8,46 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(nil)
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(nil, &imageServiceStub{})
 	require.ErrorContains(t, err, "fileReader must not be nil")
 	require.Nil(t, securityConfigService)
-}
-
-func Test_AppendBDBAImagesLayers_ReturnCorrectResources(t *testing.T) {
-	cd := &compdesc.ComponentDescriptor{}
-	cd.SetName("test.io/module/test")
-	cd.SetVersion("1.0.0")
-	cd.Provider = ocmv1.Provider{Name: "kyma"}
-
-	securityConfig := contentprovider.SecurityScanConfig{
-		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.0",
-			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
-		},
-	}
-
-	err := componentdescriptor.AppendBDBAImagesLayers(cd, securityConfig)
-	require.NoError(t, err)
-
-	require.Equal(t, "template-operator", cd.Resources[0].Name)
-	require.Equal(t, "1.0.0", cd.Resources[0].Version)
-
-	require.Equal(t, "anotherimage", cd.Resources[1].Name)
-	require.Equal(t, "4.5.6", cd.Resources[1].Version)
-
-	for _, res := range cd.Resources {
-		require.Equal(t, "ociArtifact", res.Type)
-		require.Equal(t, "scan.security.kyma-project.io/type", res.Labels[0].Name)
-		expectedLabel := json.RawMessage(`"third-party-image"`)
-		require.Equal(t, expectedLabel, res.Labels[0].Value)
-	}
 }
 
 func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
@@ -100,7 +69,7 @@ func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceStub{})
 	require.NoError(t, err)
 
 	returned, err := securityConfigService.ParseSecurityConfigData("sec-scanners-config.yaml")
@@ -114,7 +83,7 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnsCorrectData(t *tes
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileExistenceCheckError(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsErrorStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsErrorStub{}, &imageServiceStub{})
 	require.NoError(t, err)
 
 	_, err = securityConfigService.ParseSecurityConfigData("testFile")
@@ -122,7 +91,7 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileExistenceC
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileReadingError(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderReadFileErrorStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderReadFileErrorStub{}, &imageServiceStub{})
 	require.NoError(t, err)
 
 	_, err = securityConfigService.ParseSecurityConfigData("testFile")
@@ -130,7 +99,7 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileReadingErr
 }
 
 func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileDoesNotExist(t *testing.T) {
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsFalseStub{})
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderFileExistsFalseStub{}, &imageServiceStub{})
 	require.NoError(t, err)
 
 	_, err = securityConfigService.ParseSecurityConfigData("testFile")
@@ -176,6 +145,19 @@ func (*fileReaderReadFileErrorStub) FileExists(_ string) (bool, error) {
 
 func (*fileReaderReadFileErrorStub) ReadFile(_ string) ([]byte, error) {
 	return nil, errors.New("error while reading file")
+}
+
+type imageServiceStub struct{}
+
+func (*imageServiceStub) ExtractImagesFromManifest(_ string) ([]string, error) {
+	return []string{
+		"europe-docker.pkg.dev/kyma-project/prod/telemetry-manager:v1.2.0",
+		"gcr.io/istio-release/proxyv2:1.19.0",
+	}, nil
+}
+
+func (*imageServiceStub) AddImagesToOcmDescriptor(_ *compdesc.ComponentDescriptor, _ []string) error {
+	return nil
 }
 
 type fileReaderFileExistsFalseStub struct{}

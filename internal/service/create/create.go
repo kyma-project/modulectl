@@ -35,8 +35,8 @@ type FileResolver interface {
 
 type SecurityConfigService interface {
 	ParseSecurityConfigData(securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
-	AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
-		securityConfig contentprovider.SecurityScanConfig) error
+	AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor, securityConfig contentprovider.SecurityScanConfig,
+		manifestPath string) error
 }
 
 type GitSourcesService interface {
@@ -217,7 +217,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to add git sources: %w", err)
 	}
 	if moduleConfig.Security != "" {
-		err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+		err = s.configureSecScannerConf(descriptor, moduleConfig, manifestFilePath, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
@@ -340,7 +340,7 @@ func (s *Service) generateModuleTemplate(
 }
 
 func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options,
+	moduleConfig *contentprovider.ModuleConfig, manifestFilePath string, opts Options,
 ) error {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
@@ -353,7 +353,7 @@ func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescript
 		return fmt.Errorf("failed to validate security config images: %w", err)
 	}
 
-	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
+	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig, manifestFilePath); err != nil {
 		return fmt.Errorf("failed to append security scan config: %w", err)
 	}
 	return nil
