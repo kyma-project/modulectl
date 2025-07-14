@@ -3,8 +3,10 @@
 package create_test
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
@@ -23,6 +25,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const (
+	moduleVersion = "1.0.3"
+)
+
 var _ = Describe("Test 'create' command", Ordered, func() {
 	BeforeEach(func() {
 		for _, file := range filesIn("/tmp/") {
@@ -31,281 +37,287 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 			}
 		}
+
+		_, err := exec.Command("k3d", "registry", "delete", "--all").CombinedOutput()
+		Expect(err).ToNot(HaveOccurred())
+		_, err = exec.Command("k3d", "registry", "create", "oci.localhost", "--port",
+			"5001").CombinedOutput()
+		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked without config-file arg", func() {
+		By("When invoked without config-file arg", func() {
 			cmd = createCmd{
 				registry: ociRegistry,
 			}
 		})
 
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to read file module-config.yaml: open module-config.yaml: no such file or directory"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked without registry arg", func() {
+		By("When invoked without registry arg", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 			}
 		})
 
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("opts.RegistryURL must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing name", func() {
+		By("When invoked with missing name", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingNameConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("opts.ModuleName must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing version", func() {
+		By("When invoked with missing version", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingVersionConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("opts.ModuleVersion must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing manifest", func() {
+		By("When invoked with missing manifest", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingManifestConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing repository", func() {
+		By("When invoked with missing repository", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingRepositoryConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing documentation", func() {
+		By("When invoked with missing documentation", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingDocumentationConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with non https repository", func() {
+		By("When invoked with non https repository", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsRepository,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: 'http://github.com/kyma-project/template-operator' is not using https scheme: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with non https documentation", func() {
+		By("When invoked with non https documentation", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsDocumentation,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with missing icons", func() {
+		By("When invoked with missing icons", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: missingIconsConfig,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: must contain at least one icon: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with duplicate entry in icons", func() {
+		By("When invoked with duplicate entry in icons", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: duplicateIcons,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Icons: map contains duplicate entries"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with invalid icon - link missing", func() {
+		By("When invoked with invalid icon - link missing", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: iconsWithoutLink,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: link must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with invalid icon - name missing", func() {
+		By("When invoked with invalid icon - name missing", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: iconsWithoutName,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: name must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with duplicate entry in resources", func() {
+		By("When invoked with duplicate entry in resources", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: duplicateResources,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Resources: map contains duplicate entries"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with non https resource", func() {
+		By("When invoked with non https resource", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: nonHttpsResource,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: failed to validate link: 'http://some.other/location/template-operator.yaml' is not using https scheme: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with invalid resource - link missing", func() {
+		By("When invoked with invalid resource - link missing", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: resourceWithoutLink,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: link must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with invalid resource - name missing", func() {
+		By("When invoked with invalid resource - name missing", func() {
 			cmd = createCmd{
 				registry:         ociRegistry,
 				moduleConfigFile: resourceWithoutName,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: name must not be empty: invalid Option"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with existing '--registry' and missing '--insecure' flag", func() {
+		By("When invoked with existing '--registry' and missing '--insecure' flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
 			}
 		})
-		It("Then the command should fail", func() {
+		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("could not push"))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with minimal valid module-config and dry-run flag", func() {
+		By("When invoked with minimal valid module-config and dry-run flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
@@ -314,7 +326,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				dryRun:           true,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -336,9 +348,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with minimal valid module-config", func() {
+		By("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
@@ -346,7 +358,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -372,12 +384,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("metadata"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("plainText"))
-				Expect(resource.Version).To(Equal("1.0.0"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
-				Expect(resource.Version).To(Equal("1.0.0"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
@@ -400,40 +412,43 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with same version that already exists in the registry", func() {
+		By("When invoked with minimal valid module-config", func() {
+			cmd = createCmd{
+				moduleConfigFile: minimalConfig,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+			Expect(cmd.execute()).To(Succeed())
+		})
+		By("Then invoked with same version that already exists in the registry", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
 				insecure:         true,
 			}
 		})
-		It("Then the command should fail with same version exists message", func() {
+		By("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring("could not push component version: cannot push component version 1.0.0: component version already exists, cannot push the new version"))
+			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("could not push component version: cannot push component version %s: component version already exists, cannot push the new version",
+				moduleVersion)))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config but sec-scanners-config not containing correct module manager image", func() {
+		By("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
-				moduleConfigFile: invalidSecurityConfigImage,
+				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
 				insecure:         true,
 				output:           templateOutputPath,
 			}
+			Expect(cmd.execute()).To(Succeed())
 		})
-		It("Then the command should fail with invalid sec scanners config image", func() {
-			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to validate security config images: no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:0.0.1'"))
-		})
-	})
-
-	Context("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		It("When invoked with same version that already exists in the registry and dry-run flag", func() {
+		By("When invoked with same version that already exists in the registry and dry-run flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
@@ -442,18 +457,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				dryRun:           true,
 			}
 		})
-		It("Then the command should fail with same version exists message", func() {
+		By("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring("component kyma-project.io/module/template-operator in version 1.0.0 already exists: component version already exists"))
-
-			By("And no module template file should be generated")
-			Expect(filesIn("/tmp/")).Should(Not(ContainElement("template.yaml")))
+			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("component kyma-project.io/module/template-operator in version %s already exists: component version already exists",
+				moduleVersion)))
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag",
+		By("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile: minimalConfig,
@@ -464,7 +477,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					dryRun:           true,
 				}
 			})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -486,9 +499,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with same version that already exists in the registry and overwrite flag", func() {
+		By("When invoked with same version that already exists in the registry and overwrite flag", func() {
 			cmd = createCmd{
 				moduleConfigFile: minimalConfig,
 				registry:         ociRegistry,
@@ -497,15 +510,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			err := cmd.execute()
 			Expect(err).Should(Succeed())
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing annotations and different version", func() {
+		By("When invoked with valid module-config containing annotations and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withAnnotationsConfig,
 				registry:         ociRegistry,
@@ -513,7 +526,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -524,9 +537,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.1"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.1"))
 
 				By("And new annotation should be correctly added")
 				annotations := template.Annotations
@@ -535,14 +545,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And descriptor.component.resources should be correct")
 				resource := descriptor.Resources[0]
-				Expect(resource.Version).To(Equal("1.0.1"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 			})
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing default-cr and different version", func() {
+		By("When invoked with valid module-config containing default-cr and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withDefaultCrConfig,
 				registry:         ociRegistry,
@@ -550,7 +560,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -561,9 +571,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.2"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.2"))
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(3))
@@ -571,7 +578,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
-				Expect(resource.Version).To(Equal("1.0.2"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[2].access should be correct")
 				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
@@ -585,9 +592,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing security-scanner-config and different version",
+		By("When invoked with valid module-config containing security-scanner-config and different version",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile: withSecurityConfig,
@@ -596,7 +603,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					output:           templateOutputPath,
 				}
 			})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -607,9 +614,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.3"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.3"))
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
@@ -617,7 +621,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal("1.0.3"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("template-operator"))
@@ -627,11 +631,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				resource = descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("metadata"))
-				Expect(resource.Version).To(Equal("1.0.3"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				resource = descriptor.Resources[3]
 				Expect(resource.Name).To(Equal("raw-manifest"))
-				Expect(resource.Version).To(Equal("1.0.3"))
+				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
@@ -639,7 +643,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3"))
+				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
+					moduleVersion)))
 
 				By("And descriptor.component.resources[1].access should be correct")
 				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
@@ -686,7 +691,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And security scan labels should be correct")
 				secScanLabels := flatten(descriptor.Sources[0].Labels)
 				Expect(secScanLabels).To(HaveKeyWithValue("git.kyma-project.io/ref", "HEAD"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", "1.0.3"))
+				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", moduleVersion))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/language", "golang-mod"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/dev-branch", "main"))
 				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/subprojects", "false"))
@@ -696,9 +701,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with invalid module-config containing not existing security-scanner-config",
+		By("When invoked with invalid module-config containing not existing security-scanner-config",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile: invalidSecurityConfig,
@@ -707,7 +712,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					output:           templateOutputPath,
 				}
 			})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			err := cmd.execute()
 
 			Expect(err).Should(HaveOccurred())
@@ -715,9 +720,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing mandatory true and different version", func() {
+		By("When invoked with valid module-config containing mandatory true and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withMandatoryConfig,
 				registry:         ociRegistry,
@@ -725,7 +730,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -736,9 +741,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.4"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.4"))
 
 				By("And module template should be marked as mandatory")
 				Expect(template.Spec.Mandatory).To(BeTrue())
@@ -747,9 +749,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing manager field and different version", func() {
+		By("When invoked with valid module-config containing manager field and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withManagerConfig,
 				registry:         ociRegistry,
@@ -757,7 +759,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -768,9 +770,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.5"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.5"))
 
 				By("And spec.manager should be correct")
 				manager := template.Spec.Manager
@@ -784,9 +783,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing manager field without namespace and different version",
+		By("When invoked with valid module-config containing manager field without namespace and different version",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile: withNoNamespaceManagerConfig,
@@ -795,7 +794,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					output:           templateOutputPath,
 				}
 			})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -806,9 +805,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.6"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.6"))
 
 				By("And spec.manager should be correct")
 				manager := template.Spec.Manager
@@ -822,9 +818,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing associatedResources list", func() {
+		By("When invoked with valid module-config containing associatedResources list", func() {
 			cmd = createCmd{
 				moduleConfigFile: withAssociatedResourcesConfig,
 				registry:         ociRegistry,
@@ -832,7 +828,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -843,10 +839,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-
-				Expect(template.Name).To(Equal("template-operator-1.0.7"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.7"))
 
 				By("And spec.associatedResources should be correct")
 				resources := template.Spec.AssociatedResources
@@ -859,9 +851,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with minimal valid module-config containing resources", func() {
+		By("When invoked with minimal valid module-config containing resources", func() {
 			cmd = createCmd{
 				moduleConfigFile: withResources,
 				registry:         ociRegistry,
@@ -869,7 +861,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -881,16 +873,17 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				Expect(template.Spec.Resources).To(HaveLen(2))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+					moduleVersion)))
 				Expect(template.Spec.Resources[1].Name).To(Equal("someResource"))
 				Expect(template.Spec.Resources[1].Link).To(Equal("https://some.other/location/template-operator.yaml"))
 			})
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
+		By("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
 			cmd = createCmd{
 				moduleConfigFile: withResourcesOverwrite,
 				registry:         ociRegistry,
@@ -898,7 +891,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -915,9 +908,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with manifest being a local file reference", func() {
+		By("When invoked with manifest being a local file reference", func() {
 			cmd = createCmd{
 				moduleConfigFile: manifestFileref,
 				registry:         ociRegistry,
@@ -925,7 +918,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -935,7 +928,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.13")
+				validateTemplateWithFileReference(template, descriptor, moduleVersion)
 
 				By("And template's spec.resources should NOT contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(0))
@@ -943,9 +936,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with default CR being a fileref", func() {
+		By("When invoked with default CR being a fileref", func() {
 			cmd = createCmd{
 				moduleConfigFile: defaultCRFileref,
 				registry:         ociRegistry,
@@ -953,7 +946,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -963,19 +956,20 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
-				validateTemplateWithFileReference(template, descriptor, "1.0.14")
+				validateTemplateWithFileReference(template, descriptor, moduleVersion)
 
 				By("And template's spec.resources should contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(1))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+					moduleVersion)))
 			})
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing requiresDowntime true and different version", func() {
+		By("When invoked with valid module-config containing requiresDowntime true and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withRequiresDowntimeConfig,
 				registry:         ociRegistry,
@@ -983,7 +977,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -994,9 +988,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.10"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.10"))
 
 				By("And module template should have spec.requiresDowntime set to true")
 				Expect(template.Spec.RequiresDowntime).To(BeTrue())
@@ -1004,9 +995,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing internal true and different version", func() {
+		By("When invoked with valid module-config containing internal true and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withInternalConfig,
 				registry:         ociRegistry,
@@ -1014,7 +1005,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -1025,9 +1016,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.11"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.11"))
 
 				By("And module template should have operator.kyma-project.io/internal label set to true")
 				val, ok := template.Labels[shared.InternalLabel]
@@ -1037,9 +1025,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	Context("Given 'modulectl create' command", func() {
+	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		It("When invoked with valid module-config containing beta true and different version", func() {
+		By("When invoked with valid module-config containing beta true and different version", func() {
 			cmd = createCmd{
 				moduleConfigFile: withBetaConfig,
 				registry:         ociRegistry,
@@ -1047,7 +1035,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				output:           templateOutputPath,
 			}
 		})
-		It("Then the command should succeed", func() {
+		By("Then the command should succeed", func() {
 			Expect(cmd.execute()).To(Succeed())
 
 			By("And module template file should be generated")
@@ -1058,9 +1046,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
-				Expect(template.Name).To(Equal("template-operator-1.0.12"))
-				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-				Expect(template.Spec.Version).To(Equal("1.0.12"))
 
 				By("And module template should have operator.kyma-project.io/beta label set to true")
 				val, ok := template.Labels[shared.BetaLabel]
@@ -1129,11 +1114,11 @@ func filesIn(dir string) []string {
 func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor) {
 	Expect(descriptor).ToNot(BeNil())
 	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
-	Expect(template.Name).To(Equal("template-operator-1.0.0"))
+	Expect(template.Name).To(Equal(fmt.Sprintf("template-operator-%s", moduleVersion)))
 
 	By("And spec.info should be correct")
 	Expect(template.Spec.ModuleName).To(Equal("template-operator"))
-	Expect(template.Spec.Version).To(Equal("1.0.0"))
+	Expect(template.Spec.Version).To(Equal(moduleVersion))
 	Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
 	Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 	Expect(template.Spec.Info.Icons).To(HaveLen(1))
@@ -1169,7 +1154,8 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	By("And spec.resources should contain rawManifest")
 	Expect(template.Spec.Resources).To(HaveLen(1))
 	Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-	Expect(template.Spec.Resources[0].Link).To(Equal("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"))
+	Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+		moduleVersion)))
 
 	By("And spec.requiresDowntime should be set to false")
 	Expect(template.Spec.RequiresDowntime).To(BeFalse())
@@ -1186,7 +1172,8 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 }
 
 func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor,
-	version string) {
+	version string,
+) {
 	Expect(descriptor).ToNot(BeNil())
 	Expect(descriptor.SchemaVersion()).To(Equal(v2.SchemaVersion))
 

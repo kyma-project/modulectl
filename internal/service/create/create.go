@@ -82,21 +82,27 @@ type CRDParserService interface {
 }
 
 type ModuleResourceService interface {
-	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath string) ([]resources.Resource, error)
+	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
+		manifestPath, defaultCRPath string) ([]resources.Resource, error)
+}
+
+type ImageVersionVerifierService interface {
+	VerifyModuleResources(moduleConfig *contentprovider.ModuleConfig, filePath string) error
 }
 
 type Service struct {
-	moduleConfigService     ModuleConfigService
-	gitSourcesService       GitSourcesService
-	securityConfigService   SecurityConfigService
-	componentArchiveService ComponentArchiveService
-	registryService         RegistryService
-	moduleTemplateService   ModuleTemplateService
-	crdParserService        CRDParserService
-	moduleResourceService   ModuleResourceService
-	manifestFileResolver    FileResolver
-	defaultCRFileResolver   FileResolver
-	fileSystem              FileSystem
+	moduleConfigService         ModuleConfigService
+	gitSourcesService           GitSourcesService
+	securityConfigService       SecurityConfigService
+	componentArchiveService     ComponentArchiveService
+	registryService             RegistryService
+	moduleTemplateService       ModuleTemplateService
+	crdParserService            CRDParserService
+	moduleResourceService       ModuleResourceService
+	imageVersionVerifierService ImageVersionVerifierService
+	manifestFileResolver        FileResolver
+	defaultCRFileResolver       FileResolver
+	fileSystem                  FileSystem
 }
 
 func NewService(moduleConfigService ModuleConfigService,
@@ -107,6 +113,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	moduleTemplateService ModuleTemplateService,
 	crdParserService CRDParserService,
 	moduleResourceService ModuleResourceService,
+	imageVersionVerifierService ImageVersionVerifierService,
 	manifestFileResolver FileResolver,
 	defaultCRFileResolver FileResolver,
 	fileSystem FileSystem,
@@ -143,6 +150,10 @@ func NewService(moduleConfigService ModuleConfigService,
 		return nil, fmt.Errorf("moduleResourceService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
+	if imageVersionVerifierService == nil {
+		return nil, fmt.Errorf("imageVersionVerifierService must not be nil: %w", commonerrors.ErrInvalidArg)
+	}
+
 	if manifestFileResolver == nil {
 		return nil, fmt.Errorf("manifestFileResolver must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
@@ -156,17 +167,18 @@ func NewService(moduleConfigService ModuleConfigService,
 	}
 
 	return &Service{
-		moduleConfigService:     moduleConfigService,
-		gitSourcesService:       gitSourcesService,
-		securityConfigService:   securityConfigService,
-		componentArchiveService: componentArchiveService,
-		registryService:         registryService,
-		moduleTemplateService:   moduleTemplateService,
-		crdParserService:        crdParserService,
-		moduleResourceService:   moduleResourceService,
-		manifestFileResolver:    manifestFileResolver,
-		defaultCRFileResolver:   defaultCRFileResolver,
-		fileSystem:              fileSystem,
+		moduleConfigService:         moduleConfigService,
+		gitSourcesService:           gitSourcesService,
+		securityConfigService:       securityConfigService,
+		componentArchiveService:     componentArchiveService,
+		registryService:             registryService,
+		moduleTemplateService:       moduleTemplateService,
+		crdParserService:            crdParserService,
+		moduleResourceService:       moduleResourceService,
+		imageVersionVerifierService: imageVersionVerifierService,
+		manifestFileResolver:        manifestFileResolver,
+		defaultCRFileResolver:       defaultCRFileResolver,
+		fileSystem:                  fileSystem,
 	}, nil
 }
 
@@ -229,7 +241,12 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath, defaultCRFilePath)
+	if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig, manifestFilePath); err != nil {
+		return fmt.Errorf("failed to verify module resources: %w", err)
+	}
+
+	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
+		defaultCRFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
@@ -287,10 +304,13 @@ func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.Component
 		return nil
 	}
 
-	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(), ErrComponentVersionExists)
+	return fmt.Errorf("component %s in version %s already exists: %w", archive.GetName(), archive.GetVersion(),
+		ErrComponentVersionExists)
 }
 
-func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor, error) {
+func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor,
+	error,
+) {
 	if err := s.registryService.PushComponentVersion(archive,
 		opts.Insecure,
 		opts.OverwriteComponentVersion,

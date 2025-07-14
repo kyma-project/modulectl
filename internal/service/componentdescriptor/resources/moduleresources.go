@@ -44,7 +44,9 @@ type Resource struct {
 	AccessHandler AccessHandler
 }
 
-func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig, manifestPath, defaultCRPath string) ([]Resource, error) {
+func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
+	manifestPath, defaultCRPath string,
+) ([]Resource, error) {
 	moduleImageResource := GenerateModuleImageResource()
 	metadataResource, err := GenerateMetadataResource(moduleConfig)
 	if err != nil {
