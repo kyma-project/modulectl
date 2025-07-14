@@ -37,6 +37,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *
 	err = json.Unmarshal(resource1.Labels[0].Value, &labelValue1)
 	require.NoError(t, err)
 	require.Equal(t, "manifest-image", labelValue1)
+
 	resource2 := descriptor.Resources[1]
 	require.Equal(t, "nginx", resource2.Name)
 	require.Equal(t, "1.21.0", resource2.Version)
@@ -249,15 +250,15 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *t
 		"alpine@",
 	}
 
-	for _, image := range images {
-		err := service.AddImagesToOcmDescriptor(descriptor, []string{image})
+	for _, img := range images {
+		err := service.AddImagesToOcmDescriptor(descriptor, []string{img})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "failed to append image")
 	}
 }
 
 func createEmptyDescriptor() *compdesc.ComponentDescriptor {
-	return &compdesc.ComponentDescriptor{
+	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: ocmv1.ObjectMeta{
 				Name:     "kyma-project.io/module/telemetry",
@@ -267,10 +268,13 @@ func createEmptyDescriptor() *compdesc.ComponentDescriptor {
 			Resources: []compdesc.Resource{},
 		},
 	}
+	// Apply defaults to match the state after DefaultResources is called
+	compdesc.DefaultResources(descriptor)
+	return descriptor
 }
 
 func createDescriptorWithResource(resource compdesc.Resource) *compdesc.ComponentDescriptor {
-	return &compdesc.ComponentDescriptor{
+	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: ocmv1.ObjectMeta{
 				Name:     "kyma-project.io/module/telemetry",
@@ -280,4 +284,7 @@ func createDescriptorWithResource(resource compdesc.Resource) *compdesc.Componen
 			Resources: []compdesc.Resource{resource},
 		},
 	}
+	// Apply defaults to match the state after DefaultResources is called
+	compdesc.DefaultResources(descriptor)
+	return descriptor
 }

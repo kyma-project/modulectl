@@ -41,17 +41,20 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 
 	resource := compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
+			Type:     ociartifact.Type,
+			Relation: ocmv1.ExternalRelation,
 			ElementMeta: compdesc.ElementMeta{
 				Name:    imgName,
-				Version: imgTag,
 				Labels:  []ocmv1.Label{*typeLabel},
+				Version: imgTag,
 			},
-			Type: ociartifact.Type,
 		},
 		Access: access,
 	}
 
 	descriptor.Resources = append(descriptor.Resources, resource)
+	compdesc.DefaultResources(descriptor)
+
 	return nil
 }
 

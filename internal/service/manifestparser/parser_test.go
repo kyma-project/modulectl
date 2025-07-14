@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
@@ -128,6 +129,148 @@ metadata:
 			}
 		})
 	}
+}
+
+func TestParse_WhenFileNotFound_ReturnsError(t *testing.T) {
+	parser := manifestparser.NewService()
+
+	_, err := parser.Parse("/nonexistent/file.yaml")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "parse manifest")
+}
+
+func TestParse_WhenCalledWithInvalidYAML_ReturnsError(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+  invalid: [unclosed array`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	_, err := parser.Parse(tmpFile)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "error converting YAML to JSON")
+}
+
+func TestParse_WhenCalledWithDocumentsWithoutKind_SkipsInvalidDocuments(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 2)
+	require.Equal(t, "Namespace", manifests[0].GetKind())
+	require.Equal(t, "ConfigMap", manifests[1].GetKind())
+}
+
+func TestParse_WhenCalledWithComplexDeployment_ParsesCorrectly(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    app: test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: app
+        image: nginx:1.20
+        ports:
+        - containerPort: 80`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 1)
+	require.Equal(t, "Deployment", manifests[0].GetKind())
+	require.Equal(t, "test-deployment", manifests[0].GetName())
+
+	replicasRaw, found, err := unstructured.NestedFieldNoCopy(manifests[0].Object, "spec", "replicas")
+	require.NoError(t, err)
+	require.True(t, found)
+
+	// Handle both int64 and float64 types that might be returned
+	var replicas int64
+	switch v := replicasRaw.(type) {
+	case int64:
+		replicas = v
+	case float64:
+		replicas = int64(v)
+	case int:
+		replicas = int64(v)
+	default:
+		t.Fatalf("unexpected type for replicas: %T", replicasRaw)
+	}
+	require.Equal(t, int64(3), replicas)
+}
+
+func createTempFile(t *testing.T, content string) string {
+	t.Helper()
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "test.yaml")
+
+	err := os.WriteFile(tmpFile, []byte(content), 0o600)
+	require.NoError(t, err)
+
+	return tmpFile
+}
+
+func TestParse_WhenCalledWithCommentsAndWhitespace_SkipsNonResourceDocs(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `# This is a comment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+---
+# Another comment
+# Multiple lines
+
+---
+  # Indented comment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 2)
+	require.Equal(t, "Namespace", manifests[0].GetKind())
+	require.Equal(t, "ConfigMap", manifests[1].GetKind())
 }
 
 func writeToFile(t *testing.T, name string, data []byte) {
