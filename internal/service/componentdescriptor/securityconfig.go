@@ -101,7 +101,7 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.Co
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	allImages := s.mergeAndDeduplicateImages(securityConfig.BDBA, manifestImages)
+	allImages := s.MergeAndDeduplicateImages(securityConfig.BDBA, manifestImages)
 
 	if err := s.imageService.AddImagesToOcmDescriptor(descriptor, allImages); err != nil {
 		return fmt.Errorf("failed to add images to component descriptor: %w", err)
@@ -150,7 +150,7 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 	return nil
 }
 
-func (s *SecurityConfigService) mergeAndDeduplicateImages(securityImages, manifestImages []string) []string {
+func (s *SecurityConfigService) MergeAndDeduplicateImages(securityImages, manifestImages []string) []string {
 	imageSet := make(map[string]struct{})
 
 	// Add security config images

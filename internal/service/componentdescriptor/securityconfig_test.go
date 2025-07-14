@@ -140,6 +140,54 @@ func TestSecurityConfigService_AppendSecurityScanConfig_FailsOnAddImages(t *test
 	require.ErrorContains(t, err, "failed to add images to component descriptor")
 }
 
+func TestSecurityConfigService_MergeAndDeduplicateImages_OnlySecurityImages(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceStub{})
+	require.NoError(t, err)
+
+	securityImages := []string{"image1:v1", "image2:v1"}
+	result := securityConfigService.MergeAndDeduplicateImages(securityImages, []string{})
+
+	require.Len(t, result, 2)
+	require.Contains(t, result, "image1:v1")
+	require.Contains(t, result, "image2:v1")
+}
+
+func TestSecurityConfigService_MergeAndDeduplicateImages_IdenticalImages(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceStub{})
+	require.NoError(t, err)
+
+	images := []string{"image1:v1", "image2:v1"}
+	result := securityConfigService.MergeAndDeduplicateImages(images, images)
+
+	require.Len(t, result, 2)
+	require.Contains(t, result, "image1:v1")
+	require.Contains(t, result, "image2:v1")
+}
+
+func TestSecurityConfigService_MergeAndDeduplicateImages_EmptySlices(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceStub{})
+	require.NoError(t, err)
+
+	result := securityConfigService.MergeAndDeduplicateImages([]string{}, []string{})
+	require.Empty(t, result)
+}
+
+func TestSecurityConfigService_MergeAndDeduplicateImages(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceStub{})
+	require.NoError(t, err)
+
+	// Test with overlapping images
+	securityImages := []string{"image1:v1", "image2:v1", ""}
+	manifestImages := []string{"image2:v1", "image3:v1", ""}
+
+	result := securityConfigService.MergeAndDeduplicateImages(securityImages, manifestImages)
+
+	require.Len(t, result, 3)
+	require.Contains(t, result, "image1:v1")
+	require.Contains(t, result, "image2:v1")
+	require.Contains(t, result, "image3:v1")
+}
+
 type fileReaderStub struct{}
 
 func (*fileReaderStub) FileExists(_ string) (bool, error) {
