@@ -99,7 +99,7 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create manifest file resolver: %w", err)
 	}
-	manifestParser := manifestparser.NewParser()
+	manifestParser := manifestparser.NewService()
 	imageService, err := image.NewService(manifestParser)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create image service: %w", err)
