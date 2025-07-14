@@ -98,7 +98,6 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.Co
 		return fmt.Errorf("failed to append security labels to sources: %w", err)
 	}
 
-	// NEW: Extract and merge images from both sources
 	manifestImages, err := s.imageService.ExtractImagesFromManifest(manifestPath)
 	if err != nil {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
