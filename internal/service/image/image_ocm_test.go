@@ -268,7 +268,6 @@ func createEmptyDescriptor() *compdesc.ComponentDescriptor {
 			Resources: []compdesc.Resource{},
 		},
 	}
-	// Apply defaults to match the state after DefaultResources is called
 	compdesc.DefaultResources(descriptor)
 	return descriptor
 }
@@ -284,7 +283,6 @@ func createDescriptorWithResource(resource compdesc.Resource) *compdesc.Componen
 			Resources: []compdesc.Resource{resource},
 		},
 	}
-	// Apply defaults to match the state after DefaultResources is called
 	compdesc.DefaultResources(descriptor)
 	return descriptor
 }
