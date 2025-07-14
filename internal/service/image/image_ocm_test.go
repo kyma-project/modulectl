@@ -2,15 +2,15 @@ package image_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
-	"fmt"
-	"github.com/kyma-project/modulectl/internal/service/image"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
