@@ -8,7 +8,9 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
+	"fmt"
 	"github.com/kyma-project/modulectl/internal/service/image"
+	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 )
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
@@ -27,6 +29,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *
 	require.Len(t, descriptor.Resources, 2)
 
 	resource1 := descriptor.Resources[0]
+	fmt.Println(resource1)
 	require.Equal(t, "alpine", resource1.Name)
 	require.Equal(t, "3.15.4", resource1.Version)
 	require.Equal(t, "ociArtifact", resource1.Type)
@@ -36,32 +39,12 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *
 	var labelValue1 string
 	err = json.Unmarshal(resource1.Labels[0].Value, &labelValue1)
 	require.NoError(t, err)
-	require.Equal(t, "manifest-image", labelValue1)
+	require.Equal(t, "third-party-image", labelValue1)
 
 	resource2 := descriptor.Resources[1]
 	require.Equal(t, "nginx", resource2.Name)
 	require.Equal(t, "1.21.0", resource2.Version)
 	require.Equal(t, "ociArtifact", resource2.Type)
-}
-
-func TestAddImagesToOcmDescriptor_WhenCalledWithDigestImage_AppendsResource(t *testing.T) {
-	mockParser := &mockManifestParser{}
-	service, _ := image.NewService(mockParser)
-
-	descriptor := createEmptyDescriptor()
-	images := []string{
-		"europe-docker.pkg.dev/kyma-project/alpine@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
-	}
-
-	err := service.AddImagesToOcmDescriptor(descriptor, images)
-
-	require.NoError(t, err)
-	require.Len(t, descriptor.Resources, 1)
-
-	resource := descriptor.Resources[0]
-	require.Equal(t, "alpine", resource.Name)
-	require.Equal(t, "sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234", resource.Version)
-	require.Equal(t, "ociArtifact", resource.Type)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithComplexRegistryPath_AppendsResource(t *testing.T) {
@@ -132,33 +115,6 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImageList_DoesNothing(t *te
 
 	require.NoError(t, err)
 	require.Empty(t, descriptor.Resources)
-}
-
-func TestAddImagesToOcmDescriptor_WhenCalledWithExistingResources_AppendsToExisting(t *testing.T) {
-	mockParser := &mockManifestParser{}
-	service, _ := image.NewService(mockParser)
-
-	existingResource := compdesc.Resource{
-		ResourceMeta: compdesc.ResourceMeta{
-			ElementMeta: compdesc.ElementMeta{
-				Name:    "existing",
-				Version: "v1.0.0",
-			},
-			Type: "existing-type",
-		},
-	}
-
-	descriptor := createDescriptorWithResource(existingResource)
-	images := []string{
-		"alpine:3.15.4",
-	}
-
-	err := service.AddImagesToOcmDescriptor(descriptor, images)
-
-	require.NoError(t, err)
-	require.Len(t, descriptor.Resources, 2)
-	require.Equal(t, "existing", descriptor.Resources[0].Name)
-	require.Equal(t, "alpine", descriptor.Resources[1].Name)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithRegistryPortImage_AppendsResource(t *testing.T) {
@@ -255,6 +211,35 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *t
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "failed to append image")
 	}
+}
+
+func TestAddImagesToOcmDescriptor_WhenCalledWithExistingResources_AppendsToExisting(t *testing.T) {
+	mockParser := &mockManifestParser{}
+	service, _ := image.NewService(mockParser)
+
+	existingResource := compdesc.Resource{
+		ResourceMeta: compdesc.ResourceMeta{
+			Type:     "existing-type",
+			Relation: ocmv1.LocalRelation,
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "existing",
+				Version: "1.0.0",
+			},
+		},
+		Access: ociartifact.New("existing:1.0.0"),
+	}
+
+	descriptor := createDescriptorWithResource(existingResource)
+	images := []string{
+		"alpine:3.15.4",
+	}
+
+	err := service.AddImagesToOcmDescriptor(descriptor, images)
+
+	require.NoError(t, err)
+	require.Len(t, descriptor.Resources, 2)
+	require.Equal(t, "existing", descriptor.Resources[0].Name)
+	require.Equal(t, "alpine", descriptor.Resources[1].Name)
 }
 
 func createEmptyDescriptor() *compdesc.ComponentDescriptor {

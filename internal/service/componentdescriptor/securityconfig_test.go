@@ -13,6 +13,12 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
+func Test_NewSecurityConfigService_ReturnsErrorOnNilImageService(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, nil)
+	require.ErrorContains(t, err, "imageService must not be nil")
+	require.Nil(t, securityConfigService)
+}
+
 func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
 	securityConfigService, err := componentdescriptor.NewSecurityConfigService(nil, &imageServiceStub{})
 	require.ErrorContains(t, err, "fileReader must not be nil")
@@ -106,6 +112,34 @@ func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnFileDoesNotExi
 	require.ErrorContains(t, err, "security config file does not exist")
 }
 
+func TestSecurityConfigService_ParseSecurityConfigData_ReturnErrOnInvalidYAML(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderInvalidYAMLStub{}, &imageServiceStub{})
+	require.NoError(t, err)
+
+	_, err = securityConfigService.ParseSecurityConfigData("testFile")
+	require.ErrorContains(t, err, "failed to unmarshal security config file")
+}
+
+func TestSecurityConfigService_AppendSecurityScanConfig_FailsOnImageExtraction(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceExtractErrorStub{})
+	require.NoError(t, err)
+
+	descriptor := &compdesc.ComponentDescriptor{}
+
+	err = securityConfigService.AppendSecurityScanConfig(descriptor, securityConfig, "manifest.yaml")
+	require.ErrorContains(t, err, "failed to extract images from manifest")
+}
+
+func TestSecurityConfigService_AppendSecurityScanConfig_FailsOnAddImages(t *testing.T) {
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(&fileReaderStub{}, &imageServiceAddErrorStub{})
+	require.NoError(t, err)
+
+	descriptor := &compdesc.ComponentDescriptor{}
+
+	err = securityConfigService.AppendSecurityScanConfig(descriptor, securityConfig, "manifest.yaml")
+	require.ErrorContains(t, err, "failed to add images to component descriptor")
+}
+
 type fileReaderStub struct{}
 
 func (*fileReaderStub) FileExists(_ string) (bool, error) {
@@ -168,4 +202,34 @@ func (*fileReaderFileExistsFalseStub) FileExists(_ string) (bool, error) {
 
 func (*fileReaderFileExistsFalseStub) ReadFile(_ string) ([]byte, error) {
 	return nil, nil
+}
+
+type imageServiceAddErrorStub struct{}
+
+func (*imageServiceAddErrorStub) ExtractImagesFromManifest(_ string) ([]string, error) {
+	return []string{"image1:v1"}, nil
+}
+
+func (*imageServiceAddErrorStub) AddImagesToOcmDescriptor(_ *compdesc.ComponentDescriptor, _ []string) error {
+	return errors.New("add images error")
+}
+
+type fileReaderInvalidYAMLStub struct{}
+
+func (*fileReaderInvalidYAMLStub) FileExists(_ string) (bool, error) {
+	return true, nil
+}
+
+func (*fileReaderInvalidYAMLStub) ReadFile(_ string) ([]byte, error) {
+	return []byte("invalid: yaml: content: ["), nil
+}
+
+type imageServiceExtractErrorStub struct{}
+
+func (*imageServiceExtractErrorStub) ExtractImagesFromManifest(_ string) ([]string, error) {
+	return nil, errors.New("extraction error")
+}
+
+func (*imageServiceExtractErrorStub) AddImagesToOcmDescriptor(_ *compdesc.ComponentDescriptor, _ []string) error {
+	return nil
 }

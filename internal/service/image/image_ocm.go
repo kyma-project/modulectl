@@ -6,10 +6,11 @@ import (
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
+	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 )
 
 const (
-	TypeManifestImage   = "manifest-image"
+	TypeManifestImage   = "third-party-image"
 	secScanBaseLabelKey = "scan.security.kyma-project.io"
 	typeLabelKey        = "type"
 	ocmVersion          = "v1"
@@ -41,7 +42,7 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 
 	resource := compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
-			Type:     ociartifact.Type,
+			Type:     ociartifacttypes.TYPE,
 			Relation: ocmv1.ExternalRelation,
 			ElementMeta: compdesc.ElementMeta{
 				Name:    imgName,
@@ -54,6 +55,10 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 
 	descriptor.Resources = append(descriptor.Resources, resource)
 	compdesc.DefaultResources(descriptor)
+
+	if err = compdesc.Validate(descriptor); err != nil {
+		return fmt.Errorf("failed to validate component descriptor: %w", err)
+	}
 
 	return nil
 }
