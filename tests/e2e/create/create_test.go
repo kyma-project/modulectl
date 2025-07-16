@@ -628,7 +628,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal("2.0.0"))
+				Expect(resource.Version).To(Equal("1.0.3"))
 
 				resource = descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("metadata"))
