@@ -5,11 +5,9 @@ package create_test
 import (
 	"os"
 
-	"fmt"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	"path/filepath"
 )
 
 var _ = Describe("Test 'create' command with private registry", Ordered, func() {
@@ -26,10 +24,6 @@ var _ = Describe("Test 'create' command with private registry", Ordered, func() 
 		var cmd createCmd
 		By("When invoked with valid module-config with insecure private OCI registry and registry credentials",
 			func() {
-
-				cwd, _ := filepath.Abs(templateOperatorPath)
-				fmt.Println("Current working directory:", cwd)
-
 				cmd = createCmd{
 					moduleConfigFile:          minimalConfig,
 					registry:                  privateOciRegistry,
