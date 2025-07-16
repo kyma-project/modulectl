@@ -148,7 +148,8 @@ func newCreateOptionsBuilder() *createOptionsBuilder {
 		withModuleConfigFile("create-module-config.yaml").
 		withRegistryURL("https://registry.kyma.cx").
 		withTemplateOutput("test").
-		withCredentials("user:password")
+		withCredentials("user:password").
+		withModuleSourcesGitDirectory(".")
 }
 
 func (b *createOptionsBuilder) build() create.Options {
@@ -177,6 +178,11 @@ func (b *createOptionsBuilder) withTemplateOutput(templateOutput string) *create
 
 func (b *createOptionsBuilder) withCredentials(credentials string) *createOptionsBuilder {
 	b.options.Credentials = credentials
+	return b
+}
+
+func (b *createOptionsBuilder) withModuleSourcesGitDirectory(moduleSourcesGitDirectory string) *createOptionsBuilder {
+	b.options.ModuleSourcesGitDirectory = moduleSourcesGitDirectory
 	return b
 }
 
