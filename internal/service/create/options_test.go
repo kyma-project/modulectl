@@ -58,11 +58,12 @@ func Test_Validate_Options(t *testing.T) {
 		{
 			name: "All fields valid",
 			options: create.Options{
-				Out:            iotools.NewDefaultOut(io.Discard),
-				ConfigFile:     "config.yaml",
-				Credentials:    "username:password",
-				TemplateOutput: "output",
-				RegistryURL:    "http://registry.example.com",
+				Out:                       iotools.NewDefaultOut(io.Discard),
+				ConfigFile:                "config.yaml",
+				Credentials:               "username:password",
+				TemplateOutput:            "output",
+				RegistryURL:               "http://registry.example.com",
+				ModuleSourcesGitDirectory: ".",
 			},
 			wantErr: false,
 		},
@@ -89,6 +90,19 @@ func Test_Validate_Options(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "opts.RegistryURL does not start with http(s)",
+		},
+		{
+			name: "ModuleSourcesGitDirectory is empty",
+			options: create.Options{
+				Out:                       iotools.NewDefaultOut(io.Discard),
+				ConfigFile:                "config.yaml",
+				Credentials:               "username:password",
+				TemplateOutput:            "output",
+				RegistryURL:               "http://registry.example.com",
+				ModuleSourcesGitDirectory: "",
+			},
+			wantErr: true,
+			errMsg:  "opts.ModuleSourcesGitDirectory must not be empty",
 		},
 	}
 
