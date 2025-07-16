@@ -4,9 +4,6 @@ dev-branch: main
 bdba:
   - europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
   - europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0
-  - docker.io/library/nginx:1.21.0
-  - postgres:13.4
-  - redis:6.2.5
 mend:
   language: golang-mod
   subprojects: false
