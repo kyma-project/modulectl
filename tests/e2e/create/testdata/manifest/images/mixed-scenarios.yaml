@@ -21,7 +21,8 @@ spec:
             - name: WEBHOOK_IMAGE
               value: "europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"
         - name: static
-          image: gcr.io/distroless/static:nonroot
+          image: gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c
+
 
 ---
 apiVersion: apps/v1
