@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-operator-deployment
+  labels:
+    app: template-operator-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-operator-deployment
+  template:
+    metadata:
+      name: template-operator-deployment
+      labels:
+        app: template-operator-deployment
+    spec:
+      containers:
+        - name: manager
+          image: europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
+          env:
+            - name: WEBHOOK_IMAGE
+              value: "europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"
+            - name: HELPER_IMAGE
+              value: "alpine:3.18.0"
+            - name: MIGRATION_IMAGE
+              value: "migrate/migrate:v4.16.0"
+            - name: NON_IMAGE_VAR
+              value: "some-config-value"

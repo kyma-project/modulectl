@@ -1,0 +1,9 @@
+name: template-operator
+version: 1.0.3
+channel: regular
+manifest: ./testdata/manifest/images/containers.yaml
+repository: https://github.com/kyma-project/template-operator
+documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
+icons:
+  - name: module-icon
+    link: https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png

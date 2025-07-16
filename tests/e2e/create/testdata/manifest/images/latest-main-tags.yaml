@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-operator-latest-main-tag
+  labels:
+    app: template-operator-latest-main-tag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-operator-latest-main-tag
+  template:
+    metadata:
+      name: template-operator-latest-main-tag
+      labels:
+        app: template-operator-latest-main-tag
+    spec:
+      containers:
+        - name: manager
+          image: europe-docker.pkg.dev/kyma-project/prod/template-operator:latest
+        - name: helper
+          image: alpine:main
+        - name: valid
+          image: alpine:3.18.0
+      

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-operator-mixed
+  labels:
+    app: template-operator-mixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-operator-mixed
+  template:
+    spec:
+      initContainers:
+        - name: postgres-init
+          image: postgres:15.3
+      containers:
+        - name: manager
+          image: europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
+          env:
+            - name: WEBHOOK_IMAGE
+              value: "europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"
+        - name: static
+          image: gcr.io/distroless/static:nonroot
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: postgres
+    labels:
+        app: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: "postgres"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15.3
+          ports:
+            - containerPort: 5432
