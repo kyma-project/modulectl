@@ -16,7 +16,6 @@ const (
 	ocmVersion          = "v1"
 )
 
-// AddImagesToOcmDescriptor - as per ticket requirements
 func (s *Service) AddImagesToOcmDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
 	for _, image := range images {
 		if err := s.appendImageResource(descriptor, image); err != nil {

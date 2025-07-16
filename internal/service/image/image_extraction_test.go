@@ -96,7 +96,7 @@ func TestExtractImagesFromManifest_WhenCalledWithEnvImages_ReturnsImages(t *test
 	require.Contains(t, images, "tool:v2.0.0")
 }
 
-func TestExtractImagesFromManifest_WhenCalledWithLatestTag_FiltersOutImage(t *testing.T) {
+func TestExtractImagesFromManifest_WhenCalledWithLatestTag_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	service, _ := image.NewService(mockParser)
 
@@ -110,13 +110,13 @@ func TestExtractImagesFromManifest_WhenCalledWithLatestTag_FiltersOutImage(t *te
 
 	images, err := service.ExtractImagesFromManifest("test.yaml")
 
-	require.NoError(t, err)
-	require.Len(t, images, 1)
-	require.Contains(t, images, "valid:v1.0.0")
-	require.NotContains(t, images, "app:latest")
+	require.Error(t, err)
+	require.Nil(t, images)
+	require.Contains(t, err.Error(), "image tag is disallowed")
+	require.Contains(t, err.Error(), "latest")
 }
 
-func TestExtractImagesFromManifest_WhenCalledWithMainTag_FiltersOutImage(t *testing.T) {
+func TestExtractImagesFromManifest_WhenCalledWithMainTag_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	service, _ := image.NewService(mockParser)
 
@@ -130,13 +130,13 @@ func TestExtractImagesFromManifest_WhenCalledWithMainTag_FiltersOutImage(t *test
 
 	images, err := service.ExtractImagesFromManifest("test.yaml")
 
-	require.NoError(t, err)
-	require.Len(t, images, 1)
-	require.Contains(t, images, "valid:v1.0.0")
-	require.NotContains(t, images, "app:main")
+	require.Error(t, err)
+	require.Nil(t, images)
+	require.Contains(t, err.Error(), "image tag is disallowed")
+	require.Contains(t, err.Error(), "main")
 }
 
-func TestExtractImagesFromManifest_WhenCalledWithLatestTagUppercase_FiltersOutImage(t *testing.T) {
+func TestExtractImagesFromManifest_WhenCalledWithLatestTagUppercase_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	service, _ := image.NewService(mockParser)
 
@@ -151,12 +151,13 @@ func TestExtractImagesFromManifest_WhenCalledWithLatestTagUppercase_FiltersOutIm
 
 	images, err := service.ExtractImagesFromManifest("test.yaml")
 
-	require.NoError(t, err)
-	require.Len(t, images, 1)
-	require.Contains(t, images, "valid:v1.0.0")
+	require.Error(t, err)
+	require.Nil(t, images)
+	require.Contains(t, err.Error(), "image tag is disallowed")
+	require.Contains(t, err.Error(), "Latest")
 }
 
-func TestExtractImagesFromManifest_WhenCalledWithMainTagUppercase_FiltersOutImage(t *testing.T) {
+func TestExtractImagesFromManifest_WhenCalledWithMainTagUppercase_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	service, _ := image.NewService(mockParser)
 
@@ -171,9 +172,10 @@ func TestExtractImagesFromManifest_WhenCalledWithMainTagUppercase_FiltersOutImag
 
 	images, err := service.ExtractImagesFromManifest("test.yaml")
 
-	require.NoError(t, err)
-	require.Len(t, images, 1)
-	require.Contains(t, images, "valid:v1.0.0")
+	require.Error(t, err)
+	require.Nil(t, images)
+	require.Contains(t, err.Error(), "image tag is disallowed")
+	require.Contains(t, err.Error(), "Main")
 }
 
 func TestExtractImagesFromManifest_WhenCalledWithInvalidImageFormat_FiltersOutImage(t *testing.T) {
@@ -399,7 +401,7 @@ func TestExtractImagesFromManifest_WhenCalledWithDigestImages_ReturnsImages(t *t
 	require.Contains(t, images, "alpine@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234")
 }
 
-func TestExtractImagesFromManifest_WhenCalledWithEmptyTag_FiltersOutImage(t *testing.T) {
+func TestExtractImagesFromManifest_WhenCalledWithEmptyTag_ReturnsError(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	service, _ := image.NewService(mockParser)
 
@@ -419,11 +421,10 @@ func TestExtractImagesFromManifest_WhenCalledWithEmptyTag_FiltersOutImage(t *tes
 
 	images, err := service.ExtractImagesFromManifest("test.yaml")
 
-	require.NoError(t, err)
-	require.Len(t, images, 2)
-	require.Contains(t, images, "app:v1.0.0")
-	require.Contains(t, images, "valid:v1.0.0")
-	require.NotContains(t, images, "image-no-tag-colon:")
+	require.Error(t, err)
+	require.Nil(t, images)
+	require.Contains(t, err.Error(), "invalid image reference")
+	require.Contains(t, err.Error(), "image-no-tag-colon:")
 }
 
 func TestExtractImagesFromManifest_WhenCalledWithWhitespaceInImage_FiltersOutImage(t *testing.T) {

@@ -82,6 +82,12 @@ func TestParseImageReference_WhenCalledWithValidImageWithTag_ReturnsNameAndTag(t
 			expectedName: "image",
 			expectedTag:  "tag",
 		},
+		{
+			name:         "valid image URL k3d registry with port and path to the image and tag",
+			imageURL:     "k3d-abc-registry.com:443/kyma-project/prod/bar-image:2.0.1",
+			expectedName: "bar-image",
+			expectedTag:  "2.0.1",
+		},
 	}
 
 	for _, tt := range tests {

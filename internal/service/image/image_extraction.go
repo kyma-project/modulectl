@@ -1,6 +1,7 @@
 package image
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -8,38 +9,54 @@ import (
 )
 
 const (
-	LatestTag = "latest"
-	MainTag   = "main"
+	LatestTag       = "latest"
+	MainTag         = "main"
+	KindDeploymnent = "Deployment"
+	KindStatefulSet = "StatefulSet"
+)
+
+var (
+	ErrMissingImageTag = errors.New("image is missing a tag")
+	ErrDisallowedTag   = errors.New("image tag is disallowed (latest/main)")
 )
 
 func (s *Service) ExtractImagesFromManifest(manifestPath string) ([]string, error) {
 	manifests, err := s.manifestParser.Parse(manifestPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse manifest: %w", err)
+		return nil, fmt.Errorf("failed to parse manifest at %q: %w", manifestPath, err)
 	}
 
 	imageSet := make(map[string]struct{})
 	for _, manifest := range manifests {
-		s.extractImages(manifest, imageSet)
+		if err := s.extractImages(manifest, imageSet); err != nil {
+			return nil, fmt.Errorf("failed to extract images from %q kind: %w", manifest.GetKind(), err)
+		}
 	}
 
 	return setToSlice(imageSet), nil
 }
 
-func (s *Service) extractImages(manifest *unstructured.Unstructured, imageSet map[string]struct{}) {
+func (s *Service) extractImages(manifest *unstructured.Unstructured, imageSet map[string]struct{}) error {
 	kind := manifest.GetKind()
-	if kind != "Deployment" && kind != "StatefulSet" {
-		return
+	if kind != KindDeploymnent && kind != KindStatefulSet {
+		return nil
 	}
 
-	s.extractFromContainers(manifest, imageSet, "spec", "template", "spec", "containers")
-	s.extractFromContainers(manifest, imageSet, "spec", "template", "spec", "initContainers")
+	if err := s.extractFromContainers(manifest, imageSet, "spec", "template", "spec", "containers"); err != nil {
+		return fmt.Errorf("failed to extract from containers: %w", err)
+	}
+
+	if err := s.extractFromContainers(manifest, imageSet, "spec", "template", "spec", "initContainers"); err != nil {
+		return fmt.Errorf("failed to extract from initContainers: %w", err)
+	}
+
+	return nil
 }
 
-func (s *Service) extractFromContainers(manifest *unstructured.Unstructured, imageSet map[string]struct{}, path ...string) {
+func (s *Service) extractFromContainers(manifest *unstructured.Unstructured, imageSet map[string]struct{}, path ...string) error {
 	containers, found, _ := unstructured.NestedSlice(manifest.Object, path...)
 	if !found {
-		return
+		return nil
 	}
 
 	for _, container := range containers {
@@ -48,20 +65,28 @@ func (s *Service) extractFromContainers(manifest *unstructured.Unstructured, ima
 			continue
 		}
 
-		// Extract from containers.image
-		if image, found, _ := unstructured.NestedString(containerMap, "image"); found && s.isValidImage(image) {
-			imageSet[image] = struct{}{}
+		if image, found, _ := unstructured.NestedString(containerMap, "image"); found {
+			valid, err := s.isValidImage(image)
+			if err != nil {
+				return fmt.Errorf("invalid image %q in %v: %w", image, path, err)
+			}
+			if valid {
+				imageSet[image] = struct{}{}
+			}
 		}
 
-		// Extract from containers.env[].value
-		s.extractFromEnv(containerMap, imageSet)
+		if err := s.extractFromEnv(containerMap, imageSet); err != nil {
+			return fmt.Errorf("extracting env images failed: %w", err)
+		}
 	}
+
+	return nil
 }
 
-func (s *Service) extractFromEnv(container map[string]interface{}, imageSet map[string]struct{}) {
+func (s *Service) extractFromEnv(container map[string]interface{}, imageSet map[string]struct{}) error {
 	envVars, found, _ := unstructured.NestedSlice(container, "env")
 	if !found {
-		return
+		return nil
 	}
 
 	for _, envVar := range envVars {
@@ -70,44 +95,52 @@ func (s *Service) extractFromEnv(container map[string]interface{}, imageSet map[
 			continue
 		}
 
-		if value, found, _ := unstructured.NestedString(envMap, "value"); found && s.isValidImage(value) {
-			imageSet[value] = struct{}{}
+		if value, found, _ := unstructured.NestedString(envMap, "value"); found {
+			valid, err := s.isValidImage(value)
+			if err != nil {
+				return fmt.Errorf("invalid image %q in env var: %w", value, err)
+			}
+			if valid {
+				imageSet[value] = struct{}{}
+			}
 		}
 	}
+
+	return nil
 }
 
-// isValidImage, only skip latest/main as are not allowed for prod modules manifest
-func (s *Service) isValidImage(value string) bool {
+func (s *Service) isValidImage(value string) (bool, error) {
 	if !isValidImageFormat(value) {
-		return false
+		return false, nil
 	}
 
-	// Parse image to get tag
 	_, tag, err := ParseImageReference(value)
 	if err != nil {
-		return false
+		return false, fmt.Errorf("invalid image reference %q: %w", value, err)
 	}
 
 	if tag == "" {
-		return false
+		return false, fmt.Errorf("%w: %q", ErrMissingImageTag, value)
 	}
 
-	// Only skip latest and main tags
-	return !isMainOrLatestTag(tag)
+	if isMainOrLatestTag(tag) {
+		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, tag)
+	}
+
+	return true, nil
 }
 
 func isValidImageFormat(value string) bool {
-	if value == "" || len(value) < 3 || len(value) > 256 {
+	if len(value) < 3 || len(value) > 256 {
 		return false
 	}
 
 	hasTagOrDigest := false
-	for _, char := range value {
-		if char == ':' || char == '@' {
+	for _, c := range value {
+		switch c {
+		case ':', '@':
 			hasTagOrDigest = true
-			break
-		}
-		if char == ' ' || char == '\t' || char == '\n' || char == '\r' {
+		case ' ', '\t', '\n', '\r':
 			return false
 		}
 	}
@@ -115,14 +148,13 @@ func isValidImageFormat(value string) bool {
 	return hasTagOrDigest
 }
 
-// isMainOrLatestTag checks if tag should be skipped - only latest and main
 func isMainOrLatestTag(tag string) bool {
-	if tag == "" {
+	switch strings.ToLower(tag) {
+	case LatestTag, MainTag:
 		return true
+	default:
+		return false
 	}
-
-	lowercaseTag := strings.ToLower(tag)
-	return lowercaseTag == LatestTag || lowercaseTag == MainTag
 }
 
 func setToSlice(imageSet map[string]struct{}) []string {
