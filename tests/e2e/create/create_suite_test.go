@@ -61,7 +61,7 @@ const (
 	withManifestEnvVariables      = validConfigs + "with-manifest-env-variables.yaml"
 	withManifestShaDigest         = validConfigs + "with-manifest-sha-digest.yaml"
 	withManifestMixedScenarios    = validConfigs + "with-manifest-mixed-scenarios.yaml"
-	withManifestMixedWithSecurity = validConfigs + "with-manifest-mixed-with-security.yaml"
+	withManifestMixedWithSecurity = validConfigs + "with-manifest-and-security.yaml"
 	withManifestNoImages          = validConfigs + "with-manifest-no-deployment-statefulset.yaml"
 
 	ociRegistry        = "http://k3d-oci.localhost:5001"
