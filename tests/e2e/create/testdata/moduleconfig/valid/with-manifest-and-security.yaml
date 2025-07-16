@@ -1,4 +1,4 @@
-name: template-operator
+name: kyma-project.io/module/template-operator
 version: 1.0.3
 channel: regular
 manifest: .testdata/manifest/images/mixed-scenarios.yaml
