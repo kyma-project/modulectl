@@ -2,6 +2,7 @@ package image
 
 import (
 	"fmt"
+	"strings"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -36,6 +37,13 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 		return fmt.Errorf("failed to create label: %w", err)
 	}
 
+	var version string
+	if strings.HasPrefix(imgTag, "sha256:") {
+		digest := strings.TrimPrefix(imgTag, "sha256:")
+		version = "0.0.0+sha256." + digest
+	} else {
+		version = imgTag
+	}
 	access := ociartifact.New(imageURL)
 	access.SetType(ociartifact.Type)
 
@@ -46,7 +54,7 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 			ElementMeta: compdesc.ElementMeta{
 				Name:    imgName,
 				Labels:  []ocmv1.Label{*typeLabel},
-				Version: imgTag,
+				Version: version,
 			},
 		},
 		Access: access,
