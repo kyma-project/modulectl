@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/storage/memory"
 )
 
 const HeadRef = "HEAD"
@@ -17,20 +16,14 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) GetLatestCommit(repoURL string) (string, error) {
+func (s *Service) GetLatestCommit(repoPath string) (string, error) {
 	if s.latestCommit != "" {
 		return s.latestCommit, nil
 	}
 
-	repo, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
-		URL:           repoURL,
-		SingleBranch:  true,
-		NoCheckout:    true,
-		Depth:         1,
-		ReferenceName: HeadRef,
-	})
+	repo, err := git.PlainOpen(repoPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to clone repo: %w", err)
+		return "", fmt.Errorf("failed to open repo: %w", err)
 	}
 
 	ref, err := repo.Head()

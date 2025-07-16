@@ -13,7 +13,7 @@ import (
 )
 
 type GitService interface {
-	GetLatestCommit(repoURL string) (string, error)
+	GetLatestCommit(repoPath string) (string, error)
 }
 
 type GitSourcesService struct {
@@ -31,7 +31,7 @@ func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
 }
 
 func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
-	gitRepoURL, moduleVersion string,
+	gitRepoPath, moduleVersion string,
 ) error {
 	label, err := ocmv1.NewLabel(refLabel, git.HeadRef, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
@@ -47,12 +47,12 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 		},
 	}
 
-	latestCommit, err := s.gitService.GetLatestCommit(gitRepoURL)
+	latestCommit, err := s.gitService.GetLatestCommit(gitRepoPath)
 	if err != nil {
 		return fmt.Errorf("failed to get latest commit: %w", err)
 	}
 
-	access := github.New(gitRepoURL, "", latestCommit)
+	access := github.New(gitRepoPath, "", latestCommit)
 
 	componentDescriptor.Sources = append(componentDescriptor.Sources, compdesc.Source{
 		SourceMeta: sourceMeta,
