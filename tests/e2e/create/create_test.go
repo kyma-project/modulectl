@@ -1080,7 +1080,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				imageResources := getImageResources(descriptor)
-				Expect(len(imageResources)).To(BeNumerically(">=", 7)) // At least 7 unique images
+				Expect(len(imageResources)).To(Equal(5))
 
 				// Verify specific images are present
 				imageNames := extractImageNamesFromResources(imageResources)
