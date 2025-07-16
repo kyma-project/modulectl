@@ -14,7 +14,6 @@ import (
 
 type GitService interface {
 	GetLatestCommit(repoURL string) (string, error)
-	GetRemoteGitFileContent(repoURL, commit, filePath string) (string, error)
 }
 
 type GitSourcesService struct {

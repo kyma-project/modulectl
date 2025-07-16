@@ -50,16 +50,8 @@ func (*gitServiceStub) GetLatestCommit(_ string) (string, error) {
 	return "latest", nil
 }
 
-func (*gitServiceStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "test", nil
-}
-
 type gitServiceErrorStub struct{}
 
 func (*gitServiceErrorStub) GetLatestCommit(_ string) (string, error) {
 	return "", errors.New("failed to get commit")
-}
-
-func (*gitServiceErrorStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "", errors.New("failed to get file content")
 }
