@@ -31,7 +31,7 @@ func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
 }
 
 func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
-	gitRepoPath, moduleVersion string,
+	gitRepoPath, gitRepoUrl, moduleVersion string,
 ) error {
 	label, err := ocmv1.NewLabel(refLabel, git.HeadRef, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
@@ -52,7 +52,7 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 		return fmt.Errorf("failed to get latest commit: %w", err)
 	}
 
-	access := github.New(gitRepoPath, "", latestCommit)
+	access := github.New(gitRepoUrl, "", latestCommit)
 
 	componentDescriptor.Sources = append(componentDescriptor.Sources, compdesc.Source{
 		SourceMeta: sourceMeta,
