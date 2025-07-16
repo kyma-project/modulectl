@@ -1086,7 +1086,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageNames := extractImageNamesFromResources(imageResources)
 				Expect(imageNames).To(ContainElement("template-operator"))
 				Expect(imageNames).To(ContainElement("webhook"))
-				Expect(imageNames).To(ContainElement("nginx")) // from security config
+				Expect(imageNames).To(ContainElement("nginx"))
 				Expect(imageNames).To(ContainElement("postgres"))
 				Expect(imageNames).To(ContainElement("static"))
 
