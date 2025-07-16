@@ -16,6 +16,7 @@ type Options struct {
 	Insecure                  bool
 	TemplateOutput            string
 	RegistryURL               string
+	ModuleSourcesGitDirectory string
 	OverwriteComponentVersion bool
 	DryRun                    bool
 }
