@@ -63,7 +63,7 @@ func Test_Validate_Options(t *testing.T) {
 				Credentials:               "username:password",
 				TemplateOutput:            "output",
 				RegistryURL:               "http://registry.example.com",
-				ModuleSourcesGitDirectory: ".",
+				ModuleSourcesGitDirectory: "../../../",
 			},
 			wantErr: false,
 		},
@@ -103,6 +103,19 @@ func Test_Validate_Options(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "opts.ModuleSourcesGitDirectory must not be empty",
+		},
+		{
+			name: "ModuleSourcesGitDirectory is not a git directory",
+			options: create.Options{
+				Out:                       iotools.NewDefaultOut(io.Discard),
+				ConfigFile:                "config.yaml",
+				Credentials:               "username:password",
+				TemplateOutput:            "output",
+				RegistryURL:               "http://registry.example.com",
+				ModuleSourcesGitDirectory: ".",
+			},
+			wantErr: true,
+			errMsg:  "opts.ModuleSourcesGitDirectory must point to a valid git repository",
 		},
 	}
 

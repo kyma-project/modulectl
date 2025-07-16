@@ -2,6 +2,8 @@ package create
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -53,6 +55,11 @@ func (opts Options) Validate() error {
 
 	if opts.ModuleSourcesGitDirectory == "" {
 		return fmt.Errorf("opts.ModuleSourcesGitDirectory must not be empty: %w", commonerrors.ErrInvalidOption)
+	} else {
+		if isGitDir := isGitDirectory(opts.ModuleSourcesGitDirectory); !isGitDir {
+			return fmt.Errorf("opts.ModuleSourcesGitDirectory must point to a valid git repository: %w",
+				commonerrors.ErrInvalidOption)
+		}
 	}
 
 	if opts.OverwriteComponentVersion {
@@ -64,4 +71,18 @@ func (opts Options) Validate() error {
 	}
 
 	return nil
+}
+
+func isGitDirectory(path string) bool {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+
+	gitPath := filepath.Join(absPath, ".git")
+	info, err := os.Stat(gitPath)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
 }
