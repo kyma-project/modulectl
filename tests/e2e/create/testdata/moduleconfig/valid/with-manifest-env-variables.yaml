@@ -1,7 +1,7 @@
 name: kyma-project.io/module/template-operator
 version: 1.0.3
 channel: regular
-manifest: .testdata/manifest/images/env-variables.yaml
+manifest: ../../manifest/images/env-variables.yaml
 repository: https://github.com/kyma-project/template-operator
 documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
 icons:
