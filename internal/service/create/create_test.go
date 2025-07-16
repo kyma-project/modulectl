@@ -149,7 +149,7 @@ func newCreateOptionsBuilder() *createOptionsBuilder {
 		withRegistryURL("https://registry.kyma.cx").
 		withTemplateOutput("test").
 		withCredentials("user:password").
-		withModuleSourcesGitDirectory(".")
+		withModuleSourcesGitDirectory("../../../")
 }
 
 func (b *createOptionsBuilder) build() create.Options {
