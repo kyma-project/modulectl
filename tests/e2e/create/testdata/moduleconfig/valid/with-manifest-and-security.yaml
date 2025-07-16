@@ -7,4 +7,4 @@ documentation: https://github.com/kyma-project/template-operator/blob/main/READM
 icons:
   - name: module-icon
     link: https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png
-security: ./testdata/sec-scanners-config/config.yaml
+security: ./testdata/sec-scanners-config/config-images.yaml
