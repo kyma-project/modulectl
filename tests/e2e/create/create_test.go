@@ -1092,6 +1092,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				// Verify deduplication - should not have duplicates
 				imageURLs := extractImageURLsFromResources(imageResources)
+				fmt.Printf("Image URLs: %v\n", imageURLs)
 				count := 0
 				for _, url := range imageURLs {
 					if url == "europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3" {
