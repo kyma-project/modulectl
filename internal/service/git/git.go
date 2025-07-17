@@ -16,12 +16,12 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) GetLatestCommit(repoPath string) (string, error) {
+func (s *Service) GetLatestCommit(gitRepoPath string) (string, error) {
 	if s.latestCommit != "" {
 		return s.latestCommit, nil
 	}
 
-	repo, err := git.PlainOpen(repoPath)
+	repo, err := git.PlainOpen(gitRepoPath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open repo: %w", err)
 	}

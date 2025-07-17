@@ -41,7 +41,7 @@ type SecurityConfigService interface {
 
 type GitSourcesService interface {
 	AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
-		gitRepoPath, gitRepoUrl, moduleVersion string) error
+		gitRepoPath, gitRepoURL, moduleVersion string) error
 }
 
 type ComponentArchiveService interface {
