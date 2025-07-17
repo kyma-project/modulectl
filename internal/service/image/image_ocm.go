@@ -64,7 +64,6 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 	compdesc.DefaultResources(descriptor)
 
 	if err = compdesc.Validate(descriptor); err != nil {
-		fmt.Printf("[debug]: Adding resource to descriptor: %v\n", imageURL)
 		return fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 

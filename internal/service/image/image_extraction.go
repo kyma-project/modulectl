@@ -68,11 +68,9 @@ func (s *Service) extractFromContainers(manifest *unstructured.Unstructured, ima
 		if image, found, _ := unstructured.NestedString(containerMap, "image"); found {
 			valid, err := s.isValidImage(image)
 			if err != nil {
-				fmt.Printf("[DEBUG] Invalid image skipped: %s, error: %v\n", image, err)
-				continue // Skip invalid images, but log them
+				return fmt.Errorf("invalid image %q in %v: %w", image, path, err)
 			}
 			if valid {
-				fmt.Printf("[DEBUG] Valid image found: %s\n", image)
 				imageSet[image] = struct{}{}
 			}
 		}

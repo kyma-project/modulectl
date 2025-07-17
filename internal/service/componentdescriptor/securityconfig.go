@@ -166,20 +166,10 @@ func (s *SecurityConfigService) MergeAndDeduplicateImages(securityImages, manife
 			imageSet[img] = struct{}{}
 		}
 	}
-	// Debug log to verify deduplication
-	fmt.Println("DEBUG: BEFORE - Deduplicated images:")
-	for img := range imageSet {
-		fmt.Println("  -", img)
-	}
 	// Convert back to slice
 	result := make([]string, 0, len(imageSet))
 	for img := range imageSet {
 		result = append(result, img)
-	}
-	// Debug log to verify deduplication
-	fmt.Println("DEBUG: AFTER - Deduplicated images:")
-	for img := range imageSet {
-		fmt.Println("  -", img)
 	}
 	return result
 }
