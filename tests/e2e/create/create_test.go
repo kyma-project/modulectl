@@ -1162,11 +1162,29 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				imageResources := getImageResources(descriptor)
-				imageNames := extractImageNamesFromResources(imageResources)
-
-				Expect(imageNames).To(ContainElement("template-operator"))
-				Expect(imageNames).To(ContainElement("webhook"))
-				Expect(imageNames).To(ContainElement("nginx"))
+				for _, resource := range imageResources {
+					if resource.Name == "template-operator" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3"))
+					}
+					if resource.Name == "webhook" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"))
+					}
+					if resource.Name == "nginx" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("nginx:1.25.0"))
+					}
+				}
 			})
 		})
 	})
@@ -1192,15 +1210,32 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				imageResources := getImageResources(descriptor)
-				imageNames := extractImageNamesFromResources(imageResources)
-
-				Expect(imageNames).To(ContainElement("busybox"))
-				Expect(imageNames).To(ContainElement("migrate"))
-				Expect(imageNames).To(ContainElement("alpine"))
+				for _, resource := range imageResources {
+					if resource.Name == "busybox" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("busybox:1.35.0"))
+					}
+					if resource.Name == "migrate" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("migrate/migrate:v4.16.0"))
+					}
+					if resource.Name == "alpine" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("alpine:3.18.0"))
+					}
+				}
 			})
 		})
 	})
-
 	// Test for SHA digest image handling
 	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
