@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
@@ -1054,6 +1055,250 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			})
 		})
 	})
+
+	// Test for successful image extraction and merging with security config
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images from both manifest and security config", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestMixedWithSecurity,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("And the module template should contain merged and deduplicated images", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				Expect(len(imageResources)).To(Equal(6))
+
+				// Verify specific images are present
+				imageNames := extractImageNamesFromResources(imageResources)
+				fmt.Printf("Image Names: %v\n", imageNames)
+
+				Expect(imageNames).To(ContainElement("template-operator"))
+				Expect(imageNames).To(ContainElement("webhook"))
+				Expect(imageNames).To(ContainElement("nginx"))
+				Expect(imageNames).To(ContainElement("postgres"))
+				Expect(imageNames).To(ContainElement("static"))
+
+				// Verify deduplication - should not have duplicates
+				imageURLs := extractImageURLsFromResources(imageResources)
+				fmt.Printf("Image URLs: %v\n", imageURLs)
+				count := 0
+				for _, url := range imageURLs {
+					if url == "europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3" {
+						count++
+					}
+				}
+				Expect(count).To(Equal(1), "template-operator:1.0.3 should appear only once")
+			})
+		})
+	})
+
+	// Test for env variable image extraction
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images from env variables", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestEnvVariables,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should succeed and extract images from env variables", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from env variables", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				// Check that the image reference matches expected value for "webhook"
+				for _, resource := range imageResources {
+					if resource.Name == "webhook" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"))
+					}
+				}
+			})
+		})
+	})
+
+	// Test for containers image extraction
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images in containers", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestContainers,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should succeed and extract images from containers", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from containers", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				for _, resource := range imageResources {
+					if resource.Name == "template-operator" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3"))
+					}
+					if resource.Name == "webhook" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"))
+					}
+					if resource.Name == "nginx" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("nginx:1.25.0"))
+					}
+				}
+			})
+		})
+	})
+
+	// Test for initContainers image extraction
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images in initContainers", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestInitContainers,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should succeed and extract images from initContainers", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from initContainers", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				for _, resource := range imageResources {
+					if resource.Name == "busybox" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("busybox:1.35.0"))
+					}
+					if resource.Name == "migrate" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("migrate/migrate:v4.16.0"))
+					}
+					if resource.Name == "alpine" {
+						accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+						Expect(err).ToNot(HaveOccurred())
+						ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+						Expect(ok).To(BeTrue())
+						Expect(ociSpec.ImageReference).To(Equal("alpine:3.18.0"))
+					}
+				}
+			})
+		})
+	})
+	// Test for SHA digest image handling
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images with SHA digest", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestShaDigest,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should succeed and extract images with SHA digest", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images with SHA digest", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+				fmt.Printf("[DEBUG] - Descriptor: %v\n", descriptor)
+				for _, resource := range descriptor.Resources {
+					fmt.Printf("[DEBUG] - Resource: %v, Version: %v, Access: %v\n", resource.Name, resource.Version, resource.Access)
+				}
+
+				fmt.Printf("[DEBUG] - Descriptor.Resources: %v\n", descriptor.Resources)
+				imageResources := getImageResources(descriptor)
+				// imageResources[0] is nginx with SHA digest, imageResources[1] is alpine
+				Expect(imageResources[0].Name).To(Equal("nginx"))
+				accessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(imageResources[0].Access)
+				Expect(err).ToNot(HaveOccurred())
+				ociSpec0, ok := accessSpec0.(*ociartifact.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(ociSpec0.ImageReference).To(Equal("nginx@sha256:fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10"))
+				Expect(imageResources[0].Version).To(Equal("0.0.0+sha256.fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10"))
+
+				Expect(imageResources[1].Name).To(Equal("alpine"))
+				accessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(imageResources[1].Access)
+				Expect(err).ToNot(HaveOccurred())
+				ociSpec1, ok := accessSpec1.(*ociartifact.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(ociSpec1.ImageReference).To(Equal("alpine:3.18.0"))
+				Expect(imageResources[1].Version).To(Equal("3.18.0"))
+			})
+		})
+	})
+
+	// Test for latest/main tag validation failure
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with manifest containing latest/main tags", func() {
+			cmd = createCmd{
+				moduleConfigFile: withManifestLatestMainTags,
+				registry:         ociRegistry,
+				insecure:         true,
+				output:           templateOutputPath,
+			}
+		})
+		By("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("image tag is disallowed"))
+		})
+	})
 })
 
 // Test helper functions
@@ -1109,6 +1354,49 @@ func filesIn(dir string) []string {
 	}
 
 	return res
+}
+
+// Helper functions for image resource testing
+func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Resource {
+	var imageResources []compdesc.Resource
+	for _, resource := range descriptor.Resources {
+		fmt.Printf("[DEBUG] - Resource Name: %v,\n Resource Version: %v,\n Resource.Access.Type: %v,\n Resource.Access: %v\n", resource.Name, resource.Version, resource.Type, resource.Access)
+		if resource.Type == "ociArtifact" {
+			imageResources = append(imageResources, resource)
+		}
+	}
+	return imageResources
+}
+
+func extractImageNamesFromResources(resources []compdesc.Resource) []string {
+	var names []string
+	for _, resource := range resources {
+		if ociSpec, ok := resource.Access.(*ociartifact.AccessSpec); ok {
+			ref := ociSpec.ImageReference
+			parts := strings.Split(ref, "/")
+			last := parts[len(parts)-1]
+			name := strings.SplitN(last, ":", 2)[0]
+			name = strings.SplitN(name, "@", 2)[0]
+			names = append(names, name)
+		} else {
+			names = append(names, resource.Name)
+		}
+	}
+	return names
+}
+
+func extractImageURLsFromResources(resources []compdesc.Resource) []string {
+	var urls []string
+	for _, resource := range resources {
+		accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+		if err != nil {
+			continue
+		}
+		if ociSpec, ok := accessSpec.(*ociartifact.AccessSpec); ok {
+			urls = append(urls, ociSpec.ImageReference)
+		}
+	}
+	return urls
 }
 
 func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor *compdesc.ComponentDescriptor) {

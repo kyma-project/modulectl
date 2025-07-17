@@ -21,6 +21,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 	"github.com/kyma-project/modulectl/internal/service/git"
+	"github.com/kyma-project/modulectl/internal/service/image"
 	"github.com/kyma-project/modulectl/internal/service/manifestparser"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
@@ -98,7 +99,11 @@ func buildModuleService() (*create.Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create manifest file resolver: %w", err)
 	}
-
+	manifestParser := manifestparser.NewService()
+	imageService, err := image.NewService(manifestParser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create image service: %w", err)
+	}
 	defaultCRFileResolver, err := fileresolver.NewFileResolver("kyma-module-default-cr-*.yaml", tmpFileSystem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create default CR file resolver: %w", err)
@@ -114,7 +119,7 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create git sources service: %w", err)
 	}
 
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil)
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil, imageService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config service: %w", err)
 	}
@@ -133,8 +138,7 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create module resource service: %w", err)
 	}
 
-	manifestParserService := manifestparser.NewService()
-	imageVersionVerifierService := verifier.NewService(manifestParserService)
+	imageVersionVerifierService := verifier.NewService(manifestParser)
 
 	ociRepo := &ocirepo.OCIRepo{}
 	registryService, err := registry.NewService(ociRepo, nil, credential.ResolveCredentials)

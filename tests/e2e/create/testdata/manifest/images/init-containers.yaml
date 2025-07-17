@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-operator-deployment
+  labels:
+    app: template-operator-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-operator-deployment
+  template:
+    spec:
+      initContainers:
+        - name: setup
+          image: busybox:1.35.0
+        - name: migration
+          image: migrate/migrate:v4.16.0
+      containers:
+        - name: app
+          image: alpine:3.18.0
+      
