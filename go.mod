@@ -18,7 +18,7 @@ require (
 	k8s.io/api v0.33.3
 	k8s.io/apiextensions-apiserver v0.33.3
 	k8s.io/apimachinery v0.33.3
-	k8s.io/cli-runtime v0.33.2
+	k8s.io/cli-runtime v0.33.3
 	ocm.software/ocm v0.26.0
 	sigs.k8s.io/yaml v1.5.0
 )
