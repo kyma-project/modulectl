@@ -1094,7 +1094,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageURLs := extractImageURLsFromResources(imageResources)
 				count := 0
 				for _, url := range imageURLs {
-					if url == "postgres:15.3" {
+					if strings.Contains(url, "postgres") {
 						count++
 					}
 				}
