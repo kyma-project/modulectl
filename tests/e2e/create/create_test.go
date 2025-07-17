@@ -1094,11 +1094,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageURLs := extractImageURLsFromResources(imageResources)
 				count := 0
 				for _, url := range imageURLs {
-					if strings.Contains(url, "postgres") {
+					if url == "europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3" {
 						count++
 					}
 				}
-				Expect(count).To(Equal(1), "postgres:15.3 should appear only once")
+				Expect(count).To(Equal(1), "template-operator:1.0.3 should appear only once")
 			})
 		})
 	})
