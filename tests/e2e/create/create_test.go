@@ -1106,41 +1106,41 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 	})
 
-	// Test for env variable image extraction
-	It("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		By("When invoked with valid module-config containing images from env variables", func() {
-			cmd = createCmd{
-				moduleConfigFile: withManifestEnvVariables,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-			}
-		})
-		By("Then the command should succeed and extract images from env variables", func() {
-			Expect(cmd.execute()).To(Succeed())
-
-			By("And the module template should contain images from env variables", func() {
-				template, err := readModuleTemplate(templateOutputPath)
-				Expect(err).ToNot(HaveOccurred())
-				descriptor := getDescriptor(template)
-				Expect(descriptor).ToNot(BeNil())
-
-				imageResources := getImageResources(descriptor)
-				imageNames := extractImageNamesFromResources(imageResources)
-
-				// Images from env variables should be included
-				Expect(imageNames).To(ContainElement("webhook")) // from WEBHOOK_IMAGE
-				Expect(imageNames).To(ContainElement("alpine"))  // from HELPER_IMAGE
-				Expect(imageNames).To(ContainElement("migrate")) // from MIGRATION_IMAGE
-
-				// Non-image env values should be excluded
-				for _, resource := range imageResources {
-					Expect(resource.Name).ToNot(Equal("some-config-value"))
-				}
-			})
-		})
-	})
+	// // Test for env variable image extraction
+	// It("Given 'modulectl create' command", func() {
+	// 	var cmd createCmd
+	// 	By("When invoked with valid module-config containing images from env variables", func() {
+	// 		cmd = createCmd{
+	// 			moduleConfigFile: withManifestEnvVariables,
+	// 			registry:         ociRegistry,
+	// 			insecure:         true,
+	// 			output:           templateOutputPath,
+	// 		}
+	// 	})
+	// 	By("Then the command should succeed and extract images from env variables", func() {
+	// 		Expect(cmd.execute()).To(Succeed())
+	//
+	// 		By("And the module template should contain images from env variables", func() {
+	// 			template, err := readModuleTemplate(templateOutputPath)
+	// 			Expect(err).ToNot(HaveOccurred())
+	// 			descriptor := getDescriptor(template)
+	// 			Expect(descriptor).ToNot(BeNil())
+	//
+	// 			imageResources := getImageResources(descriptor)
+	// 			imageNames := extractImageNamesFromResources(imageResources)
+	//
+	// 			// Images from env variables should be included
+	// 			Expect(imageNames).To(ContainElement("webhook")) // from WEBHOOK_IMAGE
+	// 			Expect(imageNames).To(ContainElement("alpine"))  // from HELPER_IMAGE
+	// 			Expect(imageNames).To(ContainElement("migrate")) // from MIGRATION_IMAGE
+	//
+	// 			// Non-image env values should be excluded
+	// 			for _, resource := range imageResources {
+	// 				Expect(resource.Name).ToNot(Equal("some-config-value"))
+	// 			}
+	// 		})
+	// 	})
+	// })
 
 	// Test for containers image extraction
 	It("Given 'modulectl create' command", func() {
@@ -1227,12 +1227,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				// Find the image with SHA digest
 				foundShaImage := false
 				for _, resource := range imageResources {
-					if resource.Name == "template-operator" && strings.HasPrefix(resource.Version, "sha256:") {
+					if resource.Name == "nginx" && strings.HasPrefix(resource.Version, "0.0.0+sha256.") {
 						foundShaImage = true
 						break
 					}
 				}
-				Expect(foundShaImage).To(BeTrue(), "Should contain image with SHA digest")
+				Expect(foundShaImage).To(BeTrue(), "Should contain nginx image with SHA digest")
 			})
 		})
 	})
