@@ -27,6 +27,11 @@ jobs:
         with:
           repository: kyma-project/template-operator
           path: template-operator
+
+      - name: Get template-operator latest commit hash
+        working-directory: template-operator
+        run: echo "TEMPLATE_OPERATOR_LATEST_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
       - name: Go setup
         uses: actions/setup-go@v5
         with:

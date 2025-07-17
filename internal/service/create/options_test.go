@@ -115,7 +115,7 @@ func Test_Validate_Options(t *testing.T) {
 				ModuleSourcesGitDirectory: ".",
 			},
 			wantErr: true,
-			errMsg:  "opts.ModuleSourcesGitDirectory must point to a valid git repository",
+			errMsg:  "currently configured module-sources-git-directory \".\" must point to a valid git repository:",
 		},
 	}
 

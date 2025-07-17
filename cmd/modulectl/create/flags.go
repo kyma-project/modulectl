@@ -40,7 +40,7 @@ const (
 
 	ModuleSourcesGitDirectoryFlagName    = "module-sources-git-directory"
 	ModuleSourcesGitDirectoryFlagDefault = "."
-	ModuleSourcesGitDirectoryFlagUsage   = "Path to the directory containing the module sources. If not set, the current directory is used."
+	ModuleSourcesGitDirectoryFlagUsage   = "Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository."
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {

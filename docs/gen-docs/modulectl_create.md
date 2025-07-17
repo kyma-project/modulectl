@@ -79,7 +79,7 @@ Build a simple module and push it to a remote registry
     --dry-run                               Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true.
 -h, --help                                  Provides help for the create command.
     --insecure                              Allows to use a less secure (non-tls) connection for registry access, e.g. localhost when testing. Should only be used in dev scenarios.
-    --module-sources-git-directory string   Path to the directory containing the module sources. If not set, the current directory is used.
+    --module-sources-git-directory string   Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository.
 -o, --output string                         Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").
     --overwrite                             Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes.
 -r, --registry string                       Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.

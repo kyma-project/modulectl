@@ -346,7 +346,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("opts.ModuleSourcesGitDirectory must point to a valid git repository: invalid Option"))
+			Expect(err.Error()).Should(ContainSubstring("currently configured module-sources-git-directory \"/tmp/not-a-git-dir\" must point to a valid git repository: invalid Option"))
 		})
 	})
 
@@ -727,6 +727,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(ok).To(BeTrue())
 				Expect(github.Type).To(Equal(githubAccessSpec.Type))
 				Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
+				Expect(githubAccessSpec.Commit).To(Equal(os.Getenv("TEMPLATE_OPERATOR_LATEST_COMMIT")))
+				Expect(githubAccessSpec.Type).To(Equal("gitHub"))
 
 				By("And module template should not marked as mandatory")
 				Expect(template.Spec.Mandatory).To(BeFalse())
