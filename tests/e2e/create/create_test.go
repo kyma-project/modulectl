@@ -1084,6 +1084,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				// Verify specific images are present
 				imageNames := extractImageNamesFromResources(imageResources)
+				fmt.Printf("Image Names: %v\n", imageNames)
+
 				Expect(imageNames).To(ContainElement("template-operator"))
 				Expect(imageNames).To(ContainElement("webhook"))
 				Expect(imageNames).To(ContainElement("nginx"))
