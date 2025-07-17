@@ -11,7 +11,7 @@ import (
 const (
 	LatestTag       = "latest"
 	MainTag         = "main"
-	KindDeploymnent = "Deployment"
+	KindDeployment  = "Deployment"
 	KindStatefulSet = "StatefulSet"
 )
 
@@ -38,7 +38,7 @@ func (s *Service) ExtractImagesFromManifest(manifestPath string) ([]string, erro
 
 func (s *Service) extractImages(manifest *unstructured.Unstructured, imageSet map[string]struct{}) error {
 	kind := manifest.GetKind()
-	if kind != KindDeploymnent && kind != KindStatefulSet {
+	if kind != KindDeployment && kind != KindStatefulSet {
 		return nil
 	}
 
@@ -68,9 +68,11 @@ func (s *Service) extractFromContainers(manifest *unstructured.Unstructured, ima
 		if image, found, _ := unstructured.NestedString(containerMap, "image"); found {
 			valid, err := s.isValidImage(image)
 			if err != nil {
-				return fmt.Errorf("invalid image %q in %v: %w", image, path, err)
+				fmt.Printf("[DEBUG] Invalid image skipped: %s, error: %v\n", image, err)
+				continue // Skip invalid images, but log them
 			}
 			if valid {
+				fmt.Printf("[DEBUG] Valid image found: %s\n", image)
 				imageSet[image] = struct{}{}
 			}
 		}
