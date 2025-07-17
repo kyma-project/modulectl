@@ -1257,16 +1257,22 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				imageResources := getImageResources(descriptor)
+				// imageResources[0] is nginx with SHA digest, imageResources[1] is alpine
+				Expect(imageResources[0].Name).To(Equal("nginx"))
+				accessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(imageResources[0].Access)
+				Expect(err).ToNot(HaveOccurred())
+				ociSpec0, ok := accessSpec0.(*ociartifact.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(ociSpec0.ImageReference).To(Equal("nginx@sha256:fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10"))
+				Expect(imageResources[0].Version).To(Equal("0.0.0+sha256.fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10"))
 
-				// Find the image with SHA digest
-				foundShaImage := false
-				for _, resource := range imageResources {
-					if resource.Name == "nginx" && strings.HasPrefix(resource.Version, "0.0.0+sha256.") {
-						foundShaImage = true
-						break
-					}
-				}
-				Expect(foundShaImage).To(BeTrue(), "Should contain nginx image with SHA digest")
+				Expect(imageResources[1].Name).To(Equal("alpine"))
+				accessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(imageResources[1].Access)
+				Expect(err).ToNot(HaveOccurred())
+				ociSpec1, ok := accessSpec1.(*ociartifact.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(ociSpec1.ImageReference).To(Equal("alpine:3.18.0"))
+				Expect(imageResources[1].Version).To(Equal("3.18.0"))
 			})
 		})
 	})
