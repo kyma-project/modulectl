@@ -1255,7 +1255,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
+				fmt.Printf("[DEBUG] - Descriptor: %v\n", descriptor)
+				for _, resource := range descriptor.Resources {
+					fmt.Printf("[DEBUG] - Resource: %v, Version: %v, Access: %v\n", resource.Name, resource.Version, resource.Access)
+				}
 
+				fmt.Printf("[DEBUG] - Descriptor.Resources: %v\n", descriptor.Resources)
 				imageResources := getImageResources(descriptor)
 				// imageResources[0] is nginx with SHA digest, imageResources[1] is alpine
 				Expect(imageResources[0].Name).To(Equal("nginx"))
