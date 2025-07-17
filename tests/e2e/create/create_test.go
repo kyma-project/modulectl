@@ -1343,7 +1343,11 @@ func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 func extractImageURLsFromResources(resources []compdesc.Resource) []string {
 	var urls []string
 	for _, resource := range resources {
-		if ociSpec, ok := resource.Access.(*ociartifact.AccessSpec); ok {
+		accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+		if err != nil {
+			continue
+		}
+		if ociSpec, ok := accessSpec.(*ociartifact.AccessSpec); ok {
 			urls = append(urls, ociSpec.ImageReference)
 		}
 	}
