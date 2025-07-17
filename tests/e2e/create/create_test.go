@@ -1315,7 +1315,7 @@ func filesIn(dir string) []string {
 func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Resource {
 	var imageResources []compdesc.Resource
 	for _, resource := range descriptor.Resources {
-		fmt.Printf("Resource Access Type: %v, .Access: %v\n", resource.Type, resource.Access)
+		fmt.Printf("[DEBUG] - Resource Name: %v,\n Resource Version: %v,\n Resource.Access.Type: %v,\n Resource.Access: %v\n", resource.Name, resource.Version, resource.Type, resource.Access)
 		if resource.Type == "ociArtifact" {
 			imageResources = append(imageResources, resource)
 		}
