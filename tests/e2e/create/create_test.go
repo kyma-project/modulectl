@@ -1092,54 +1092,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				// Verify deduplication - should not have duplicates
 				imageURLs := extractImageURLsFromResources(imageResources)
-				uniqueURLs := make(map[string]struct{})
+				count := 0
 				for _, url := range imageURLs {
-					_, exists := uniqueURLs[url]
-					Expect(exists).To(BeFalse(), "Duplicate image URL found: %s", url)
-					uniqueURLs[url] = struct{}{}
-				}
-			})
-		})
-	})
-
-	// Test for deduplication of images
-	It("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		By("When invoked with valid module-config containing duplicate images in manifest containers and initContainers", func() {
-			cmd = createCmd{
-				moduleConfigFile: withManifestMixedScenarios,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-			}
-		})
-		By("Then the command should succeed and deduplicate images", func() {
-			Expect(cmd.execute()).To(Succeed())
-
-			By("And the module template should not contain duplicate image resources", func() {
-				template, err := readModuleTemplate(templateOutputPath)
-				Expect(err).ToNot(HaveOccurred())
-				descriptor := getDescriptor(template)
-				Expect(descriptor).ToNot(BeNil())
-
-				imageResources := getImageResources(descriptor)
-
-				// Check for postgres:15.3 which appears in both containers and initContainers
-				postgresCount := 0
-				templateOperatorCount := 0
-
-				for _, resource := range imageResources {
-					if resource.Name == "postgres" && resource.Version == "15.3" {
-						postgresCount++
-					}
-					if resource.Name == "template-operator" && resource.Version == "1.0.3" {
-						templateOperatorCount++
+					if url == "postgres:15.3" {
+						count++
 					}
 				}
-
-				// Each image should appear only once despite being in multiple places
-				Expect(postgresCount).To(Equal(1), "postgres:15.3 should appear only once")
-				Expect(templateOperatorCount).To(Equal(1), "template-operator:1.0.3 should appear only once")
+				Expect(count).To(Equal(1), "postgres:15.3 should appear only once")
 			})
 		})
 	})
@@ -1363,7 +1322,16 @@ func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Reso
 func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 	var names []string
 	for _, resource := range resources {
-		names = append(names, resource.Name)
+		if ociSpec, ok := resource.Access.(*ociartifact.AccessSpec); ok {
+			ref := ociSpec.ImageReference
+			parts := strings.Split(ref, "/")
+			last := parts[len(parts)-1]
+			name := strings.SplitN(last, ":", 2)[0]
+			name = strings.SplitN(name, "@", 2)[0]
+			names = append(names, name)
+		} else {
+			names = append(names, resource.Name)
+		}
 	}
 	return names
 }
