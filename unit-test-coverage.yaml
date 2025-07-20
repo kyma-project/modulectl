@@ -10,6 +10,8 @@ packages:
   internal/service/fileresolver: 100
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 81
+  internal/service/create: 42
+  internal/service/componentdescriptor: 76.7
   internal/service/create: 38
   internal/service/componentdescriptor: 74
   internal/service/componentdescriptor/resources: 93

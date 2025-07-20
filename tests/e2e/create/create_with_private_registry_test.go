@@ -25,11 +25,12 @@ var _ = Describe("Test 'create' command with private registry", Ordered, func() 
 		By("When invoked with valid module-config with insecure private OCI registry and registry credentials",
 			func() {
 				cmd = createCmd{
-					moduleConfigFile: minimalConfig,
-					registry:         privateOciRegistry,
-					insecure:         true,
-					output:           templateOutputPath,
-					registryCreds:    ociRegistryCreds,
+					moduleConfigFile:          minimalConfig,
+					registry:                  privateOciRegistry,
+					insecure:                  true,
+					output:                    templateOutputPath,
+					registryCreds:             ociRegistryCreds,
+					moduleSourcesGitDirectory: templateOperatorPath,
 				}
 			})
 		By("Then the command should succeed", func() {

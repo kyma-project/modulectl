@@ -2,6 +2,8 @@ package create
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -16,6 +18,7 @@ type Options struct {
 	Insecure                  bool
 	TemplateOutput            string
 	RegistryURL               string
+	ModuleSourcesGitDirectory string
 	OverwriteComponentVersion bool
 	DryRun                    bool
 }
@@ -50,6 +53,15 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
 	}
 
+	if opts.ModuleSourcesGitDirectory == "" {
+		return fmt.Errorf("opts.ModuleSourcesGitDirectory must not be empty: %w", commonerrors.ErrInvalidOption)
+	} else {
+		if isGitDir := isGitDirectory(opts.ModuleSourcesGitDirectory); !isGitDir {
+			return fmt.Errorf("currently configured module-sources-git-directory \"%s\" must point to a valid git repository: %w",
+				opts.ModuleSourcesGitDirectory, commonerrors.ErrInvalidOption)
+		}
+	}
+
 	if opts.OverwriteComponentVersion {
 		opts.Out.Write("Warning: overwrite flag is set to true. This should ONLY be used for testing purposes.\n")
 	}
@@ -59,4 +71,18 @@ func (opts Options) Validate() error {
 	}
 
 	return nil
+}
+
+func isGitDirectory(path string) bool {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+
+	gitPath := filepath.Join(absPath, ".git")
+	info, err := os.Stat(gitPath)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
 }

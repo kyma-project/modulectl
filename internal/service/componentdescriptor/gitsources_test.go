@@ -17,7 +17,7 @@ func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 	moduleVersion := "1.0.0"
 	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
-	err = gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
+	err = gitSourcesService.AddGitSources(descriptor, "gitRepoPath", "gitRepoUrl", moduleVersion)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Sources, 1)
@@ -39,7 +39,7 @@ func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *t
 	moduleVersion := "1.0.0"
 	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
 
-	err = gitSourcesService.AddGitSources(descriptor, "repoUrl", moduleVersion)
+	err = gitSourcesService.AddGitSources(descriptor, "gitRepoPath", "gitRepoUrl", moduleVersion)
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to get latest commit")
 }
@@ -50,16 +50,8 @@ func (*gitServiceStub) GetLatestCommit(_ string) (string, error) {
 	return "latest", nil
 }
 
-func (*gitServiceStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "test", nil
-}
-
 type gitServiceErrorStub struct{}
 
 func (*gitServiceErrorStub) GetLatestCommit(_ string) (string, error) {
 	return "", errors.New("failed to get commit")
-}
-
-func (*gitServiceErrorStub) GetRemoteGitFileContent(_, _, _ string) (string, error) {
-	return "", errors.New("failed to get file content")
 }

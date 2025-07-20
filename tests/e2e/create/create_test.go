@@ -48,7 +48,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked without config-file arg", func() {
 			cmd = createCmd{
-				registry: ociRegistry,
+				registry:                  ociRegistry,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 
@@ -63,7 +64,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked without registry arg", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
+				moduleConfigFile:          minimalConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 
@@ -78,8 +80,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing name", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingNameConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingNameConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -93,8 +96,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing version", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingVersionConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingVersionConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -108,8 +112,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing manifest", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingManifestConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingManifestConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -123,8 +128,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing repository", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingRepositoryConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingRepositoryConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -138,8 +144,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing documentation", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingDocumentationConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingDocumentationConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -153,8 +160,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with non https repository", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: nonHttpsRepository,
+				registry:                  ociRegistry,
+				moduleConfigFile:          nonHttpsRepository,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -168,8 +176,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with non https documentation", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: nonHttpsDocumentation,
+				registry:                  ociRegistry,
+				moduleConfigFile:          nonHttpsDocumentation,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -183,8 +192,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with missing icons", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: missingIconsConfig,
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingIconsConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -198,8 +208,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with duplicate entry in icons", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: duplicateIcons,
+				registry:                  ociRegistry,
+				moduleConfigFile:          duplicateIcons,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -213,8 +224,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with invalid icon - link missing", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: iconsWithoutLink,
+				registry:                  ociRegistry,
+				moduleConfigFile:          iconsWithoutLink,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -228,8 +240,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with invalid icon - name missing", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: iconsWithoutName,
+				registry:                  ociRegistry,
+				moduleConfigFile:          iconsWithoutName,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -243,8 +256,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with duplicate entry in resources", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: duplicateResources,
+				registry:                  ociRegistry,
+				moduleConfigFile:          duplicateResources,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -258,8 +272,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with non https resource", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: nonHttpsResource,
+				registry:                  ociRegistry,
+				moduleConfigFile:          nonHttpsResource,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -273,8 +288,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with invalid resource - link missing", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: resourceWithoutLink,
+				registry:                  ociRegistry,
+				moduleConfigFile:          resourceWithoutLink,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -288,8 +304,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with invalid resource - name missing", func() {
 			cmd = createCmd{
-				registry:         ociRegistry,
-				moduleConfigFile: resourceWithoutName,
+				registry:                  ociRegistry,
+				moduleConfigFile:          resourceWithoutName,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -303,8 +320,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with existing '--registry' and missing '--insecure' flag", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail", func() {
@@ -316,13 +334,31 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		By("When invoked with a non git directory for module-sources-git-directory arg", func() {
+			cmd = createCmd{
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				moduleSourcesGitDirectory: "/tmp/not-a-git-dir",
+			}
+		})
+
+		By("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("currently configured module-sources-git-directory \"/tmp/not-a-git-dir\" must point to a valid git repository: invalid Option"))
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		By("When invoked with minimal valid module-config and dry-run flag", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-				dryRun:           true,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				dryRun:                    true,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -351,10 +387,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -415,18 +452,20 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 			Expect(cmd.execute()).To(Succeed())
 		})
 		By("Then invoked with same version that already exists in the registry", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail with same version exists message", func() {
@@ -440,20 +479,22 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with minimal valid module-config", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 			Expect(cmd.execute()).To(Succeed())
 		})
 		By("When invoked with same version that already exists in the registry and dry-run flag", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
-				dryRun:           true,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				dryRun:                    true,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail with same version exists message", func() {
@@ -468,12 +509,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("When invoked with same version that already exists in the registry, and dry-run flag, and overwrite flag",
 			func() {
 				cmd = createCmd{
-					moduleConfigFile: minimalConfig,
-					registry:         ociRegistry,
-					insecure:         true,
-					output:           templateOutputPath,
-					overwrite:        true,
-					dryRun:           true,
+					moduleConfigFile:          minimalConfig,
+					registry:                  ociRegistry,
+					insecure:                  true,
+					output:                    templateOutputPath,
+					overwrite:                 true,
+					dryRun:                    true,
+					moduleSourcesGitDirectory: templateOperatorPath,
 				}
 			})
 		By("Then the command should succeed", func() {
@@ -502,11 +544,12 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with same version that already exists in the registry and overwrite flag", func() {
 			cmd = createCmd{
-				moduleConfigFile: minimalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				overwrite:        true,
-				output:           templateOutputPath,
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				overwrite:                 true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -519,10 +562,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing annotations and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withAnnotationsConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withAnnotationsConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -553,10 +597,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing default-cr and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withDefaultCrConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withDefaultCrConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -596,10 +641,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("When invoked with valid module-config containing security-scanner-config and different version",
 			func() {
 				cmd = createCmd{
-					moduleConfigFile: withSecurityConfig,
-					registry:         ociRegistry,
-					insecure:         true,
-					output:           templateOutputPath,
+					moduleConfigFile:          withSecurityConfig,
+					registry:                  ociRegistry,
+					insecure:                  true,
+					output:                    templateOutputPath,
+					moduleSourcesGitDirectory: templateOperatorPath,
 				}
 			})
 		By("Then the command should succeed", func() {
@@ -680,6 +726,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(ok).To(BeTrue())
 				Expect(github.Type).To(Equal(githubAccessSpec.Type))
 				Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
+				Expect(githubAccessSpec.Commit).To(Equal(os.Getenv("TEMPLATE_OPERATOR_LATEST_COMMIT")))
+				Expect(githubAccessSpec.Type).To(Equal("gitHub"))
 
 				By("And module template should not marked as mandatory")
 				Expect(template.Spec.Mandatory).To(BeFalse())
@@ -705,10 +753,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("When invoked with invalid module-config containing not existing security-scanner-config",
 			func() {
 				cmd = createCmd{
-					moduleConfigFile: invalidSecurityConfig,
-					registry:         ociRegistry,
-					insecure:         true,
-					output:           templateOutputPath,
+					moduleConfigFile:          invalidSecurityConfig,
+					registry:                  ociRegistry,
+					insecure:                  true,
+					output:                    templateOutputPath,
+					moduleSourcesGitDirectory: templateOperatorPath,
 				}
 			})
 		By("Then the command should succeed", func() {
@@ -723,10 +772,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing mandatory true and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withMandatoryConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withMandatoryConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -752,10 +802,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing manager field and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManagerConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManagerConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -787,10 +838,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("When invoked with valid module-config containing manager field without namespace and different version",
 			func() {
 				cmd = createCmd{
-					moduleConfigFile: withNoNamespaceManagerConfig,
-					registry:         ociRegistry,
-					insecure:         true,
-					output:           templateOutputPath,
+					moduleConfigFile:          withNoNamespaceManagerConfig,
+					registry:                  ociRegistry,
+					insecure:                  true,
+					output:                    templateOutputPath,
+					moduleSourcesGitDirectory: templateOperatorPath,
 				}
 			})
 		By("Then the command should succeed", func() {
@@ -821,10 +873,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing associatedResources list", func() {
 			cmd = createCmd{
-				moduleConfigFile: withAssociatedResourcesConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withAssociatedResourcesConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -854,10 +907,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with minimal valid module-config containing resources", func() {
 			cmd = createCmd{
-				moduleConfigFile: withResources,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withResources,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -884,10 +938,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with minimal valid module-config containing rawManfiest in resources", func() {
 			cmd = createCmd{
-				moduleConfigFile: withResourcesOverwrite,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withResourcesOverwrite,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -911,10 +966,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with manifest being a local file reference", func() {
 			cmd = createCmd{
-				moduleConfigFile: manifestFileref,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          manifestFileref,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -939,10 +995,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with default CR being a fileref", func() {
 			cmd = createCmd{
-				moduleConfigFile: defaultCRFileref,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          defaultCRFileref,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -970,10 +1027,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing requiresDowntime true and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withRequiresDowntimeConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withRequiresDowntimeConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -998,10 +1056,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing internal true and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withInternalConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withInternalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -1028,10 +1087,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing beta true and different version", func() {
 			cmd = createCmd{
-				moduleConfigFile: withBetaConfig,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withBetaConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {

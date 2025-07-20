@@ -134,59 +134,35 @@ func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t
 	require.Contains(t, err.Error(), "failed to resolve file")
 }
 
-func Test_NewService_ReturnsError_WhenManifestServiceIsNil(t *testing.T) {
-	_, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, nil, &fileResolverStub{}, &fileResolverStub{},
-		&fileExistsStub{})
-
-	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
-	require.Contains(t, err.Error(), "manifestService")
-}
-
-func Test_CreateModule_ReturnsError_WhenExtractImagesFromManifestFails(t *testing.T) {
+func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceErrorStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().build()
+	opts := newCreateOptionsBuilder().withModuleSourcesGitDirectory("").build()
 
 	err = svc.Run(opts)
 
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to extract images from manifest")
+	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
+	require.Contains(t, err.Error(), "opts.ModuleSourcesGitDirectory must not be empty")
 }
 
-func Test_CreateModule_ReturnsError_WhenParseSecurityConfigDataFails(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceSecurityStub{}, &gitSourcesServiceStub{}, &securityConfigServiceErrorStub{},
+func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testing.T) {
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().build()
+	opts := newCreateOptionsBuilder().withModuleSourcesGitDirectory(".").build()
 
 	err = svc.Run(opts)
 
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to configure security scanners")
-}
-
-func Test_CreateModule_ReturnsError_WhenAppendSecurityScanConfigFails(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceSecurityStub{}, &gitSourcesServiceStub{}, &securityConfigServiceAppendErrorStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().build()
-
-	err = svc.Run(opts)
-
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to configure security scanners")
+	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
+	require.Contains(t, err.Error(),
+		"currently configured module-sources-git-directory \".\" must point to a valid git repository")
 }
 
 type createOptionsBuilder struct {
@@ -203,7 +179,8 @@ func newCreateOptionsBuilder() *createOptionsBuilder {
 		withModuleConfigFile("create-module-config.yaml").
 		withRegistryURL("https://registry.kyma.cx").
 		withTemplateOutput("test").
-		withCredentials("user:password")
+		withCredentials("user:password").
+		withModuleSourcesGitDirectory("../../../")
 }
 
 func (b *createOptionsBuilder) build() create.Options {
@@ -232,6 +209,11 @@ func (b *createOptionsBuilder) withTemplateOutput(templateOutput string) *create
 
 func (b *createOptionsBuilder) withCredentials(credentials string) *createOptionsBuilder {
 	b.options.Credentials = credentials
+	return b
+}
+
+func (b *createOptionsBuilder) withModuleSourcesGitDirectory(moduleSourcesGitDirectory string) *createOptionsBuilder {
+	b.options.ModuleSourcesGitDirectory = moduleSourcesGitDirectory
 	return b
 }
 
@@ -288,7 +270,7 @@ func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string)
 type gitSourcesServiceStub struct{}
 
 func (*gitSourcesServiceStub) AddGitSources(_ *compdesc.ComponentDescriptor,
-	_, _ string,
+	_, _, _ string,
 ) error {
 	return nil
 }
@@ -303,45 +285,6 @@ func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *compdesc.Component
 	_ contentprovider.SecurityScanConfig,
 ) error {
 	return nil
-}
-
-type securityConfigServiceErrorStub struct{}
-
-func (*securityConfigServiceErrorStub) ParseSecurityConfigData(_ string) (*contentprovider.SecurityScanConfig, error) {
-	return nil, errors.New("failed to parse security config")
-}
-
-func (*securityConfigServiceErrorStub) AppendSecurityScanConfig(_ *compdesc.ComponentDescriptor,
-	_ contentprovider.SecurityScanConfig,
-) error {
-	return nil
-}
-
-type securityConfigServiceAppendErrorStub struct{}
-
-func (*securityConfigServiceAppendErrorStub) ParseSecurityConfigData(_ string) (*contentprovider.SecurityScanConfig, error) {
-	return &contentprovider.SecurityScanConfig{}, nil
-}
-
-func (*securityConfigServiceAppendErrorStub) AppendSecurityScanConfig(_ *compdesc.ComponentDescriptor,
-	_ contentprovider.SecurityScanConfig,
-) error {
-	return errors.New("failed to append security scan config")
-}
-
-type moduleConfigServiceSecurityStub struct{}
-
-func (*moduleConfigServiceSecurityStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
-	var fileRef contentprovider.UrlOrLocalFile
-	if err := fileRef.FromString("default-cr.yaml"); err != nil {
-		return nil, err
-	}
-	return &contentprovider.ModuleConfig{
-		Name:      "kyma-project.io/module/telemetry", // Add valid name
-		Version:   "1.43.1",                           // Add valid version
-		DefaultCR: fileRef,
-		Security:  "security-config.yaml",
-	}, nil
 }
 
 type componentArchiveServiceStub struct{}

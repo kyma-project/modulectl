@@ -40,7 +40,8 @@ type SecurityConfigService interface {
 }
 
 type GitSourcesService interface {
-	AddGitSources(componentDescriptor *compdesc.ComponentDescriptor, gitRepoURL, moduleVersion string) error
+	AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
+		gitRepoPath, gitRepoURL, moduleVersion string) error
 }
 
 type ComponentArchiveService interface {
@@ -225,7 +226,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
-	if err = s.gitSourcesService.AddGitSources(descriptor, moduleConfig.Repository,
+	if err = s.gitSourcesService.AddGitSources(descriptor, opts.ModuleSourcesGitDirectory, moduleConfig.Repository,
 		moduleConfig.Version); err != nil {
 		return fmt.Errorf("failed to add git sources: %w", err)
 	}

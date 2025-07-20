@@ -37,6 +37,10 @@ const (
 	DryRunFlagName    = "dry-run"
 	dryRunFlagUsage   = "Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true."
 	DryRunFlagDefault = false
+
+	ModuleSourcesGitDirectoryFlagName    = "module-sources-git-directory"
+	ModuleSourcesGitDirectoryFlagDefault = "."
+	ModuleSourcesGitDirectoryFlagUsage   = "Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository."
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
@@ -63,6 +67,10 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 		registryFlagShort,
 		RegistryURLFlagDefault,
 		registryURLFlagUsage)
+	flags.StringVar(&opts.ModuleSourcesGitDirectory,
+		ModuleSourcesGitDirectoryFlagName,
+		ModuleSourcesGitDirectoryFlagDefault,
+		ModuleSourcesGitDirectoryFlagUsage)
 	flags.BoolVar(&opts.OverwriteComponentVersion,
 		OverwriteComponentVersionFlagName,
 		OverwriteComponentVersionFlagDefault,

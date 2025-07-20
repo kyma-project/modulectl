@@ -64,22 +64,24 @@ const (
 	withManifestMixedWithSecurity = validConfigs + "with-manifest-and-security.yaml"
 	withManifestNoImages          = validConfigs + "with-manifest-no-deployment-statefulset.yaml"
 
-	ociRegistry        = "http://k3d-oci.localhost:5001"
-	templateOutputPath = "/tmp/template.yaml"
-	privateOciRegistry = "http://k3d-private-oci.localhost:5002"
-	ociRegistryCreds   = "k3duser:k3dpass"
+	ociRegistry          = "http://k3d-oci.localhost:5001"
+	templateOutputPath   = "/tmp/template.yaml"
+	privateOciRegistry   = "http://k3d-private-oci.localhost:5002"
+	ociRegistryCreds     = "k3duser:k3dpass"
+	templateOperatorPath = "../../../template-operator"
 )
 
 // Command wrapper for `modulectl create`
 
 type createCmd struct {
-	registry         string
-	output           string
-	moduleConfigFile string
-	registryCreds    string
-	insecure         bool
-	overwrite        bool
-	dryRun           bool
+	registry                  string
+	output                    string
+	moduleConfigFile          string
+	registryCreds             string
+	moduleSourcesGitDirectory string
+	insecure                  bool
+	overwrite                 bool
+	dryRun                    bool
 }
 
 func (cmd *createCmd) execute() error {
@@ -101,6 +103,10 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.registryCreds != "" {
 		args = append(args, "--registry-credentials="+cmd.registryCreds)
+	}
+
+	if cmd.moduleSourcesGitDirectory != "" {
+		args = append(args, "--module-sources-git-directory="+cmd.moduleSourcesGitDirectory)
 	}
 
 	if cmd.insecure {
