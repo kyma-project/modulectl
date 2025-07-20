@@ -137,7 +137,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t
 func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -152,7 +152,7 @@ func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *test
 func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
