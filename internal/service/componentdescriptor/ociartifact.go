@@ -1,4 +1,4 @@
-package image
+package componentdescriptor
 
 import (
 	"fmt"
@@ -8,31 +8,26 @@ import (
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
+
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
-const (
-	TypeManifestImage   = "third-party-image"
-	secScanBaseLabelKey = "scan.security.kyma-project.io"
-	typeLabelKey        = "type"
-	ocmVersion          = "v1"
-)
-
-func (s *Service) AddImagesToOcmDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
+func AddImagesToOcmDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
 	for _, image := range images {
-		if err := s.appendImageResource(descriptor, image); err != nil {
+		if err := AppendImageResource(descriptor, image); err != nil {
 			return fmt.Errorf("failed to append image %s: %w", image, err)
 		}
 	}
 	return nil
 }
 
-func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
-	imgName, imgTag, err := ParseImageReference(imageURL)
+func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
+	imgName, imgTag, err := image.ParseImageReference(imageURL)
 	if err != nil {
 		return fmt.Errorf("failed to parse image: %w", err)
 	}
 
-	typeLabel, err := createImageTypeLabel()
+	typeLabel, err := CreateImageTypeLabel()
 	if err != nil {
 		return fmt.Errorf("failed to create label: %w", err)
 	}
@@ -70,9 +65,9 @@ func (s *Service) appendImageResource(descriptor *compdesc.ComponentDescriptor, 
 	return nil
 }
 
-func createImageTypeLabel() (*ocmv1.Label, error) {
+func CreateImageTypeLabel() (*ocmv1.Label, error) {
 	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-	label, err := ocmv1.NewLabel(labelKey, TypeManifestImage, ocmv1.WithVersion(ocmVersion))
+	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OCM label: %w", err)
 	}

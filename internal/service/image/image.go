@@ -6,29 +6,40 @@ import (
 	"strings"
 
 	"github.com/distribution/reference"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+)
+
+const (
+	LatestTag = "latest"
+	MainTag   = "main"
 )
 
 var (
-	ErrParserNil           = errors.New("parser cannot be nil")
 	ErrEmptyImageURL       = errors.New("empty image URL")
 	ErrImageNameExtraction = errors.New("could not extract image name")
 	ErrNoTagOrDigest       = errors.New("no tag or digest found")
+	ErrMissingImageTag     = errors.New("image is missing a tag")
+	ErrDisallowedTag       = errors.New("image tag is disallowed (latest/main)")
 )
 
-type ManifestParser interface {
-	Parse(path string) ([]*unstructured.Unstructured, error)
-}
-
-type Service struct {
-	manifestParser ManifestParser
-}
-
-func NewService(manifestParser ManifestParser) (*Service, error) {
-	if manifestParser == nil {
-		return nil, fmt.Errorf("manifestParser must not be nil: %w", ErrParserNil)
+func IsValidImage(value string) (bool, error) {
+	if !isValidImageFormat(value) {
+		return false, nil
 	}
-	return &Service{manifestParser: manifestParser}, nil
+
+	_, tag, err := ParseImageReference(value)
+	if err != nil {
+		return false, fmt.Errorf("invalid image reference %q: %w", value, err)
+	}
+
+	if tag == "" {
+		return false, fmt.Errorf("%w: %q", ErrMissingImageTag, value)
+	}
+
+	if isMainOrLatestTag(tag) {
+		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, tag)
+	}
+
+	return true, nil
 }
 
 func ParseImageReference(imageURL string) (string, string, error) {
@@ -56,5 +67,32 @@ func ParseImageReference(imageURL string) (string, string, error) {
 		return imageName, t.Digest().String(), nil
 	default:
 		return "", "", fmt.Errorf("no tag or digest found in %s: %w", imageURL, ErrNoTagOrDigest)
+	}
+}
+
+func isValidImageFormat(value string) bool {
+	if len(value) < 3 || len(value) > 256 {
+		return false
+	}
+
+	hasTagOrDigest := false
+	for _, c := range value {
+		switch c {
+		case ':', '@':
+			hasTagOrDigest = true
+		case ' ', '\t', '\n', '\r':
+			return false
+		}
+	}
+
+	return hasTagOrDigest
+}
+
+func isMainOrLatestTag(tag string) bool {
+	switch strings.ToLower(tag) {
+	case LatestTag, MainTag:
+		return true
+	default:
+		return false
 	}
 }

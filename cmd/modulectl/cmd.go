@@ -21,7 +21,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
 	"github.com/kyma-project/modulectl/internal/service/git"
-	"github.com/kyma-project/modulectl/internal/service/image"
 	"github.com/kyma-project/modulectl/internal/service/manifestparser"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
@@ -100,10 +99,11 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create manifest file resolver: %w", err)
 	}
 	manifestParser := manifestparser.NewService()
-	imageService, err := image.NewService(manifestParser)
+	manifestService, err := contentprovider.NewManifest(manifestParser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create image service: %w", err)
+		return nil, fmt.Errorf("failed to create manifest content provider: %w", err)
 	}
+
 	defaultCRFileResolver, err := fileresolver.NewFileResolver("kyma-module-default-cr-*.yaml", tmpFileSystem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create default CR file resolver: %w", err)
@@ -119,7 +119,7 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create git sources service: %w", err)
 	}
 
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil, imageService)
+	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config service: %w", err)
 	}
@@ -155,7 +155,7 @@ func buildModuleService() (*create.Service, error) {
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
 		securityConfigService, componentArchiveService, registryService, moduleTemplateService,
-		crdParserService, moduleResourceService, imageVersionVerifierService, manifestFileResolver,
+		crdParserService, moduleResourceService, imageVersionVerifierService, manifestService, manifestFileResolver,
 		defaultCRFileResolver, fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
@@ -166,7 +166,11 @@ func buildModuleService() (*create.Service, error) {
 func buildScaffoldService() (*scaffold.Service, error) {
 	fileSystemUtil := &filesystem.Util{}
 	yamlConverter := &yaml.ObjectToYAMLConverter{}
-
+	manifestParser := manifestparser.NewService()
+	manifestContentProvider, err := contentprovider.NewManifest(manifestParser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create manifest content provider: %w", err)
+	}
 	moduleConfigContentProvider, err := contentprovider.NewModuleConfigProvider(yamlConverter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module config content provider: %w", err)
@@ -183,7 +187,7 @@ func buildScaffoldService() (*scaffold.Service, error) {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
 
-	manifestFileGenerator, err := filegenerator.NewService(manifestKind, fileSystemUtil, contentprovider.NewManifest())
+	manifestFileGenerator, err := filegenerator.NewService(manifestKind, fileSystemUtil, manifestContentProvider)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create manifest file generator: %w", err)
 	}
