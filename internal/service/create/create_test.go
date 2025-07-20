@@ -358,9 +358,3 @@ type manifestServiceStub struct{}
 func (*manifestServiceStub) ExtractImagesFromManifest(_ string) ([]string, error) {
 	return []string{"image1:latest", "image2:v1.0"}, nil
 }
-
-type manifestServiceErrorStub struct{}
-
-func (*manifestServiceErrorStub) ExtractImagesFromManifest(_ string) ([]string, error) {
-	return nil, errors.New("failed to extract images from manifest")
-}

@@ -1329,7 +1329,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageResources := getImageResourcesMap(descriptor)
 
 				// Verify webhook image exists with correct reference
-				err := verifyImageResource(imageResources, "webhook",
+				err = verifyImageResource(imageResources, "webhook",
 					"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0")
 				Expect(err).ToNot(HaveOccurred())
 
