@@ -9,10 +9,10 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
-	"github.com/kyma-project/modulectl/internal/service/image"
+	"github.com/kyma-project/modulectl/internal/image"
 )
 
-func AddImagesToOcmDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
+func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
 	for _, image := range images {
 		if err := AppendImageResource(descriptor, image); err != nil {
 			return fmt.Errorf("failed to append image %s: %w", image, err)

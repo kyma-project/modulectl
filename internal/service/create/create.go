@@ -407,7 +407,7 @@ func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
 	images []string, opts Options,
 ) error {
 	opts.Out.Write("- Adding oci artifacts to component descriptor\n")
-	if err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images); err != nil {
+	if err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images); err != nil {
 		return fmt.Errorf("failed to add images to component descriptor: %w", err)
 	}
 	return nil

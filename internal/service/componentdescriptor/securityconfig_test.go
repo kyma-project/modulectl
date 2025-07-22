@@ -5,49 +5,17 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
 	securityConfigService, err := componentdescriptor.NewSecurityConfigService(nil)
 	require.ErrorContains(t, err, "fileReader must not be nil")
 	require.Nil(t, securityConfigService)
-}
-
-func Test_AppendBDBAImagesLayers_ReturnCorrectResources(t *testing.T) {
-	cd := &compdesc.ComponentDescriptor{}
-	cd.SetName("test.io/module/test")
-	cd.SetVersion("1.0.0")
-	cd.Provider = ocmv1.Provider{Name: "kyma"}
-
-	securityConfig := contentprovider.SecurityScanConfig{
-		BDBA: []string{
-			"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.0",
-			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
-		},
-	}
-
-	err := componentdescriptor.AppendBDBAImagesLayers(cd, securityConfig)
-	require.NoError(t, err)
-
-	require.Equal(t, "template-operator", cd.Resources[0].Name)
-	require.Equal(t, "1.0.0", cd.Resources[0].Version)
-
-	require.Equal(t, "anotherimage", cd.Resources[1].Name)
-	require.Equal(t, "4.5.6", cd.Resources[1].Version)
-
-	for _, res := range cd.Resources {
-		require.Equal(t, "ociArtifact", res.Type)
-		require.Equal(t, "scan.security.kyma-project.io/type", res.Labels[0].Name)
-		expectedLabel := json.RawMessage(`"third-party-image"`)
-		require.Equal(t, expectedLabel, res.Labels[0].Value)
-	}
 }
 
 func Test_AppendSecurityLabelsToSources_ReturnCorrectLabels(t *testing.T) {

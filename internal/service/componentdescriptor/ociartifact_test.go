@@ -20,7 +20,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -50,7 +50,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithComplexRegistryPath_AppendsResou
 		"europe-docker.pkg.dev/kyma-project/prod/external/istio/proxyv2:1.25.3-distroless",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -67,7 +67,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithGcrImage_AppendsResource(t *test
 		"gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -85,7 +85,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithInvalidImage_ReturnsError(t *tes
 		"invalid-image-no-tag",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to append image")
@@ -96,7 +96,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImageList_DoesNothing(t *te
 	descriptor := createEmptyDescriptor()
 	images := []string{}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Empty(t, descriptor.Resources)
@@ -108,7 +108,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithRegistryPortImage_AppendsResourc
 		"localhost:5000/myimage:v1.0.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -125,7 +125,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDockerHubImage_AppendsResource(t
 		"istio/proxyv2:1.19.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -143,7 +143,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMultipleImages_CreatesCorrectLab
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -163,7 +163,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDigestImage_AppendsResourceWithC
 		"alpine@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -183,7 +183,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *t
 	}
 
 	for _, img := range images {
-		err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, []string{img})
+		err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, []string{img})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "failed to append image")
 	}
@@ -207,7 +207,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithExistingResources_AppendsToExist
 		"alpine:3.15.4",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -220,7 +220,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithNilDescriptor_Panics(t *testing.
 	images := []string{"alpine:3.15.4"}
 
 	require.Panics(t, func() {
-		_ = componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+		_ = componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 	})
 }
 
@@ -230,7 +230,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithoutTag_ReturnsError(t *
 		"alpine",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to append image")
@@ -244,7 +244,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProces
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
 	require.Len(t, descriptor.Resources, 1) // Only first image should be added
@@ -261,7 +261,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithVariousTagFormats_AppendsResourc
 		"registry.k3d.localhost:5000/myapp:123",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 5)
@@ -279,7 +279,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledAfterDefaults_MaintainsDescriptorVal
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 
@@ -293,7 +293,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithMultipleSlashes_Extract
 		"registry.example.com/team/project/subproject/app:v1.0.0",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -309,7 +309,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithShortDigest_ReturnsError(t *test
 		"alpine@sha256:short",
 	}
 
-	err := componentdescriptor.AddImagesToOcmDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to append image")

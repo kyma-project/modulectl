@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/modulectl/internal/service/image"
+	"github.com/kyma-project/modulectl/internal/image"
 )
 
 func TestParseImageReference_ValidImagesWithTag(t *testing.T) {
