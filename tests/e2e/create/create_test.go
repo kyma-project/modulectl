@@ -1119,10 +1119,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images from both manifest and security config", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestMixedWithSecurity,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestMixedWithSecurity,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed", func() {
@@ -1179,10 +1180,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images in containers", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestContainers,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestContainers,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed and extract images from containers", func() {
@@ -1223,10 +1225,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images in initContainers", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestInitContainers,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestInitContainers,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed and extract images from initContainers", func() {
@@ -1266,10 +1269,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images with SHA digest", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestShaDigest,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestShaDigest,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed and extract images with SHA digest", func() {
@@ -1311,10 +1315,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images from env variables", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestEnvVariables,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestEnvVariables,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should succeed and extract images from env variables", func() {
@@ -1343,10 +1348,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with manifest containing latest/main tags", func() {
 			cmd = createCmd{
-				moduleConfigFile: withManifestLatestMainTags,
-				registry:         ociRegistry,
-				insecure:         true,
-				output:           templateOutputPath,
+				moduleConfigFile:          withManifestLatestMainTags,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
 		By("Then the command should fail with specific error", func() {
