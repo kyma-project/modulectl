@@ -451,7 +451,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.resources[2].access should be correct")
 				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
 				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec2, ok := resourceAccessSpec1.(*localblob.AccessSpec)
+				localBlobAccessSpec2, ok := resourceAccessSpec2.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(localBlobAccessSpec2.GetType()).To(Equal(localblob.Type))
 				Expect(localBlobAccessSpec2.LocalReference).To(ContainSubstring("sha256:"))
