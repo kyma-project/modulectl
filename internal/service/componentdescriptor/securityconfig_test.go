@@ -5,11 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func Test_NewSecurityConfigService_ReturnsErrorOnNilFileReader(t *testing.T) {
