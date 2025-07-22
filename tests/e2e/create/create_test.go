@@ -1140,7 +1140,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageResources := getImageResourcesMap(descriptor)
 
 				// Verify exact count
-				Expect(len(imageResources)).To(Equal(5), "Expected exactly 6 image resources")
+				Expect(len(imageResources)).To(Equal(5), "Expected exactly 5 image resources")
 
 				expectedImages := map[string]struct {
 					reference string
@@ -1377,6 +1377,12 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
+	yamlBytes, err := yaml2.Marshal(moduleTemplate)
+	if err != nil {
+		fmt.Printf("[DEBUG] Failed to marshal module template: %v\n", err)
+	} else {
+		fmt.Printf("[DEBUG] ModuleTemplate content:\n%s\n", string(yamlBytes))
+	}
 	return moduleTemplate, err
 }
 
@@ -1385,8 +1391,17 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescript
 		template.Spec.Descriptor.Raw,
 		[]compdesc.DecodeOption{compdesc.DisableValidation(true)}...)
 	if err != nil {
+		fmt.Printf("[ERROR] - getDescriptor | Failed to decode descriptor: %v\n", err)
 		return nil
 	}
+
+	yamlBytes, err := yaml2.Marshal(ocmDesc)
+	if err != nil {
+		fmt.Printf("[ERROR] - getDescriptor | Failed to marshal descriptor: %v\n", err)
+		return ocmDesc
+	}
+
+	fmt.Printf("[INFO] - getDescriptor | Component Descriptor (YAML):\n%s\n", string(yamlBytes))
 	return ocmDesc
 }
 
