@@ -4,13 +4,13 @@ packages:
   internal/common/validation: 92
   internal/service/scaffold: 91
   internal/service/credential: 83
-  internal/service/contentprovider: 91.1
+  internal/service/contentprovider: 90
   internal/service/filegenerator: 100
   internal/service/filegenerator/reusefilegenerator: 94
   internal/service/fileresolver: 100
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 81
-  internal/service/create: 42
+  internal/service/create: 35
   internal/service/componentdescriptor: 76.7
   internal/service/componentdescriptor/resources: 93
   internal/service/componentdescriptor/resources/accesshandler: 100

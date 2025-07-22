@@ -630,14 +630,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
-				resource := descriptor.Resources[1]
+				resource := descriptor.Resources[3]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal(moduleVersion))
 
-				By("And descriptor.component.resources[2].access should be correct")
-				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+				By("And descriptor.component.resources[3].access should be correct")
+				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[3].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
