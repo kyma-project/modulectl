@@ -1,7 +1,9 @@
 package componentdescriptor
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -12,17 +14,32 @@ import (
 	"github.com/kyma-project/modulectl/internal/image"
 )
 
+const (
+	SemverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
+)
+
+var ErrInvalidImageFormat = errors.New("invalid image format")
+
 func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
-	for _, image := range images {
-		if err := AppendImageResource(descriptor, image); err != nil {
-			return fmt.Errorf("failed to append image %s: %w", image, err)
+	for _, img := range images {
+		// Use the validation from image package
+		valid, err := image.IsValidImage(img)
+		if err != nil {
+			return fmt.Errorf("image validation failed for %s: %w", img, err)
+		}
+		if !valid {
+			return fmt.Errorf("%w: %s", ErrInvalidImageFormat, img)
+		}
+
+		if err := AppendImageResource(descriptor, img); err != nil {
+			return fmt.Errorf("failed to append image %s: %w", img, err)
 		}
 	}
 	return nil
 }
 
 func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
-	imgName, imgTag, err := image.ParseImageReference(imageURL)
+	imageInfo, err := image.ParseImageInfo(imageURL)
 	if err != nil {
 		return fmt.Errorf("failed to parse image: %w", err)
 	}
@@ -32,13 +49,14 @@ func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL stri
 		return fmt.Errorf("failed to create label: %w", err)
 	}
 
-	var version string
-	if strings.HasPrefix(imgTag, "sha256:") {
-		digest := strings.TrimPrefix(imgTag, "sha256:")
-		version = "0.0.0+sha256." + digest
-	} else {
-		version = imgTag
+	// Generate OCM-compatible version and resource name
+	version, resourceName := generateOCMVersionAndName(imageInfo)
+
+	// Check if resource already exists to prevent duplicates
+	if resourceExists(descriptor, resourceName, version) {
+		return nil // Skip duplicate resource
 	}
+
 	access := ociartifact.New(imageURL)
 	access.SetType(ociartifact.Type)
 
@@ -47,7 +65,7 @@ func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL stri
 			Type:     ociartifacttypes.TYPE,
 			Relation: ocmv1.ExternalRelation,
 			ElementMeta: compdesc.ElementMeta{
-				Name:    imgName,
+				Name:    resourceName,
 				Labels:  []ocmv1.Label{*typeLabel},
 				Version: version,
 			},
@@ -65,6 +83,42 @@ func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL stri
 	return nil
 }
 
+func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
+	if info.Digest != "" {
+		shortDigest := info.Digest[:12]
+		var version string
+		switch {
+		case info.Tag != "" && isValidSemverForOCM(info.Tag):
+			version = fmt.Sprintf("%s+sha256.%s", info.Tag, shortDigest)
+		case info.Tag != "":
+			version = fmt.Sprintf("0.0.0-%s+sha256.%s", normalizeTagForOCM(info.Tag), shortDigest)
+		default:
+			version = "0.0.0+sha256." + shortDigest
+		}
+		resourceName := fmt.Sprintf("%s-%s", info.Name, info.Digest[:8])
+		return version, resourceName
+	}
+
+	var version string
+	if isValidSemverForOCM(info.Tag) {
+		version = info.Tag
+	} else {
+		version = "0.0.0-" + normalizeTagForOCM(info.Tag)
+	}
+
+	resourceName := info.Name
+	return version, resourceName
+}
+
+func resourceExists(descriptor *compdesc.ComponentDescriptor, name, version string) bool {
+	for _, resource := range descriptor.Resources {
+		if resource.Name == name && resource.Version == version {
+			return true
+		}
+	}
+	return false
+}
+
 func CreateImageTypeLabel() (*ocmv1.Label, error) {
 	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
 	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
@@ -72,4 +126,19 @@ func CreateImageTypeLabel() (*ocmv1.Label, error) {
 		return nil, fmt.Errorf("failed to create OCM label: %w", err)
 	}
 	return label, nil
+}
+
+func normalizeTagForOCM(tag string) string {
+	reg := regexp.MustCompile(`[^a-zA-Z0-9.-]`)
+	normalized := reg.ReplaceAllString(tag, "-")
+	normalized = strings.Trim(normalized, "-.")
+	if normalized == "" {
+		normalized = "unknown"
+	}
+	return normalized
+}
+
+func isValidSemverForOCM(version string) bool {
+	matched, _ := regexp.MatchString(SemverPattern, version)
+	return matched
 }

@@ -80,16 +80,12 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithGcrImage_AppendsResource(t *test
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithInvalidImage_ReturnsError(t *testing.T) {
 	descriptor := createEmptyDescriptor()
-	images := []string{
-		"alpine:v1.0.0",
-		"invalid-image-no-tag",
-	}
+	images := []string{"invalid-image-no-tag"}
 
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to append image")
-	require.Contains(t, err.Error(), "invalid-image-no-tag")
+	require.Contains(t, err.Error(), "invalid image format: invalid-image-no-tag")
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImageList_DoesNothing(t *testing.T) {
@@ -169,9 +165,15 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDigestImage_AppendsResourceWithC
 	require.Len(t, descriptor.Resources, 1)
 
 	resource := descriptor.Resources[0]
-	require.Equal(t, "alpine", resource.Name)
-	require.Equal(t, "0.0.0+sha256.abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab", resource.Version)
+	require.Equal(t, "alpine-abcd1234", resource.Name)
+	require.Equal(t, "0.0.0+sha256.abcd12345678", resource.Version)
 	require.Equal(t, ociartifacttypes.TYPE, resource.Type)
+
+	access, ok := resource.Access.(*ociartifact.AccessSpec)
+	if !ok {
+		t.Fatalf("expected AccessSpec type, got %T", resource.Access)
+	}
+	require.Equal(t, "alpine@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab", access.ImageReference)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *testing.T) {
@@ -185,7 +187,6 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *t
 	for _, img := range images {
 		err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, []string{img})
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "failed to append image")
 	}
 }
 
@@ -233,7 +234,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithoutTag_ReturnsError(t *
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to append image")
+	require.Contains(t, err.Error(), "invalid image format: alpine")
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProcessing(t *testing.T) {
@@ -254,21 +255,27 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProces
 func TestAddImagesToOcmDescriptor_WhenCalledWithVariousTagFormats_AppendsResourcesWithCorrectVersions(t *testing.T) {
 	descriptor := createEmptyDescriptor()
 	images := []string{
-		"alpine:v1.2.3",
-		"nginx:1.0.0",
-		"kyma-project.io/myimage:2.2.3",
-		"ghcr.io/mymodule/anotherimage:4.5.6",
-		"registry.k3d.localhost:5000/myapp:123",
+		"myapp:v1.0.0",
+		"myapp:1.0.0",
+		"myapp:123",
+		"myapp:feature-branch",
 	}
 
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.NoError(t, err)
-	require.Len(t, descriptor.Resources, 5)
+	require.Len(t, descriptor.Resources, 4)
 
-	expectedVersions := []string{"v1.2.3", "1.0.0", "2.2.3", "4.5.6", "123"}
-	for i, resource := range descriptor.Resources {
-		require.Equal(t, expectedVersions[i], resource.Version)
+	expectedVersions := []string{
+		"v1.0.0",
+		"1.0.0",
+		"0.0.0-123",
+		"0.0.0-feature-branch",
+	}
+
+	for i, expected := range expectedVersions {
+		require.Equal(t, expected, descriptor.Resources[i].Version,
+			"Resource %d version mismatch", i)
 	}
 }
 
@@ -312,11 +319,10 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithShortDigest_ReturnsError(t *test
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to append image")
+	require.Contains(t, err.Error(), "invalid reference format")
 }
 
 // Test helper functions
-
 func createEmptyDescriptor() *compdesc.ComponentDescriptor {
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{

@@ -21,35 +21,44 @@ var (
 	ErrDisallowedTag       = errors.New("image tag is disallowed (latest/main)")
 )
 
+type ImageInfo struct {
+	Name    string
+	Tag     string
+	Digest  string
+	FullURL string
+}
+
 func IsValidImage(value string) (bool, error) {
 	if !isValidImageFormat(value) {
 		return false, nil
 	}
 
-	_, tag, err := ParseImageReference(value)
+	info, err := ParseImageInfo(value)
 	if err != nil {
 		return false, fmt.Errorf("invalid image reference %q: %w", value, err)
 	}
 
-	if tag == "" {
+	if info.Tag == "" && info.Digest == "" {
 		return false, fmt.Errorf("%w: %q", ErrMissingImageTag, value)
 	}
 
-	if isMainOrLatestTag(tag) {
-		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, tag)
+	// Check for disallowed tags (even with digest)
+	if info.Tag != "" && isMainOrLatestTag(info.Tag) {
+		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, info.Tag)
 	}
 
 	return true, nil
 }
 
-func ParseImageReference(imageURL string) (string, string, error) {
+// ParseImageInfo parses image reference and extracts all components
+func ParseImageInfo(imageURL string) (*ImageInfo, error) {
 	if imageURL == "" {
-		return "", "", fmt.Errorf("failed to parse image reference: %w", ErrEmptyImageURL)
+		return nil, fmt.Errorf("failed to parse image reference: %w", ErrEmptyImageURL)
 	}
 
 	ref, err := reference.ParseAnyReference(imageURL)
 	if err != nil {
-		return "", "", fmt.Errorf("invalid image reference: %w", err)
+		return nil, fmt.Errorf("invalid image reference: %w", err)
 	}
 
 	var imageName string
@@ -57,17 +66,29 @@ func ParseImageReference(imageURL string) (string, string, error) {
 		parts := strings.Split(named.Name(), "/")
 		imageName = parts[len(parts)-1]
 	} else {
-		return "", "", fmt.Errorf("failed to extract image name from %s: %w", imageURL, ErrImageNameExtraction)
+		return nil, fmt.Errorf("failed to extract image name from %s: %w", imageURL, ErrImageNameExtraction)
 	}
 
-	switch t := ref.(type) {
-	case reference.Tagged:
-		return imageName, t.Tag(), nil
-	case reference.Digested:
-		return imageName, t.Digest().String(), nil
-	default:
-		return "", "", fmt.Errorf("no tag or digest found in %s: %w", imageURL, ErrNoTagOrDigest)
+	info := &ImageInfo{
+		Name:    imageName,
+		FullURL: imageURL,
 	}
+
+	// Handle different reference types
+	switch refType := ref.(type) {
+	case reference.Tagged:
+		info.Tag = refType.Tag()
+		// Check if it also has digest
+		if digested, ok := refType.(reference.Digested); ok {
+			info.Digest = strings.TrimPrefix(digested.Digest().String(), "sha256:")
+		}
+	case reference.Digested:
+		info.Digest = strings.TrimPrefix(refType.Digest().String(), "sha256:")
+	default:
+		return nil, fmt.Errorf("no tag or digest found in %s: %w", imageURL, ErrNoTagOrDigest)
+	}
+
+	return info, nil
 }
 
 func isValidImageFormat(value string) bool {

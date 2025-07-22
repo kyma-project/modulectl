@@ -75,14 +75,15 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
 	foundCorrectManagerVersion := false
 	filteredImages := make([]string, 0, len(s.BDBA))
 	for _, img := range s.BDBA {
-		_, tag, err := image.ParseImageReference(img)
+		imageInfo, err := image.ParseImageInfo(img)
 		if err != nil {
-			return fmt.Errorf("failed to get image name and tag: %w", err)
+			return fmt.Errorf("failed to parse image reference: %w", err)
 		}
-		_, err = semver.NewVersion(tag)
+		_, err = semver.NewVersion(imageInfo.Tag)
 		if err != nil {
-			return fmt.Errorf("failed to parse image tag [%s] as semantic version: %w", tag, err)
+			return fmt.Errorf("failed to parse image tag [%s] as semantic version: %w", imageInfo.Tag, err)
 		}
+
 		filteredImages = append(filteredImages, img)
 
 		if !foundCorrectManagerVersion {

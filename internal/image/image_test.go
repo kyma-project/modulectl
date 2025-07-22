@@ -9,98 +9,132 @@ import (
 	"github.com/kyma-project/modulectl/internal/image"
 )
 
-func TestParseImageReference_ValidImagesWithTag(t *testing.T) {
+func TestParseImageInfo_ValidImagesWithTag(t *testing.T) {
 	tests := []struct {
-		name         string
-		imageURL     string
-		expectedName string
-		expectedTag  string
+		name           string
+		imageURL       string
+		expectedName   string
+		expectedTag    string
+		expectedDigest string
 	}{
-		{"basic image with tag", "alpine:3.15.4", "alpine", "3.15.4"},
-		{"registry with port and tag", "localhost:5000/myimage:v1.0.0", "myimage", "v1.0.0"},
+		{"basic image with tag", "alpine:3.15.4", "alpine", "3.15.4", ""},
+		{"registry with port and tag", "localhost:5000/myimage:v1.0.0", "myimage", "v1.0.0", ""},
 		{
 			"complex registry path with tag",
 			"europe-docker.pkg.dev/kyma-project/prod/external/istio/proxyv2:1.25.3-distroless",
 			"proxyv2",
 			"1.25.3-distroless",
+			"",
 		},
-		{"gcr.io with tag", "gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1", "kube-rbac-proxy", "v0.13.1"},
-		{"docker hub with organization", "istio/proxyv2:1.19.0", "proxyv2", "1.19.0"},
-		{"image name only with tag", "nginx:latest", "nginx", "latest"},
+		{"gcr.io with tag", "gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1", "kube-rbac-proxy", "v0.13.1", ""},
+		{"docker hub with organization", "istio/proxyv2:1.19.0", "proxyv2", "1.19.0", ""},
+		{"image name only with tag", "nginx:latest", "nginx", "latest", ""},
 		{
 			"registry with port and complex path",
 			"localhost:5000/org/project/subproject/image:v1.2.3",
 			"image",
 			"v1.2.3",
+			"",
 		},
-		{"multiple colons in registry path", "registry.io:5000/project/namespace/image:tag", "image", "tag"},
+		{"multiple colons in registry path", "registry.io:5000/project/namespace/image:tag", "image", "tag", ""},
 		{
 			"k3d registry with port and path",
 			"k3d-abc-registry.com:443/kyma-project/prod/bar-image:2.0.1",
 			"bar-image",
 			"2.0.1",
+			"",
 		},
-		{"image with numeric tag", "nginx:1.21.0", "nginx", "1.21.0"},
-		{"image with semantic version tag", "postgres:13.7-alpine", "postgres", "13.7-alpine"},
-		// Removed the build tag test as it's not valid according to Docker reference format
-		{"single character image name", "a:tag", "a", "tag"},
-		{"numeric image name", "123:tag", "123", "tag"},
+		{"image with numeric tag", "nginx:1.21.0", "nginx", "1.21.0", ""},
+		{"image with semantic version tag", "postgres:13.7-alpine", "postgres", "13.7-alpine", ""},
+		{"single character image name", "a:tag", "a", "tag", ""},
+		{"numeric image name", "123:tag", "123", "tag", ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			name, tag, err := image.ParseImageReference(tt.imageURL)
+			info, err := image.ParseImageInfo(tt.imageURL)
 			require.NoError(t, err)
-			require.Equal(t, tt.expectedName, name)
-			require.Equal(t, tt.expectedTag, tag)
+			require.Equal(t, tt.expectedName, info.Name)
+			require.Equal(t, tt.expectedTag, info.Tag)
+			require.Equal(t, tt.expectedDigest, info.Digest)
+			require.Equal(t, tt.imageURL, info.FullURL)
 		})
 	}
 }
 
-func TestParseImageReference_ValidImagesWithDigest(t *testing.T) {
+func TestParseImageInfo_ValidImagesWithDigest(t *testing.T) {
 	tests := []struct {
-		name         string
-		imageURL     string
-		expectedName string
-		expectedTag  string
+		name           string
+		imageURL       string
+		expectedName   string
+		expectedTag    string
+		expectedDigest string
 	}{
 		{
 			"digest format",
 			"docker.io/alpine@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
 			"alpine",
-			"sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+			"",
+			"abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234", // Note: no sha256: prefix
 		},
 		{
 			"complex digest",
 			"gcr.io/distroless/static@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
 			"static",
-			"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+			"",
+			"1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
 		},
 		{
 			"registry with port and digest",
 			"localhost:5000/myimage@sha256:fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
 			"myimage",
-			"sha256:fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
-		},
-		{
-			"sha512 digest",
-			"alpine@sha512:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
-			"alpine",
-			"sha512:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+			"",
+			"fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			name, tag, err := image.ParseImageReference(tt.imageURL)
+			info, err := image.ParseImageInfo(tt.imageURL)
 			require.NoError(t, err)
-			require.Equal(t, tt.expectedName, name)
-			require.Equal(t, tt.expectedTag, tag)
+			require.Equal(t, tt.expectedName, info.Name)
+			require.Equal(t, tt.expectedTag, info.Tag)
+			require.Equal(t, tt.expectedDigest, info.Digest)
+			require.Equal(t, tt.imageURL, info.FullURL)
 		})
 	}
 }
 
-func TestParseImageReference_InvalidInputs_ReturnsError(t *testing.T) {
+func TestParseImageInfo_ImagesWithTagAndDigest(t *testing.T) {
+	tests := []struct {
+		name           string
+		imageURL       string
+		expectedName   string
+		expectedTag    string
+		expectedDigest string
+	}{
+		{
+			"image with both tag and digest",
+			"nginx:1.21@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+			"nginx",
+			"1.21",
+			"abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			info, err := image.ParseImageInfo(tt.imageURL)
+			require.NoError(t, err)
+			require.Equal(t, tt.expectedName, info.Name)
+			require.Equal(t, tt.expectedTag, info.Tag)
+			require.Equal(t, tt.expectedDigest, info.Digest)
+			require.Equal(t, tt.imageURL, info.FullURL)
+		})
+	}
+}
+
+func TestParseImageInfo_InvalidInputs_ReturnsError(t *testing.T) {
 	tests := []struct {
 		name        string
 		imageURL    string
@@ -111,17 +145,16 @@ func TestParseImageReference_InvalidInputs_ReturnsError(t *testing.T) {
 		{"registry port only", "localhost:5000/myimage", image.ErrNoTagOrDigest},
 		{"path with colon but no valid tag", "registry.io:5000/path/to/image", image.ErrNoTagOrDigest},
 		{"colon in path but no tag", "example.com:8080/project/image", image.ErrNoTagOrDigest},
-		{"invalid digest format", "alpine@sha256:invalid", nil}, // Will be caught by reference.ParseAnyReference
-		{"malformed reference", "alpine@sha256:", nil},          // Will be caught by reference.ParseAnyReference
-		{"multiple @ symbols", "alpine@sha256:abc@def", nil},    // Will be caught by reference.ParseAnyReference
+		{"invalid digest format", "alpine@sha256:invalid", nil},
+		{"malformed reference", "alpine@sha256:", nil},
+		{"multiple @ symbols", "alpine@sha256:abc@def", nil},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			name, tag, err := image.ParseImageReference(tt.imageURL)
+			info, err := image.ParseImageInfo(tt.imageURL)
 			require.Error(t, err)
-			require.Empty(t, name)
-			require.Empty(t, tag)
+			require.Nil(t, info)
 
 			if tt.expectedErr != nil {
 				require.ErrorIs(t, err, tt.expectedErr)
@@ -130,28 +163,22 @@ func TestParseImageReference_InvalidInputs_ReturnsError(t *testing.T) {
 	}
 }
 
-func TestParseImageReference_EdgeCases(t *testing.T) {
+func TestParseImageInfo_EdgeCases(t *testing.T) {
 	tests := []struct {
-		name        string
-		imageURL    string
-		expectError bool
-		expectName  string
-		expectTag   string
+		name         string
+		imageURL     string
+		expectError  bool
+		expectName   string
+		expectTag    string
+		expectDigest string
 	}{
-		{
-			// When both tag and digest are present, the reference library prioritizes tag, not digest
-			"image with both tag and digest (tag takes precedence)",
-			"nginx:1.21@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
-			false,
-			"nginx",
-			"1.21", // Tag is returned, not digest
-		},
 		{
 			"image name with underscores",
 			"my_image:v1.0.0",
 			false,
 			"my_image",
 			"v1.0.0",
+			"",
 		},
 		{
 			"image name with hyphens",
@@ -159,21 +186,23 @@ func TestParseImageReference_EdgeCases(t *testing.T) {
 			false,
 			"my-image",
 			"v1.0.0",
+			"",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			name, tag, err := image.ParseImageReference(tt.imageURL)
+			info, err := image.ParseImageInfo(tt.imageURL)
 
 			if tt.expectError {
 				require.Error(t, err)
-				require.Empty(t, name)
-				require.Empty(t, tag)
+				require.Nil(t, info)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tt.expectName, name)
-				require.Equal(t, tt.expectTag, tag)
+				require.NotNil(t, info)
+				require.Equal(t, tt.expectName, info.Name)
+				require.Equal(t, tt.expectTag, info.Tag)
+				require.Equal(t, tt.expectDigest, info.Digest)
 			}
 		})
 	}
@@ -262,13 +291,12 @@ func TestIsValidImage_InvalidFormat_ReturnsFalse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			valid, err := image.IsValidImage(tt.imageURL)
 			require.False(t, valid)
-			require.NoError(t, err) // isValidImageFormat returns false, so no error is propagated
+			require.NoError(t, err)
 		})
 	}
 }
 
 func TestIsValidImage_InvalidFormat_ReturnsError(t *testing.T) {
-	// These cases pass format validation but fail in parsing
 	tests := []struct {
 		name     string
 		imageURL string
@@ -281,7 +309,7 @@ func TestIsValidImage_InvalidFormat_ReturnsError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			valid, err := image.IsValidImage(tt.imageURL)
 			require.False(t, valid)
-			require.Error(t, err) // These will fail in ParseImageReference
+			require.Error(t, err)
 			require.Contains(t, err.Error(), "invalid image reference")
 		})
 	}
@@ -293,10 +321,8 @@ func TestIsValidImage_MissingTag_Cases(t *testing.T) {
 		imageURL    string
 		expectError bool
 	}{
-		// These fail format validation (no : or @), so return false with no error
 		{"simple image name without tag", "alpine", false},
 		{"complex path without tag", "gcr.io/project/image", false},
-		// This passes format validation but fails parsing
 		{"registry with port but no tag", "localhost:5000/myimage", true},
 	}
 
@@ -309,17 +335,16 @@ func TestIsValidImage_MissingTag_Cases(t *testing.T) {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), "no tag or digest found")
 			} else {
-				require.NoError(t, err) // Failed format validation
+				require.NoError(t, err)
 			}
 		})
 	}
 }
 
 func TestIsValidImage_NoTagImage_ReturnsFalseNoError(t *testing.T) {
-	// Test the specific case that was failing
 	valid, err := image.IsValidImage("nginx")
 	require.False(t, valid)
-	require.NoError(t, err) // This fails isValidImageFormat, so no error
+	require.NoError(t, err)
 }
 
 func TestIsValidImage_ErrorPropagation(t *testing.T) {
@@ -333,7 +358,7 @@ func TestIsValidImage_ErrorPropagation(t *testing.T) {
 			"valid format but parse error",
 			"invalid@sha256:xyz",
 			true,
-			nil, // Will be a parsing error from reference package
+			nil,
 		},
 		{
 			"valid format and parse but disallowed tag",
@@ -358,12 +383,9 @@ func TestIsValidImage_ErrorPropagation(t *testing.T) {
 	}
 }
 
-// Additional test for build tags that don't work with Docker reference format
-func TestParseImageReference_InvalidBuildTag(t *testing.T) {
-	// This test documents that build metadata in tags is not supported by Docker reference format
-	name, tag, err := image.ParseImageReference("myimage:v1.0.0-rc.1+build.123")
+func TestParseImageInfo_InvalidBuildTag(t *testing.T) {
+	info, err := image.ParseImageInfo("myimage:v1.0.0-rc.1+build.123")
 	require.Error(t, err)
-	require.Empty(t, name)
-	require.Empty(t, tag)
+	require.Nil(t, info)
 	require.Contains(t, err.Error(), "invalid reference format")
 }

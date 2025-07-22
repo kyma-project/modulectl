@@ -1150,11 +1150,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					version   string
 				}{
 					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
+					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0", "2.0.0"},
 					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
 					"nginx":             {"nginx:1.25.0", "1.25.0"},
-					"postgres":          {"postgres:13.7-alpine", "13.7-alpine"},
-					"static":            {"gcr.io/distroless/static:latest", "latest"}, // adjust based on your config
-					// Add the 6th expected image here
+					"postgres":          {"postgres:15.3.0", "15.3.0"},
+					"static": {
+						"gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
+						"0.0.0+sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
+					},
 				}
 
 				for imageName, expected := range expectedImages {

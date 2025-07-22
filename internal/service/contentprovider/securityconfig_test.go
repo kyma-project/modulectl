@@ -67,7 +67,7 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenImageNameAnd
 	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to get image name and tag")
+	require.Contains(t, err.Error(), "no tag or digest found")
 }
 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenLatestTag(t *testing.T) {
