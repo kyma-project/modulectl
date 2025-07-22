@@ -1519,27 +1519,17 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(template.Spec.Version).To(Equal(version))
 
 	By("And descriptor.component.resources should be correct")
-	Expect(len(descriptor.Resources)).To(BeNumerically(">=", 2))
-
-	var rawManifestRes, defaultCRRes *ocmv1.Resource
-	for index := range descriptor.Resources {
-		switch descriptor.Resources[index].Name {
-		case "raw-manifest":
-			rawManifestRes = &descriptor.Resources[index]
-		case "default-cr":
-			defaultCRRes = &descriptor.Resources[index]
-		}
-	}
-	Expect(rawManifestRes).ToNot(BeNil(), "raw-manifest resource not found")
-	Expect(defaultCRRes).ToNot(BeNil(), "default-cr resource not found")
+	Expect(descriptor.Resources).To(HaveLen(3))
 
 	By("And descriptor.component.resources for manifest should be correct")
-	Expect(rawManifestRes.Relation).To(Equal(ocmv1.LocalRelation))
-	Expect(rawManifestRes.Type).To(Equal("directoryTree"))
-	Expect(rawManifestRes.Version).To(Equal(version))
+	resource := descriptor.Resources[1]
+	Expect(resource.Name).To(Equal("raw-manifest"))
+	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
+	Expect(resource.Type).To(Equal("directoryTree"))
+	Expect(resource.Version).To(Equal(version))
 
 	By("And descriptor.component.resources.access for raw-manifest should be correct")
-	manifestResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(rawManifestRes.Access)
+	manifestResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	manifestAccessSpec, ok := manifestResourceAccessSpec.(*localblob.AccessSpec)
 	Expect(ok).To(BeTrue())
@@ -1549,12 +1539,14 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(manifestAccessSpec.ReferenceName).To(Equal("raw-manifest"))
 
 	By("And descriptor.component.resources for default CR should be correct")
-	Expect(defaultCRRes.Relation).To(Equal(ocmv1.LocalRelation))
-	Expect(defaultCRRes.Type).To(Equal("directoryTree"))
-	Expect(defaultCRRes.Version).To(Equal(version))
+	resource = descriptor.Resources[2]
+	Expect(resource.Name).To(Equal("default-cr"))
+	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
+	Expect(resource.Type).To(Equal("directoryTree"))
+	Expect(resource.Version).To(Equal(version))
 
 	By("And descriptor.component.resources.access for default-cr should be correct")
-	defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(defaultCRRes.Access)
+	defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 	Expect(ok).To(BeTrue())
