@@ -1135,6 +1135,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And the module template should contain merged and deduplicated images", func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
+				fmt.Printf("[INFO] Template: %v\n", template)
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
 
@@ -1390,7 +1391,7 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescript
 	if err != nil {
 		return nil
 	}
-
+	fmt.Printf("[INFO] - getDescriptor | Component Descriptor: %v\n", ocmDesc)
 	return ocmDesc
 }
 
@@ -1536,6 +1537,7 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Resource {
 	var imageResources []compdesc.Resource
 	for _, resource := range descriptor.Resources {
+		fmt.Printf("[INFO] - getImageResources | Resource: %v\n", resource)
 		if resource.Type == "ociArtifact" {
 			imageResources = append(imageResources, resource)
 		}
@@ -1567,6 +1569,7 @@ func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 func extractImageURLsFromResources(resources []compdesc.Resource) []string {
 	var urls []string
 	for _, resource := range resources {
+		fmt.Printf("[INFO] - extractImageURLsFromResources | Resource: %v\n", resource)
 		accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 		if err != nil {
 			continue
