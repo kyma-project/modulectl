@@ -377,8 +377,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.repositoryContexts should be empty")
 				Expect(descriptor.RepositoryContexts).To(HaveLen(0))
 
-				By("And descriptor.component.resources should be empty")
-				Expect(descriptor.Resources).To(HaveLen(0))
+				By("And descriptor.component.resources should have one from manifest")
+				Expect(descriptor.Resources).To(HaveLen(1))
 			})
 		})
 	})
