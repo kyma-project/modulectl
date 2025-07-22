@@ -421,7 +421,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
 				Expect(resource.Version).To(Equal(moduleVersion))
-				resource := descriptor.Resources[1]
+				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("metadata"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("plainText"))
@@ -435,8 +435,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
 				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec0, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
+				ociartifactAccessSpec0, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
+				Expect(ociartifactAccessSpec0.GetType()).To(Equal(ociartifact.Type))
 
 				By("And descriptor.component.resources[1].access should be correct")
 				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
