@@ -629,7 +629,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(3))
+				Expect(descriptor.Resources).To(HaveLen(4))
 				resource := descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
