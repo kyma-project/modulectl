@@ -18,6 +18,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"os"
 	"os/exec"
+	yaml2 "sigs.k8s.io/yaml"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
