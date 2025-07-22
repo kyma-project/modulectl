@@ -1118,7 +1118,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		var cmd createCmd
 		By("When invoked with valid module-config containing images from both manifest and security config", func() {
 			cmd = createCmd{
-				moduleConfigFile:          withManifestMixedWithSecurity,
+				moduleConfigFile:          withManifestAndSecurity,
 				registry:                  ociRegistry,
 				insecure:                  true,
 				output:                    templateOutputPath,
@@ -1134,7 +1134,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And the module template should contain merged and deduplicated images", func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
-				fmt.Printf("[INFO] Template: %v\n", template)
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
 
