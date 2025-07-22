@@ -63,11 +63,11 @@ const (
 	withManifestAndSecurity       = validConfigs + "with-manifest-and-security.yaml"
 	withManifestNoImages          = validConfigs + "with-manifest-no-deployment-statefulset.yaml"
 
-	ociRegistry          = "http://localhost:5001"
+	ociRegistry          = "http://k3d-oci.localhost:5001"
 	templateOutputPath   = "/tmp/template.yaml"
 	privateOciRegistry   = "http://k3d-private-oci.localhost:5002"
 	ociRegistryCreds     = "k3duser:k3dpass"
-	templateOperatorPath = "/Users/Mo/Projects/template-operator"
+	templateOperatorPath = "../../../template-operator"
 )
 
 // Command wrapper for `modulectl create`
@@ -122,7 +122,7 @@ func (cmd *createCmd) execute() error {
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))
 
-	command = exec.Command("/Users/Mo/Projects/kyma-operator-manager/modulectl/bin/modulectl-darwin", args...)
+	command = exec.Command("modulectl", args...)
 	cmdOut, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("create command failed with output: %s and error: %w", cmdOut, err)
