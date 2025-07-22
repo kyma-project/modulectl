@@ -311,8 +311,8 @@ func createContainers(containers []containerSpec) []interface{} {
 	result := make([]interface{}, 0, len(containers))
 	for _, container := range containers {
 		containerObj := map[string]interface{}{
-			"name": container.name,
-			"img":  container.image,
+			"name":  container.name,
+			"image": container.image,
 		}
 		if len(container.envVars) > 0 {
 			envVars := make([]interface{}, 0, len(container.envVars))

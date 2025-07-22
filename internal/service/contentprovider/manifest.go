@@ -83,7 +83,7 @@ func extractFromContainers(manifest *unstructured.Unstructured, imageSet map[str
 			continue
 		}
 
-		if img, found, _ := unstructured.NestedString(containerMap, "img"); found {
+		if img, found, _ := unstructured.NestedString(containerMap, "image"); found {
 			valid, err := image.IsValidImage(img)
 			if err != nil {
 				return fmt.Errorf("invalid img %q in %v: %w", img, path, err)
