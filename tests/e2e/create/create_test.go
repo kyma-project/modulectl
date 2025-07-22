@@ -1140,17 +1140,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				imageResources := getImageResourcesMap(descriptor)
 
 				// Verify exact count
-				Expect(len(imageResources)).To(Equal(6), "Expected exactly 6 image resources")
+				Expect(len(imageResources)).To(Equal(5), "Expected exactly 6 image resources")
 
 				expectedImages := map[string]struct {
 					reference string
 					version   string
 				}{
-					"template-operator":   {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
-					"template-operator-2": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0", "2.0.0"},
-					"webhook":             {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
-					"nginx":               {"nginx:1.25.0", "1.25.0"},
-					"postgres":            {"postgres:15.3", "15.3"},
+					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
+					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
+					"nginx":             {"nginx:1.25.0", "1.25.0"},
+					"postgres":          {"postgres:15.3", "15.3"},
 					"static": {
 						"gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
 						"0.0.0+sha256.c7742da01aa7e",

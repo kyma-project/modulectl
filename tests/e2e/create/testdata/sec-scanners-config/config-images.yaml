@@ -3,7 +3,6 @@ rc-tag: 1.0.3
 dev-branch: main
 bdba:
   - europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
-  - europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0
   - nginx:1.25.0
 mend:
   language: golang-mod
