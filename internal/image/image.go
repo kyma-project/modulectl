@@ -74,11 +74,9 @@ func ParseImageInfo(imageURL string) (*ImageInfo, error) {
 		FullURL: imageURL,
 	}
 
-	// Handle different reference types
 	switch refType := ref.(type) {
 	case reference.Tagged:
 		info.Tag = refType.Tag()
-		// Check if it also has digest
 		if digested, ok := refType.(reference.Digested); ok {
 			info.Digest = strings.TrimPrefix(digested.Digest().String(), "sha256:")
 		}
