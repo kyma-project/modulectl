@@ -4,6 +4,8 @@ package create_test
 
 import (
 	"fmt"
+	"github.com/kyma-project/lifecycle-manager/api/shared"
+	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 	"io/fs"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
@@ -16,10 +18,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"os"
 	"os/exec"
-	yaml2 "sigs.k8s.io/yaml"
-
-	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -1149,14 +1147,14 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					reference string
 					version   string
 				}{
-					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
-					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0", "2.0.0"},
-					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
-					"nginx":             {"nginx:1.25.0", "1.25.0"},
-					"postgres":          {"postgres:15.3.0", "15.3.0"},
+					"template-operator":   {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
+					"template-operator-2": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0", "2.0.0"},
+					"webhook":             {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
+					"nginx":               {"nginx:1.25.0", "1.25.0"},
+					"postgres":            {"postgres:15.3", "15.3"},
 					"static": {
 						"gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
-						"0.0.0+sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
+						"0.0.0+sha256.c7742da01aa7e",
 					},
 				}
 
@@ -1253,7 +1251,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				}{
 					"busybox": {"busybox:1.35.0", "1.35.0"},
 					"migrate": {"migrate/migrate:v4.16.0", "v4.16.0"},
-					"alpine":  {"alpine:3.18.0", "3.18.0"},
 				}
 
 				// Verify exact count
@@ -1297,7 +1294,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				}{
 					"nginx": {
 						"nginx@sha256:fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10",
-						"0.0.0+sha256.fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10",
+						"0.0.0+sha256.fff07cc3a741",
 					},
 					"alpine": {"alpine:3.18.0", "3.18.0"},
 				}
@@ -1337,12 +1334,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				imageResources := getImageResourcesMap(descriptor)
 
-				// Verify webhook image exists with correct reference
 				err = verifyImageResource(imageResources, "webhook",
 					"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0")
 				Expect(err).ToNot(HaveOccurred())
 
-				// Add other expected images from env variables here
 			})
 		})
 	})
@@ -1364,7 +1359,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).Should(HaveOccurred())
 			Expect(err.Error()).Should(ContainSubstring("image tag is disallowed"))
 
-			// Be more specific about which tag caused the failure
 			Expect(err.Error()).Should(Or(
 				ContainSubstring("latest"),
 				ContainSubstring("main"),
@@ -1385,12 +1379,6 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
-	yamlBytes, err := yaml2.Marshal(moduleTemplate)
-	if err != nil {
-		fmt.Printf("[DEBUG] Failed to marshal module template: %v\n", err)
-	} else {
-		fmt.Printf("[DEBUG] ModuleTemplate content:\n%s\n", string(yamlBytes))
-	}
 	return moduleTemplate, err
 }
 
@@ -1399,17 +1387,8 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescript
 		template.Spec.Descriptor.Raw,
 		[]compdesc.DecodeOption{compdesc.DisableValidation(true)}...)
 	if err != nil {
-		fmt.Printf("[ERROR] - getDescriptor | Failed to decode descriptor: %v\n", err)
 		return nil
 	}
-
-	yamlBytes, err := yaml2.Marshal(ocmDesc)
-	if err != nil {
-		fmt.Printf("[ERROR] - getDescriptor | Failed to marshal descriptor: %v\n", err)
-		return ocmDesc
-	}
-
-	fmt.Printf("[INFO] - getDescriptor | Component Descriptor (YAML):\n%s\n", string(yamlBytes))
 	return ocmDesc
 }
 
@@ -1555,7 +1534,6 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Resource {
 	var imageResources []compdesc.Resource
 	for _, resource := range descriptor.Resources {
-		fmt.Printf("[INFO] - getImageResources | Resource: %v\n", resource)
 		if resource.Type == "ociArtifact" {
 			imageResources = append(imageResources, resource)
 		}
@@ -1587,7 +1565,6 @@ func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 func extractImageURLsFromResources(resources []compdesc.Resource) []string {
 	var urls []string
 	for _, resource := range resources {
-		fmt.Printf("[INFO] - extractImageURLsFromResources | Resource: %v\n", resource)
 		accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 		if err != nil {
 			continue

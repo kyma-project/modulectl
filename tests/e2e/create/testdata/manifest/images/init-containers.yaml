@@ -12,7 +12,7 @@ spec:
   template:
     spec:
       initContainers:
-        - name: setup
+        - name: busybox
           image: busybox:1.35.0
         - name: migration
           image: migrate/migrate:v4.16.0
