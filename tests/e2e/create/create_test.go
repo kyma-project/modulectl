@@ -1519,7 +1519,7 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(template.Spec.Version).To(Equal(version))
 
 	By("And descriptor.component.resources should be correct")
-	Expect(descriptor.Resources).To(HaveLen(3))
+	Expect(descriptor.Resources).To(HaveLen(4))
 
 	By("And descriptor.component.resources for manifest should be correct")
 	resource := descriptor.Resources[1]
