@@ -1143,7 +1143,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				// Verify exact count
 				Expect(len(imageResources)).To(Equal(6), "Expected exactly 6 image resources")
 
-				// Verify each expected image exists with correct details
 				expectedImages := map[string]struct {
 					reference string
 					version   string
