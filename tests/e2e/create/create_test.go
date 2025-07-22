@@ -630,7 +630,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
-				resource := descriptor.Resources[2]
+				resource := descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))

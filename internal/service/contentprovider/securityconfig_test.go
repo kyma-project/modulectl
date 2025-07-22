@@ -124,6 +124,134 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsNoError_WhenValidTagsP
 	require.Equal(t, "europe-docker.pkg.dev/kyma-project/prod/another-image:4.5.6", config.BDBA[1])
 }
 
+func Test_SecurityConfig_ValidateBDBAImageTags_ReturnsError_WhenRegexFails(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/test-image:1.2.3",
+		},
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3[invalid")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "no image with the correct manager version found")
+}
+
+func Test_SecurityConfig_ValidateBDBAImageTags_FiltersImagesCorrectly(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/worker:4.5.6",
+			"other-registry.com/image:1.2.3", // This should still be included if it has valid semver
+		},
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.NoError(t, err)
+	require.Len(t, config.BDBA, 3)
+	require.Contains(t, config.BDBA, "europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3")
+	require.Contains(t, config.BDBA, "europe-docker.pkg.dev/kyma-project/prod/worker:4.5.6")
+	require.Contains(t, config.BDBA, "other-registry.com/image:1.2.3")
+}
+
+func Test_SecurityConfig_ValidateBDBAImageTags_EmptyBDBAList(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{}, // Empty list
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "no image with the correct manager version found")
+}
+
+func Test_SecurityConfig_ValidateBDBAImageTags_FoundCorrectManagerVersionEarlyExit(t *testing.T) {
+	config := contentprovider.SecurityScanConfig{
+		BDBA: []string{
+			"europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3",
+			"europe-docker.pkg.dev/kyma-project/prod/worker:4.5.6",
+		},
+	}
+
+	err := config.ValidateBDBAImageTags("1.2.3")
+
+	require.NoError(t, err)
+	require.Len(t, config.BDBA, 2)
+}
+
+func Test_isCorrectManagerVersion_EdgeCases(t *testing.T) {
+	testCases := []struct {
+		name          string
+		image         string
+		moduleVersion string
+		expected      bool
+	}{
+		{
+			name:          "exact match",
+			image:         "europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3",
+			moduleVersion: "1.2.3",
+			expected:      true,
+		},
+		{
+			name:          "different version",
+			image:         "europe-docker.pkg.dev/kyma-project/prod/manager:1.2.4",
+			moduleVersion: "1.2.3",
+			expected:      false,
+		},
+		{
+			name:          "wrong registry",
+			image:         "other-registry.com/kyma-project/prod/manager:1.2.3",
+			moduleVersion: "1.2.3",
+			expected:      false,
+		},
+		{
+			name:          "wrong path",
+			image:         "europe-docker.pkg.dev/other-project/prod/manager:1.2.3",
+			moduleVersion: "1.2.3",
+			expected:      false,
+		},
+		{
+			name:          "empty version",
+			image:         "europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3",
+			moduleVersion: "",
+			expected:      false,
+		},
+		{
+			name:          "special characters in version",
+			image:         "europe-docker.pkg.dev/kyma-project/prod/manager:1.2.3-alpha.1",
+			moduleVersion: "1.2.3-alpha.1",
+			expected:      true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			config := contentprovider.SecurityScanConfig{
+				BDBA: []string{tc.image},
+			}
+
+			err := config.ValidateBDBAImageTags(tc.moduleVersion)
+
+			if tc.expected {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), "no image with the correct manager version found")
+			}
+		})
+	}
+}
+
+func Test_SecurityConfig_GetSecurityConfig_Structure(t *testing.T) {
+	// Test the structure of the default security config
+	svc, _ := contentprovider.NewSecurityConfig(&objectToYAMLConverterCapture{})
+
+	_, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: "test-module"})
+
+	require.NoError(t, err)
+}
+
 // Test Stubs
 
 type objectToYAMLConverterStub struct{}
@@ -132,4 +260,27 @@ const convertedContent = "content"
 
 func (o *objectToYAMLConverterStub) ConvertToYaml(_ interface{}) string {
 	return convertedContent
+}
+
+type objectToYAMLConverterCapture struct {
+	capturedConfig interface{}
+}
+
+func (o *objectToYAMLConverterCapture) ConvertToYaml(obj interface{}) string {
+	o.capturedConfig = obj
+	// Verify the structure
+	config, ok := obj.(contentprovider.SecurityScanConfig)
+	if !ok {
+		return "error: not a SecurityScanConfig"
+	}
+
+	if config.ModuleName == "" {
+		return "error: empty module name"
+	}
+
+	if len(config.BDBA) != 2 {
+		return "error: expected 2 BDBA images"
+	}
+
+	return "valid-config"
 }
