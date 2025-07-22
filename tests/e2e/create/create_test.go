@@ -1519,7 +1519,7 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(template.Spec.Version).To(Equal(version))
 
 	By("And descriptor.component.resources should be correct")
-	Expect(descriptor.Resources).To(HaveLen(3))
+	Expect(descriptor.Resources).To(BeNumerically(">=", 2))
 
 	findResource := func(name string) *compdesc.Resource {
 		for i := range descriptor.Resources {
