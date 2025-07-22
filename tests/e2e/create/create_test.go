@@ -1521,14 +1521,21 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	By("And descriptor.component.resources should be correct")
 	Expect(descriptor.Resources).To(HaveLen(3))
 
-	By("And descriptor.component.resources for manifest should be correct")
-	resource := descriptor.Resources[1]
-	Expect(resource.Name).To(Equal("raw-manifest"))
+	findResource := func(name string) *compdesc.Resource {
+		for i := range descriptor.Resources {
+			if descriptor.Resources[i].Name == name {
+				return &descriptor.Resources[i]
+			}
+		}
+		return nil
+	}
+
+	resource := findResource("raw-manifest")
+	Expect(resource).ToNot(BeNil(), "raw-manifest resource not found")
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
 	Expect(resource.Version).To(Equal(version))
 
-	By("And descriptor.component.resources.access for raw-manifest should be correct")
 	manifestResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	manifestAccessSpec, ok := manifestResourceAccessSpec.(*localblob.AccessSpec)
@@ -1538,14 +1545,12 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(manifestAccessSpec.MediaType).To(Equal("application/x-tar"))
 	Expect(manifestAccessSpec.ReferenceName).To(Equal("raw-manifest"))
 
-	By("And descriptor.component.resources for default CR should be correct")
-	resource = descriptor.Resources[2]
-	Expect(resource.Name).To(Equal("default-cr"))
+	resource = findResource("default-cr")
+	Expect(resource).ToNot(BeNil(), "default-cr resource not found")
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
 	Expect(resource.Version).To(Equal(version))
 
-	By("And descriptor.component.resources.access for default-cr should be correct")
 	defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
