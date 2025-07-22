@@ -16,6 +16,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 	"os"
 	"os/exec"
+	yaml2 "sigs.k8s.io/yaml"
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
@@ -1381,7 +1382,7 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
-	yamlBytes, err := yaml.Marshal(moduleTemplate)
+	yamlBytes, err := yaml2.Marshal(moduleTemplate)
 	if err != nil {
 		fmt.Printf("[DEBUG] Failed to marshal module template: %v\n", err)
 	} else {
@@ -1399,7 +1400,7 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescript
 		return nil
 	}
 
-	yamlBytes, err := yaml.Marshal(ocmDesc)
+	yamlBytes, err := yaml2.Marshal(ocmDesc)
 	if err != nil {
 		fmt.Printf("[ERROR] - getDescriptor | Failed to marshal descriptor: %v\n", err)
 		return ocmDesc
