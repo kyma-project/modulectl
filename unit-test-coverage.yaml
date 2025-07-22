@@ -17,7 +17,7 @@ packages:
   internal/service/templategenerator: 86
   internal/service/crdparser: 73
   internal/service/registry: 80
-  internal/service/image: 80
+  internal/image: 80
   internal/service/manifestparser: 80
   internal/service/componentarchive: 40
   tools/filesystem: 21
