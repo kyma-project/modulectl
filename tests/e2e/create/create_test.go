@@ -415,7 +415,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(repo.Object["type"]).To(Equal(ocireg.Type))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(2))
+				Expect(descriptor.Resources).To(HaveLen(3))
 				resource := descriptor.Resources[0]
 				Expect(resource.Name).To(Equal("metadata"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
