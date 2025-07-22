@@ -1519,10 +1519,10 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(template.Spec.Version).To(Equal(version))
 
 	By("And descriptor.component.resources should be correct")
-	Expect(descriptor.Resources).To(HaveLen(4))
+	Expect(descriptor.Resources).To(HaveLen(3))
 
 	By("And descriptor.component.resources for manifest should be correct")
-	resource := descriptor.Resources[2]
+	resource := descriptor.Resources[1]
 	Expect(resource.Name).To(Equal("raw-manifest"))
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
@@ -1539,7 +1539,7 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(manifestAccessSpec.ReferenceName).To(Equal("raw-manifest"))
 
 	By("And descriptor.component.resources for default CR should be correct")
-	resource = descriptor.Resources[3]
+	resource = descriptor.Resources[2]
 	Expect(resource.Name).To(Equal("default-cr"))
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
