@@ -80,7 +80,7 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 		DryRunFlagDefault,
 		dryRunFlagUsage)
 
-	// Feature toggle flag for skipping version validation, should be removed once all module confirmed in this issue: https://github.tools.sap/kyma/backlog/issues/7573
+	// Feature toggle flag for skipping version validation, should be removed once all module confirmed in the internal backlog issue: 7573
 	flags.BoolVar(&opts.SkipVersionValidation,
 		"skip-version-validation",
 		true,
