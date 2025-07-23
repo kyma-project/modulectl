@@ -84,6 +84,7 @@ Build a simple module and push it to a remote registry
     --overwrite                             Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes.
 -r, --registry string                       Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
     --registry-credentials string           Basic authentication credentials for the given repository in the <user:password> format.
+    --skip-version-validation               Skipping image and ocm version validation
 ```
 
 ## See also

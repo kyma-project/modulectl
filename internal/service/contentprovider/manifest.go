@@ -17,14 +17,11 @@ const (
 
 var ErrParserNil = errors.New("parser cannot be nil")
 
-type ManifestParser interface {
-	Parse(path string) ([]*unstructured.Unstructured, error)
-}
 type Manifest struct {
-	manifestParser ManifestParser
+	manifestParser types.RawManifestParser
 }
 
-func NewManifest(manifestParser ManifestParser) (*Manifest, error) {
+func NewManifest(manifestParser types.RawManifestParser) (*Manifest, error) {
 	if manifestParser == nil {
 		return nil, fmt.Errorf("manifestParser must not be nil: %w", ErrParserNil)
 	}

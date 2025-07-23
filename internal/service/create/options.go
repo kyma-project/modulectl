@@ -21,6 +21,7 @@ type Options struct {
 	ModuleSourcesGitDirectory string
 	OverwriteComponentVersion bool
 	DryRun                    bool
+	SkipVersionValidation     bool
 }
 
 func (opts Options) Validate() error {
