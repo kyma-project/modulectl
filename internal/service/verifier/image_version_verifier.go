@@ -10,11 +10,12 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 type Service struct {
-	rawManifestParser RawManifestParser
+	rawManifestParser types.RawManifestParser
 }
 
 const managerContainer = "manager"
@@ -24,11 +25,7 @@ var (
 	errNoMatchedVersionFound = errors.New("no matched version found")
 )
 
-type RawManifestParser interface {
-	Parse(filePath string) ([]*unstructured.Unstructured, error)
-}
-
-func NewService(parser RawManifestParser) *Service {
+func NewService(parser types.RawManifestParser) *Service {
 	return &Service{
 		rawManifestParser: parser,
 	}

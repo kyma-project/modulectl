@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"github.com/kyma-project/modulectl/internal/utils"
 )
 
 var ErrComponentVersionExists = errors.New("component version already exists")
@@ -244,7 +245,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	images := mergeAndDeduplicateImages(securityConfigImages, manifestImages)
+	images := utils.MergeAndDeduplicateSlices(securityConfigImages, manifestImages)
 	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
@@ -411,30 +412,6 @@ func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
 		return fmt.Errorf("failed to add images to component descriptor: %w", err)
 	}
 	return nil
-}
-
-func mergeAndDeduplicateImages(securityImages, manifestImages []string) []string {
-	imageSet := make(map[string]struct{})
-
-	// Add security config images
-	for _, img := range securityImages {
-		if img != "" {
-			imageSet[img] = struct{}{}
-		}
-	}
-
-	// Add manifest images
-	for _, img := range manifestImages {
-		if img != "" {
-			imageSet[img] = struct{}{}
-		}
-	}
-	// Convert back to slice
-	result := make([]string, 0, len(imageSet))
-	for img := range imageSet {
-		result = append(result, img)
-	}
-	return result
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {

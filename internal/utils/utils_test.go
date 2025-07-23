@@ -1,0 +1,55 @@
+package utils_test
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/modulectl/internal/utils"
+)
+
+func TestMergeAndDeduplicateSlices(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    [][]string
+		expected []string
+	}{
+		{
+			name:     "Overlapping elements",
+			input:    [][]string{{"a", "b"}, {"b", "c"}},
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "Unique elements",
+			input:    [][]string{{"x"}, {"y"}, {"z"}},
+			expected: []string{"x", "y", "z"},
+		},
+		{
+			name:     "Empty strings ignored",
+			input:    [][]string{{"", "a"}, {"b", ""}},
+			expected: []string{"a", "b"},
+		},
+		{
+			name:     "All slices empty",
+			input:    [][]string{{}, {}},
+			expected: []string{},
+		},
+		{
+			name:     "No arguments",
+			input:    [][]string{},
+			expected: []string{},
+		},
+		{
+			name:     "All duplicates",
+			input:    [][]string{{"d", "d"}, {"d"}},
+			expected: []string{"d"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := utils.MergeAndDeduplicateSlices(tt.input...)
+			require.ElementsMatch(t, tt.expected, got)
+		})
+	}
+}
