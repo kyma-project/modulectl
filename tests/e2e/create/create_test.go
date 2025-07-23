@@ -19,7 +19,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-	yaml2 "sigs.k8s.io/yaml"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -1337,12 +1336,6 @@ func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
-	yamlBytes, err := yaml2.Marshal(moduleTemplate)
-	if err != nil {
-		fmt.Printf("[DEBUG] Failed to marshal module template: %v\n", err)
-	} else {
-		fmt.Printf("[DEBUG] ModuleTemplate content:\n%s\n", string(yamlBytes))
-	}
 	return moduleTemplate, err
 }
 
@@ -1351,17 +1344,9 @@ func getDescriptor(template *v1beta2.ModuleTemplate) *compdesc.ComponentDescript
 		template.Spec.Descriptor.Raw,
 		[]compdesc.DecodeOption{compdesc.DisableValidation(true)}...)
 	if err != nil {
-		fmt.Printf("[ERROR] - getDescriptor | Failed to decode descriptor: %v\n", err)
 		return nil
 	}
 
-	yamlBytes, err := yaml2.Marshal(ocmDesc)
-	if err != nil {
-		fmt.Printf("[ERROR] - getDescriptor | Failed to marshal descriptor: %v\n", err)
-		return ocmDesc
-	}
-
-	fmt.Printf("[INFO] - getDescriptor | Component Descriptor (YAML):\n%s\n", string(yamlBytes))
 	return ocmDesc
 }
 
@@ -1509,7 +1494,6 @@ func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Reso
 	return imageResources
 }
 
-// Get a map of image name -> resource for easier testing
 func getImageResourcesMap(descriptor *compdesc.ComponentDescriptor) map[string]compdesc.Resource {
 	resourceMap := make(map[string]compdesc.Resource)
 	for _, resource := range descriptor.Resources {
@@ -1520,7 +1504,6 @@ func getImageResourcesMap(descriptor *compdesc.ComponentDescriptor) map[string]c
 	return resourceMap
 }
 
-// Extract image names from resources (use resource.Name, not parsed from URL)
 func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 	var names []string
 	for _, resource := range resources {
@@ -1529,7 +1512,6 @@ func extractImageNamesFromResources(resources []compdesc.Resource) []string {
 	return names
 }
 
-// Extract image URLs from resources
 func extractImageURLsFromResources(resources []compdesc.Resource) []string {
 	var urls []string
 	for _, resource := range resources {
@@ -1544,7 +1526,6 @@ func extractImageURLsFromResources(resources []compdesc.Resource) []string {
 	return urls
 }
 
-// Helper to get image reference from resource
 func getImageReference(resource compdesc.Resource) (string, error) {
 	accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	if err != nil {
@@ -1557,7 +1538,6 @@ func getImageReference(resource compdesc.Resource) (string, error) {
 	return ociSpec.ImageReference, nil
 }
 
-// Verify expected image exists with correct reference
 func verifyImageResource(resources map[string]compdesc.Resource, imageName, expectedReference, expectedVersion string) error {
 	resource, exists := resources[imageName]
 	if !exists {
