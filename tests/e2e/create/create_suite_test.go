@@ -81,6 +81,7 @@ type createCmd struct {
 	insecure                  bool
 	overwrite                 bool
 	dryRun                    bool
+	skipVersionValidation     bool
 }
 
 func (cmd *createCmd) execute() error {
@@ -118,6 +119,10 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.dryRun {
 		args = append(args, "--dry-run")
+	}
+
+	if cmd.skipVersionValidation {
+		args = append(args, "--skip-version-validation")
 	}
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))

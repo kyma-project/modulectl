@@ -358,6 +358,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				insecure:                  true,
 				output:                    templateOutputPath,
 				dryRun:                    true,
+				skipVersionValidation:     false,
 				moduleSourcesGitDirectory: templateOperatorPath,
 			}
 		})
