@@ -84,5 +84,5 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 	flags.BoolVar(&opts.SkipVersionValidation,
 		"skip-version-validation",
 		true,
-		"Feature toggle flag for skipping image and ocm version validation")
+		"Skipping image and ocm version validation")
 }
