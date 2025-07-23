@@ -183,7 +183,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-//nolint:funlen // this is a straight down aggregation of the individual steps
+//nolint:funlen,cyclop // this is a straight down aggregation of the individual steps
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
@@ -242,8 +242,10 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
-	if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig, manifestFilePath); err != nil {
-		return fmt.Errorf("failed to verify module resources: %w", err)
+	if !opts.SkipVersionValidation {
+		if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig, manifestFilePath); err != nil {
+			return fmt.Errorf("failed to verify module resources: %w", err)
+		}
 	}
 
 	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
