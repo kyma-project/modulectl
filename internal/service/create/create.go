@@ -183,7 +183,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-//nolint:funlen // this is a straight down aggregation of the individual steps
+//nolint:funlen,cyclop // this is a straight down aggregation of the individual steps
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err
