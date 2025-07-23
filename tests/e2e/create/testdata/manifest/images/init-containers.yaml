@@ -16,7 +16,15 @@ spec:
           image: busybox:1.35.0
         - name: migration
           image: migrate/migrate:v4.16.0
+          command: ["migrate", "up"]
       containers:
-        - name: app
+        - name: alpine
           image: alpine:3.18.0
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "16Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
       
