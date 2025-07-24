@@ -11,6 +11,12 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
+func TestNewManifest_NilParser(t *testing.T) {
+	m, err := contentprovider.NewManifest(nil)
+	require.Nil(t, m)
+	require.ErrorIs(t, err, contentprovider.ErrParserNil)
+}
+
 func Test_Manifest_GetDefaultContent_ReturnsExpectedValue(t *testing.T) {
 	mockParser := &mockManifestParser{}
 	manifestContentProvider, err := contentprovider.NewManifest(mockParser)
@@ -207,6 +213,29 @@ func TestExtractImagesFromManifest_UnsupportedResourceType_IgnoresResource(t *te
 	require.NoError(t, err)
 	require.Len(t, images, 1)
 	require.Contains(t, images, "app:v1.0.0")
+}
+
+func TestExtractImagesFromManifest_MalformedContainer(t *testing.T) {
+	mockParser := &mockManifestParser{
+		manifests: []*unstructured.Unstructured{
+			&unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"kind": "Deployment",
+					"spec": map[string]interface{}{
+						"template": map[string]interface{}{
+							"spec": map[string]interface{}{
+								"containers": []interface{}{"not-a-map"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	manifest, _ := contentprovider.NewManifest(mockParser)
+	images, err := manifest.ExtractImagesFromManifest("test.yaml")
+	require.NoError(t, err)
+	require.Empty(t, images)
 }
 
 type mockManifestParser struct {
