@@ -218,7 +218,7 @@ func TestExtractImagesFromManifest_UnsupportedResourceType_IgnoresResource(t *te
 func TestExtractImagesFromManifest_MalformedContainer(t *testing.T) {
 	mockParser := &mockManifestParser{
 		manifests: []*unstructured.Unstructured{
-			&unstructured.Unstructured{
+			{
 				Object: map[string]interface{}{
 					"kind": "Deployment",
 					"spec": map[string]interface{}{
