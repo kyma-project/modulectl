@@ -270,7 +270,7 @@ metadata:
 
 func writeToFile(t *testing.T, name string, data []byte) {
 	t.Helper()
-	if err := os.WriteFile(name, data, 0o644); err != nil {
+	if err := os.WriteFile(name, data, 0o600); err != nil {
 		t.Fatalf("failed to write manifest: %v", err)
 	}
 }

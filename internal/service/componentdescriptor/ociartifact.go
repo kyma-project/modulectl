@@ -22,7 +22,6 @@ var ErrInvalidImageFormat = errors.New("invalid image format")
 
 func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
 	for _, img := range images {
-		// Use the validation from image package
 		valid, err := image.IsValidImage(img)
 		if err != nil {
 			return fmt.Errorf("image validation failed for %s: %w", img, err)
@@ -52,7 +51,6 @@ func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL stri
 	// Generate OCM-compatible version and resource name
 	version, resourceName := generateOCMVersionAndName(imageInfo)
 
-	// Check if resource already exists to prevent duplicates
 	if resourceExists(descriptor, resourceName, version) {
 		return nil // Skip duplicate resource
 	}

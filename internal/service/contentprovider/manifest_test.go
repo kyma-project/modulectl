@@ -221,8 +221,7 @@ func (m *mockManifestParser) Parse(_ string) ([]*unstructured.Unstructured, erro
 	return m.manifests, nil
 }
 
-// --- Test helpers (copy from image_extraction_test.go) ---
-
+// test helper functions
 type containerSpec struct {
 	name    string
 	image   string
