@@ -75,7 +75,7 @@ func TestParseImageInfo_ValidImagesWithDigest(t *testing.T) {
 			"docker.io/alpine@sha256:abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
 			"alpine",
 			"",
-			"abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234", // Note: no sha256: prefix
+			"abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
 		},
 		{
 			"complex digest",

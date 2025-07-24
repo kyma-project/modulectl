@@ -244,7 +244,6 @@ func Test_isCorrectManagerVersion_EdgeCases(t *testing.T) {
 }
 
 func Test_SecurityConfig_GetSecurityConfig_Structure(t *testing.T) {
-	// Test the structure of the default security config
 	svc, _ := contentprovider.NewSecurityConfig(&objectToYAMLConverterCapture{})
 
 	_, err := svc.GetDefaultContent(types.KeyValueArgs{contentprovider.ArgModuleName: "test-module"})

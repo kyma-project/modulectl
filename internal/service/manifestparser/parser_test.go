@@ -40,25 +40,21 @@ metadata:
 `
 	tmpDir := t.TempDir()
 
-	// Write single resource file
 	tmpFile := filepath.Join(tmpDir, "deploy.yaml")
 	writeToFile(t, tmpFile, []byte(manifest))
 
-	// Write multiple resources file
 	multiFile := filepath.Join(tmpDir, "multi.yaml")
 	writeToFile(t, multiFile, []byte(multiManifest))
 
-	// Write empty file
 	emptyFile := filepath.Join(tmpDir, "empty.yaml")
 	writeToFile(t, emptyFile, []byte(""))
 
-	// Prepare expected objects
 	var obj1 unstructured.Unstructured
 	if err := yaml.Unmarshal([]byte(manifest), &obj1); err != nil {
 		t.Fatalf("failed to unmarshal manifest: %v", err)
 	}
-	// For multiManifest, unmarshal both
 	var svcObj, deployObj unstructured.Unstructured
+
 	docs := [][]byte{}
 	for _, doc := range []string{
 		"apiVersion: v1\nkind: Service\nmetadata:\n  name: test-svc\n",
@@ -218,7 +214,6 @@ spec:
 	require.NoError(t, err)
 	require.True(t, found)
 
-	// Handle both int64 and float64 types that might be returned
 	var replicas int64
 	switch v := replicasRaw.(type) {
 	case int64:
@@ -275,7 +270,6 @@ metadata:
 
 func writeToFile(t *testing.T, name string, data []byte) {
 	t.Helper()
-	//nolint:gosec // This is a test, so we can ignore the file permissions
 	if err := os.WriteFile(name, data, 0o644); err != nil {
 		t.Fatalf("failed to write manifest: %v", err)
 	}

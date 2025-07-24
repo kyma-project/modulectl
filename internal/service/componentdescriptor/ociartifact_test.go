@@ -241,14 +241,14 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProces
 	descriptor := createEmptyDescriptor()
 	images := []string{
 		"alpine:3.15.4",
-		"", // invalid image
+		"",
 		"nginx:1.21.0",
 	}
 
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Len(t, descriptor.Resources, 1) // Only first image should be added
+	require.Len(t, descriptor.Resources, 1)
 	require.Equal(t, "alpine", descriptor.Resources[0].Name)
 }
 

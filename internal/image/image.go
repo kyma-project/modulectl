@@ -42,7 +42,6 @@ func IsValidImage(value string) (bool, error) {
 		return false, fmt.Errorf("%w: %q", ErrMissingImageTag, value)
 	}
 
-	// Check for disallowed tags (even with digest)
 	if info.Tag != "" && isMainOrLatestTag(info.Tag) {
 		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, info.Tag)
 	}
