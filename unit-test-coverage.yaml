@@ -19,7 +19,7 @@ packages:
   internal/service/registry: 80
   internal/service/manifestparser: 80
   internal/service/componentarchive: 40
-  internal/image: 80
-  internal/utils: 80
+  internal/image: 100
+  internal/utils: 100
   tools/filesystem: 21
   tools/ocirepo: 23
