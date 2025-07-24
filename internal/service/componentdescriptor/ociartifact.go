@@ -11,7 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
-	"github.com/kyma-project/modulectl/internal/image"
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 const (

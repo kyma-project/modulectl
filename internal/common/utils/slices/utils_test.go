@@ -1,11 +1,11 @@
-package utils_test
+package slices_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/modulectl/internal/utils"
+	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 )
 
 func TestMergeAndDeduplicateSlices(t *testing.T) {
@@ -48,7 +48,7 @@ func TestMergeAndDeduplicateSlices(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := utils.MergeAndDeduplicateSlices(tt.input...)
+			got := slices.MergeAndDeduplicate(tt.input...)
 			require.ElementsMatch(t, tt.expected, got)
 		})
 	}

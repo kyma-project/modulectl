@@ -8,7 +8,7 @@ import (
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/internal/image"
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 type SecurityConfig struct {

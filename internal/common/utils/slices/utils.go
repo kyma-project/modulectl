@@ -1,6 +1,6 @@
-package utils
+package slices
 
-func MergeAndDeduplicateSlices(slices ...[]string) []string {
+func MergeAndDeduplicate(slices ...[]string) []string {
 	itemSet := make(map[string]struct{})
 	for _, slice := range slices {
 		for _, item := range slice {

@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/internal/image"
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 const (

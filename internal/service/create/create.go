@@ -10,11 +10,11 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/kyma-project/modulectl/internal/utils"
 )
 
 var ErrComponentVersionExists = errors.New("component version already exists")
@@ -245,7 +245,7 @@ func (s *Service) Run(opts Options) error {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	images := utils.MergeAndDeduplicateSlices(securityConfigImages, manifestImages)
+	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
 	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
