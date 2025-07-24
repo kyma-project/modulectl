@@ -53,3 +53,34 @@ func TestMergeAndDeduplicateSlices(t *testing.T) {
 		})
 	}
 }
+
+func TestSetToSlice(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    map[string]struct{}
+		expected []string
+	}{
+		{
+			name:     "Empty set",
+			input:    map[string]struct{}{},
+			expected: []string{},
+		},
+		{
+			name:     "Single item",
+			input:    map[string]struct{}{"a": {}},
+			expected: []string{"a"},
+		},
+		{
+			name:     "Multiple items",
+			input:    map[string]struct{}{"a": {}, "b": {}, "c": {}},
+			expected: []string{"a", "b", "c"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := slices.SetToSlice(tt.input)
+			require.ElementsMatch(t, tt.expected, got)
+		})
+	}
+}

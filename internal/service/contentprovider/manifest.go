@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/kyma-project/modulectl/internal/common/types"
+	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
@@ -48,7 +49,7 @@ func (m *Manifest) ExtractImagesFromManifest(manifestPath string) ([]string, err
 		}
 	}
 
-	return setToSlice(imageSet), nil
+	return slices.SetToSlice(imageSet), nil
 }
 
 func extractImages(manifest *unstructured.Unstructured, imageSet map[string]struct{}) error {
@@ -122,12 +123,4 @@ func extractFromEnv(container map[string]interface{}, imageSet map[string]struct
 	}
 
 	return nil
-}
-
-func setToSlice(imageSet map[string]struct{}) []string {
-	images := make([]string, 0, len(imageSet))
-	for image := range imageSet {
-		images = append(images, image)
-	}
-	return images
 }

@@ -30,14 +30,14 @@ func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, image
 			return fmt.Errorf("%w: %s", ErrInvalidImageFormat, img)
 		}
 
-		if err := AppendImageResource(descriptor, img); err != nil {
+		if err := appendOciArtifactResource(descriptor, img); err != nil {
 			return fmt.Errorf("failed to append image %s: %w", img, err)
 		}
 	}
 	return nil
 }
 
-func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
+func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
 	imageInfo, err := image.ParseImageInfo(imageURL)
 	if err != nil {
 		return fmt.Errorf("failed to parse image: %w", err)
@@ -81,6 +81,24 @@ func AppendImageResource(descriptor *compdesc.ComponentDescriptor, imageURL stri
 	return nil
 }
 
+func CreateImageTypeLabel() (*ocmv1.Label, error) {
+	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
+	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OCM label: %w", err)
+	}
+	return label, nil
+}
+
+func resourceExists(descriptor *compdesc.ComponentDescriptor, name, version string) bool {
+	for _, resource := range descriptor.Resources {
+		if resource.Name == name && resource.Version == version {
+			return true
+		}
+	}
+	return false
+}
+
 func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
 	if info.Digest != "" {
 		shortDigest := info.Digest[:12]
@@ -106,24 +124,6 @@ func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
 
 	resourceName := info.Name
 	return version, resourceName
-}
-
-func resourceExists(descriptor *compdesc.ComponentDescriptor, name, version string) bool {
-	for _, resource := range descriptor.Resources {
-		if resource.Name == name && resource.Version == version {
-			return true
-		}
-	}
-	return false
-}
-
-func CreateImageTypeLabel() (*ocmv1.Label, error) {
-	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create OCM label: %w", err)
-	}
-	return label, nil
 }
 
 func normalizeTagForOCM(tag string) string {

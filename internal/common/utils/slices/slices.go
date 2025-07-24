@@ -15,3 +15,11 @@ func MergeAndDeduplicate(slices ...[]string) []string {
 	}
 	return result
 }
+
+func SetToSlice(itemSet map[string]struct{}) []string {
+	items := make([]string, 0, len(itemSet))
+	for item := range itemSet {
+		items = append(items, item)
+	}
+	return items
+}
