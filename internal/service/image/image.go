@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	LatestTag = "latest"
-	MainTag   = "main"
+	latestTag = "latest"
+	mainTag   = "main"
 )
 
 var (
@@ -108,7 +108,7 @@ func isValidImageFormat(value string) bool {
 
 func isMainOrLatestTag(tag string) bool {
 	switch strings.ToLower(tag) {
-	case LatestTag, MainTag:
+	case latestTag, mainTag:
 		return true
 	default:
 		return false

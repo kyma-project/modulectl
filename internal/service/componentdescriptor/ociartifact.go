@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	SemverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
+	// Semantic versioning format following e.g: x.y.z or vx.y,z
+	semverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
 )
 
 var ErrInvalidImageFormat = errors.New("invalid image format")
@@ -137,6 +138,6 @@ func normalizeTagForOCM(tag string) string {
 }
 
 func isValidSemverForOCM(version string) bool {
-	matched, _ := regexp.MatchString(SemverPattern, version)
+	matched, _ := regexp.MatchString(semverPattern, version)
 	return matched
 }
