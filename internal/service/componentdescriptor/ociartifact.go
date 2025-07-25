@@ -23,27 +23,18 @@ var ErrInvalidImageFormat = errors.New("invalid image format")
 
 func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
 	for _, img := range images {
-		valid, err := image.IsValidImage(img)
+		imageInfo, err := image.ValidateAndParseImageInfo(img)
 		if err != nil {
 			return fmt.Errorf("image validation failed for %s: %w", img, err)
 		}
-		if !valid {
-			return fmt.Errorf("%w: %s", ErrInvalidImageFormat, img)
-		}
-
-		if err := appendOciArtifactResource(descriptor, img); err != nil {
+		if err := appendOciArtifactResource(descriptor, imageInfo); err != nil {
 			return fmt.Errorf("failed to append image %s: %w", img, err)
 		}
 	}
 	return nil
 }
 
-func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageURL string) error {
-	imageInfo, err := image.ParseImageInfo(imageURL)
-	if err != nil {
-		return fmt.Errorf("failed to parse image: %w", err)
-	}
-
+func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageInfo *image.ImageInfo) error {
 	typeLabel, err := CreateImageTypeLabel()
 	if err != nil {
 		return fmt.Errorf("failed to create label: %w", err)
@@ -56,7 +47,7 @@ func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageUR
 		return nil // Skip duplicate resource
 	}
 
-	access := ociartifact.New(imageURL)
+	access := ociartifact.New(imageInfo.FullURL)
 	access.SetType(ociartifact.Type)
 
 	resource := compdesc.Resource{

@@ -85,7 +85,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithInvalidImage_ReturnsError(t *tes
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "invalid image format: invalid-image-no-tag")
+	require.Contains(t, err.Error(), "no tag or digest found")
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImageList_DoesNothing(t *testing.T) {
@@ -234,7 +234,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithoutTag_ReturnsError(t *
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "invalid image format: alpine")
+	require.Contains(t, err.Error(), "no tag or digest found in alpine")
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProcessing(t *testing.T) {

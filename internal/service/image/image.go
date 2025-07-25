@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	latestTag = "latest"
-	mainTag   = "main"
+	latestTag         = "latest"
+	mainTag           = "main"
+	minImageRefLength = 3
+	maxImageRefLength = 256
 )
 
 var (
@@ -28,25 +30,41 @@ type ImageInfo struct {
 	FullURL string
 }
 
-func IsValidImage(value string) (bool, error) {
-	if !isValidImageFormat(value) {
-		return false, nil
+// IsImageReferenceCandidate checks if the provided string is a valid candidate for an image reference.
+func IsImageReferenceCandidate(value string) bool {
+	if len(value) < minImageRefLength || len(value) > maxImageRefLength {
+		return false
 	}
 
-	info, err := ParseImageInfo(value)
+	hasTagOrDigest := false
+	for _, c := range value {
+		switch c {
+		case ':', '@':
+			hasTagOrDigest = true
+		case ' ', '\t', '\n', '\r':
+			return false
+		}
+	}
+
+	return hasTagOrDigest
+}
+
+// ValidateAndParseImageInfo validates the image URL and parses it into ImageInfo.
+func ValidateAndParseImageInfo(imageURL string) (*ImageInfo, error) {
+	info, err := ParseImageInfo(imageURL)
 	if err != nil {
-		return false, fmt.Errorf("invalid image reference %q: %w", value, err)
+		return nil, err
 	}
 
 	if info.Tag == "" && info.Digest == "" {
-		return false, fmt.Errorf("%w: %q", ErrMissingImageTag, value)
+		return nil, fmt.Errorf("%w: %q", ErrMissingImageTag, imageURL)
 	}
 
 	if info.Tag != "" && isMainOrLatestTag(info.Tag) {
-		return false, fmt.Errorf("%w: %q", ErrDisallowedTag, info.Tag)
+		return nil, fmt.Errorf("%w: %q", ErrDisallowedTag, info.Tag)
 	}
 
-	return true, nil
+	return info, nil
 }
 
 // ParseImageInfo parses image reference and extracts all components
@@ -86,24 +104,6 @@ func ParseImageInfo(imageURL string) (*ImageInfo, error) {
 	}
 
 	return info, nil
-}
-
-func isValidImageFormat(value string) bool {
-	if len(value) < 3 || len(value) > 256 {
-		return false
-	}
-
-	hasTagOrDigest := false
-	for _, c := range value {
-		switch c {
-		case ':', '@':
-			hasTagOrDigest = true
-		case ' ', '\t', '\n', '\r':
-			return false
-		}
-	}
-
-	return hasTagOrDigest
 }
 
 func isMainOrLatestTag(tag string) bool {

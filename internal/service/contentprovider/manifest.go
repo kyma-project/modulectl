@@ -82,11 +82,10 @@ func extractFromContainers(manifest *unstructured.Unstructured, imageSet map[str
 		}
 
 		if img, found, _ := unstructured.NestedString(containerMap, "image"); found {
-			valid, err := image.IsValidImage(img)
-			if err != nil {
-				return fmt.Errorf("invalid img %q in %v: %w", img, path, err)
-			}
-			if valid {
+			if image.IsImageReferenceCandidate(img) {
+				if _, err := image.ValidateAndParseImageInfo(img); err != nil {
+					return fmt.Errorf("invalid img %q in %v: %w", img, path, err)
+				}
 				imageSet[img] = struct{}{}
 			}
 		}
@@ -112,11 +111,10 @@ func extractFromEnv(container map[string]interface{}, imageSet map[string]struct
 		}
 
 		if value, found, _ := unstructured.NestedString(envMap, "value"); found {
-			valid, err := image.IsValidImage(value)
-			if err != nil {
-				return fmt.Errorf("invalid image %q in env var: %w", value, err)
-			}
-			if valid {
+			if image.IsImageReferenceCandidate(value) {
+				if _, err := image.ValidateAndParseImageInfo(value); err != nil {
+					return fmt.Errorf("invalid image %q in env var: %w", value, err)
+				}
 				imageSet[value] = struct{}{}
 			}
 		}

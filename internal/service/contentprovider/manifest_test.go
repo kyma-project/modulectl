@@ -81,6 +81,7 @@ func TestExtractImagesFromManifest_StatefulSet(t *testing.T) {
 		manifests: []*unstructured.Unstructured{
 			createStatefulSet("db", []containerSpec{
 				{name: "db", image: "postgres:13"},
+				{name: "not-an-image", image: "this-is-not-an-image"},
 			}),
 		},
 	}
@@ -99,6 +100,7 @@ func TestExtractImagesFromManifest_InitContainers(t *testing.T) {
 				{name: "main", image: "app:v1.0.0"},
 			}, []containerSpec{
 				{name: "init", image: "init:v1.0.0"},
+				{name: "not-an-image", image: "this-is-not-an-image"},
 			}),
 		},
 	}
@@ -121,6 +123,7 @@ func TestExtractImagesFromManifest_EnvImages(t *testing.T) {
 					envVars: []envVar{
 						{name: "HELPER_IMAGE", value: "helper:v1.0.0"},
 						{name: "TOOL_IMAGE", value: "tool:v2.0.0"},
+						{name: "ENV_VAR", value: "this-is-not-an-image"},
 					},
 				},
 			}),
