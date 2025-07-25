@@ -18,6 +18,13 @@ spec:
       containers:
         - name: manager
           image: europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
           env:
             - name: WEBHOOK_IMAGE
               value: "europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0"
@@ -27,3 +34,6 @@ spec:
               value: "migrate/migrate:v4.16.0"
             - name: NON_IMAGE_VAR
               value: "some-config-value"
+            - name: ENV_SECRET_VAR
+              value: "${ENV_SECRET_VAR}"
+              

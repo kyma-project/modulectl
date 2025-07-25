@@ -1293,6 +1293,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				imageResources := getImageResourcesMap(descriptor)
+				Expect(len(imageResources)).To(Equal(4), "Expected exactly 4 image resources from env variables")
 
 				err = verifyImageResource(imageResources, "webhook",
 					"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0")
