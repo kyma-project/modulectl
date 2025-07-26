@@ -1,7 +1,6 @@
 package resources_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,7 +23,7 @@ func TestNewOciArtifactResource_WhenImageInfoIsNil_ReturnsError(t *testing.T) {
 
 	require.Nil(t, result)
 	require.Error(t, err)
-	require.True(t, errors.Is(err, resources.ErrInvalidImageFormat))
+	require.ErrorIs(t, err, resources.ErrInvalidImageFormat)
 	require.Contains(t, err.Error(), "image info is nil or empty")
 }
 
@@ -35,7 +34,7 @@ func TestNewOciArtifactResource_WhenImageInfoHasEmptyURL_ReturnsError(t *testing
 
 	require.Nil(t, result)
 	require.Error(t, err)
-	require.True(t, errors.Is(err, resources.ErrInvalidImageFormat))
+	require.ErrorIs(t, err, resources.ErrInvalidImageFormat)
 	require.Contains(t, err.Error(), "image info is nil or empty")
 }
 

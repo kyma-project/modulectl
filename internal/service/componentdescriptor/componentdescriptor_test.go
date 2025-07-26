@@ -366,6 +366,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithShortDigest_ReturnsError(t *test
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid reference format")
 }
+
 func TestAddOciArtifactsToDescriptor_WhenImageListIsEmpty_LeavesResourcesUnchanged(t *testing.T) {
 	descriptor := createEmptyDescriptor()
 	descriptor.Resources = append(descriptor.Resources, compdesc.Resource{
@@ -413,7 +414,7 @@ func TestAddOciArtifactsToDescriptor_WhenManyInvalidAndOneValidImage_AddsOnlyVal
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
 	require.Error(t, err)
-	require.Len(t, descriptor.Resources, 0)
+	require.Empty(t, descriptor.Resources)
 }
 
 func TestAddOciArtifactsToDescriptor_WhenAllImagesValid_AddsAll(t *testing.T) {
@@ -474,7 +475,7 @@ func TestAddOciArtifactsToDescriptor_WhenCompdescValidateFailsAfterResourceAddit
 func TestAddOciArtifactsToDescriptor_WhenLargeNumberOfImages_AddsAllResources(t *testing.T) {
 	descriptor := createEmptyDescriptor()
 	images := []string{}
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		images = append(images, fmt.Sprintf("alpine:3.15.%d", i))
 	}
 
@@ -482,7 +483,7 @@ func TestAddOciArtifactsToDescriptor_WhenLargeNumberOfImages_AddsAllResources(t 
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 50)
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		require.Equal(t, fmt.Sprintf("3.15.%d", i), descriptor.Resources[i].Version)
 	}
 }
