@@ -3,10 +3,11 @@ package componentdescriptor
 import (
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
-	"github.com/kyma-project/modulectl/internal/service/image"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
+	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 const (
@@ -26,9 +27,11 @@ func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*co
 	if err != nil {
 		return nil, fmt.Errorf("failed to create label: %w", err)
 	}
+
 	componentDescriptor.Provider = ocmv1.Provider{Name: providerName, Labels: ocmv1.Labels{*providerLabel}}
 
 	compdesc.DefaultResources(componentDescriptor)
+
 	if err = compdesc.Validate(componentDescriptor); err != nil {
 		return nil, fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
@@ -47,10 +50,13 @@ func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, image
 		if err != nil {
 			return fmt.Errorf("failed to create resource for %s: %w", img, err)
 		}
+
 		resources.AddResourceIfNotExists(descriptor, resource)
 	}
-	if err := compdesc.Validate(descriptor); err != nil {
+	err := compdesc.Validate(descriptor)
+	if err != nil {
 		return fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
+
 	return nil
 }
