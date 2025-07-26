@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: template-operator-controller-manager
+  labels:
+    app: template-operator-controller-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: template-operator-controller-manager
+  template:
+    spec:
+      containers:
+        - name: manager
+          image: europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3
+        - name: webhook
+          image: europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0
+        - name: nginx
+          image: nginx:1.25.0
+      

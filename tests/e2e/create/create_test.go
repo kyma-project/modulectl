@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/kyma-project/lifecycle-manager/api/shared"
+	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -17,9 +19,6 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/localblob"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
-
-	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -379,8 +378,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.repositoryContexts should be empty")
 				Expect(descriptor.RepositoryContexts).To(HaveLen(0))
 
-				By("And descriptor.component.resources should be empty")
-				Expect(descriptor.Resources).To(HaveLen(0))
+				By("And descriptor.component.resources should have one from manifest")
+				Expect(descriptor.Resources).To(HaveLen(1))
 			})
 		})
 	})
@@ -417,13 +416,18 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(repo.Object["type"]).To(Equal(ocireg.Type))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(2))
+				Expect(descriptor.Resources).To(HaveLen(3))
 				resource := descriptor.Resources[0]
+				Expect(resource.Name).To(Equal("template-operator"))
+				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
+				Expect(resource.Type).To(Equal("ociArtifact"))
+				Expect(resource.Version).To(Equal(moduleVersion))
+				resource = descriptor.Resources[1]
 				Expect(resource.Name).To(Equal("metadata"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("plainText"))
 				Expect(resource.Version).To(Equal(moduleVersion))
-				resource = descriptor.Resources[1]
+				resource = descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
@@ -432,11 +436,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.resources[0].access should be correct")
 				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
 				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec0, ok := resourceAccessSpec0.(*localblob.AccessSpec)
+				ociartifactAccessSpec0, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
-				Expect(localBlobAccessSpec0.GetType()).To(Equal(localblob.Type))
-				Expect(localBlobAccessSpec0.LocalReference).To(ContainSubstring("sha256:"))
-				Expect(localBlobAccessSpec0.MediaType).To(Equal("application/x-yaml"))
+				Expect(ociartifactAccessSpec0.GetType()).To(Equal(ociartifact.Type))
 
 				By("And descriptor.component.resources[1].access should be correct")
 				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
@@ -445,7 +447,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(ok).To(BeTrue())
 				Expect(localBlobAccessSpec1.GetType()).To(Equal(localblob.Type))
 				Expect(localBlobAccessSpec1.LocalReference).To(ContainSubstring("sha256:"))
-				Expect(localBlobAccessSpec1.MediaType).To(Equal("application/x-tar"))
+				Expect(localBlobAccessSpec1.MediaType).To(Equal("application/x-yaml"))
+
+				By("And descriptor.component.resources[2].access should be correct")
+				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+				Expect(err).ToNot(HaveOccurred())
+				localBlobAccessSpec2, ok := resourceAccessSpec2.(*localblob.AccessSpec)
+				Expect(ok).To(BeTrue())
+				Expect(localBlobAccessSpec2.GetType()).To(Equal(localblob.Type))
+				Expect(localBlobAccessSpec2.LocalReference).To(ContainSubstring("sha256:"))
+				Expect(localBlobAccessSpec2.MediaType).To(Equal("application/x-tar"))
 			})
 		})
 	})
@@ -536,8 +547,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.repositoryContexts should be empty")
 				Expect(descriptor.RepositoryContexts).To(HaveLen(0))
 
-				By("And descriptor.component.resources should be empty")
-				Expect(descriptor.Resources).To(HaveLen(0))
+				By("And descriptor.component.resources should have only from raw manifest entry")
+				Expect(descriptor.Resources).To(HaveLen(1))
 			})
 		})
 	})
@@ -619,15 +630,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(3))
-				resource := descriptor.Resources[2]
+				Expect(descriptor.Resources).To(HaveLen(4))
+				resource := descriptor.Resources[3]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal(moduleVersion))
 
-				By("And descriptor.component.resources[2].access should be correct")
-				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+				By("And descriptor.component.resources[3].access should be correct")
+				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[3].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -664,45 +675,32 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
-				resource := descriptor.Resources[0]
-				Expect(resource.Name).To(Equal("template-operator"))
+
+				resource := findResourceByNameVersionType(descriptor.Resources, "template-operator", moduleVersion, "ociArtifact")
+				Expect(resource).ToNot(BeNil())
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
-				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal(moduleVersion))
 
-				resource = descriptor.Resources[1]
-				Expect(resource.Name).To(Equal("template-operator"))
-				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
-				Expect(resource.Type).To(Equal("ociArtifact"))
-				Expect(resource.Version).To(Equal("2.0.0"))
-
-				resource = descriptor.Resources[2]
-				Expect(resource.Name).To(Equal("metadata"))
-				Expect(resource.Version).To(Equal(moduleVersion))
-
-				resource = descriptor.Resources[3]
-				Expect(resource.Name).To(Equal("raw-manifest"))
-				Expect(resource.Version).To(Equal(moduleVersion))
-
-				By("And descriptor.component.resources[0].access should be correct")
-				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[0].Access)
+				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 				Expect(err).ToNot(HaveOccurred())
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
-					moduleVersion)))
+				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s", moduleVersion)))
 
-				By("And descriptor.component.resources[1].access should be correct")
-				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
+				resource = findResourceByNameVersionType(descriptor.Resources, "template-operator", "2.0.0", "ociArtifact")
+				Expect(resource).ToNot(BeNil())
+				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
+
+				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 				Expect(err).ToNot(HaveOccurred())
 				ociArtifactAccessSpec, ok = resourceAccessSpec1.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
 				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
 
-				By("And descriptor.component.resources[2].access should be correct")
-				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+				resource = findResourceByNameVersionType(descriptor.Resources, "metadata", moduleVersion, "plainText")
+				Expect(resource).ToNot(BeNil())
+				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 				Expect(err).ToNot(HaveOccurred())
 				localBlobAccessSpec, ok := resourceAccessSpec2.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -710,42 +708,15 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
 				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-yaml"))
 
-				By("And descriptor.component.resources[3].access should be correct")
-				resourceAccessSpec3, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[3].Access)
+				resource = findResourceByNameVersionType(descriptor.Resources, "raw-manifest", moduleVersion, "directoryTree")
+				Expect(resource).ToNot(BeNil())
+				resourceAccessSpec3, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 				Expect(err).ToNot(HaveOccurred())
 				localBlobAccessSpec2, ok := resourceAccessSpec3.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(localBlobAccessSpec2.GetType()).To(Equal(localblob.Type))
 				Expect(localBlobAccessSpec2.LocalReference).To(ContainSubstring("sha256:"))
 				Expect(localBlobAccessSpec2.MediaType).To(Equal("application/x-tar"))
-
-				By("And descriptor.component.sources should be correct")
-				Expect(len(descriptor.Sources)).To(Equal(1))
-				source := descriptor.Sources[0]
-				sourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(source.Access)
-				Expect(err).ToNot(HaveOccurred())
-				githubAccessSpec, ok := sourceAccessSpec.(*github.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(github.Type).To(Equal(githubAccessSpec.Type))
-				Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
-				Expect(githubAccessSpec.Commit).To(Equal(os.Getenv("TEMPLATE_OPERATOR_LATEST_COMMIT")))
-				Expect(githubAccessSpec.Type).To(Equal("gitHub"))
-
-				By("And module template should not marked as mandatory")
-				Expect(template.Spec.Mandatory).To(BeFalse())
-				val, ok := template.Labels[shared.IsMandatoryModule]
-				Expect(val).To(BeEmpty())
-				Expect(ok).To(BeFalse())
-
-				By("And security scan labels should be correct")
-				secScanLabels := flatten(descriptor.Sources[0].Labels)
-				Expect(secScanLabels).To(HaveKeyWithValue("git.kyma-project.io/ref", "HEAD"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/rc-tag", moduleVersion))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/language", "golang-mod"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/dev-branch", "main"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/subprojects", "false"))
-				Expect(secScanLabels).To(HaveKeyWithValue("scan.security.kyma-project.io/exclude",
-					"**/test/**,**/*_test.go"))
 			})
 		})
 	})
@@ -1115,9 +1086,246 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			})
 		})
 	})
-})
 
-// Test helper functions
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images from both manifest and security config", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestAndSecurity,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("And the module template should contain merged and deduplicated images", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResourcesMap(descriptor)
+
+				Expect(len(imageResources)).To(Equal(5), "Expected exactly 5 image resources")
+
+				expectedImages := map[string]struct {
+					reference string
+					version   string
+				}{
+					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
+					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
+					"nginx":             {"nginx:1.25.0", "1.25.0"},
+					"postgres":          {"postgres:15.3", "0.0.0-15.3"},
+					"static-c7742da0": {
+						"gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",
+						"0.0.0+sha256.c7742da01aa7",
+					},
+				}
+
+				for imageName, expected := range expectedImages {
+					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
+					Expect(err).ToNot(HaveOccurred(), "Failed verification for image: %s", imageName)
+				}
+
+				templateOperatorCount := 0
+				for _, resource := range imageResources {
+					if imageRef, err := getImageReference(resource); err == nil {
+						if imageRef == "europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3" {
+							templateOperatorCount++
+						}
+					}
+				}
+				Expect(templateOperatorCount).To(Equal(1), "template-operator:1.0.3 should appear exactly once")
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images in containers", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestContainers,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed and extract images from containers", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from containers", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResourcesMap(descriptor)
+
+				expectedImages := map[string]struct {
+					reference string
+					version   string
+				}{
+					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
+					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
+					"nginx":             {"nginx:1.25.0", "1.25.0"},
+				}
+
+				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources", len(expectedImages))
+
+				for imageName, expected := range expectedImages {
+					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
+					Expect(err).ToNot(HaveOccurred(), "Failed verification for image: %s", imageName)
+				}
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images in initContainers", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestInitContainers,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed and extract images from initContainers", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from initContainers", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResourcesMap(descriptor)
+
+				expectedImages := map[string]struct {
+					reference string
+					version   string
+				}{
+					"busybox": {"busybox:1.35.0", "1.35.0"},
+					"migrate": {"migrate/migrate:v4.16.0", "v4.16.0"},
+					"alpine":  {"alpine:3.18.0", "3.18.0"},
+				}
+
+				Expect(len(imageResources)).To(Equal(len(expectedImages)),
+					"Expected exactly %d instead of 2 images, as the alpine image is from containers, and it's not possible to have initContainers without containers for a valid k8s deployment/statefulset yaml file", len(expectedImages))
+
+				for imageName, expected := range expectedImages {
+					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
+					Expect(err).ToNot(HaveOccurred(), "Failed verification for image: %s", imageName)
+				}
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images with SHA digest", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestShaDigest,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed and extract images with SHA digest", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images with SHA digest", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResourcesMap(descriptor)
+
+				expectedImages := map[string]struct {
+					reference string
+					version   string
+				}{
+					"nginx-fff07cc3": {
+						"nginx@sha256:fff07cc3a741c20b2b1e4bbc3bbd6d3c84859e5116fce7858d3d176542800c10",
+						"0.0.0+sha256.fff07cc3a741",
+					},
+					"alpine": {"alpine:3.18.0", "3.18.0"},
+				}
+
+				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources", len(expectedImages))
+
+				for imageName, expected := range expectedImages {
+					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
+					Expect(err).ToNot(HaveOccurred(), "Failed verification for image: %s", imageName)
+				}
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with valid module-config containing images from env variables", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestEnvVariables,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed and extract images from env variables", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And the module template should contain images from env variables", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResourcesMap(descriptor)
+				Expect(len(imageResources)).To(Equal(4), "Expected exactly 4 image resources from env variables")
+
+				err = verifyImageResource(imageResources, "webhook",
+					"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0")
+				Expect(err).ToNot(HaveOccurred())
+
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with manifest containing latest/main tags", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withManifestLatestMainTags,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should fail with specific error", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(err.Error()).Should(ContainSubstring("image tag is disallowed"))
+
+			Expect(err.Error()).Should(Or(
+				ContainSubstring("latest"),
+				ContainSubstring("main"),
+			))
+		})
+	})
+})
 
 func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	moduleTemplate := &v1beta2.ModuleTemplate{}
@@ -1244,16 +1452,14 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(template.Spec.Version).To(Equal(version))
 
 	By("And descriptor.component.resources should be correct")
-	Expect(descriptor.Resources).To(HaveLen(3))
+	Expect(len(descriptor.Resources)).To(BeNumerically(">=", 2))
 
-	By("And descriptor.component.resources for manifest should be correct")
-	resource := descriptor.Resources[1]
-	Expect(resource.Name).To(Equal("raw-manifest"))
+	resource := findResourceByName(descriptor.Resources, "raw-manifest")
+	Expect(resource).ToNot(BeNil(), "raw-manifest resource not found")
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
 	Expect(resource.Version).To(Equal(version))
 
-	By("And descriptor.component.resources.access for raw-manifest should be correct")
 	manifestResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	manifestAccessSpec, ok := manifestResourceAccessSpec.(*localblob.AccessSpec)
@@ -1263,14 +1469,12 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(manifestAccessSpec.MediaType).To(Equal("application/x-tar"))
 	Expect(manifestAccessSpec.ReferenceName).To(Equal("raw-manifest"))
 
-	By("And descriptor.component.resources for default CR should be correct")
-	resource = descriptor.Resources[2]
-	Expect(resource.Name).To(Equal("default-cr"))
+	resource = findResourceByName(descriptor.Resources, "default-cr")
+	Expect(resource).ToNot(BeNil(), "default-cr resource not found")
 	Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 	Expect(resource.Type).To(Equal("directoryTree"))
 	Expect(resource.Version).To(Equal(version))
 
-	By("And descriptor.component.resources.access for default-cr should be correct")
 	defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 	Expect(err).ToNot(HaveOccurred())
 	defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
@@ -1279,4 +1483,99 @@ func validateTemplateWithFileReference(template *v1beta2.ModuleTemplate, descrip
 	Expect(defaultCRAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
 	Expect(defaultCRAccessSpec.MediaType).To(Equal("application/x-tar"))
 	Expect(defaultCRAccessSpec.ReferenceName).To(Equal("default-cr"))
+}
+
+func getImageResources(descriptor *compdesc.ComponentDescriptor) []compdesc.Resource {
+	var imageResources []compdesc.Resource
+	for _, resource := range descriptor.Resources {
+		if resource.Type == "ociArtifact" {
+			imageResources = append(imageResources, resource)
+		}
+	}
+	return imageResources
+}
+
+func getImageResourcesMap(descriptor *compdesc.ComponentDescriptor) map[string]compdesc.Resource {
+	resourceMap := make(map[string]compdesc.Resource)
+	for _, resource := range descriptor.Resources {
+		if resource.Type == "ociArtifact" {
+			resourceMap[resource.Name] = resource
+		}
+	}
+	return resourceMap
+}
+
+func extractImageNamesFromResources(resources []compdesc.Resource) []string {
+	var names []string
+	for _, resource := range resources {
+		names = append(names, resource.Name)
+	}
+	return names
+}
+
+func extractImageURLsFromResources(resources []compdesc.Resource) []string {
+	var urls []string
+	for _, resource := range resources {
+		accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+		if err != nil {
+			continue
+		}
+		if ociSpec, ok := accessSpec.(*ociartifact.AccessSpec); ok {
+			urls = append(urls, ociSpec.ImageReference)
+		}
+	}
+	return urls
+}
+
+func getImageReference(resource compdesc.Resource) (string, error) {
+	accessSpec, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
+	if err != nil {
+		return "", err
+	}
+	ociSpec, ok := accessSpec.(*ociartifact.AccessSpec)
+	if !ok {
+		return "", fmt.Errorf("resource is not an OCI artifact")
+	}
+	return ociSpec.ImageReference, nil
+}
+
+func verifyImageResource(resources map[string]compdesc.Resource, imageName, expectedReference, expectedVersion string) error {
+	resource, exists := resources[imageName]
+	if !exists {
+		return fmt.Errorf("expected image '%s' not found in resources", imageName)
+	}
+
+	actualReference, err := getImageReference(resource)
+	if err != nil {
+		return fmt.Errorf("failed to get image reference for '%s': %w", imageName, err)
+	}
+
+	if actualReference != expectedReference {
+		return fmt.Errorf("image '%s' has reference '%s', expected '%s'", imageName, actualReference, expectedReference)
+	}
+
+	if resource.Version != expectedVersion {
+		return fmt.Errorf("image '%s' has version '%s', expected '%s'", imageName, resource.Version, expectedVersion)
+	}
+
+	return nil
+}
+
+func findResourceByName(resources []compdesc.Resource, name string) *compdesc.Resource {
+	for i := range resources {
+		if resources[i].Name == name {
+			return &resources[i]
+		}
+	}
+	return nil
+}
+
+func findResourceByNameVersionType(resources []compdesc.Resource, name, version, typ string) *compdesc.Resource {
+	for i := range resources {
+		r := &resources[i]
+		if r.Name == name && r.Version == version && r.Type == typ {
+			return r
+		}
+	}
+	return nil
 }

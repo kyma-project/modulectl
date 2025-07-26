@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
@@ -39,25 +40,21 @@ metadata:
 `
 	tmpDir := t.TempDir()
 
-	// Write single resource file
 	tmpFile := filepath.Join(tmpDir, "deploy.yaml")
 	writeToFile(t, tmpFile, []byte(manifest))
 
-	// Write multiple resources file
 	multiFile := filepath.Join(tmpDir, "multi.yaml")
 	writeToFile(t, multiFile, []byte(multiManifest))
 
-	// Write empty file
 	emptyFile := filepath.Join(tmpDir, "empty.yaml")
 	writeToFile(t, emptyFile, []byte(""))
 
-	// Prepare expected objects
 	var obj1 unstructured.Unstructured
 	if err := yaml.Unmarshal([]byte(manifest), &obj1); err != nil {
 		t.Fatalf("failed to unmarshal manifest: %v", err)
 	}
-	// For multiManifest, unmarshal both
 	var svcObj, deployObj unstructured.Unstructured
+
 	docs := [][]byte{}
 	for _, doc := range []string{
 		"apiVersion: v1\nkind: Service\nmetadata:\n  name: test-svc\n",
@@ -130,10 +127,150 @@ metadata:
 	}
 }
 
+func TestParse_WhenFileNotFound_ReturnsError(t *testing.T) {
+	parser := manifestparser.NewService()
+
+	_, err := parser.Parse("/nonexistent/file.yaml")
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "parse manifest")
+}
+
+func TestParse_WhenCalledWithInvalidYAML_ReturnsError(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+  invalid: [unclosed array`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	_, err := parser.Parse(tmpFile)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "error converting YAML to JSON")
+}
+
+func TestParse_WhenCalledWithDocumentsWithoutKind_SkipsInvalidDocuments(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 2)
+	require.Equal(t, "Namespace", manifests[0].GetKind())
+	require.Equal(t, "ConfigMap", manifests[1].GetKind())
+}
+
+func TestParse_WhenCalledWithComplexDeployment_ParsesCorrectly(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    app: test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: app
+        image: nginx:1.20
+        ports:
+        - containerPort: 80`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 1)
+	require.Equal(t, "Deployment", manifests[0].GetKind())
+	require.Equal(t, "test-deployment", manifests[0].GetName())
+
+	replicasRaw, found, err := unstructured.NestedFieldNoCopy(manifests[0].Object, "spec", "replicas")
+	require.NoError(t, err)
+	require.True(t, found)
+
+	var replicas int64
+	switch v := replicasRaw.(type) {
+	case int64:
+		replicas = v
+	case float64:
+		replicas = int64(v)
+	case int:
+		replicas = int64(v)
+	default:
+		t.Fatalf("unexpected type for replicas: %T", replicasRaw)
+	}
+	require.Equal(t, int64(3), replicas)
+}
+
+func createTempFile(t *testing.T, content string) string {
+	t.Helper()
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "test.yaml")
+
+	err := os.WriteFile(tmpFile, []byte(content), 0o600)
+	require.NoError(t, err)
+
+	return tmpFile
+}
+
+func TestParse_WhenCalledWithCommentsAndWhitespace_SkipsNonResourceDocs(t *testing.T) {
+	parser := manifestparser.NewService()
+	content := `# This is a comment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-namespace
+---
+# Another comment
+# Multiple lines
+
+---
+  # Indented comment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-config`
+
+	tmpFile := createTempFile(t, content)
+	defer os.Remove(tmpFile)
+
+	manifests, err := parser.Parse(tmpFile)
+
+	require.NoError(t, err)
+	require.Len(t, manifests, 2)
+	require.Equal(t, "Namespace", manifests[0].GetKind())
+	require.Equal(t, "ConfigMap", manifests[1].GetKind())
+}
+
 func writeToFile(t *testing.T, name string, data []byte) {
 	t.Helper()
-	//nolint:gosec // This is a test, so we can ignore the file permissions
-	if err := os.WriteFile(name, data, 0o644); err != nil {
+	if err := os.WriteFile(name, data, 0o600); err != nil {
 		t.Fatalf("failed to write manifest: %v", err)
 	}
 }

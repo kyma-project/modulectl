@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
@@ -91,6 +92,9 @@ type ImageVersionVerifierService interface {
 	VerifyModuleResources(moduleConfig *contentprovider.ModuleConfig, filePath string) error
 }
 
+type ManifestService interface {
+	ExtractImagesFromManifest(manifestPath string) ([]string, error)
+}
 type Service struct {
 	moduleConfigService         ModuleConfigService
 	gitSourcesService           GitSourcesService
@@ -101,6 +105,7 @@ type Service struct {
 	crdParserService            CRDParserService
 	moduleResourceService       ModuleResourceService
 	imageVersionVerifierService ImageVersionVerifierService
+	manifestService             ManifestService
 	manifestFileResolver        FileResolver
 	defaultCRFileResolver       FileResolver
 	fileSystem                  FileSystem
@@ -115,6 +120,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	crdParserService CRDParserService,
 	moduleResourceService ModuleResourceService,
 	imageVersionVerifierService ImageVersionVerifierService,
+	manifestService ManifestService,
 	manifestFileResolver FileResolver,
 	defaultCRFileResolver FileResolver,
 	fileSystem FileSystem,
@@ -154,6 +160,9 @@ func NewService(moduleConfigService ModuleConfigService,
 	if imageVersionVerifierService == nil {
 		return nil, fmt.Errorf("imageVersionVerifierService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
+	if manifestService == nil {
+		return nil, fmt.Errorf("manifestService must not be nil: %w", commonerrors.ErrInvalidArg)
+	}
 
 	if manifestFileResolver == nil {
 		return nil, fmt.Errorf("manifestFileResolver must not be nil: %w", commonerrors.ErrInvalidArg)
@@ -177,6 +186,7 @@ func NewService(moduleConfigService ModuleConfigService,
 		crdParserService:            crdParserService,
 		moduleResourceService:       moduleResourceService,
 		imageVersionVerifierService: imageVersionVerifierService,
+		manifestService:             manifestService,
 		manifestFileResolver:        manifestFileResolver,
 		defaultCRFileResolver:       defaultCRFileResolver,
 		fileSystem:                  fileSystem,
@@ -189,15 +199,7 @@ func (s *Service) Run(opts Options) error {
 		return err
 	}
 
-	defer func() {
-		if err := s.defaultCRFileResolver.CleanupTempFiles(); err != nil {
-			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary default CR files: %v\n", err))
-		}
-
-		if err := s.manifestFileResolver.CleanupTempFiles(); err != nil {
-			opts.Out.Write(fmt.Sprintf("failed to cleanup temporary manifest files: %v\n", err))
-		}
-	}()
+	defer s.cleanupTempFiles(opts)
 
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ConfigFile)
 	if err != nil {
@@ -229,11 +231,24 @@ func (s *Service) Run(opts Options) error {
 		moduleConfig.Version); err != nil {
 		return fmt.Errorf("failed to add git sources: %w", err)
 	}
+
+	var securityConfigImages []string
 	if moduleConfig.Security != "" {
-		err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+		securityConfigImages, err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
+	}
+
+	manifestImages, err := s.extractImagesFromManifest(manifestFilePath, opts)
+	if err != nil {
+		return fmt.Errorf("failed to extract images from manifest: %w", err)
+	}
+
+	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
+	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
+	if err != nil {
+		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
 	}
 
 	opts.Out.Write("- Creating component archive\n")
@@ -364,20 +379,48 @@ func (s *Service) generateModuleTemplate(
 
 func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
 	moduleConfig *contentprovider.ModuleConfig, opts Options,
-) error {
+) ([]string, error) {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
 	if err != nil {
-		return fmt.Errorf("failed to parse security config data: %w", err)
+		return nil, fmt.Errorf("failed to parse security config data: %w", err)
 	}
 
 	err = securityConfig.ValidateBDBAImageTags(moduleConfig.Version)
 	if err != nil {
-		return fmt.Errorf("failed to validate security config images: %w", err)
+		return nil, fmt.Errorf("failed to validate security config images: %w", err)
 	}
 
 	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
-		return fmt.Errorf("failed to append security scan config: %w", err)
+		return nil, fmt.Errorf("failed to append security scan config: %w", err)
+	}
+	return securityConfig.BDBA, nil
+}
+
+func (s *Service) extractImagesFromManifest(manifestFilePath string, opts Options) ([]string, error) {
+	opts.Out.Write("- Extracting images from raw manifest\n")
+	images, err := s.manifestService.ExtractImagesFromManifest(manifestFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract images from manifest: %w", err)
+	}
+	return images, nil
+}
+
+func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
+	images []string, opts Options,
+) error {
+	opts.Out.Write("- Adding oci artifacts to component descriptor\n")
+	if err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images); err != nil {
+		return fmt.Errorf("failed to add images to component descriptor: %w", err)
 	}
 	return nil
+}
+
+func (s *Service) cleanupTempFiles(opts Options) {
+	if err := s.defaultCRFileResolver.CleanupTempFiles(); err != nil {
+		opts.Out.Write(fmt.Sprintf("failed to cleanup temporary default CR files: %v\n", err))
+	}
+	if err := s.manifestFileResolver.CleanupTempFiles(); err != nil {
+		opts.Out.Write(fmt.Sprintf("failed to cleanup temporary manifest files: %v\n", err))
+	}
 }

@@ -8,29 +8,24 @@ import (
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
-	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/kyma-project/modulectl/internal/utils"
 )
 
 const (
-	secBaseLabelKey           = "security.kyma-project.io"
-	secScanBaseLabelKey       = "scan.security.kyma-project.io"
-	scanLabelKey              = "scan"
-	secScanEnabled            = "enabled"
-	rcTagLabelKey             = "rc-tag"
-	languageLabelKey          = "language"
-	devBranchLabelKey         = "dev-branch"
-	subProjectsLabelKey       = "subprojects"
-	excludeLabelKey           = "exclude"
-	typeLabelKey              = "type"
-	thirdPartyImageLabelValue = "third-party-image"
-	ocmIdentityName           = "module-sources"
-	ocmVersion                = "v1"
-	refLabel                  = "git.kyma-project.io/ref"
+	secBaseLabelKey     = "security.kyma-project.io"
+	secScanBaseLabelKey = "scan.security.kyma-project.io"
+	scanLabelKey        = "scan"
+	secScanEnabled      = "enabled"
+	rcTagLabelKey       = "rc-tag"
+	languageLabelKey    = "language"
+	devBranchLabelKey   = "dev-branch"
+	subProjectsLabelKey = "subprojects"
+	excludeLabelKey     = "exclude"
+	ocmIdentityName     = "module-sources"
+	ocmVersion          = "v1"
+	refLabel            = "git.kyma-project.io/ref"
 )
 
 var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
@@ -90,10 +85,6 @@ func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.Co
 		return fmt.Errorf("failed to append security labels to sources: %w", err)
 	}
 
-	if err := AppendBDBAImagesLayers(descriptor, securityConfig); err != nil {
-		return fmt.Errorf("failed to append bdba images layers: %w", err)
-	}
-
 	return nil
 }
 
@@ -127,47 +118,6 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 			excludeMendProjects, secScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
-	}
-
-	return nil
-}
-
-func AppendBDBAImagesLayers(componentDescriptor *compdesc.ComponentDescriptor,
-	securityScanConfig contentprovider.SecurityScanConfig,
-) error {
-	imagesToScan := securityScanConfig.BDBA
-	for _, img := range imagesToScan {
-		imgName, imgTag, err := utils.GetImageNameAndTag(img)
-		if err != nil {
-			return fmt.Errorf("failed to get image name and tag: %w", err)
-		}
-
-		imageTypeLabelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-		imageTypeLabel, err := ocmv1.NewLabel(imageTypeLabelKey, thirdPartyImageLabelValue,
-			ocmv1.WithVersion(ocmVersion))
-		if err != nil {
-			return fmt.Errorf("failed to create security label: %w", err)
-		}
-
-		access := ociartifact.New(img)
-		access.SetType(ociartifact.Type)
-		proteccodeImageLayer := compdesc.Resource{
-			ResourceMeta: compdesc.ResourceMeta{
-				Type:     ociartifacttypes.TYPE,
-				Relation: ocmv1.ExternalRelation,
-				ElementMeta: compdesc.ElementMeta{
-					Name:    imgName,
-					Labels:  []ocmv1.Label{*imageTypeLabel},
-					Version: imgTag,
-				},
-			},
-			Access: access,
-		}
-		componentDescriptor.Resources = append(componentDescriptor.Resources, proteccodeImageLayer)
-	}
-	compdesc.DefaultResources(componentDescriptor)
-	if err := compdesc.Validate(componentDescriptor); err != nil {
-		return fmt.Errorf("failed to validate component descriptor: %w", err)
 	}
 
 	return nil

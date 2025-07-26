@@ -21,7 +21,7 @@ import (
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidArg)
@@ -31,7 +31,7 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -46,7 +46,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -61,7 +61,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -76,7 +76,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -92,7 +92,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
 		&securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -107,7 +107,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverErrorStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverErrorStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -122,7 +122,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t 
 func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverErrorStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverErrorStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -137,7 +137,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t
 func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -152,7 +152,7 @@ func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *test
 func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &fileResolverStub{}, &fileResolverStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
 
@@ -255,15 +255,15 @@ func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*content
 		return nil, err
 	}
 	return &contentprovider.ModuleConfig{
+		Name:      "kyma-project.io/module/telemetry",
 		DefaultCR: fileRef,
+		Version:   "1.43.1",
 	}, nil
 }
 
 type moduleConfigServiceParseErrorStub struct{}
 
-func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig,
-	error,
-) {
+func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
 	return nil, errors.New("failed to read module config file")
 }
 
@@ -351,4 +351,10 @@ func (*imageVersionVerifierStub) VerifyModuleResources(_ *contentprovider.Module
 	_ string,
 ) error {
 	return nil
+}
+
+type manifestServiceStub struct{}
+
+func (*manifestServiceStub) ExtractImagesFromManifest(_ string) ([]string, error) {
+	return []string{"image1:latest", "image2:v1.0"}, nil
 }
