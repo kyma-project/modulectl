@@ -452,6 +452,7 @@ func TestAddOciArtifactsToDescriptor_WhenImagesResultInDuplicateResources_DoesNo
 	images := []string{
 		"alpine:3.15.4",
 		"library/alpine:3.15.4",
+	}
 
 	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
 
