@@ -14,20 +14,18 @@ import (
 )
 
 const (
-	secBaseLabelKey           = "security.kyma-project.io"
-	secScanBaseLabelKey       = "scan.security.kyma-project.io"
-	scanLabelKey              = "scan"
-	secScanEnabled            = "enabled"
-	rcTagLabelKey             = "rc-tag"
-	languageLabelKey          = "language"
-	devBranchLabelKey         = "dev-branch"
-	subProjectsLabelKey       = "subprojects"
-	excludeLabelKey           = "exclude"
-	typeLabelKey              = "type"
-	thirdPartyImageLabelValue = "third-party-image"
-	ocmIdentityName           = "module-sources"
-	ocmVersion                = "v1"
-	refLabel                  = "git.kyma-project.io/ref"
+	secBaseLabelKey     = "security.kyma-project.io"
+	secScanBaseLabelKey = "scan.security.kyma-project.io"
+	scanLabelKey        = "scan"
+	secScanEnabled      = "enabled"
+	rcTagLabelKey       = "rc-tag"
+	languageLabelKey    = "language"
+	devBranchLabelKey   = "dev-branch"
+	subProjectsLabelKey = "subprojects"
+	excludeLabelKey     = "exclude"
+	ocmIdentityName     = "module-sources"
+	ocmVersion          = "v1"
+	refLabel            = "git.kyma-project.io/ref"
 )
 
 var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")

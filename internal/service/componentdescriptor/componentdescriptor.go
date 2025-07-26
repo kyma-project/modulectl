@@ -3,6 +3,8 @@ package componentdescriptor
 import (
 	"fmt"
 
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
+	"github.com/kyma-project/modulectl/internal/service/image"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 )
@@ -32,4 +34,23 @@ func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*co
 	}
 
 	return componentDescriptor, nil
+}
+
+func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
+	for _, img := range images {
+		imageInfo, err := image.ValidateAndParseImageInfo(img)
+		if err != nil {
+			return fmt.Errorf("image validation failed for %s: %w", img, err)
+		}
+
+		resource, err := resources.NewOciArtifactResource(imageInfo)
+		if err != nil {
+			return fmt.Errorf("failed to create resource for %s: %w", img, err)
+		}
+		resources.AddResourceIfNotExists(descriptor, resource)
+	}
+	if err := compdesc.Validate(descriptor); err != nil {
+		return fmt.Errorf("failed to validate component descriptor: %w", err)
+	}
+	return nil
 }

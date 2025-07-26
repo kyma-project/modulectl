@@ -1,4 +1,4 @@
-package componentdescriptor
+package resources
 
 import (
 	"errors"
@@ -16,41 +16,29 @@ import (
 
 const (
 	// Semantic versioning format following e.g: x.y.z or vx.y,z
-	semverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
+	semverPattern             = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
+	secScanBaseLabelKey       = "scan.security.kyma-project.io"
+	typeLabelKey              = "type"
+	thirdPartyImageLabelValue = "third-party-image"
+	ocmVersion                = "v1"
 )
 
-var ErrInvalidImageFormat = errors.New("invalid image format")
+var ErrInvalidImageFormat = errors.New("invalid image url format")
 
-func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
-	for _, img := range images {
-		imageInfo, err := image.ValidateAndParseImageInfo(img)
-		if err != nil {
-			return fmt.Errorf("image validation failed for %s: %w", img, err)
-		}
-		if err := appendOciArtifactResource(descriptor, imageInfo); err != nil {
-			return fmt.Errorf("failed to append image %s: %w", img, err)
-		}
+func NewOciArtifactResource(imageInfo *image.ImageInfo) (*compdesc.Resource, error) {
+	if imageInfo == nil || imageInfo.FullURL == "" {
+		return nil, fmt.Errorf("image info is nil or empty: %w", ErrInvalidImageFormat)
 	}
-	return nil
-}
 
-func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageInfo *image.ImageInfo) error {
-	typeLabel, err := CreateImageTypeLabel()
+	typeLabel, err := createLabel()
 	if err != nil {
-		return fmt.Errorf("failed to create label: %w", err)
+		return nil, err
 	}
-
-	// Generate OCM-compatible version and resource name
 	version, resourceName := generateOCMVersionAndName(imageInfo)
-
-	if resourceExists(descriptor, resourceName, version) {
-		return nil // Skip duplicate resource
-	}
-
 	access := ociartifact.New(imageInfo.FullURL)
 	access.SetType(ociartifact.Type)
 
-	resource := compdesc.Resource{
+	return &compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
 			Type:     ociartifacttypes.TYPE,
 			Relation: ocmv1.ExternalRelation,
@@ -61,34 +49,26 @@ func appendOciArtifactResource(descriptor *compdesc.ComponentDescriptor, imageIn
 			},
 		},
 		Access: access,
-	}
-
-	descriptor.Resources = append(descriptor.Resources, resource)
-	compdesc.DefaultResources(descriptor)
-
-	if err = compdesc.Validate(descriptor); err != nil {
-		return fmt.Errorf("failed to validate component descriptor: %w", err)
-	}
-
-	return nil
+	}, nil
 }
 
-func CreateImageTypeLabel() (*ocmv1.Label, error) {
+func AddResourceIfNotExists(descriptor *compdesc.ComponentDescriptor, resource *compdesc.Resource) {
+	for _, r := range descriptor.Resources {
+		if r.Name == resource.Name && r.Version == resource.Version {
+			return // Already exists, skip
+		}
+	}
+	descriptor.Resources = append(descriptor.Resources, *resource)
+	compdesc.DefaultResources(descriptor)
+}
+
+func createLabel() (*ocmv1.Label, error) {
 	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
 	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OCM label: %w", err)
 	}
 	return label, nil
-}
-
-func resourceExists(descriptor *compdesc.ComponentDescriptor, name, version string) bool {
-	for _, resource := range descriptor.Resources {
-		if resource.Name == name && resource.Version == version {
-			return true
-		}
-	}
-	return false
 }
 
 func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
