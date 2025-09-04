@@ -226,7 +226,6 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-//nolint:cyclop // this is a straight down aggregation of the individual steps
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err

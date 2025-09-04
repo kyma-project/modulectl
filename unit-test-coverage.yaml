@@ -2,6 +2,7 @@ packages:
   cmd/modulectl/scaffold: 100
   cmd/modulectl/create: 100
   internal/common/validation: 92
+  internal/common/types/component: 92.3
   internal/service/scaffold: 91
   internal/service/credential: 83
   internal/service/contentprovider: 91.8
@@ -11,15 +12,16 @@ packages:
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 81
   internal/service/create: 31
-  internal/service/componentdescriptor: 79.7
+  internal/service/componentdescriptor: 81.8
   internal/service/componentdescriptor/resources: 94.6
   internal/service/componentdescriptor/resources/accesshandler: 100
-  internal/service/templategenerator: 86
+  internal/service/templategenerator: 85.9
   internal/service/crdparser: 73
   internal/service/registry: 80
   internal/service/manifestparser: 93.3
   internal/service/componentarchive: 40
   internal/service/image: 94.6
+  internal/service/componentconstructor: 100
   internal/common/utils/slices: 100
   tools/filesystem: 21
   tools/ocirepo: 23

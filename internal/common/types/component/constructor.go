@@ -226,5 +226,6 @@ func (c *Constructor) CreateComponentConstructorFile(filePath string) error {
 	if err != nil {
 		return fmt.Errorf("unable to marshal component constructor: %w", err)
 	}
-	return os.WriteFile(filePath, marshal, 0o600)
+	permission := os.FileMode(0o600)
+	return os.WriteFile(filePath, marshal, permission)
 }
