@@ -3,32 +3,27 @@ package componentdescriptor
 import (
 	"fmt"
 
-	"ocm.software/ocm/api/ocm/compdesc"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
+	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/image"
-)
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
-const (
-	versionV1, versionV2 = "v1", "v2"
-	providerName         = "kyma-project.io"
-	labelKey             = providerName + "/built-by"
-	labelValue           = "modulectl"
+	"ocm.software/ocm/api/ocm/compdesc"
 )
 
 func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*compdesc.ComponentDescriptor, error) {
 	componentDescriptor := &compdesc.ComponentDescriptor{}
 	componentDescriptor.SetName(moduleName)
 	componentDescriptor.SetVersion(moduleVersion)
-	componentDescriptor.Metadata.ConfiguredVersion = versionV2
+	componentDescriptor.Metadata.ConfiguredVersion = common.VersionV2
 
-	providerLabel, err := ocmv1.NewLabel(labelKey, labelValue, ocmv1.WithVersion(versionV1))
+	providerLabel, err := ocmv1.NewLabel(common.BuiltByLabelKey, common.BuiltByLabelValue,
+		ocmv1.WithVersion(common.VersionV1))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create label: %w", err)
 	}
 
-	componentDescriptor.Provider = ocmv1.Provider{Name: providerName, Labels: ocmv1.Labels{*providerLabel}}
+	componentDescriptor.Provider = ocmv1.Provider{Name: common.ProviderName, Labels: ocmv1.Labels{*providerLabel}}
 
 	compdesc.DefaultResources(componentDescriptor)
 

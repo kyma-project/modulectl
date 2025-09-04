@@ -20,7 +20,6 @@ import (
 
 var (
 	ErrEmptyModuleConfig = errors.New("can not generate module template from empty module config")
-	ErrEmptyDescriptor   = errors.New("can not generate module template from empty descriptor")
 )
 
 type FileSystem interface {
@@ -96,8 +95,10 @@ spec:
     version: {{.GroupVersionKind.Version}}
     kind: {{.GroupVersionKind.Kind}}
 {{- end}}
+{{- with .Descriptor}}
   descriptor:
-{{yaml .Descriptor | printf "%s" | indent 4}}
+{{yaml . | printf "%s" | indent 4}}
+{{- end}}
 {{- with .Resources}}
   resources:
     {{- range $key, $value := . }}
@@ -113,7 +114,7 @@ type moduleTemplateData struct {
 	ResourceName        string
 	Namespace           string
 	ModuleVersion       string
-	Descriptor          compdesc.ComponentDescriptorVersion
+	Descriptor          *compdesc.ComponentDescriptorVersion
 	Repository          string
 	Documentation       string
 	Icons               contentprovider.Icons
@@ -129,16 +130,13 @@ type moduleTemplateData struct {
 
 func (s *Service) GenerateModuleTemplate(
 	moduleConfig *contentprovider.ModuleConfig,
-	descriptor *compdesc.ComponentDescriptor,
+	descriptorToRender *compdesc.ComponentDescriptor,
 	data []byte,
 	isCrdClusterScoped bool,
 	templateOutput string,
 ) error {
 	if moduleConfig == nil {
 		return ErrEmptyModuleConfig
-	}
-	if descriptor == nil {
-		return ErrEmptyDescriptor
 	}
 
 	labels := generateLabels(moduleConfig)
@@ -160,9 +158,13 @@ func (s *Service) GenerateModuleTemplate(
 		return fmt.Errorf("failed to parse module template: %w", err)
 	}
 
-	cva, err := compdesc.Convert(descriptor)
-	if err != nil {
-		return fmt.Errorf("failed to convert descriptor: %w", err)
+	var covertedDescriptor *compdesc.ComponentDescriptorVersion
+	if descriptorToRender != nil {
+		converted, err := compdesc.Convert(descriptorToRender)
+		if err != nil {
+			return fmt.Errorf("failed to convert descriptor: %w", err)
+		}
+		covertedDescriptor = &converted
 	}
 
 	mtData := moduleTemplateData{
@@ -170,7 +172,7 @@ func (s *Service) GenerateModuleTemplate(
 		ResourceName:        moduleTemplateName,
 		Namespace:           moduleConfig.Namespace,
 		ModuleVersion:       moduleConfig.Version,
-		Descriptor:          cva,
+		Descriptor:          covertedDescriptor,
 		Repository:          moduleConfig.Repository,
 		Documentation:       moduleConfig.Documentation,
 		Icons:               moduleConfig.Icons,

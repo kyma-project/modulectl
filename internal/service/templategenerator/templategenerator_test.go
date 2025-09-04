@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"ocm.software/ocm/api/ocm/compdesc"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
@@ -27,15 +28,6 @@ func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.
 
 	require.Error(t, err)
 	require.ErrorIs(t, err, templategenerator.ErrEmptyModuleConfig)
-}
-
-func TestGenerateModuleTemplate_WhenCalledWithNilDescriptor_ReturnsError(t *testing.T) {
-	svc, _ := templategenerator.NewService(&mockFileSystem{})
-
-	err := svc.GenerateModuleTemplate(&contentprovider.ModuleConfig{}, nil, nil, false, "")
-
-	require.Error(t, err)
-	require.ErrorIs(t, err, templategenerator.ErrEmptyDescriptor)
 }
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {
@@ -338,13 +330,35 @@ spec:
 				require.Contains(t, mockFS.writtenTemplate, "\"operator.kyma-project.io/beta\": \"true\"")
 			},
 		},
+		{
+			name: "With Nil Descriptor",
+			data: defaultData,
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:        "example.com/component",
+				Namespace:   "default",
+				Version:     "1.0.0",
+				Labels:      map[string]string{"key": "value"},
+				Annotations: map[string]string{"annotation": "value"},
+				Mandatory:   true,
+				Manifest:    commonManifest,
+				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+			},
+			assertions: func(t *testing.T, mockFS *mockFileSystem) {
+				t.Helper()
+				require.NotContains(t, mockFS.writtenTemplate, "descriptor:")
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockFS := &mockFileSystem{}
 			svc, _ := templategenerator.NewService(mockFS)
-			descriptor := testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+
+			var descriptor *compdesc.ComponentDescriptor
+			if tt.name != "With Nil Descriptor" {
+				descriptor = testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
+			}
 
 			err := svc.GenerateModuleTemplate(tt.moduleConfig, descriptor, tt.data, true, "output.yaml")
 

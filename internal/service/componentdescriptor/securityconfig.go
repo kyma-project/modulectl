@@ -5,27 +5,26 @@ import (
 	"fmt"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/kyma-project/modulectl/internal/common"
+	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
+	"gopkg.in/yaml.v3"
 )
 
 const (
-	secBaseLabelKey     = "security.kyma-project.io"
-	secScanBaseLabelKey = "scan.security.kyma-project.io"
-	scanLabelKey        = "scan"
-	secScanEnabled      = "enabled"
-	rcTagLabelKey       = "rc-tag"
-	languageLabelKey    = "language"
-	devBranchLabelKey   = "dev-branch"
-	subProjectsLabelKey = "subprojects"
-	excludeLabelKey     = "exclude"
-	ocmIdentityName     = "module-sources"
-	ocmVersion          = "v1"
-	refLabel            = "git.kyma-project.io/ref"
+	SecBaseLabelKey = "security.kyma-project.io"
+
+	ScanLabelKey        = "scan"
+	SecScanEnabled      = "enabled"
+	RCTagLabelKey       = "rc-tag"
+	LanguageLabelKey    = "language"
+	DevBranchLabelKey   = "dev-branch"
+	SubProjectsLabelKey = "subprojects"
+	ExcludeLabelKey     = "exclude"
 )
 
 var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
@@ -77,7 +76,7 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
 	securityConfig contentprovider.SecurityScanConfig,
 ) error {
-	if err := appendLabelToAccessor(descriptor, scanLabelKey, secScanEnabled, secBaseLabelKey); err != nil {
+	if err := appendLabelToAccessor(descriptor, ScanLabelKey, SecScanEnabled, SecBaseLabelKey); err != nil {
 		return fmt.Errorf("failed to append security label to descriptor: %w", err)
 	}
 
@@ -93,29 +92,29 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 ) error {
 	for srcIndex := range sources {
 		src := &sources[srcIndex]
-		if err := appendLabelToAccessor(src, rcTagLabelKey, securityScanConfig.RcTag,
-			secScanBaseLabelKey); err != nil {
+		if err := appendLabelToAccessor(src, RCTagLabelKey, securityScanConfig.RcTag,
+			common.SecScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToAccessor(src, languageLabelKey,
-			securityScanConfig.Mend.Language, secScanBaseLabelKey); err != nil {
+		if err := appendLabelToAccessor(src, LanguageLabelKey,
+			securityScanConfig.Mend.Language, common.SecScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToAccessor(src, devBranchLabelKey, securityScanConfig.DevBranch,
-			secScanBaseLabelKey); err != nil {
+		if err := appendLabelToAccessor(src, DevBranchLabelKey, securityScanConfig.DevBranch,
+			common.SecScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
-		if err := appendLabelToAccessor(src, subProjectsLabelKey,
-			securityScanConfig.Mend.SubProjects, secScanBaseLabelKey); err != nil {
+		if err := appendLabelToAccessor(src, SubProjectsLabelKey,
+			securityScanConfig.Mend.SubProjects, common.SecScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 
 		excludeMendProjects := strings.Join(securityScanConfig.Mend.Exclude, ",")
-		if err := appendLabelToAccessor(src, excludeLabelKey,
-			excludeMendProjects, secScanBaseLabelKey); err != nil {
+		if err := appendLabelToAccessor(src, ExcludeLabelKey,
+			excludeMendProjects, common.SecScanBaseLabelKey); err != nil {
 			return fmt.Errorf("failed to append security label to source: %w", err)
 		}
 	}
@@ -126,11 +125,28 @@ func AppendSecurityLabelsToSources(securityScanConfig contentprovider.SecuritySc
 func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey string) error {
 	labels := labeled.GetLabels()
 	securityLabelKey := fmt.Sprintf("%s/%s", baseKey, key)
-	labelValue, err := ocmv1.NewLabel(securityLabelKey, value, ocmv1.WithVersion(ocmVersion))
+	labelValue, err := ocmv1.NewLabel(securityLabelKey, value, ocmv1.WithVersion(common.OCMVersion))
 	if err != nil {
 		return fmt.Errorf("failed to create security label: %w", err)
 	}
 	labels = append(labels, *labelValue)
 	labeled.SetLabels(labels)
 	return nil
+}
+
+func (s *SecurityConfigService) AppendSecurityScanConfigToConstructor(constructor *component.Constructor,
+	securityConfig contentprovider.SecurityScanConfig) {
+	constructor.AddLabel(fmt.Sprintf("%s/%s", SecBaseLabelKey, ScanLabelKey), SecScanEnabled, common.OCMVersion)
+
+	labelKeyValues := map[string]string{
+		RCTagLabelKey:       securityConfig.RcTag,
+		LanguageLabelKey:    securityConfig.Mend.Language,
+		DevBranchLabelKey:   securityConfig.DevBranch,
+		SubProjectsLabelKey: securityConfig.Mend.SubProjects,
+		ExcludeLabelKey:     strings.Join(securityConfig.Mend.Exclude, ","),
+	}
+	for key, value := range labelKeyValues {
+		constructor.AddLabelToSources(fmt.Sprintf("%s/%s", common.SecScanBaseLabelKey, key), value,
+			common.OCMVersion)
+	}
 }
