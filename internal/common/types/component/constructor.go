@@ -6,12 +6,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -140,7 +141,7 @@ func (c *Constructor) AddLabel(key, value, version string) {
 }
 
 func (c *Constructor) AddLabelToSources(key, value, version string) {
-	for i, source := range c.Components[0].Sources {
+	for index, source := range c.Components[0].Sources {
 		labels := source.Labels
 		labelValue := Label{
 			Name:    key,
@@ -148,7 +149,7 @@ func (c *Constructor) AddLabelToSources(key, value, version string) {
 			Version: version,
 		}
 		labels = append(labels, labelValue)
-		c.Components[0].Sources[i].Labels = labels
+		c.Components[0].Sources[index].Labels = labels
 	}
 }
 
@@ -223,7 +224,7 @@ func (c *Constructor) AddMetadataResource(moduleConfig *contentprovider.ModuleCo
 func (c *Constructor) CreateComponentConstructorFile(filePath string) error {
 	marshal, err := yaml.Marshal(c)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to marshal component constructor: %w", err)
 	}
-	return os.WriteFile(filePath, marshal, 0644)
+	return os.WriteFile(filePath, marshal, 0o600)
 }

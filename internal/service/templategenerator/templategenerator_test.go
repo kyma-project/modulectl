@@ -7,12 +7,11 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"ocm.software/ocm/api/ocm/compdesc"
+	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
 	"github.com/kyma-project/modulectl/internal/testutils"
-
-	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
 
 func TestNew_WhenCalledWithNilDependencies_ReturnsError(t *testing.T) {

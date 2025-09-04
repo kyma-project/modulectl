@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/tools/io"
+	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"ocm.software/ocm/api/ocm/compdesc"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 var ErrComponentVersionExists = errors.New("component version already exists")
@@ -61,7 +61,7 @@ type ComponentConstructorService interface {
 		moduleConfig *contentprovider.ModuleConfig,
 		manifestFilePath string,
 		defaultCRFilePath string,
-		cmdOutput io.Out,
+		cmdOutput iotools.Out,
 		outputFile string,
 	) error
 }
@@ -137,6 +137,7 @@ type Service struct {
 	fileSystem                  FileSystem
 }
 
+//nolint:funlen // this is a straight down aggregation of the individual services
 func NewService(moduleConfigService ModuleConfigService,
 	gitSourcesService GitSourcesService,
 	securityConfigService SecurityConfigService,
@@ -225,7 +226,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-//nolint:funlen,cyclop // this is a straight down aggregation of the individual steps
+//nolint:cyclop // this is a straight down aggregation of the individual steps
 func (s *Service) Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return err

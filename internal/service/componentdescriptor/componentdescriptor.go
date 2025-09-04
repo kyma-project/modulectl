@@ -3,12 +3,12 @@ package componentdescriptor
 import (
 	"fmt"
 
+	"ocm.software/ocm/api/ocm/compdesc"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
+
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/image"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
-	"ocm.software/ocm/api/ocm/compdesc"
 )
 
 func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*compdesc.ComponentDescriptor, error) {

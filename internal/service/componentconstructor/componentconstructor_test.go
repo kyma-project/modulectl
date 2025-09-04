@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 const (
@@ -33,7 +33,7 @@ func TestService_AddResourcesAndCreateConstructorFile_Success(t *testing.T) {
 	}
 
 	var outputBuffer bytes.Buffer
-	cmdOutput := io.NewDefaultOut(&outputBuffer)
+	cmdOutput := iotools.NewDefaultOut(&outputBuffer)
 
 	tempDir := t.TempDir()
 	outputFile := filepath.Join(tempDir, testOutputFileName)
@@ -49,7 +49,7 @@ func TestService_AddResourcesAndCreateConstructorFile_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.FileExists(t, outputFile)
-	require.Equal(t, 2, len(constructor.Components[0].Resources))
+	require.Len(t, constructor.Components[0].Resources, 2)
 
 	resources := constructor.Components[0].Resources
 	resourceNames := make([]string, len(resources))
@@ -71,7 +71,7 @@ func TestService_AddResourcesAndCreateConstructorFile_WithDefaultCR(t *testing.T
 	}
 
 	var outputBuffer bytes.Buffer
-	cmdOutput := io.NewDefaultOut(&outputBuffer)
+	cmdOutput := iotools.NewDefaultOut(&outputBuffer)
 
 	tempDir := t.TempDir()
 	outputFile := filepath.Join(tempDir, testOutputFileName)
@@ -87,7 +87,7 @@ func TestService_AddResourcesAndCreateConstructorFile_WithDefaultCR(t *testing.T
 
 	require.NoError(t, err)
 	require.FileExists(t, outputFile)
-	require.Equal(t, 3, len(constructor.Components[0].Resources))
+	require.Len(t, constructor.Components[0].Resources, 3)
 
 	resources := constructor.Components[0].Resources
 	resourceNames := make([]string, len(resources))
@@ -112,7 +112,7 @@ func TestService_AddResourcesAndCreateConstructorFile_CreateFileError(t *testing
 	}
 
 	var outputBuffer bytes.Buffer
-	cmdOutput := io.NewDefaultOut(&outputBuffer)
+	cmdOutput := iotools.NewDefaultOut(&outputBuffer)
 
 	err := service.AddResourcesAndCreateConstructorFile(
 		constructor,

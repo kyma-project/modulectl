@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/modulectl/internal/common"
-	"github.com/kyma-project/modulectl/internal/common/types/component"
+	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -135,7 +135,8 @@ func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey 
 }
 
 func (s *SecurityConfigService) AppendSecurityScanConfigToConstructor(constructor *component.Constructor,
-	securityConfig contentprovider.SecurityScanConfig) {
+	securityConfig contentprovider.SecurityScanConfig,
+) {
 	constructor.AddLabel(fmt.Sprintf("%s/%s", SecBaseLabelKey, ScanLabelKey), SecScanEnabled, common.OCMVersion)
 
 	labelKeyValues := map[string]string{

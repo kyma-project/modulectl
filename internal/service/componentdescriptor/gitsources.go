@@ -3,14 +3,14 @@ package componentdescriptor
 import (
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/common"
-	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
@@ -65,7 +65,8 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 }
 
 func (s *GitSourcesService) AddGitSourcesToConstructor(constructor *component.Constructor,
-	gitRepoPath, gitRepoURL string) error {
+	gitRepoPath, gitRepoURL string,
+) error {
 	latestCommit, err := s.gitService.GetLatestCommit(gitRepoPath)
 	if err != nil {
 		return fmt.Errorf("failed to get latest commit: %w", err)

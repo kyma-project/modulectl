@@ -5,12 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"ocm.software/ocm/api/ocm/compdesc"
 
+	"github.com/kyma-project/modulectl/internal/common/types/component"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
@@ -173,7 +173,7 @@ func TestSecurityConfigService_AppendSecurityScanConfigToConstructor_WithEmptyEx
 		}
 	}
 	require.NotNil(t, excludeLabel)
-	require.Equal(t, "", excludeLabel.Value)
+	require.Empty(t, excludeLabel.Value)
 }
 
 func TestSecurityConfigService_AppendSecurityScanConfigToConstructor_WithMultipleSources(t *testing.T) {
@@ -218,7 +218,7 @@ func TestSecurityConfigService_AppendSecurityScanConfigToConstructor_WithNoSourc
 	require.Equal(t, "security.kyma-project.io/scan", scanLabel.Name)
 	require.Equal(t, "enabled", scanLabel.Value)
 
-	require.Len(t, comp.Sources, 0)
+	require.Empty(t, comp.Sources)
 }
 
 type fileReaderStub struct{}

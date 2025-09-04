@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/common"
-
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )

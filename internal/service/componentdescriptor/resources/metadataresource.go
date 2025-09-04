@@ -2,10 +2,12 @@ package resources
 
 import (
 	"errors"
+	"fmt"
 
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 var ErrNilModuleConfig = errors.New("module config must not be nil")
@@ -37,5 +39,9 @@ func GenerateMetadataYaml(config *contentprovider.ModuleConfig) ([]byte, error) 
 	metadataResource.Spec.Resources = config.Resources
 	metadataResource.Spec.AssociatedResources = config.AssociatedResources
 
-	return yaml.Marshal(metadataResource)
+	bytes, err := yaml.Marshal(metadataResource)
+	if err != nil {
+		return []byte{}, fmt.Errorf("failed to marshal metadata resource: %w", err)
+	}
+	return bytes, nil
 }

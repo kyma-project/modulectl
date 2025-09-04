@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/image"
-	"github.com/kyma-project/modulectl/tools/io"
+	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 type Service struct{}
@@ -20,7 +20,7 @@ func (s *Service) AddResourcesAndCreateConstructorFile(
 	moduleConfig *contentprovider.ModuleConfig,
 	manifestFilePath string,
 	defaultCRFilePath string,
-	cmdOutput io.Out,
+	cmdOutput iotools.Out,
 	outputFile string,
 ) error {
 	cmdOutput.Write("- Generating module resources\n")
@@ -31,14 +31,18 @@ func (s *Service) AddResourcesAndCreateConstructorFile(
 	componentConstructor.AddMetadataResource(moduleConfig)
 
 	cmdOutput.Write("- Creating component constructor file\n")
-	return componentConstructor.CreateComponentConstructorFile(outputFile)
+	err := componentConstructor.CreateComponentConstructorFile(outputFile)
+	if err != nil {
+		return fmt.Errorf("failed to create component constructor file: %w", err)
+	}
+	return nil
 }
 
 func (s *Service) AddImagesToConstructor(
 	componentConstructor *component.Constructor,
 	images []string,
 ) error {
-	var imageInfos []*image.ImageInfo
+	imageInfos := make([]*image.ImageInfo, 0, len(images))
 	for _, img := range images {
 		imageInfo, err := image.ValidateAndParseImageInfo(img)
 		if err != nil {

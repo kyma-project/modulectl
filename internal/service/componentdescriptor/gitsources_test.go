@@ -5,13 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/git"
-
-	"github.com/stretchr/testify/require"
-
 	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
@@ -83,7 +82,7 @@ func TestGitSourcesService_AddGitSourcesToConstructor_ReturnsErrorOnCommitRetrie
 
 	require.Error(t, err)
 	require.ErrorContains(t, err, "failed to get latest commit")
-	require.Len(t, constructor.Components[0].Sources, 0)
+	require.Empty(t, constructor.Components[0].Sources)
 }
 
 type gitServiceStub struct {

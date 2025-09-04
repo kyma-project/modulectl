@@ -7,12 +7,13 @@ import (
 	"reflect"
 	"testing"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
-	"gopkg.in/yaml.v3"
 )
 
 func TestNewConstructor(t *testing.T) {
@@ -337,13 +338,10 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 func TestConstructor_AddRawManifestResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	initialResourceCount := len(constructor.Components[0].Resources)
-
 	constructor.AddRawManifestResource("/path/to/manifest.yaml")
 
-	expectedCount := initialResourceCount + 1
-	if len(constructor.Components[0].Resources) != expectedCount {
-		t.Fatalf("expected %d resources, got %d", expectedCount, len(constructor.Components[0].Resources))
+	if len(constructor.Components[0].Resources) != 1 {
+		t.Fatalf("expected %d resources, got %d", 1, len(constructor.Components[0].Resources))
 	}
 
 	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
@@ -363,21 +361,23 @@ func TestConstructor_AddRawManifestResource(t *testing.T) {
 		t.Errorf("expected input type dir, got %s", resource.Input.Type)
 	}
 
-	if resource.Input.Path != "/path/to/manifest.yaml" {
-		t.Errorf("expected input path /path/to/manifest.yaml, got %s", resource.Input.Path)
+	if resource.Input.Path != "/path/to" {
+		t.Errorf("expected input path /path/to, got %s", resource.Input.Path)
+	}
+
+	if resource.Input.IncludeFiles == nil || len(resource.Input.IncludeFiles) != 1 ||
+		resource.Input.IncludeFiles[0] != "manifest.yaml" {
+		t.Errorf("expected include files [manifest.yaml], got %v", resource.Input.IncludeFiles)
 	}
 }
 
 func TestConstructor_AddDefaultCRResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	initialResourceCount := len(constructor.Components[0].Resources)
-
 	constructor.AddDefaultCRResource("/path/to/defaultcr.yaml")
 
-	expectedCount := initialResourceCount + 1
-	if len(constructor.Components[0].Resources) != expectedCount {
-		t.Fatalf("expected %d resources, got %d", expectedCount, len(constructor.Components[0].Resources))
+	if len(constructor.Components[0].Resources) != 1 {
+		t.Fatalf("expected %d resources, got %d", 1, len(constructor.Components[0].Resources))
 	}
 
 	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
@@ -397,8 +397,13 @@ func TestConstructor_AddDefaultCRResource(t *testing.T) {
 		t.Errorf("expected input type dir, got %s", resource.Input.Type)
 	}
 
-	if resource.Input.Path != "/path/to/defaultcr.yaml" {
-		t.Errorf("expected input path /path/to/defaultcr.yaml, got %s", resource.Input.Path)
+	if resource.Input.Path != "/path/to" {
+		t.Errorf("expected input path /path/to, got %s", resource.Input.Path)
+	}
+
+	if resource.Input.IncludeFiles == nil || len(resource.Input.IncludeFiles) != 1 ||
+		resource.Input.IncludeFiles[0] != "defaultcr.yaml" {
+		t.Errorf("expected include files [defaultcr.yaml], got %v", resource.Input.IncludeFiles)
 	}
 }
 
@@ -410,36 +415,32 @@ func TestConstructor_AddMetadataResource(t *testing.T) {
 		Version: "1.0.0",
 	}
 
-	initialResourceCount := len(constructor.Components[0].Resources)
-
 	constructor.AddMetadataResource(moduleConfig)
 
-	if len(constructor.Components[0].Resources) > initialResourceCount {
-		resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
-		if resource.Name != common.MetadataResourceName {
-			t.Errorf("expected resource name %s, got %s", common.MetadataResourceName, resource.Name)
-		}
+	resource := constructor.Components[0].Resources[0]
+	if resource.Name != common.MetadataResourceName {
+		t.Errorf("expected resource name %s, got %s", common.MetadataResourceName, resource.Name)
+	}
 
-		if resource.Type != component.PlainTextResourceType {
-			t.Errorf("expected resource type %s, got %s", component.PlainTextResourceType, resource.Type)
-		}
+	if resource.Type != component.PlainTextResourceType {
+		t.Errorf("expected resource type %s, got %s", component.PlainTextResourceType, resource.Type)
+	}
 
-		if resource.Version != "1.0.0" {
-			t.Errorf("expected resource version 1.0.0, got %s", resource.Version)
-		}
+	if resource.Version != "1.0.0" {
+		t.Errorf("expected resource version 1.0.0, got %s", resource.Version)
+	}
 
-		if resource.Input.Type != component.BinaryResourceInput {
-			t.Errorf("expected input type %s, got %s", component.BinaryResourceInput, resource.Input.Type)
-		}
+	if resource.Input.Type != component.BinaryResourceInput {
+		t.Errorf("expected input type %s, got %s", component.BinaryResourceInput, resource.Input.Type)
+	}
 
-		if resource.Input.Data == "" {
-			t.Error("expected input data to be non-empty")
-		}
+	if resource.Input.Data == "" {
+		t.Error("expected input data to be non-empty")
+	}
 
-		_, err := base64.StdEncoding.DecodeString(resource.Input.Data)
-		if err != nil {
-			t.Errorf("expected input data to be valid base64: %v", err)
-		}
+	_, err := base64.StdEncoding.DecodeString(resource.Input.Data)
+	if err != nil {
+		t.Errorf("expected input data to be valid base64: %v", err)
 	}
 }
 
@@ -473,6 +474,7 @@ func TestConstructor_CreateComponentConstructorFile(t *testing.T) {
 }
 
 func compareTwoConstructors(t *testing.T, loadedConstructor component.Constructor, constructor *component.Constructor) {
+	t.Helper()
 	if len(loadedConstructor.Components) != 1 {
 		t.Errorf("expected 1 component in loaded constructor, got %d", len(loadedConstructor.Components))
 	}
