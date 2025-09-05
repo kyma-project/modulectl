@@ -264,7 +264,7 @@ func TestConstructor_AddMetadataResource_ReturnsError_WhenConfigNil(t *testing.T
 	err := constructor.AddMetadataResource(nil)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "config is nil")
+	require.Contains(t, err.Error(), "failed to generate metadata yaml: module config must not be nil")
 	require.Empty(t, constructor.Components[0].Resources)
 }
 
