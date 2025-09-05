@@ -205,10 +205,10 @@ func (c *Constructor) AddDefaultCRResource(defaultCRPath string) {
 	})
 }
 
-func (c *Constructor) AddMetadataResource(moduleConfig *contentprovider.ModuleConfig) {
+func (c *Constructor) AddMetadataResource(moduleConfig *contentprovider.ModuleConfig) error {
 	yamlData, err := resources.GenerateMetadataYaml(moduleConfig)
 	if err != nil {
-		return
+		return fmt.Errorf("failed to generate metadata yaml: %w", err)
 	}
 	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
 		Name:    common.MetadataResourceName,

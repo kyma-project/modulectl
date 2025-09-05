@@ -28,11 +28,12 @@ func (s *Service) AddResourcesAndCreateConstructorFile(
 	if defaultCRFilePath != "" {
 		componentConstructor.AddDefaultCRResource(defaultCRFilePath)
 	}
-	componentConstructor.AddMetadataResource(moduleConfig)
+	if err := componentConstructor.AddMetadataResource(moduleConfig); err != nil {
+		return fmt.Errorf("failed to add metadata resource: %w", err)
+	}
 
 	cmdOutput.Write("- Creating component constructor file\n")
-	err := componentConstructor.CreateComponentConstructorFile(outputFile)
-	if err != nil {
+	if err := componentConstructor.CreateComponentConstructorFile(outputFile); err != nil {
 		return fmt.Errorf("failed to create component constructor file: %w", err)
 	}
 	return nil
