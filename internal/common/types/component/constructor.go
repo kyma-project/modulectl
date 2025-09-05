@@ -219,6 +219,7 @@ func (c *Constructor) AddMetadataResource(moduleConfig *contentprovider.ModuleCo
 			Data: base64.StdEncoding.EncodeToString(yamlData),
 		},
 	})
+	return nil
 }
 
 func (c *Constructor) CreateComponentConstructorFile(filePath string) error {
