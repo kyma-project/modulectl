@@ -99,7 +99,7 @@ func TestService_AddResourcesAndCreateConstructorFile_WithDefaultCR(t *testing.T
 	require.Contains(t, resourceNames, common.DefaultCRResourceName)
 }
 
-func TestService_AddResourcesAndCreateConstructorFile_CreateFileError(t *testing.T) {
+func TestService_AddResourcesAndCreateConstructorFile_ReturnsError_WhenOutputPathInvalid(t *testing.T) {
 	const invalidOutputPath = "/invalid/path/that/does/not/exist/output.yaml"
 
 	service := componentconstructor.NewService()
@@ -124,6 +124,30 @@ func TestService_AddResourcesAndCreateConstructorFile_CreateFileError(t *testing
 	)
 
 	require.Error(t, err)
+}
+
+func TestService_AddResourcesAndCreateConstructorFile_ReturnsError_WhenConfigNil(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+
+	var outputBuffer bytes.Buffer
+	cmdOutput := iotools.NewDefaultOut(&outputBuffer)
+
+	tempDir := t.TempDir()
+	outputFile := filepath.Join(tempDir, testOutputFileName)
+
+	err := service.AddResourcesAndCreateConstructorFile(
+		constructor,
+		nil,
+		testManifestPath,
+		testDefaultCRPath,
+		cmdOutput,
+		outputFile,
+	)
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to add metadata resource")
 }
 
 func TestService_AddImagesToConstructor_Success(t *testing.T) {
