@@ -11,6 +11,7 @@ import (
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 	"github.com/kyma-project/modulectl/cmd/modulectl/version"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
+	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
@@ -119,6 +120,8 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create git sources service: %w", err)
 	}
 
+	componentConstructorService := componentconstructor.NewService()
+
 	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create security config service: %w", err)
@@ -154,7 +157,8 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		securityConfigService, componentArchiveService, registryService, moduleTemplateService,
+		securityConfigService, componentConstructorService, componentArchiveService, registryService,
+		moduleTemplateService,
 		crdParserService, moduleResourceService, imageVersionVerifierService, manifestService, manifestFileResolver,
 		defaultCRFileResolver, fileSystemUtil)
 	if err != nil {

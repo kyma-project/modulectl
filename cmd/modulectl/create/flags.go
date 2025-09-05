@@ -41,6 +41,14 @@ const (
 	ModuleSourcesGitDirectoryFlagName    = "module-sources-git-directory"
 	ModuleSourcesGitDirectoryFlagDefault = "."
 	ModuleSourcesGitDirectoryFlagUsage   = "Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository."
+
+	DisableOCMRegistryPushFlagName    = "disable-ocm-registry-push"
+	DisableOCMRegistryPushFlagDefault = false
+	DisableOCMRegistryPushFlagUsage   = "Disables the push of the component version to the OCM registry."
+
+	OutputConstructorFileFlagName    = "output-constructor-file"
+	OutputConstructorFileFlagDefault = "component-constructor.yaml"
+	OutputConstructorFileFlagUsage   = "Path to write the component constructor file to (default \"component-constructor.yaml\")."
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
@@ -85,4 +93,14 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 		"skip-version-validation",
 		true,
 		"Skipping image and ocm version validation")
+
+	flags.BoolVar(&opts.DisableOCMRegistryPush,
+		DisableOCMRegistryPushFlagName,
+		DisableOCMRegistryPushFlagDefault,
+		DisableOCMRegistryPushFlagUsage)
+
+	flags.StringVar(&opts.OutputConstructorFile,
+		OutputConstructorFileFlagName,
+		OutputConstructorFileFlagDefault,
+		OutputConstructorFileFlagUsage)
 }

@@ -6,16 +6,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-)
-
-const (
-	metadataResourceName = "metadata"
 )
 
 var ErrNilModuleConfig = errors.New("module config must not be nil")
@@ -34,11 +26,10 @@ type MetadataResource struct {
 	} `yaml:"spec"`
 }
 
-func GenerateMetadataResource(config *contentprovider.ModuleConfig) (Resource, error) {
+func GenerateMetadataYaml(config *contentprovider.ModuleConfig) ([]byte, error) {
 	if config == nil {
-		return Resource{}, ErrNilModuleConfig
+		return []byte{}, ErrNilModuleConfig
 	}
-
 	metadataResource := MetadataResource{}
 	metadataResource.Spec.Mandatory = config.Mandatory
 	metadataResource.Spec.Manager = config.Manager
@@ -48,21 +39,9 @@ func GenerateMetadataResource(config *contentprovider.ModuleConfig) (Resource, e
 	metadataResource.Spec.Resources = config.Resources
 	metadataResource.Spec.AssociatedResources = config.AssociatedResources
 
-	data, err := yaml.Marshal(metadataResource)
+	bytes, err := yaml.Marshal(metadataResource)
 	if err != nil {
-		return Resource{}, fmt.Errorf("failed to marshal metadata resource: %w", err)
+		return []byte{}, fmt.Errorf("failed to marshal metadata resource: %w", err)
 	}
-
-	return Resource{
-		Resource: compdesc.Resource{
-			ResourceMeta: compdesc.ResourceMeta{
-				ElementMeta: compdesc.ElementMeta{
-					Name: metadataResourceName,
-				},
-				Type:     artifacttypes.PLAIN_TEXT,
-				Relation: ocmv1.LocalRelation,
-			},
-		},
-		AccessHandler: accesshandler.NewYaml(string(data)),
-	}, nil
+	return bytes, nil
 }

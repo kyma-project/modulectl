@@ -8,7 +8,9 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/github"
 	"ocm.software/ocm/api/tech/github/identity"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
@@ -33,7 +35,7 @@ func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
 func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
 	gitRepoPath, gitRepoURL, moduleVersion string,
 ) error {
-	label, err := ocmv1.NewLabel(refLabel, git.HeadRef, ocmv1.WithVersion(ocmVersion))
+	label, err := ocmv1.NewLabel(common.RefLabel, git.HeadRef, ocmv1.WithVersion(common.OCMVersion))
 	if err != nil {
 		return fmt.Errorf("failed to create label: %w", err)
 	}
@@ -41,7 +43,7 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 	sourceMeta := compdesc.SourceMeta{
 		Type: identity.CONSUMER_TYPE,
 		ElementMeta: compdesc.ElementMeta{
-			Name:    ocmIdentityName,
+			Name:    common.OCMIdentityName,
 			Version: moduleVersion,
 			Labels:  ocmv1.Labels{*label},
 		},
@@ -59,5 +61,17 @@ func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.Componen
 		Access:     access,
 	})
 
+	return nil
+}
+
+func (s *GitSourcesService) AddGitSourcesToConstructor(constructor *component.Constructor,
+	gitRepoPath, gitRepoURL string,
+) error {
+	latestCommit, err := s.gitService.GetLatestCommit(gitRepoPath)
+	if err != nil {
+		return fmt.Errorf("failed to get latest commit: %w", err)
+	}
+
+	constructor.AddGitSource(gitRepoURL, latestCommit)
 	return nil
 }

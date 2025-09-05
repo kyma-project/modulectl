@@ -22,6 +22,8 @@ type Options struct {
 	OverwriteComponentVersion bool
 	DryRun                    bool
 	SkipVersionValidation     bool
+	DisableOCMRegistryPush    bool
+	OutputConstructorFile     string
 }
 
 func (opts Options) Validate() error {

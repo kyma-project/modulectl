@@ -9,14 +9,9 @@ import (
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-)
-
-const (
-	moduleImageResourceName = "module-image"
-	rawManifestResourceName = "raw-manifest"
-	defaultCRResourceName   = "default-cr"
 )
 
 var ErrNilTarGenerator = errors.New("tarGenerator must not be nil")
@@ -70,7 +65,7 @@ func GenerateModuleImageResource() Resource {
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
 				ElementMeta: compdesc.ElementMeta{
-					Name: moduleImageResourceName,
+					Name: common.ModuleImageResourceName,
 				},
 				Type:     artifacttypes.OCI_ARTIFACT,
 				Relation: ocmv1.ExternalRelation,
@@ -84,7 +79,7 @@ func GenerateRawManifestResource(tarGen accesshandler.TarGenerator, manifestPath
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
 				ElementMeta: compdesc.ElementMeta{
-					Name: rawManifestResourceName,
+					Name: common.RawManifestResourceName,
 				},
 				Type:     artifacttypes.DIRECTORY_TREE,
 				Relation: ocmv1.LocalRelation,
@@ -99,7 +94,7 @@ func GenerateDefaultCRResource(tarGen accesshandler.TarGenerator, defaultCRPath 
 		Resource: compdesc.Resource{
 			ResourceMeta: compdesc.ResourceMeta{
 				ElementMeta: compdesc.ElementMeta{
-					Name: defaultCRResourceName,
+					Name: common.DefaultCRResourceName,
 				},
 				Type:     artifacttypes.DIRECTORY_TREE,
 				Relation: ocmv1.LocalRelation,
@@ -107,4 +102,24 @@ func GenerateDefaultCRResource(tarGen accesshandler.TarGenerator, defaultCRPath 
 		},
 		AccessHandler: accesshandler.NewTar(tarGen, defaultCRPath),
 	}
+}
+
+func GenerateMetadataResource(moduleConfig *contentprovider.ModuleConfig) (Resource, error) {
+	yamlData, err := GenerateMetadataYaml(moduleConfig)
+	if err != nil {
+		return Resource{}, err
+	}
+
+	return Resource{
+		Resource: compdesc.Resource{
+			ResourceMeta: compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
+					Name: common.MetadataResourceName,
+				},
+				Type:     artifacttypes.PLAIN_TEXT,
+				Relation: ocmv1.LocalRelation,
+			},
+		},
+		AccessHandler: accesshandler.NewYaml(string(yamlData)),
+	}, nil
 }

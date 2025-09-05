@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -20,8 +20,8 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/kyma-project/lifecycle-manager/api/shared"
+	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 )
 
 const (
@@ -737,7 +737,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to parse security config data: security config file does not exist"))
+			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to get security config: failed to parse security config data: security config file does not exist"))
 		})
 	})
 
@@ -1298,7 +1298,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				err = verifyImageResource(imageResources, "webhook",
 					"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0")
 				Expect(err).ToNot(HaveOccurred())
-
 			})
 		})
 	})

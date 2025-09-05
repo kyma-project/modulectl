@@ -11,16 +11,13 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	ociartifacttypes "ocm.software/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociartifact"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 const (
 	// Semantic versioning format following e.g: x.y.z or vx.y,z
-	semverPattern             = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
-	secScanBaseLabelKey       = "scan.security.kyma-project.io"
-	typeLabelKey              = "type"
-	thirdPartyImageLabelValue = "third-party-image"
-	ocmVersion                = "v1"
+	semverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
 )
 
 var ErrInvalidImageFormat = errors.New("invalid image url format")
@@ -34,7 +31,7 @@ func NewOciArtifactResource(imageInfo *image.ImageInfo) (*compdesc.Resource, err
 	if err != nil {
 		return nil, err
 	}
-	version, resourceName := generateOCMVersionAndName(imageInfo)
+	version, resourceName := GenerateOCMVersionAndName(imageInfo)
 	access := ociartifact.New(imageInfo.FullURL)
 	access.SetType(ociartifact.Type)
 
@@ -63,15 +60,15 @@ func AddResourceIfNotExists(descriptor *compdesc.ComponentDescriptor, resource *
 }
 
 func createLabel() (*ocmv1.Label, error) {
-	labelKey := fmt.Sprintf("%s/%s", secScanBaseLabelKey, typeLabelKey)
-	label, err := ocmv1.NewLabel(labelKey, thirdPartyImageLabelValue, ocmv1.WithVersion(ocmVersion))
+	labelKey := fmt.Sprintf("%s/%s", common.SecScanBaseLabelKey, common.TypeLabelKey)
+	label, err := ocmv1.NewLabel(labelKey, common.ThirdPartyImageLabelValue, ocmv1.WithVersion(common.OCMVersion))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OCM label: %w", err)
 	}
 	return label, nil
 }
 
-func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
+func GenerateOCMVersionAndName(info *image.ImageInfo) (string, string) {
 	if info.Digest != "" {
 		shortDigest := info.Digest[:12]
 		var version string
