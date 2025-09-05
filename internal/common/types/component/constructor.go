@@ -228,5 +228,8 @@ func (c *Constructor) CreateComponentConstructorFile(filePath string) error {
 	}
 
 	filePermission := 0o600
-	return os.WriteFile(filePath, marshal, os.FileMode(filePermission))
+	if err = os.WriteFile(filePath, marshal, os.FileMode(filePermission)); err != nil {
+		return fmt.Errorf("unable to write component constructor file: %w", err)
+	}
+	return nil
 }
