@@ -265,7 +265,7 @@ func TestConstructor_AddMetadataResource_ReturnsError_WhenConfigNil(t *testing.T
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "config is nil")
-	require.Len(t, constructor.Components[0].Resources, 0)
+	require.Empty(t, constructor.Components[0].Resources)
 }
 
 func TestConstructor_CreateComponentConstructorFile_Success(t *testing.T) {
