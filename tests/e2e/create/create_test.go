@@ -1324,6 +1324,63 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			))
 		})
 	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		constructorFilePath := "/tmp/component-constructor.yaml"
+		By("When invoked with --disable-ocm-registry-push flag", func() {
+			cmd = createCmd{
+				moduleConfigFile:          minimalConfig,
+				output:                    templateOutputPath,
+				outputConstructorFile:     constructorFilePath,
+				disableOCMRegistryPush:    true,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("And component constructor file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("component-constructor.yaml"))
+
+			By("And the module template should contain the expected content", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+
+				By("And template should have no descriptor")
+				Expect(template.Spec.Descriptor).To(BeNil())
+
+				By("And template should have basic info")
+				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
+				Expect(template.Spec.Version).To(Equal(moduleVersion))
+				Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
+				Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
+
+				By("And template should have rawManifest resource")
+				Expect(template.Spec.Resources).To(HaveLen(1))
+				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml", moduleVersion)))
+			})
+
+			By("And the component constructor file should contain expected content", func() {
+				constructorData, err := os.ReadFile(constructorFilePath)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(string(constructorData)).To(ContainSubstring("components:"))
+				Expect(string(constructorData)).To(ContainSubstring("name: kyma-project.io/module/template-operator"))
+				Expect(string(constructorData)).To(ContainSubstring("version: " + moduleVersion))
+				Expect(string(constructorData)).To(ContainSubstring("resources:"))
+			})
+
+			By("And cleanup temporary files", func() {
+				if _, err := os.Stat(constructorFilePath); err == nil {
+					os.Remove(constructorFilePath)
+				}
+			})
+		})
+	})
 })
 
 func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {

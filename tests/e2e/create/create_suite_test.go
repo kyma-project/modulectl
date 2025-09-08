@@ -82,6 +82,8 @@ type createCmd struct {
 	overwrite                 bool
 	dryRun                    bool
 	skipVersionValidation     bool
+	disableOCMRegistryPush    bool
+	outputConstructorFile     string
 }
 
 func (cmd *createCmd) execute() error {
@@ -123,6 +125,14 @@ func (cmd *createCmd) execute() error {
 
 	if cmd.skipVersionValidation {
 		args = append(args, "--skip-version-validation")
+	}
+
+	if cmd.disableOCMRegistryPush {
+		args = append(args, "--disable-ocm-registry-push")
+	}
+
+	if cmd.outputConstructorFile != "" {
+		args = append(args, "--output-constructor-file="+cmd.outputConstructorFile)
 	}
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))
