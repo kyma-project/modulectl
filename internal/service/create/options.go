@@ -46,21 +46,9 @@ func (opts Options) Validate() error {
 
 	// Only validate registry related args if OCM registry push is not disabled
 	if !opts.DisableOCMRegistryPush {
-		if opts.Credentials != "" {
-			matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
-			if err != nil {
-				return fmt.Errorf("opts.Credentials could not be parsed: %w: %w", commonerrors.ErrInvalidOption, err)
-			} else if !matched {
-				return fmt.Errorf("opts.Credentials is in invalid format: %w", commonerrors.ErrInvalidOption)
-			}
-		}
-
-		if opts.RegistryURL == "" {
-			return fmt.Errorf("opts.RegistryURL must not be empty: %w", commonerrors.ErrInvalidOption)
-		}
-
-		if !strings.HasPrefix(opts.RegistryURL, "http") {
-			return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
+		err := opts.validateArgsForRegistryPush()
+		if err != nil {
+			return err
 		}
 	}
 
@@ -81,6 +69,26 @@ func (opts Options) Validate() error {
 		opts.Out.Write("Warning: dry-run flag is set to true. The descriptor will NOT be pushed.\n")
 	}
 
+	return nil
+}
+
+func (opts Options) validateArgsForRegistryPush() error {
+	if opts.Credentials != "" {
+		matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
+		if err != nil {
+			return fmt.Errorf("opts.Credentials could not be parsed: %w: %w", commonerrors.ErrInvalidOption, err)
+		} else if !matched {
+			return fmt.Errorf("opts.Credentials is in invalid format: %w", commonerrors.ErrInvalidOption)
+		}
+	}
+
+	if opts.RegistryURL == "" {
+		return fmt.Errorf("opts.RegistryURL must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
+	if !strings.HasPrefix(opts.RegistryURL, "http") {
+		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
+	}
 	return nil
 }
 

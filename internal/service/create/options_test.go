@@ -35,25 +35,25 @@ func Test_Validate_Options(t *testing.T) {
 			errMsg:  "opts.ConfigFile must not be empty",
 		},
 		{
-			name: "Credentials invalid format",
-			options: create.Options{
-				Out:         iotools.NewDefaultOut(io.Discard),
-				ConfigFile:  "config.yaml",
-				Credentials: "missingsemicolon",
-			},
-			wantErr: true,
-			errMsg:  "opts.Credentials is in invalid format",
-		},
-		{
 			name: "TemplateOutput is empty",
 			options: create.Options{
 				Out:            iotools.NewDefaultOut(io.Discard),
 				ConfigFile:     "config.yaml",
-				Credentials:    "username:password",
 				TemplateOutput: "",
 			},
 			wantErr: true,
 			errMsg:  "opts.TemplateOutput must not be empty",
+		},
+		{
+			name: "Credentials invalid format",
+			options: create.Options{
+				Out:            iotools.NewDefaultOut(io.Discard),
+				ConfigFile:     "config.yaml",
+				TemplateOutput: "output",
+				Credentials:    "missingsemicolon",
+			},
+			wantErr: true,
+			errMsg:  "opts.Credentials is in invalid format",
 		},
 		{
 			name: "All fields valid",
