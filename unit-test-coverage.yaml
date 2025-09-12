@@ -2,7 +2,7 @@ packages:
   cmd/modulectl/scaffold: 100
   cmd/modulectl/create: 100
   internal/common/validation: 92
-  internal/common/types/component: 96.7
+  internal/common/types/component: 100
   internal/service/scaffold: 91
   internal/service/credential: 83
   internal/service/contentprovider: 91.8
@@ -21,7 +21,7 @@ packages:
   internal/service/manifestparser: 93.3
   internal/service/componentarchive: 40
   internal/service/image: 94.6
-  internal/service/componentconstructor: 100
+  internal/service/componentconstructor: 96
   internal/common/utils/slices: 100
   tools/filesystem: 21
   tools/ocirepo: 23
