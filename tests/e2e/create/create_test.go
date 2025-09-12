@@ -5,10 +5,10 @@ package create_test
 import (
 	"fmt"
 	"io/fs"
-	"net/http"
 	"os"
 	"os/exec"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -1381,6 +1381,10 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(string(constructorData)).To(ContainSubstring("name: kyma-project.io/module/template-operator"))
 				Expect(string(constructorData)).To(ContainSubstring("version: " + moduleVersion))
 				Expect(string(constructorData)).To(ContainSubstring("resources:"))
+				Expect(string(constructorData)).To(ContainSubstring(common.MetadataResourceName))
+				Expect(string(constructorData)).To(ContainSubstring(common.RawManifestResourceName))
+				Expect(string(constructorData)).To(ContainSubstring(common.DefaultCRResourceName))
+				Expect(string(constructorData)).To(ContainSubstring(common.ModuleTemplateResourceName))
 			})
 
 			By("And cleanup temporary files", func() {
