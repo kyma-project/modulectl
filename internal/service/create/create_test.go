@@ -11,6 +11,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
@@ -325,11 +326,14 @@ func (c *componentConstructorServiceStub) AddImagesToConstructor(_ *component.Co
 	return nil
 }
 
-func (c *componentConstructorServiceStub) AddResourcesAndCreateConstructorFile(_ *component.Constructor,
+func (c *componentConstructorServiceStub) AddResources(_ *component.Constructor,
 	_ *contentprovider.ModuleConfig,
-	_ string,
-	_ string,
-	_ iotools.Out,
+	_ *types.ResourcePaths,
+) error {
+	return nil
+}
+
+func (c *componentConstructorServiceStub) CreateConstructorFile(_ *component.Constructor,
 	_ string,
 ) error {
 	return nil
@@ -381,14 +385,14 @@ func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.Modu
 
 type CRDParserServiceStub struct{}
 
-func (*CRDParserServiceStub) IsCRDClusterScoped(_, _ string) (bool, error) {
+func (*CRDParserServiceStub) IsCRDClusterScoped(_ *types.ResourcePaths) (bool, error) {
 	return false, nil
 }
 
 type ModuleResourceServiceStub struct{}
 
 func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig,
-	_, _ string,
+	_ *types.ResourcePaths,
 ) ([]resources.Resource, error) {
 	return []resources.Resource{}, nil
 }

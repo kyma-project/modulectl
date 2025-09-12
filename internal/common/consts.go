@@ -14,8 +14,9 @@ const (
 	TypeLabelKey              = "type"
 	ThirdPartyImageLabelValue = "third-party-image"
 
-	ModuleImageResourceName = "module-image"
-	RawManifestResourceName = "raw-manifest"
-	DefaultCRResourceName   = "default-cr"
-	MetadataResourceName    = "metadata"
+	ModuleImageResourceName    = "module-image"
+	RawManifestResourceName    = "raw-manifest"
+	DefaultCRResourceName      = "default-cr"
+	MetadataResourceName       = "metadata"
+	ModuleTemplateResourceName = "moduletemplate"
 )
