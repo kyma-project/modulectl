@@ -10,6 +10,7 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/artifacttypes"
 
 	"github.com/kyma-project/modulectl/internal/common"
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
@@ -40,17 +41,17 @@ type Resource struct {
 }
 
 func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
-	manifestPath, defaultCRPath string,
+	resourcePaths *types.ResourcePaths,
 ) ([]Resource, error) {
 	moduleImageResource := GenerateModuleImageResource()
 	metadataResource, err := GenerateMetadataResource(moduleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate metadata resource: %w", err)
 	}
-	rawManifestResource := GenerateRawManifestResource(s.tarGenerator, manifestPath)
+	rawManifestResource := GenerateRawManifestResource(s.tarGenerator, resourcePaths.RawManifest)
 	resources := []Resource{moduleImageResource, metadataResource, rawManifestResource}
-	if defaultCRPath != "" {
-		defaultCRResource := GenerateDefaultCRResource(s.tarGenerator, defaultCRPath)
+	if resourcePaths.DefaultCR != "" {
+		defaultCRResource := GenerateDefaultCRResource(s.tarGenerator, resourcePaths.DefaultCR)
 		resources = append(resources, defaultCRResource)
 	}
 

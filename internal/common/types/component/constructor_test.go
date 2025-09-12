@@ -2,16 +2,12 @@ package component_test
 
 import (
 	"encoding/base64"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
@@ -202,51 +198,31 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 	}
 }
 
-func TestConstructor_AddRawManifestResource(t *testing.T) {
+func TestConstructor_AddFileAsDirResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	constructor.AddRawManifestResource("/path/to/manifest.yaml")
+	constructor.AddFileAsDirResource("test-resource", "/path/to/manifest.yaml")
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
-	require.Equal(t, common.RawManifestResourceName, resource.Name)
+	require.Equal(t, "test-resource", resource.Name)
 	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
 	require.Equal(t, "1.0.0", resource.Version)
 	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
 	require.Equal(t, "/path/to", resource.Input.Path)
+	require.True(t, resource.Input.Compress)
 	require.NotNil(t, resource.Input.IncludeFiles)
 	require.Len(t, resource.Input.IncludeFiles, 1)
 	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
 }
 
-func TestConstructor_AddDefaultCRResource(t *testing.T) {
+func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	constructor.AddDefaultCRResource("/path/to/defaultcr.yaml")
+	testData := []byte("test metadata content")
+	constructor.AddBinaryDataAsFileResource(common.MetadataResourceName, testData)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
-	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
-	require.Equal(t, common.DefaultCRResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
-	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
-	require.Equal(t, "/path/to", resource.Input.Path)
-	require.NotNil(t, resource.Input.IncludeFiles)
-	require.Len(t, resource.Input.IncludeFiles, 1)
-	require.Equal(t, "defaultcr.yaml", resource.Input.IncludeFiles[0])
-}
-
-func TestConstructor_AddMetadataResource_Success(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:    "test-module",
-		Version: "1.0.0",
-	}
-
-	err := constructor.AddMetadataResource(moduleConfig)
-	require.NoError(t, err)
-
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.MetadataResourceName, resource.Name)
 	require.Equal(t, component.PlainTextResourceType, resource.Type)
@@ -254,52 +230,21 @@ func TestConstructor_AddMetadataResource_Success(t *testing.T) {
 	require.Equal(t, component.BinaryResourceInput, resource.Input.Type)
 	require.NotEmpty(t, resource.Input.Data)
 
-	_, err = base64.StdEncoding.DecodeString(resource.Input.Data)
+	decodedData, err := base64.StdEncoding.DecodeString(resource.Input.Data)
 	require.NoError(t, err, "expected input data to be valid base64")
+	require.Equal(t, testData, decodedData)
 }
 
-func TestConstructor_AddMetadataResource_ReturnsError_WhenConfigNil(t *testing.T) {
+func TestConstructor_AddFileResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddMetadataResource(nil)
+	constructor.AddFileResource("test-resource", "/path/to/file.yaml")
 
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to generate metadata yaml: module config must not be nil")
-	require.Empty(t, constructor.Components[0].Resources)
-}
-
-func TestConstructor_CreateComponentConstructorFile_Success(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	tempDir := t.TempDir()
-	filePath := filepath.Join(tempDir, "constructor.yaml")
-
-	err := constructor.CreateComponentConstructorFile(filePath)
-	require.NoError(t, err)
-
-	_, err = os.Stat(filePath)
-	require.NoError(t, err, "constructor file was not created")
-
-	content, err := os.ReadFile(filePath)
-	require.NoError(t, err, "failed to read constructor file")
-
-	var loadedConstructor component.Constructor
-	err = yaml.Unmarshal(content, &loadedConstructor)
-	require.NoError(t, err, "failed to unmarshal constructor file")
-
-	require.Len(t, loadedConstructor.Components, 1, "expected 1 component in loaded constructor")
-	require.Equal(t, "test-component", loadedConstructor.Components[0].Name)
-	require.Equal(t, "1.0.0", loadedConstructor.Components[0].Version)
-	require.Equal(t, constructor.Components[0].Provider, loadedConstructor.Components[0].Provider)
-	require.Len(t, loadedConstructor.Components[0].Resources, len(constructor.Components[0].Resources))
-	require.Len(t, loadedConstructor.Components[0].Sources, len(constructor.Components[0].Sources))
-}
-
-func TestConstructor_CreateComponentConstructorFile_ReturnsError_WhenOutputFilePathInvalid(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	filePath := "/invalid/path/constructor.yaml"
-	err := constructor.CreateComponentConstructorFile(filePath)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "unable to write component constructor file")
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, component.PlainTextResourceType, resource.Type)
+	require.Equal(t, "1.0.0", resource.Version)
+	require.Equal(t, component.FileResourceInput, resource.Input.Type)
+	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
 }

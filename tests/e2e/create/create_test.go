@@ -5,6 +5,7 @@ package create_test
 import (
 	"fmt"
 	"io/fs"
+	"net/http"
 	"os"
 	"os/exec"
 
@@ -676,7 +677,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And descriptor.component.resources should be correct")
 				Expect(descriptor.Resources).To(HaveLen(4))
 
-				resource := findResourceByNameVersionType(descriptor.Resources, "template-operator", moduleVersion, "ociArtifact")
+				resource := findResourceByNameVersionType(descriptor.Resources, "template-operator", moduleVersion,
+					"ociArtifact")
 				Expect(resource).ToNot(BeNil())
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 
@@ -685,9 +687,11 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s", moduleVersion)))
+				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
+					moduleVersion)))
 
-				resource = findResourceByNameVersionType(descriptor.Resources, "template-operator", "2.0.0", "ociArtifact")
+				resource = findResourceByNameVersionType(descriptor.Resources, "template-operator", "2.0.0",
+					"ociArtifact")
 				Expect(resource).ToNot(BeNil())
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 
@@ -708,7 +712,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
 				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-yaml"))
 
-				resource = findResourceByNameVersionType(descriptor.Resources, "raw-manifest", moduleVersion, "directoryTree")
+				resource = findResourceByNameVersionType(descriptor.Resources, "raw-manifest", moduleVersion,
+					"directoryTree")
 				Expect(resource).ToNot(BeNil())
 				resourceAccessSpec3, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
 				Expect(err).ToNot(HaveOccurred())
@@ -1177,7 +1182,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					"nginx":             {"nginx:1.25.0", "1.25.0"},
 				}
 
-				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources", len(expectedImages))
+				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources",
+					len(expectedImages))
 
 				for imageName, expected := range expectedImages {
 					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
@@ -1219,7 +1225,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				}
 
 				Expect(len(imageResources)).To(Equal(len(expectedImages)),
-					"Expected exactly %d instead of 2 images, as the alpine image is from containers, and it's not possible to have initContainers without containers for a valid k8s deployment/statefulset yaml file", len(expectedImages))
+					"Expected exactly %d instead of 2 images, as the alpine image is from containers, and it's not possible to have initContainers without containers for a valid k8s deployment/statefulset yaml file",
+					len(expectedImages))
 
 				for imageName, expected := range expectedImages {
 					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
@@ -1262,7 +1269,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					"alpine": {"alpine:3.18.0", "3.18.0"},
 				}
 
-				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources", len(expectedImages))
+				Expect(len(imageResources)).To(Equal(len(expectedImages)), "Expected exactly %d image resources",
+					len(expectedImages))
 
 				for imageName, expected := range expectedImages {
 					err := verifyImageResource(imageResources, imageName, expected.reference, expected.version)
@@ -1362,7 +1370,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And template should have rawManifest resource")
 				Expect(template.Spec.Resources).To(HaveLen(1))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml", moduleVersion)))
+				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+					moduleVersion)))
 			})
 
 			By("And the component constructor file should contain expected content", func() {
@@ -1595,7 +1604,9 @@ func getImageReference(resource compdesc.Resource) (string, error) {
 	return ociSpec.ImageReference, nil
 }
 
-func verifyImageResource(resources map[string]compdesc.Resource, imageName, expectedReference, expectedVersion string) error {
+func verifyImageResource(resources map[string]compdesc.Resource,
+	imageName, expectedReference, expectedVersion string,
+) error {
 	resource, exists := resources[imageName]
 	if !exists {
 		return fmt.Errorf("expected image '%s' not found in resources", imageName)
