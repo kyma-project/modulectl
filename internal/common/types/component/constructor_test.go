@@ -251,10 +251,3 @@ func TestConstructor_AddFileResource(t *testing.T) {
 	require.Equal(t, component.FileResourceInput, resource.Input.Type)
 	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
 }
-				resource.Input.Path)
-		} else if resource.Input.Type == component.FileResourceInput {
-			require.True(t, filepath.IsAbs(resource.Input.Path), "File path should be absolute: %s",
-				resource.Input.Path)
-		}
-	}
-}
