@@ -35,7 +35,7 @@ func TestService_AddResources_Success(t *testing.T) {
 	err := service.AddResources(constructor, moduleConfig, resourcePaths)
 
 	require.NoError(t, err)
-	require.Len(t, constructor.Components[0].Resources, 2)
+	require.Len(t, constructor.Components[0].Resources, 3)
 
 	resources := constructor.Components[0].Resources
 	resourceNames := make([]string, len(resources))

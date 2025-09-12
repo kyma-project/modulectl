@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 )
 

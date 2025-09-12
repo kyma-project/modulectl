@@ -16,10 +16,10 @@ type ResourcePaths struct {
 	ModuleTemplate string
 }
 
-func NewResourcePaths(DefaultCRPath, RawManifestPath, ModuleTemplatePath string) *ResourcePaths {
+func NewResourcePaths(defaultCRPath, rawManifestPath, moduleTemplatePath string) *ResourcePaths {
 	return &ResourcePaths{
-		DefaultCR:      DefaultCRPath,
-		RawManifest:    RawManifestPath,
-		ModuleTemplate: ModuleTemplatePath,
+		DefaultCR:      defaultCRPath,
+		RawManifest:    rawManifestPath,
+		ModuleTemplate: moduleTemplatePath,
 	}
 }

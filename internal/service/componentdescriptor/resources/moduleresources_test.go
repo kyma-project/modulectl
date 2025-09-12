@@ -3,10 +3,10 @@ package resources_test
 import (
 	"testing"
 
-	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/stretchr/testify/require"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
