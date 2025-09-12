@@ -194,14 +194,16 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 2)
 
 	for i, resource := range constructor.Components[0].Resources {
-		require.Equal(t, imageInfos[i].FullURL, resource.Access.ImageReference, "resource %d: image reference mismatch", i)
+		require.Equal(t, imageInfos[i].FullURL, resource.Access.ImageReference, "resource %d: image reference mismatch",
+			i)
 	}
 }
 
 func TestConstructor_AddFileAsDirResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	constructor.AddFileAsDirResource("test-resource", "/path/to/manifest.yaml")
+	err := constructor.AddFileAsDirResource("test-resource", "/path/to/manifest.yaml")
+	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
@@ -238,7 +240,8 @@ func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
 func TestConstructor_AddFileResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	constructor.AddFileResource("test-resource", "/path/to/file.yaml")
+	err := constructor.AddFileResource("test-resource", "/path/to/file.yaml")
+	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
@@ -247,4 +250,11 @@ func TestConstructor_AddFileResource(t *testing.T) {
 	require.Equal(t, "1.0.0", resource.Version)
 	require.Equal(t, component.FileResourceInput, resource.Input.Type)
 	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
+}
+				resource.Input.Path)
+		} else if resource.Input.Type == component.FileResourceInput {
+			require.True(t, filepath.IsAbs(resource.Input.Path), "File path should be absolute: %s",
+				resource.Input.Path)
+		}
+	}
 }

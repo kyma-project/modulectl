@@ -174,18 +174,35 @@ func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 	}
 }
 
-func (c *Constructor) AddFileAsDirResource(resourceName, filePath string) {
+func (c *Constructor) AddFileAsDirResource(resourceName, filePath string) error {
+	dir, err := getAbsPath(filepath.Dir(filePath))
+	if err != nil {
+		return err
+	}
+
 	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
 		Name:    resourceName,
 		Type:    DirectoryTreeResourceType,
 		Version: c.Components[0].Version,
 		Input: &Input{
 			Type:         DirectoryInputType,
-			Path:         filepath.Dir(filePath),
+			Path:         dir,
 			Compress:     true,
 			IncludeFiles: []string{filepath.Base(filePath)},
 		},
 	})
+	return nil
+}
+
+func getAbsPath(filePath string) (string, error) {
+	if !filepath.IsAbs(filePath) {
+		absPath, err := filepath.Abs(filePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to get absolute path for %s: %w", filePath, err)
+		}
+		filePath = absPath
+	}
+	return filePath, nil
 }
 
 func (c *Constructor) AddBinaryDataAsFileResource(resourceName string, data []byte) {
@@ -200,7 +217,12 @@ func (c *Constructor) AddBinaryDataAsFileResource(resourceName string, data []by
 	})
 }
 
-func (c *Constructor) AddFileResource(resourceName, filePath string) {
+func (c *Constructor) AddFileResource(resourceName, filePath string) error {
+	filePath, err := getAbsPath(filePath)
+	if err != nil {
+		return err
+	}
+
 	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
 		Name:    resourceName,
 		Type:    PlainTextResourceType,
@@ -210,4 +232,5 @@ func (c *Constructor) AddFileResource(resourceName, filePath string) {
 			Path: filePath,
 		},
 	})
+	return nil
 }

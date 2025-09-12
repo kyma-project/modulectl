@@ -31,11 +31,20 @@ func (s *Service) AddResources(
 	}
 
 	componentConstructor.AddBinaryDataAsFileResource(common.MetadataResourceName, metadataYaml)
-	componentConstructor.AddFileAsDirResource(common.RawManifestResourceName, resourcePaths.RawManifest)
-	if resourcePaths.DefaultCR != "" {
-		componentConstructor.AddFileAsDirResource(common.DefaultCRResourceName, resourcePaths.DefaultCR)
+	err = componentConstructor.AddFileAsDirResource(common.RawManifestResourceName, resourcePaths.RawManifest)
+	if err != nil {
+		return fmt.Errorf("failed to create raw manifest resource: %w", err)
 	}
-	componentConstructor.AddFileResource(common.ModuleTemplateResourceName, resourcePaths.ModuleTemplate)
+	if resourcePaths.DefaultCR != "" {
+		err = componentConstructor.AddFileAsDirResource(common.DefaultCRResourceName, resourcePaths.DefaultCR)
+		if err != nil {
+			return fmt.Errorf("failed to create default CR resource: %w", err)
+		}
+	}
+	err = componentConstructor.AddFileResource(common.ModuleTemplateResourceName, resourcePaths.ModuleTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create moduletemplate resource: %w", err)
+	}
 	return nil
 }
 
