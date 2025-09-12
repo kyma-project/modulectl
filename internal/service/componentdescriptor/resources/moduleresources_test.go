@@ -3,6 +3,7 @@ package resources_test
 import (
 	"testing"
 
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/stretchr/testify/require"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 
@@ -26,7 +27,8 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath)
+	resourcePaths := types.NewResourcePaths(defaultCRPath, manifestPath, "")
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
 	require.NoError(t, err)
 	require.Len(t, res, 4)
 
@@ -70,7 +72,8 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, "")
+	resourcePaths := types.NewResourcePaths("", manifestPath, "")
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
 	require.NoError(t, err)
 	require.Len(t, res, 3)
 
@@ -108,7 +111,8 @@ func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
 	manifestPath := "path/to/manifest"
 	defaultCRPath := "path/to/defaultCR"
 
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, manifestPath, defaultCRPath)
+	resourcePaths := types.NewResourcePaths(defaultCRPath, manifestPath, "")
+	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
 	require.NoError(t, err)
 	require.Len(t, res, 4)
 

@@ -7,11 +7,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
+)
+
+const (
+	defaultCRPath   = "/path/to/defaultCR"
+	rawManifestPath = "/path/to/manifest"
 )
 
 func TestService_NewService_ReturnsErrorWhenCalledWithNil(t *testing.T) {
@@ -23,7 +29,8 @@ func TestService_NewService_ReturnsErrorWhenCalledWithNil(t *testing.T) {
 func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
 	crdParserService, _ := crdparser.NewService(&fileSystemClusterScopedExistsStub{})
 
-	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
+	resourcePaths := types.NewResourcePaths(defaultCRPath, rawManifestPath, "")
+	isClusterScoped, err := crdParserService.IsCRDClusterScoped(resourcePaths)
 	require.NoError(t, err)
 	require.True(t, isClusterScoped)
 }
@@ -31,7 +38,8 @@ func TestService_IsCRDClusterScoped_ReturnsTrueWhenClusterScoped(t *testing.T) {
 func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T) {
 	crdParserService, _ := crdparser.NewService(&fileSystemNamespacedScopedExistsStub{})
 
-	isClusterScoped, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
+	resourcePaths := types.NewResourcePaths(defaultCRPath, rawManifestPath, "")
+	isClusterScoped, err := crdParserService.IsCRDClusterScoped(resourcePaths)
 	require.NoError(t, err)
 	require.False(t, isClusterScoped)
 }
@@ -39,7 +47,8 @@ func TestService_IsCRDClusterScoped_ReturnsFalseWhenNamespaceScoped(t *testing.T
 func TestService_IsCRDClusterScoped_ReturnsErrorWhenFileReadingRetrievalError(t *testing.T) {
 	crdParserService, _ := crdparser.NewService(&fileSystemNotExistStub{})
 
-	_, err := crdParserService.IsCRDClusterScoped("/path/to/defaultCR", "/path/to/manifest")
+	resourcePaths := types.NewResourcePaths(defaultCRPath, rawManifestPath, "")
+	_, err := crdParserService.IsCRDClusterScoped(resourcePaths)
 	require.ErrorContains(t, err, "error reading CRD file")
 }
 
