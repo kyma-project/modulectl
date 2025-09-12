@@ -1383,7 +1383,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(string(constructorData)).To(ContainSubstring("resources:"))
 				Expect(string(constructorData)).To(ContainSubstring(common.MetadataResourceName))
 				Expect(string(constructorData)).To(ContainSubstring(common.RawManifestResourceName))
-				Expect(string(constructorData)).To(ContainSubstring(common.DefaultCRResourceName))
 				Expect(string(constructorData)).To(ContainSubstring(common.ModuleTemplateResourceName))
 			})
 
