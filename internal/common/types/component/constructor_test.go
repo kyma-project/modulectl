@@ -2,6 +2,7 @@ package component_test
 
 import (
 	"encoding/base64"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -250,4 +251,69 @@ func TestConstructor_AddFileResource(t *testing.T) {
 	require.Equal(t, "1.0.0", resource.Version)
 	require.Equal(t, component.FileResourceInput, resource.Input.Type)
 	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
+}
+
+func TestConstructor_AddFileResource_RelativePath(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileResource("test-resource", "relative/path/file.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, component.PlainTextResourceType, resource.Type)
+	require.True(t, filepath.IsAbs(resource.Input.Path), "path should be converted to absolute")
+	require.Contains(t, resource.Input.Path, "relative/path/file.yaml")
+}
+
+func TestConstructor_AddFileResource_CurrentDirectory(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileResource("test-resource", "./file.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.True(t, filepath.IsAbs(resource.Input.Path), "path should be converted to absolute")
+	require.Contains(t, resource.Input.Path, "file.yaml")
+}
+
+func TestConstructor_AddFileAsDirResource_RelativePath(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileAsDirResource("test-resource", "relative/path/manifest.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
+	require.Contains(t, resource.Input.Path, "relative/path")
+	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
+}
+
+func TestConstructor_AddFileAsDirResource_CurrentDirectory(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileAsDirResource("test-resource", "./manifest.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
+	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
+}
+
+func TestConstructor_AddFileAsDirResource_ParentDirectory(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileAsDirResource("test-resource", "../manifest.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
+	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
 }
