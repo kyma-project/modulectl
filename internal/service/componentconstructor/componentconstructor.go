@@ -3,10 +3,15 @@ package componentconstructor
 import (
 	"fmt"
 
+	"gopkg.in/yaml.v3"
+
+	"github.com/kyma-project/modulectl/internal/common"
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
+	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/image"
-	iotools "github.com/kyma-project/modulectl/tools/io"
+	"github.com/kyma-project/modulectl/tools/filesystem"
 )
 
 type Service struct{}
@@ -15,26 +20,43 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) AddResourcesAndCreateConstructorFile(
+func (s *Service) AddResources(
 	componentConstructor *component.Constructor,
 	moduleConfig *contentprovider.ModuleConfig,
-	manifestFilePath string,
-	defaultCRFilePath string,
-	cmdOutput iotools.Out,
-	outputFile string,
+	resourcePaths *types.ResourcePaths,
 ) error {
-	cmdOutput.Write("- Generating module resources\n")
-	componentConstructor.AddRawManifestResource(manifestFilePath)
-	if defaultCRFilePath != "" {
-		componentConstructor.AddDefaultCRResource(defaultCRFilePath)
-	}
-	if err := componentConstructor.AddMetadataResource(moduleConfig); err != nil {
-		return fmt.Errorf("failed to add metadata resource: %w", err)
+	metadataYaml, err := resources.GenerateMetadataYaml(moduleConfig)
+	if err != nil {
+		return fmt.Errorf("failed to generate metadata yaml: %w", err)
 	}
 
-	cmdOutput.Write("- Creating component constructor file\n")
-	if err := componentConstructor.CreateComponentConstructorFile(outputFile); err != nil {
-		return fmt.Errorf("failed to create component constructor file: %w", err)
+	componentConstructor.AddBinaryDataResource(common.MetadataResourceName, metadataYaml)
+	err = componentConstructor.AddFileResource(common.RawManifestResourceName, resourcePaths.RawManifest)
+	if err != nil {
+		return fmt.Errorf("failed to create raw manifest resource: %w", err)
+	}
+	if resourcePaths.DefaultCR != "" {
+		err = componentConstructor.AddFileResource(common.DefaultCRResourceName, resourcePaths.DefaultCR)
+		if err != nil {
+			return fmt.Errorf("failed to create default CR resource: %w", err)
+		}
+	}
+	err = componentConstructor.AddFileResource(common.ModuleTemplateResourceName, resourcePaths.ModuleTemplate)
+	if err != nil {
+		return fmt.Errorf("failed to create moduletemplate resource: %w", err)
+	}
+	return nil
+}
+
+func (s *Service) CreateConstructorFile(componentConstructor *component.Constructor, filePath string) error {
+	marshal, err := yaml.Marshal(componentConstructor)
+	if err != nil {
+		return fmt.Errorf("unable to marshal component constructor: %w", err)
+	}
+
+	helper := &filesystem.Helper{}
+	if err = helper.WriteFile(filePath, string(marshal)); err != nil {
+		return fmt.Errorf("unable to write component constructor file: %w", err)
 	}
 	return nil
 }

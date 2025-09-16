@@ -10,13 +10,13 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	iotools "github.com/kyma-project/modulectl/tools/io"
 )
 
 var ErrComponentVersionExists = errors.New("component version already exists")
@@ -57,17 +57,18 @@ type ComponentConstructorService interface {
 	AddImagesToConstructor(componentConstructor *component.Constructor,
 		images []string,
 	) error
-	AddResourcesAndCreateConstructorFile(componentConstructor *component.Constructor,
+	AddResources(componentConstructor *component.Constructor,
 		moduleConfig *contentprovider.ModuleConfig,
-		manifestFilePath string,
-		defaultCRFilePath string,
-		cmdOutput iotools.Out,
+		resourcePaths *types.ResourcePaths,
+	) error
+	CreateConstructorFile(componentConstructor *component.Constructor,
 		outputFile string,
 	) error
 }
 
 type ComponentArchiveService interface {
-	CreateComponentArchive(componentDescriptor *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
+	CreateComponentArchive(componentDescriptor *compdesc.ComponentDescriptor) (
+		*comparch.ComponentArchive,
 		error)
 	AddModuleResourcesToArchive(componentArchive componentarchive.ComponentArchive,
 		moduleResources []resources.Resource,
@@ -103,12 +104,12 @@ type ModuleTemplateService interface {
 }
 
 type CRDParserService interface {
-	IsCRDClusterScoped(crPath, manifestPath string) (bool, error)
+	IsCRDClusterScoped(paths *types.ResourcePaths) (bool, error)
 }
 
 type ModuleResourceService interface {
 	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
-		manifestPath, defaultCRPath string,
+		resourcesPaths *types.ResourcePaths,
 	) ([]resources.Resource, error)
 }
 
@@ -254,29 +255,21 @@ func (s *Service) Run(opts Options) error {
 		}
 	}
 
-	var descriptorToRenderInModuleTemplate *compdesc.ComponentDescriptor
+	resourcePaths := types.NewResourcePaths(defaultCRFilePath, manifestFilePath, opts.TemplateOutput)
+
 	if opts.DisableOCMRegistryPush {
-		err = s.useComponentConstructor(moduleConfig, manifestFilePath, defaultCRFilePath, opts)
+		err = s.useComponentConstructor(moduleConfig, resourcePaths, opts)
 	} else {
-		descriptorToRenderInModuleTemplate, err = s.useComponentDescriptor(moduleConfig, manifestFilePath,
-			defaultCRFilePath, opts)
+		err = s.useComponentDescriptor(moduleConfig, resourcePaths, opts)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to process component: %w", err)
-	}
-
-	opts.Out.Write("- Creating module template\n")
-	err = s.createModuleTemplate(moduleConfig, descriptorToRenderInModuleTemplate, manifestFilePath, defaultCRFilePath,
-		opts.TemplateOutput)
-	if err != nil {
-		return fmt.Errorf("failed to create module template: %w", err)
 	}
 	return nil
 }
 
 func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleConfig,
-	manifestFilePath string,
-	defaultCRFilePath string,
+	resourcePaths *types.ResourcePaths,
 	opts Options,
 ) error {
 	constructor := component.NewConstructor(moduleConfig.Name, moduleConfig.Version)
@@ -295,7 +288,7 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		}
 	}
 
-	manifestImages, err := s.extractImagesFromManifest(manifestFilePath, opts)
+	manifestImages, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
 	if err != nil {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
@@ -307,84 +300,102 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		return fmt.Errorf("failed to add images to component constructor: %w", err)
 	}
 
-	if err = s.componentConstructorService.AddResourcesAndCreateConstructorFile(constructor, moduleConfig,
-		manifestFilePath, defaultCRFilePath, opts.Out, opts.OutputConstructorFile); err != nil {
-		return fmt.Errorf("failed to create component constructor file: %w", err)
+	opts.Out.Write("- Creating module template\n")
+	err = s.createModuleTemplate(moduleConfig, nil, resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to create module template: %w", err)
+	}
+
+	opts.Out.Write("- Generating module resources\n")
+	if err = s.componentConstructorService.AddResources(constructor, moduleConfig,
+		resourcePaths); err != nil {
+		return fmt.Errorf("failed to add resources to component constructor: %w", err)
+	}
+
+	opts.Out.Write("- Creating component constructor file\n")
+	if err = s.componentConstructorService.CreateConstructorFile(constructor,
+		opts.OutputConstructorFile); err != nil {
+		return fmt.Errorf("failed to create constructor file: %w", err)
 	}
 	return nil
 }
 
 // This method will be deprecated in the future along with the OCM registry push support.
 func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleConfig,
-	manifestFilePath string,
-	defaultCRFilePath string,
+	resourcePaths *types.ResourcePaths,
 	opts Options,
-) (*compdesc.ComponentDescriptor, error) {
+) error {
 	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version)
 	if err != nil {
-		return nil, fmt.Errorf("failed to populate component descriptor metadata: %w", err)
+		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
 	if err = s.gitSourcesService.AddGitSources(descriptor, opts.ModuleSourcesGitDirectory, moduleConfig.Repository,
 		moduleConfig.Version); err != nil {
-		return nil, fmt.Errorf("failed to add git sources: %w", err)
+		return fmt.Errorf("failed to add git sources: %w", err)
 	}
 
 	var securityConfigImages []string
 	if moduleConfig.Security != "" {
 		securityConfigImages, err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
 		if err != nil {
-			return nil, fmt.Errorf("failed to configure security scanners: %w", err)
+			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
 	}
 
-	manifestImages, err := s.extractImagesFromManifest(manifestFilePath, opts)
+	manifestImages, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to extract images from manifest: %w", err)
+		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
 	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
 	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
+		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
 	}
 
 	opts.Out.Write("- Creating component archive\n")
 	archive, err := s.componentArchiveService.CreateComponentArchive(descriptor)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create component archive: %w", err)
+		return fmt.Errorf("failed to create component archive: %w", err)
 	}
 
 	if !opts.SkipVersionValidation {
-		if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig, manifestFilePath); err != nil {
-			return nil, fmt.Errorf("failed to verify module resources: %w", err)
+		if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig,
+			resourcePaths.RawManifest); err != nil {
+			return fmt.Errorf("failed to verify module resources: %w", err)
 		}
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, manifestFilePath,
-		defaultCRFilePath)
+	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate module resources: %w", err)
+		return fmt.Errorf("failed to generate module resources: %w", err)
 	}
 
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(archive,
 		moduleResources); err != nil {
-		return nil, fmt.Errorf("failed to add module resources to component archive: %w", err)
+		return fmt.Errorf("failed to add module resources to component archive: %w", err)
 	}
 
 	opts.Out.Write("- Pushing component version\n")
 	if !opts.DryRun {
 		descriptor, err = s.pushComponentVersion(archive, opts)
 		if err != nil {
-			return nil, fmt.Errorf("failed to push component version: %w", err)
+			return fmt.Errorf("failed to push component version: %w", err)
 		}
 	} else {
 		opts.Out.Write("\tSkipping push due to dry-run mode\n")
 		if err = s.ensureComponentVersionDoesNotExist(archive, opts); err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return descriptor, nil
+
+	opts.Out.Write("- Creating module template\n")
+	err = s.createModuleTemplate(moduleConfig, descriptor, resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to create module template: %w", err)
+	}
+	return nil
 }
 
 func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.ComponentArchive, opts Options) error {
@@ -414,7 +425,8 @@ func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.Component
 		ErrComponentVersionExists)
 }
 
-func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (*compdesc.ComponentDescriptor,
+func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts Options) (
+	*compdesc.ComponentDescriptor,
 	error,
 ) {
 	if err := s.registryService.PushComponentVersion(archive,
@@ -507,18 +519,16 @@ func (s *Service) cleanupTempFiles(opts Options) {
 func (s *Service) createModuleTemplate(
 	moduleConfig *contentprovider.ModuleConfig,
 	descriptorToRender *compdesc.ComponentDescriptor,
-	manifestFilePath string,
-	defaultCRFilePath string,
-	templateOutput string,
+	resourcePaths *types.ResourcePaths,
 ) error {
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(defaultCRFilePath, manifestFilePath)
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
 	if err != nil {
 		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
 	}
 
 	var crData []byte
-	if defaultCRFilePath != "" {
-		crData, err = s.fileSystem.ReadFile(defaultCRFilePath)
+	if resourcePaths.DefaultCR != "" {
+		crData, err = s.fileSystem.ReadFile(resourcePaths.DefaultCR)
 		if err != nil {
 			return fmt.Errorf("failed to get default CR data: %w", err)
 		}
@@ -528,7 +538,7 @@ func (s *Service) createModuleTemplate(
 		descriptorToRender,
 		crData,
 		isCRDClusterScoped,
-		templateOutput); err != nil {
+		resourcePaths.ModuleTemplate); err != nil {
 		return fmt.Errorf("failed to generate module template: %w", err)
 	}
 

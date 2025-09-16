@@ -3,14 +3,11 @@ package component
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/kyma-project/modulectl/internal/common"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
@@ -28,6 +25,7 @@ const (
 
 	PlainTextResourceType = "PlainText"
 	BinaryResourceInput   = "binary"
+	FileResourceInput     = "file"
 )
 
 type Provider struct {
@@ -177,60 +175,74 @@ func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 	}
 }
 
-func (c *Constructor) AddRawManifestResource(manifestPath string) {
-	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    common.RawManifestResourceName,
-		Type:    DirectoryTreeResourceType,
-		Version: c.Components[0].Version,
-		Input: &Input{
-			Type:         DirectoryInputType,
-			Path:         filepath.Dir(manifestPath),
-			Compress:     true,
-			IncludeFiles: []string{filepath.Base(manifestPath)},
-		},
-	})
-}
-
-func (c *Constructor) AddDefaultCRResource(defaultCRPath string) {
-	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    common.DefaultCRResourceName,
-		Type:    DirectoryTreeResourceType,
-		Version: c.Components[0].Version,
-		Input: &Input{
-			Type:         DirectoryInputType,
-			Path:         filepath.Dir(defaultCRPath),
-			Compress:     true,
-			IncludeFiles: []string{filepath.Base(defaultCRPath)},
-		},
-	})
-}
-
-func (c *Constructor) AddMetadataResource(moduleConfig *contentprovider.ModuleConfig) error {
-	yamlData, err := resources.GenerateMetadataYaml(moduleConfig)
-	if err != nil {
-		return fmt.Errorf("failed to generate metadata yaml: %w", err)
+func (c *Constructor) AddFileResource(resourceName, filePath string) error {
+	switch resourceName {
+	case common.RawManifestResourceName, common.DefaultCRResourceName:
+		return c.addFileAsDirResource(resourceName, filePath)
+	case common.ModuleTemplateResourceName:
+		return c.addFileAsPlainTextResource(resourceName, filePath)
+	default:
+		return fmt.Errorf("%w: %s", commonerrors.ErrUnknownResourceName, resourceName)
 	}
+}
+
+func (c *Constructor) AddBinaryDataResource(resourceName string, data []byte) {
 	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    common.MetadataResourceName,
+		Name:    resourceName,
 		Type:    PlainTextResourceType,
 		Version: c.Components[0].Version,
 		Input: &Input{
 			Type: BinaryResourceInput,
-			Data: base64.StdEncoding.EncodeToString(yamlData),
+			Data: base64.StdEncoding.EncodeToString(data),
+		},
+	})
+}
+
+func (c *Constructor) addFileAsDirResource(resourceName, filePath string) error {
+	dir, err := getAbsPath(filepath.Dir(filePath))
+	if err != nil {
+		return err
+	}
+
+	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
+		Name:    resourceName,
+		Type:    DirectoryTreeResourceType,
+		Version: c.Components[0].Version,
+		Input: &Input{
+			Type:         DirectoryInputType,
+			Path:         dir,
+			Compress:     true,
+			IncludeFiles: []string{filepath.Base(filePath)},
 		},
 	})
 	return nil
 }
 
-func (c *Constructor) CreateComponentConstructorFile(filePath string) error {
-	marshal, err := yaml.Marshal(c)
+func (c *Constructor) addFileAsPlainTextResource(resourceName, filePath string) error {
+	filePath, err := getAbsPath(filePath)
 	if err != nil {
-		return fmt.Errorf("unable to marshal component constructor: %w", err)
+		return err
 	}
 
-	filePermission := 0o600
-	if err = os.WriteFile(filePath, marshal, os.FileMode(filePermission)); err != nil {
-		return fmt.Errorf("unable to write component constructor file: %w", err)
-	}
+	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
+		Name:    resourceName,
+		Type:    PlainTextResourceType,
+		Version: c.Components[0].Version,
+		Input: &Input{
+			Type: FileResourceInput,
+			Path: filePath,
+		},
+	})
 	return nil
+}
+
+func getAbsPath(filePath string) (string, error) {
+	if !filepath.IsAbs(filePath) {
+		absPath, err := filepath.Abs(filePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to get absolute path for %s: %w", filePath, err)
+		}
+		filePath = absPath
+	}
+	return filePath, nil
 }

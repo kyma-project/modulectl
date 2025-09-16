@@ -9,6 +9,7 @@ import (
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
+	"github.com/kyma-project/modulectl/internal/common/types"
 )
 
 type FileSystem interface {
@@ -41,14 +42,14 @@ type Resource struct {
 	} `yaml:"spec"`
 }
 
-func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) {
-	if crPath == "" {
+func (s *Service) IsCRDClusterScoped(paths *types.ResourcePaths) (bool, error) {
+	if paths.DefaultCR == "" {
 		return false, nil
 	}
 
-	crData, err := s.fileSystem.ReadFile(crPath)
+	crData, err := s.fileSystem.ReadFile(paths.DefaultCR)
 	if err != nil {
-		return false, fmt.Errorf("error reading CRD file: %w", err)
+		return false, fmt.Errorf("error reading default CR file: %w", err)
 	}
 
 	var customResource Resource
@@ -58,14 +59,14 @@ func (s *Service) IsCRDClusterScoped(crPath, manifestPath string) (bool, error) 
 
 	group := strings.Split(customResource.APIVersion, "/")[0]
 
-	manifestData, err := s.fileSystem.ReadFile(manifestPath)
+	manifestData, err := s.fileSystem.ReadFile(paths.RawManifest)
 	if err != nil {
 		return false, fmt.Errorf("error reading manifest file: %w", err)
 	}
 
 	crdScope, err := getCrdScopeFromManifest(manifestData, group, customResource.Kind)
 	if err != nil {
-		return false, fmt.Errorf("error finding CRD file in the %q file: %w", manifestPath, err)
+		return false, fmt.Errorf("error finding CRD file in the %q file: %w", paths.RawManifest, err)
 	}
 
 	return crdScope == apiextensions.ClusterScoped, nil
