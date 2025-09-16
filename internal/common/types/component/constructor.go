@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/kyma-project/modulectl/internal/common"
-	"github.com/kyma-project/modulectl/internal/common/errors"
+	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
@@ -182,7 +182,7 @@ func (c *Constructor) AddFileResource(resourceName, filePath string) error {
 	case common.ModuleTemplateResourceName:
 		return c.addFileAsPlainTextResource(resourceName, filePath)
 	default:
-		return fmt.Errorf("%w: %s", errors.ErrUnknownResourceName, resourceName)
+		return fmt.Errorf("%w: %s", commonerrors.ErrUnknownResourceName, resourceName)
 	}
 }
 
