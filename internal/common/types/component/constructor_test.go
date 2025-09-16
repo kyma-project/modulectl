@@ -200,25 +200,6 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 	}
 }
 
-func TestConstructor_AddFileAsDirResource(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	err := constructor.AddFileAsDirResource("test-resource", "/path/to/manifest.yaml")
-	require.NoError(t, err)
-
-	require.Len(t, constructor.Components[0].Resources, 1)
-	resource := constructor.Components[0].Resources[len(constructor.Components[0].Resources)-1]
-	require.Equal(t, "test-resource", resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
-	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
-	require.Equal(t, "/path/to", resource.Input.Path)
-	require.True(t, resource.Input.Compress)
-	require.NotNil(t, resource.Input.IncludeFiles)
-	require.Len(t, resource.Input.IncludeFiles, 1)
-	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
-}
-
 func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
@@ -238,82 +219,117 @@ func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
 	require.Equal(t, testData, decodedData)
 }
 
-func TestConstructor_AddFileResource(t *testing.T) {
+func TestConstructor_AddFileResource_ModuleTemplate(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddFileResource("test-resource", "/path/to/file.yaml")
+	err := constructor.AddFileResource(common.ModuleTemplateResourceName, "/path/to/file.yaml")
 	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
-	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, common.ModuleTemplateResourceName, resource.Name)
 	require.Equal(t, component.PlainTextResourceType, resource.Type)
 	require.Equal(t, "1.0.0", resource.Version)
 	require.Equal(t, component.FileResourceInput, resource.Input.Type)
 	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
 }
 
-func TestConstructor_AddFileResource_RelativePath(t *testing.T) {
+func TestConstructor_AddFileResource_RawManifest(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddFileResource("test-resource", "relative/path/file.yaml")
+	err := constructor.AddFileResource(common.RawManifestResourceName, "/path/to/manifest.yaml")
 	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
-	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, common.RawManifestResourceName, resource.Name)
+	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, "1.0.0", resource.Version)
+	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
+	require.Equal(t, "/path/to", resource.Input.Path)
+	require.Equal(t, []string{"manifest.yaml"}, resource.Input.IncludeFiles)
+	require.True(t, resource.Input.Compress)
+}
+
+func TestConstructor_AddFileResource_DefaultCR(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileResource(common.DefaultCRResourceName, "/path/to/cr.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, common.DefaultCRResourceName, resource.Name)
+	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, "1.0.0", resource.Version)
+	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
+	require.Equal(t, "/path/to", resource.Input.Path)
+	require.Equal(t, []string{"cr.yaml"}, resource.Input.IncludeFiles)
+	require.True(t, resource.Input.Compress)
+}
+
+func TestConstructor_AddFileResource_UnknownResourceName(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileResource("unknown-resource", "/path/to/file.yaml")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "unknown resource name: unknown-resource")
+	require.Len(t, constructor.Components[0].Resources, 0)
+}
+
+func TestConstructor_AddFileResource_ModuleTemplate_RelativePath(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	err := constructor.AddFileResource(common.ModuleTemplateResourceName, "relative/path/file.yaml")
+	require.NoError(t, err)
+
+	require.Len(t, constructor.Components[0].Resources, 1)
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, common.ModuleTemplateResourceName, resource.Name)
 	require.Equal(t, component.PlainTextResourceType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "path should be converted to absolute")
 	require.Contains(t, resource.Input.Path, "relative/path/file.yaml")
 }
 
-func TestConstructor_AddFileResource_CurrentDirectory(t *testing.T) {
+func TestConstructor_AddFileResource_RawManifest_RelativePath(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddFileResource("test-resource", "./file.yaml")
+	err := constructor.AddFileResource(common.RawManifestResourceName, "relative/path/manifest.yaml")
 	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
-	require.True(t, filepath.IsAbs(resource.Input.Path), "path should be converted to absolute")
-	require.Contains(t, resource.Input.Path, "file.yaml")
-}
-
-func TestConstructor_AddFileAsDirResource_RelativePath(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	err := constructor.AddFileAsDirResource("test-resource", "relative/path/manifest.yaml")
-	require.NoError(t, err)
-
-	require.Len(t, constructor.Components[0].Resources, 1)
-	resource := constructor.Components[0].Resources[0]
-	require.Equal(t, "test-resource", resource.Name)
+	require.Equal(t, common.RawManifestResourceName, resource.Name)
 	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
 	require.Contains(t, resource.Input.Path, "relative/path")
 	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
 }
 
-func TestConstructor_AddFileAsDirResource_CurrentDirectory(t *testing.T) {
+func TestConstructor_AddFileResource_DefaultCR_CurrentDirectory(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddFileAsDirResource("test-resource", "./manifest.yaml")
+	err := constructor.AddFileResource(common.DefaultCRResourceName, "./cr.yaml")
 	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, common.DefaultCRResourceName, resource.Name)
+	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
-	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
+	require.Equal(t, "cr.yaml", resource.Input.IncludeFiles[0])
 }
 
-func TestConstructor_AddFileAsDirResource_ParentDirectory(t *testing.T) {
+func TestConstructor_AddFileResource_RawManifest_ParentDirectory(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
-	err := constructor.AddFileAsDirResource("test-resource", "../manifest.yaml")
+	err := constructor.AddFileResource(common.RawManifestResourceName, "../manifest.yaml")
 	require.NoError(t, err)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, common.RawManifestResourceName, resource.Name)
+	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
 	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
 }

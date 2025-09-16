@@ -49,7 +49,7 @@ func TestService_IsCRDClusterScoped_ReturnsErrorWhenFileReadingRetrievalError(t 
 
 	resourcePaths := types.NewResourcePaths(defaultCRPath, rawManifestPath, "")
 	_, err := crdParserService.IsCRDClusterScoped(resourcePaths)
-	require.ErrorContains(t, err, "error reading CRD file")
+	require.ErrorContains(t, err, "error reading default CR file")
 }
 
 type fileSystemClusterScopedExistsStub struct{}

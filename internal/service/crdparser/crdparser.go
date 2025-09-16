@@ -49,7 +49,7 @@ func (s *Service) IsCRDClusterScoped(paths *types.ResourcePaths) (bool, error) {
 
 	crData, err := s.fileSystem.ReadFile(paths.DefaultCR)
 	if err != nil {
-		return false, fmt.Errorf("error reading CRD file: %w", err)
+		return false, fmt.Errorf("error reading default CR file: %w", err)
 	}
 
 	var customResource Resource

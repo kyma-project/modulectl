@@ -2,7 +2,6 @@ package componentconstructor
 
 import (
 	"fmt"
-	"os"
 
 	"gopkg.in/yaml.v3"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/image"
+	"github.com/kyma-project/modulectl/tools/filesystem"
 )
 
 type Service struct{}
@@ -31,12 +31,12 @@ func (s *Service) AddResources(
 	}
 
 	componentConstructor.AddBinaryDataAsFileResource(common.MetadataResourceName, metadataYaml)
-	err = componentConstructor.AddFileAsDirResource(common.RawManifestResourceName, resourcePaths.RawManifest)
+	err = componentConstructor.AddFileResource(common.RawManifestResourceName, resourcePaths.RawManifest)
 	if err != nil {
 		return fmt.Errorf("failed to create raw manifest resource: %w", err)
 	}
 	if resourcePaths.DefaultCR != "" {
-		err = componentConstructor.AddFileAsDirResource(common.DefaultCRResourceName, resourcePaths.DefaultCR)
+		err = componentConstructor.AddFileResource(common.DefaultCRResourceName, resourcePaths.DefaultCR)
 		if err != nil {
 			return fmt.Errorf("failed to create default CR resource: %w", err)
 		}
@@ -54,8 +54,8 @@ func (s *Service) CreateConstructorFile(componentConstructor *component.Construc
 		return fmt.Errorf("unable to marshal component constructor: %w", err)
 	}
 
-	filePermission := 0o600
-	if err = os.WriteFile(filePath, marshal, os.FileMode(filePermission)); err != nil {
+	helper := &filesystem.Helper{}
+	if err = helper.WriteFile(filePath, string(marshal)); err != nil {
 		return fmt.Errorf("unable to write component constructor file: %w", err)
 	}
 	return nil

@@ -174,7 +174,18 @@ func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 	}
 }
 
-func (c *Constructor) AddFileAsDirResource(resourceName, filePath string) error {
+func (c *Constructor) AddFileResource(resourceName, filePath string) error {
+	switch resourceName {
+	case common.RawManifestResourceName, common.DefaultCRResourceName:
+		return c.addFileAsDirResource(resourceName, filePath)
+	case common.ModuleTemplateResourceName:
+		return c.addFileAsPlainTextResource(resourceName, filePath)
+	default:
+		return fmt.Errorf("unknown resource name: %s", resourceName)
+	}
+}
+
+func (c *Constructor) addFileAsDirResource(resourceName, filePath string) error {
 	dir, err := getAbsPath(filepath.Dir(filePath))
 	if err != nil {
 		return err
@@ -189,6 +200,24 @@ func (c *Constructor) AddFileAsDirResource(resourceName, filePath string) error 
 			Path:         dir,
 			Compress:     true,
 			IncludeFiles: []string{filepath.Base(filePath)},
+		},
+	})
+	return nil
+}
+
+func (c *Constructor) addFileAsPlainTextResource(resourceName, filePath string) error {
+	filePath, err := getAbsPath(filePath)
+	if err != nil {
+		return err
+	}
+
+	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
+		Name:    resourceName,
+		Type:    PlainTextResourceType,
+		Version: c.Components[0].Version,
+		Input: &Input{
+			Type: FileResourceInput,
+			Path: filePath,
 		},
 	})
 	return nil
@@ -215,22 +244,4 @@ func (c *Constructor) AddBinaryDataAsFileResource(resourceName string, data []by
 			Data: base64.StdEncoding.EncodeToString(data),
 		},
 	})
-}
-
-func (c *Constructor) AddFileResource(resourceName, filePath string) error {
-	filePath, err := getAbsPath(filePath)
-	if err != nil {
-		return err
-	}
-
-	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    resourceName,
-		Type:    PlainTextResourceType,
-		Version: c.Components[0].Version,
-		Input: &Input{
-			Type: FileResourceInput,
-			Path: filePath,
-		},
-	})
-	return nil
 }

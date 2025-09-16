@@ -92,7 +92,7 @@ func NewCmd() (*cobra.Command, error) {
 }
 
 func buildModuleService() (*create.Service, error) {
-	fileSystemUtil := &filesystem.Util{}
+	fileSystemUtil := &filesystem.Helper{}
 	tmpFileSystem := filesystem.NewTempFileSystem()
 
 	manifestFileResolver, err := fileresolver.NewFileResolver("kyma-module-manifest-*.yaml", tmpFileSystem)
@@ -168,7 +168,7 @@ func buildModuleService() (*create.Service, error) {
 }
 
 func buildScaffoldService() (*scaffold.Service, error) {
-	fileSystemUtil := &filesystem.Util{}
+	fileSystemUtil := &filesystem.Helper{}
 	yamlConverter := &yaml.ObjectToYAMLConverter{}
 	manifestParser := manifestparser.NewService()
 	manifestContentProvider, err := contentprovider.NewManifest(manifestParser)
