@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/kyma-project/modulectl/internal/common"
+	"github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
@@ -181,8 +182,20 @@ func (c *Constructor) AddFileResource(resourceName, filePath string) error {
 	case common.ModuleTemplateResourceName:
 		return c.addFileAsPlainTextResource(resourceName, filePath)
 	default:
-		return fmt.Errorf("unknown resource name: %s", resourceName)
+		return fmt.Errorf("%w: %s", errors.ErrUnknownResourceName, resourceName)
 	}
+}
+
+func (c *Constructor) AddBinaryDataResource(resourceName string, data []byte) {
+	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
+		Name:    resourceName,
+		Type:    PlainTextResourceType,
+		Version: c.Components[0].Version,
+		Input: &Input{
+			Type: BinaryResourceInput,
+			Data: base64.StdEncoding.EncodeToString(data),
+		},
+	})
 }
 
 func (c *Constructor) addFileAsDirResource(resourceName, filePath string) error {
@@ -232,16 +245,4 @@ func getAbsPath(filePath string) (string, error) {
 		filePath = absPath
 	}
 	return filePath, nil
-}
-
-func (c *Constructor) AddBinaryDataAsFileResource(resourceName string, data []byte) {
-	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    resourceName,
-		Type:    PlainTextResourceType,
-		Version: c.Components[0].Version,
-		Input: &Input{
-			Type: BinaryResourceInput,
-			Data: base64.StdEncoding.EncodeToString(data),
-		},
-	})
 }

@@ -204,7 +204,7 @@ func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
 	testData := []byte("test metadata content")
-	constructor.AddBinaryDataAsFileResource(common.MetadataResourceName, testData)
+	constructor.AddBinaryDataResource(common.MetadataResourceName, testData)
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
@@ -274,7 +274,7 @@ func TestConstructor_AddFileResource_UnknownResourceName(t *testing.T) {
 	err := constructor.AddFileResource("unknown-resource", "/path/to/file.yaml")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "unknown resource name: unknown-resource")
-	require.Len(t, constructor.Components[0].Resources, 0)
+	require.Empty(t, constructor.Components[0].Resources)
 }
 
 func TestConstructor_AddFileResource_ModuleTemplate_RelativePath(t *testing.T) {

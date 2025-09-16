@@ -30,7 +30,7 @@ func (s *Service) AddResources(
 		return fmt.Errorf("failed to generate metadata yaml: %w", err)
 	}
 
-	componentConstructor.AddBinaryDataAsFileResource(common.MetadataResourceName, metadataYaml)
+	componentConstructor.AddBinaryDataResource(common.MetadataResourceName, metadataYaml)
 	err = componentConstructor.AddFileResource(common.RawManifestResourceName, resourcePaths.RawManifest)
 	if err != nil {
 		return fmt.Errorf("failed to create raw manifest resource: %w", err)
