@@ -37,6 +37,7 @@ type AccessHandler interface {
 
 type Resource struct {
 	compdesc.Resource
+
 	AccessHandler AccessHandler
 }
 

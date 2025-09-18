@@ -161,6 +161,7 @@ func verifyTar(data []byte) error {
 // A wrapper around vfs.File that allows to simulate read errors when a value of mockFile is used as a source in io.Copy().
 type mockFile struct {
 	vfs.File
+
 	readError error
 }
 
@@ -179,6 +180,7 @@ func (m *mockFile) Close() error {
 
 type mockFileSystem struct {
 	vfs.FileSystem
+
 	openError error
 	mockFile  *mockFile
 }

@@ -71,6 +71,7 @@ func Test_ExistsComponentDescriptor_Error_WrongVersion(t *testing.T) {
 
 type repoStub struct {
 	cpi.Repository
+
 	exists bool
 	err    error
 }

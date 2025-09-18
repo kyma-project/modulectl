@@ -101,9 +101,10 @@ type ModuleConfig struct {
 }
 
 type Manager struct {
-	Name                    string `yaml:"name" comment:"required, the name of the manager"`
-	Namespace               string `yaml:"namespace" comment:"optional, the path to the manager"`
 	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+
+	Name      string `yaml:"name" comment:"required, the name of the manager"`
+	Namespace string `yaml:"namespace" comment:"optional, the path to the manager"`
 }
 
 // Icons represents a map of icon names to links.
