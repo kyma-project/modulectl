@@ -161,7 +161,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Deployment with multiple containers, no one with matching image tag",
+			name: "Deployment with multiple containers, none with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
 					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
