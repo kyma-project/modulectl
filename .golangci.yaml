@@ -86,6 +86,7 @@ linters:
           arguments:
             - 120
           severity: warning
+          disabled: true
     varnamelen:
       ignore-names:
         - ok
