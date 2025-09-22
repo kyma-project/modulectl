@@ -18,8 +18,6 @@ type Service struct {
 	rawManifestParser types.RawManifestParser
 }
 
-const managerContainer = "manager"
-
 var (
 	errImageNoTag            = errors.New("no image tag")
 	errNoMatchedVersionFound = errors.New("no matched version found")
@@ -80,14 +78,12 @@ func verifyModuleImageVersion(resources []*unstructured.Unstructured, version st
 
 func foundMatchedVersionInContainers(containers []corev1.Container, version string) bool {
 	for _, c := range containers {
-		if c.Name == managerContainer {
-			imageTag, err := getImageTag(c.Image)
-			if err != nil {
-				return false
-			}
-			if imageTag == version {
-				return true
-			}
+		imageTag, err := getImageTag(c.Image)
+		if err != nil {
+			return false
+		}
+		if imageTag == version {
+			return true
 		}
 	}
 	return false

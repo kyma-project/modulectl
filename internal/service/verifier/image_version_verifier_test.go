@@ -55,7 +55,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name: "Deployment with matching image tag and name",
+			name: "Deployment with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
 					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
@@ -64,7 +64,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:1.2.3", Name: "manager"},
+									{Image: "repo/test-manager:1.2.3"},
 								},
 							},
 						},
@@ -76,7 +76,28 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "StatefulSet with matching image tag and name",
+			name: "Deployment with image that has no tag",
+			resources: []*unstructured.Unstructured{
+				makeUnstructuredFromObj(&appsv1.Deployment{
+					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
+					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{Image: "repo/test-manager"},
+								},
+							},
+						},
+					},
+				}),
+			},
+			version: "1.2.3",
+			manager: &contentprovider.Manager{Name: "test-manager", GroupVersionKind: *gvkDeployment},
+			wantErr: true,
+		},
+		{
+			name: "StatefulSet with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.StatefulSet{
 					TypeMeta:   metav1.TypeMeta{Kind: "StatefulSet"},
@@ -85,7 +106,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:1.2.3", Name: "manager"},
+									{Image: "repo/test-manager:1.2.3"},
 								},
 							},
 						},
@@ -106,7 +127,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/test-manager:2.0.0", Name: "manager"},
+									{Image: "repo/test-manager:2.0.0"},
 								},
 							},
 						},
@@ -118,28 +139,7 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "No matching manager name",
-			resources: []*unstructured.Unstructured{
-				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "other-manager"},
-					Spec: appsv1.DeploymentSpec{
-						Template: corev1.PodTemplateSpec{
-							Spec: corev1.PodSpec{
-								Containers: []corev1.Container{
-									{Image: "repo/other:1.2.3", Name: "manager"},
-								},
-							},
-						},
-					},
-				}),
-			},
-			version: "1.2.3",
-			manager: &contentprovider.Manager{Name: "test-manager", GroupVersionKind: *gvkDeployment},
-			wantErr: true,
-		},
-		{
-			name: "Container name mismatch",
+			name: "Deployment with multiple containers, one with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
 					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
@@ -148,7 +148,30 @@ func TestService_VerifyModuleResources(t *testing.T) {
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
 								Containers: []corev1.Container{
-									{Image: "repo/other:1.2.3", Name: "other"},
+									{Image: "repo/test-manager:1.2.3"},
+									{Image: "repo/other-container:2.0.0"},
+								},
+							},
+						},
+					},
+				}),
+			},
+			version: "1.2.3",
+			manager: &contentprovider.Manager{Name: "test-manager", GroupVersionKind: *gvkDeployment},
+			wantErr: false,
+		},
+		{
+			name: "Deployment with multiple containers, no one with matching image tag",
+			resources: []*unstructured.Unstructured{
+				makeUnstructuredFromObj(&appsv1.Deployment{
+					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
+					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{Image: "repo/test-manager:2.0.1"},
+									{Image: "repo/other-container:2.0.0"},
 								},
 							},
 						},
