@@ -59,14 +59,21 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 
 	if moduleConfig.Manifest.IsURL() {
 		if moduleConfig.Manifest.URL().Scheme != "https" {
-			return fmt.Errorf("failed to validate manifest: %w", fmt.Errorf("'%s' is not using https scheme: %w", moduleConfig.Manifest.String(), commonerrors.ErrInvalidOption))
+			return fmt.Errorf(
+				"failed to validate manifest: %w",
+				fmt.Errorf(
+					"'%s' is not using https scheme: %w", moduleConfig.Manifest.String(),
+					commonerrors.ErrInvalidOption,
+				),
+			)
 		}
 	} else {
 		if moduleConfig.Manifest.IsEmpty() {
 			return fmt.Errorf("failed to validate manifest: must not be empty: %w", commonerrors.ErrInvalidOption)
 		}
 		if strings.HasPrefix(moduleConfig.Manifest.String(), "/") {
-			return fmt.Errorf("failed to validate manifest: must not be an absolute path: %w", commonerrors.ErrInvalidOption)
+			return fmt.Errorf("failed to validate manifest: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption)
 		}
 	}
 
@@ -93,11 +100,19 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 
 	if moduleConfig.DefaultCR.IsURL() {
 		if moduleConfig.DefaultCR.URL().Scheme != "https" {
-			return fmt.Errorf("failed to validate default CR: %w", fmt.Errorf("'%s' is not using https scheme: %w", moduleConfig.DefaultCR.String(), commonerrors.ErrInvalidOption))
+			return fmt.Errorf(
+				"failed to validate default CR: %w",
+				fmt.Errorf(
+					"'%s' is not using https scheme: %w",
+					moduleConfig.DefaultCR.String(),
+					commonerrors.ErrInvalidOption,
+				),
+			)
 		}
 	} else {
 		if !moduleConfig.DefaultCR.IsEmpty() && strings.HasPrefix(moduleConfig.DefaultCR.String(), "/") {
-			return fmt.Errorf("failed to validate default CR: must not be an absolute path: %w", commonerrors.ErrInvalidOption)
+			return fmt.Errorf("failed to validate default CR: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption)
 		}
 	}
 

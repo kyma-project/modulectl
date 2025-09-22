@@ -137,7 +137,11 @@ func printFlagsWithOnlyUsage(buf *bytes.Buffer, cmd *cobra.Command) {
 	maxLength := 0
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
 		uniformSpacingFactor := 6
-		flagLength := len(flag.Shorthand) + len(flag.Name) + uniformSpacingFactor // 6 accounts for the formatting "-s, --"
+		flagLength := len(
+			flag.Shorthand,
+		) + len(
+			flag.Name,
+		) + uniformSpacingFactor // 6 accounts for the formatting "-s, --"
 		if flagLength > maxLength {
 			maxLength = flagLength
 		}

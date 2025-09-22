@@ -179,7 +179,8 @@ func (s *Service) GenerateModuleTemplate(
 	}
 	if moduleConfig.Manifest.IsURL() {
 		mtData.Resources = contentprovider.Resources{
-			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest;
+			// may be overwritten by explicitly provided entries
 		}
 	}
 
@@ -207,7 +208,9 @@ func (s *Service) GenerateModuleTemplate(
 	return nil
 }
 
-func ConvertDescriptorIfNotNil(descriptorToRender *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptorVersion, error) {
+func ConvertDescriptorIfNotNil(
+	descriptorToRender *compdesc.ComponentDescriptor,
+) (*compdesc.ComponentDescriptorVersion, error) {
 	var covertedDescriptor *compdesc.ComponentDescriptorVersion
 	if descriptorToRender != nil {
 		converted, err := compdesc.Convert(descriptorToRender)

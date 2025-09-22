@@ -283,7 +283,9 @@ func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*content
 
 type moduleConfigServiceParseErrorStub struct{}
 
-func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
+func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(
+	_ string,
+) (*contentprovider.ModuleConfig, error) {
 	return nil, errors.New("failed to read module config file")
 }
 

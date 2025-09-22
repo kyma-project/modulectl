@@ -240,8 +240,8 @@ func TestValidateMapEntries(t *testing.T) {
 		{
 			name: "valid resources",
 			resources: map[string]string{
-				"first":  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
-				"second": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				"first":  "https://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
+				"second": "https://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: false,
 		},
@@ -262,7 +262,7 @@ func TestValidateMapEntries(t *testing.T) {
 		{
 			name: "non-https schema",
 			resources: map[string]string{
-				"first": "http://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				"first": "http://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
 		},

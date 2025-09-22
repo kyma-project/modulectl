@@ -92,7 +92,11 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
 	}
 
 	if !foundCorrectManagerVersion {
-		return fmt.Errorf("no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:%s', %w", moduleVersion, commonerrors.ErrInvalidArg)
+		return fmt.Errorf(
+			"no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:%s', %w",
+			moduleVersion,
+			commonerrors.ErrInvalidArg,
+		)
 	}
 
 	s.BDBA = filteredImages

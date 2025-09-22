@@ -57,7 +57,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to read file module-config.yaml: open module-config.yaml: no such file or directory"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to read file module-config.yaml: open module-config.yaml: no such file or directory"))
 		})
 	})
 
@@ -121,7 +123,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate manifest: must not be empty: invalid Option"))
 		})
 	})
 
@@ -137,7 +141,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: must not be empty: invalid Option"))
 		})
 	})
 
@@ -153,7 +159,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: must not be empty: invalid Option"))
 		})
 	})
 
@@ -169,7 +177,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: 'http://github.com/kyma-project/template-operator' is not using https scheme: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate repository: 'http://github.com/kyma-project/template-operator' is not using https scheme: invalid Option"))
 		})
 	})
 
@@ -185,7 +195,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate documentation: 'http://github.com/kyma-project/template-operator/blob/main/README.md' is not using https scheme: invalid Option"))
 		})
 	})
 
@@ -201,7 +213,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: must contain at least one icon: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: must contain at least one icon: invalid Option"))
 		})
 	})
 
@@ -217,7 +231,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Icons: map contains duplicate entries"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Icons: map contains duplicate entries"))
 		})
 	})
 
@@ -233,7 +249,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: link must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: link must not be empty: invalid Option"))
 		})
 	})
 
@@ -249,7 +267,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: name must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate module icons: name must not be empty: invalid Option"))
 		})
 	})
 
@@ -265,7 +285,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Resources: map contains duplicate entries"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config file: failed to unmarshal Resources: map contains duplicate entries"))
 		})
 	})
 
@@ -281,7 +303,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: failed to validate link: 'http://some.other/location/template-operator.yaml' is not using https scheme: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: failed to validate link: 'http://some.other/location/template-operator.yaml' is not using https scheme: invalid Option"))
 		})
 	})
 
@@ -297,7 +321,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: link must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: link must not be empty: invalid Option"))
 		})
 	})
 
@@ -313,7 +339,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: name must not be empty: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate resources: name must not be empty: invalid Option"))
 		})
 	})
 
@@ -346,7 +374,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		By("Then the command should fail", func() {
 			err := cmd.execute()
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("currently configured module-sources-git-directory \"/tmp/not-a-git-dir\" must point to a valid git repository: invalid Option"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("currently configured module-sources-git-directory \"/tmp/not-a-git-dir\" must point to a valid git repository: invalid Option"))
 		})
 	})
 
@@ -484,7 +514,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		By("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("could not push component version: cannot push component version %s: component version already exists, cannot push the new version",
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring(fmt.Sprintf("could not push component version: cannot push component version %s: component version already exists, cannot push the new version",
 				moduleVersion)))
 		})
 	})
@@ -513,7 +545,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 		})
 		By("Then the command should fail with same version exists message", func() {
 			err := cmd.execute()
-			Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf("component kyma-project.io/module/template-operator in version %s already exists: component version already exists",
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring(fmt.Sprintf("component kyma-project.io/module/template-operator in version %s already exists: component version already exists",
 				moduleVersion)))
 		})
 	})
@@ -639,7 +673,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Version).To(Equal(moduleVersion))
 
 				By("And descriptor.component.resources[3].access should be correct")
-				defaultCRResourceAccessSpec, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[3].Access)
+				defaultCRResourceAccessSpec, err := ocm.DefaultContext().
+					AccessSpecForSpec(descriptor.Resources[3].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -687,7 +722,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
+				Expect(
+					ociArtifactAccessSpec.ImageReference,
+				).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
 					moduleVersion)))
 
 				resource = findResourceByNameVersionType(descriptor.Resources, "template-operator", "2.0.0",
@@ -700,7 +737,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				ociArtifactAccessSpec, ok = resourceAccessSpec1.(*ociartifact.AccessSpec)
 				Expect(ok).To(BeTrue())
 				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(ociArtifactAccessSpec.ImageReference).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
+				Expect(
+					ociArtifactAccessSpec.ImageReference,
+				).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
 
 				resource = findResourceByNameVersionType(descriptor.Resources, "metadata", moduleVersion, "plainText")
 				Expect(resource).ToNot(BeNil())
@@ -742,7 +781,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			err := cmd.execute()
 
 			Expect(err).Should(HaveOccurred())
-			Expect(err.Error()).Should(ContainSubstring("failed to configure security scanners: failed to get security config: failed to parse security config data: security config file does not exist"))
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to configure security scanners: failed to get security config: failed to parse security config data: security config file does not exist"))
 		})
 	})
 
@@ -904,7 +945,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				Expect(template.Spec.Resources).To(HaveLen(2))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+				Expect(
+					template.Spec.Resources[0].Link,
+				).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
 					moduleVersion)))
 				Expect(template.Spec.Resources[1].Name).To(Equal("someResource"))
 				Expect(template.Spec.Resources[1].Link).To(Equal("https://some.other/location/template-operator.yaml"))
@@ -995,7 +1038,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				By("And template's spec.resources should contain rawManifest")
 				Expect(template.Spec.Resources).To(HaveLen(1))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+				Expect(
+					template.Spec.Resources[0].Link,
+				).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
 					moduleVersion)))
 			})
 		})
@@ -1365,12 +1410,16 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
 				Expect(template.Spec.Version).To(Equal(moduleVersion))
 				Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
-				Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
+				Expect(
+					template.Spec.Info.Documentation,
+				).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 
 				By("And template should have rawManifest resource")
 				Expect(template.Spec.Resources).To(HaveLen(1))
 				Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-				Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+				Expect(
+					template.Spec.Resources[0].Link,
+				).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
 					moduleVersion)))
 			})
 
@@ -1457,10 +1506,14 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	Expect(template.Spec.ModuleName).To(Equal("template-operator"))
 	Expect(template.Spec.Version).To(Equal(moduleVersion))
 	Expect(template.Spec.Info.Repository).To(Equal("https://github.com/kyma-project/template-operator"))
-	Expect(template.Spec.Info.Documentation).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
+	Expect(
+		template.Spec.Info.Documentation,
+	).To(Equal("https://github.com/kyma-project/template-operator/blob/main/README.md"))
 	Expect(template.Spec.Info.Icons).To(HaveLen(1))
 	Expect(template.Spec.Info.Icons[0].Name).To(Equal("module-icon"))
-	Expect(template.Spec.Info.Icons[0].Link).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
+	Expect(
+		template.Spec.Info.Icons[0].Link,
+	).To(Equal("https://github.com/kyma-project/template-operator/blob/main/docs/assets/logo.png"))
 
 	By("And annotations should be correct")
 	annotations := template.Annotations
@@ -1491,7 +1544,9 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	By("And spec.resources should contain rawManifest")
 	Expect(template.Spec.Resources).To(HaveLen(1))
 	Expect(template.Spec.Resources[0].Name).To(Equal("rawManifest"))
-	Expect(template.Spec.Resources[0].Link).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
+	Expect(
+		template.Spec.Resources[0].Link,
+	).To(Equal(fmt.Sprintf("https://github.com/kyma-project/template-operator/releases/download/%s/template-operator.yaml",
 		moduleVersion)))
 
 	By("And spec.requiresDowntime should be set to false")

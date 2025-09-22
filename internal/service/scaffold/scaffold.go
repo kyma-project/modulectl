@@ -62,7 +62,12 @@ func (s *Service) Run(opts Options) error {
 
 	if err := s.moduleConfigService.ForceExplicitOverwrite(opts.Directory, opts.ModuleConfigFileName,
 		opts.ModuleConfigFileOverwrite); err != nil {
-		return fmt.Errorf("failed to force explicit overwrite for file %q in directory %q: %w", opts.ModuleConfigFileName, opts.Directory, err)
+		return fmt.Errorf(
+			"failed to force explicit overwrite for file %q in directory %q: %w",
+			opts.ModuleConfigFileName,
+			opts.Directory,
+			err,
+		)
 	}
 
 	manifestFilePath := path.Join(opts.Directory, opts.ManifestFileName)
@@ -74,7 +79,12 @@ func (s *Service) Run(opts Options) error {
 	if opts.defaultCRFileNameConfigured() {
 		defaultCRFilePath = path.Join(opts.Directory, opts.DefaultCRFileName)
 		if err := s.defaultCRService.GenerateFile(opts.Out, defaultCRFilePath, nil); err != nil {
-			return fmt.Errorf("failed to generate default CR file %q at %q: %w", opts.DefaultCRFileName, defaultCRFilePath, err)
+			return fmt.Errorf(
+				"failed to generate default CR file %q at %q: %w",
+				opts.DefaultCRFileName,
+				defaultCRFilePath,
+				err,
+			)
 		}
 	}
 
@@ -85,7 +95,12 @@ func (s *Service) Run(opts Options) error {
 			opts.Out,
 			securityConfigFilePath,
 			types.KeyValueArgs{contentprovider.ArgModuleName: opts.ModuleName}); err != nil {
-			return fmt.Errorf("failed to generate security config file %q at %q: %w", opts.SecurityConfigFileName, securityConfigFilePath, err)
+			return fmt.Errorf(
+				"failed to generate security config file %q at %q: %w",
+				opts.SecurityConfigFileName,
+				securityConfigFilePath,
+				err,
+			)
 		}
 	}
 
@@ -100,7 +115,12 @@ func (s *Service) Run(opts Options) error {
 			contentprovider.ArgDefaultCRFile:      defaultCRFilePath,
 			contentprovider.ArgSecurityConfigFile: securityConfigFilePath,
 		}); err != nil {
-		return fmt.Errorf("failed to generate module config file %q at %q: %w", opts.ModuleConfigFileName, moduleConfigFilePath, err)
+		return fmt.Errorf(
+			"failed to generate module config file %q at %q: %w",
+			opts.ModuleConfigFileName,
+			moduleConfigFilePath,
+			err,
+		)
 	}
 
 	return nil

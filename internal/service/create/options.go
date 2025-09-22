@@ -56,7 +56,8 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("opts.ModuleSourcesGitDirectory must not be empty: %w", commonerrors.ErrInvalidOption)
 	} else {
 		if isGitDir := isGitDirectory(opts.ModuleSourcesGitDirectory); !isGitDir {
-			return fmt.Errorf("currently configured module-sources-git-directory \"%s\" must point to a valid git repository: %w",
+			return fmt.Errorf("currently configured module-sources-git-directory \"%s\" must point to "+
+				" a valid git repository: %w",
 				opts.ModuleSourcesGitDirectory, commonerrors.ErrInvalidOption)
 		}
 	}

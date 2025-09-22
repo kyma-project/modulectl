@@ -89,8 +89,10 @@ func (s *ArchiveFileSystem) ArchiveFile(filePath string) (TarData, error) {
 	}
 
 	// Close the tar writer to flush the data.
-	// I am not using defer for closing, because Close() on tarWriter appends a final padding to the tar archive, which is then not directly visible for the caller.
-	// To make it visible to the caller the function return value must be re-assigned in the deferred code, which requires usage of named returns. The technique works, but the code is harder to understand.
+	// I am not using defer for closing, because Close() on tarWriter appends a final padding to the tar archive,
+	// which is then not directly visible for the caller.
+	// To make it visible to the caller the function return value must be re-assigned in the deferred code,
+	// which requires usage of named returns. The technique works, but the code is harder to understand.
 	if err := tarWriter.Close(); err != nil {
 		return nil, fmt.Errorf("unable to close tar writer: %w", err)
 	}

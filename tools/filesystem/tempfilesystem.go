@@ -84,7 +84,12 @@ func getBytesFromURL(url *url.URL) ([]byte, error) {
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received status code %d for GET request to %s: %w", resp.StatusCode, url, errBadHTTPStatus)
+		return nil, fmt.Errorf(
+			"received status code %d for GET request to %s: %w",
+			resp.StatusCode,
+			url,
+			errBadHTTPStatus,
+		)
 	}
 
 	data, err := io.ReadAll(resp.Body)

@@ -240,7 +240,9 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	configFilePath := path.Dir(opts.ConfigFile)
-	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+	// If the manifest is a local file reference,
+	// it's entry in the module config file will be relative to the module config file location
+	//  (usually the same directory).
 	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest, configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to resolve manifest file: %w", err)
@@ -248,7 +250,9 @@ func (s *Service) Run(opts Options) error {
 
 	var defaultCRFilePath string
 	if !moduleConfig.DefaultCR.IsEmpty() {
-		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+		// If the defaultCR is a local file reference,
+		// it's entry in the module config file will be relative to the module config file location
+		//  (usually the same directory).
 		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR, configFilePath)
 		if err != nil {
 			return fmt.Errorf("failed to resolve default CR file: %w", err)
@@ -415,9 +419,12 @@ func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.Component
 
 	if opts.OverwriteComponentVersion {
 		opts.Out.Write(
-			fmt.Sprintf("\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
+			fmt.Sprintf(
+				"\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
 				archive.GetName(),
-				archive.GetVersion()))
+				archive.GetVersion(),
+			),
+		)
 		return nil
 	}
 

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	// // taken from "https://github.com/open-component-model/ocm/blob/4473dacca406e4c84c0ac5e6e14393c659384afc/resources/component-descriptor-v2-schema.yaml#L40"
-	moduleNamePattern   = "^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$"
+	//nolint:revive // taken from "https://github.com/open-component-model/ocm/blob/4473dacca406e4c84c0ac5e6e14393c659384afc/resources/component-descriptor-v2-schema.yaml#L40"
+	moduleNamePattern   = "^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$" //nolint:revive // for readability
 	moduleNameMaxLength = 255
 	namespaceMaxLength  = 253
 	namespacePattern    = "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -25,7 +25,11 @@ func ValidateModuleName(name string) error {
 	}
 
 	if len(name) > moduleNameMaxLength {
-		return fmt.Errorf("opts.ModuleName length must not exceed %q characters: %w", moduleNameMaxLength, commonerrors.ErrInvalidOption)
+		return fmt.Errorf(
+			"opts.ModuleName length must not exceed %q characters: %w",
+			moduleNameMaxLength,
+			commonerrors.ErrInvalidOption,
+		)
 	}
 
 	if name != strings.ToLower(name) {
@@ -76,7 +80,8 @@ func ValidateNamespace(namespace string) error {
 	if matched, err := regexp.MatchString(namespacePattern, namespace); err != nil {
 		return fmt.Errorf("failed to evaluate regex pattern for module namespace: %w", err)
 	} else if !matched {
-		return fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
+		return fmt.Errorf("namespace must match the required pattern, "+
+			"only small alphanumeric characters and hyphens: %w",
 			commonerrors.ErrInvalidOption)
 	}
 

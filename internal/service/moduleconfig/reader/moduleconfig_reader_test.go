@@ -19,7 +19,8 @@ const (
 	exampleRepository    = "https://example.com/path/to/repository"
 	exampleDocumentation = "https://example.com/path/to/documentation"
 	exampleIcon          = "https://example.com/path/to/some-icon"
-	exampleRawManifest   = "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"
+	exampleRawManifest   = "https://github.com/kyma-project/template-operator/" +
+		"releases/download/1.0.1/template-operator.yaml"
 )
 
 func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T) {
@@ -111,7 +112,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate manifest: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "default CR file name",
@@ -143,7 +147,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				},
 				DefaultCR: contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate default CR: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module name",
@@ -158,8 +165,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module version",
@@ -190,8 +199,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "empty manifest path",
@@ -270,8 +281,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate documentation: 'some documentation' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate documentation: 'some documentation' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "empty icons",
@@ -332,8 +345,11 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "this is not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: failed to validate link: 'this is not a URL' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate module icons: failed to validate link:"+
+					" 'this is not a URL' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module resources - not a URL",
@@ -351,8 +367,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: '%%%% not a URL' is not a valid URL: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate resources: failed to validate link: '%%%% not a URL' is not a valid URL: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module resources - empty name",
@@ -405,8 +423,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: 'file://path/to/manifest' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate manifest: 'file://path/to/manifest' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module defaultCR - schema is not https",
@@ -422,8 +442,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: 'file://path/to/defaultCR' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate default CR: 'file://path/to/defaultCR' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 	}
 	for _, test := range tests {
