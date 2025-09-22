@@ -17,6 +17,5 @@ const (
 	ModuleImageResourceName    = "module-image"
 	RawManifestResourceName    = "raw-manifest"
 	DefaultCRResourceName      = "default-cr"
-	MetadataResourceName       = "metadata"
 	ModuleTemplateResourceName = "moduletemplate"
 )

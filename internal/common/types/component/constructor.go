@@ -1,7 +1,6 @@
 package component
 
 import (
-	"encoding/base64"
 	"fmt"
 	"path/filepath"
 
@@ -184,18 +183,6 @@ func (c *Constructor) AddFileResource(resourceName, filePath string) error {
 	default:
 		return fmt.Errorf("%w: %s", commonerrors.ErrUnknownResourceName, resourceName)
 	}
-}
-
-func (c *Constructor) AddBinaryDataResource(resourceName string, data []byte) {
-	c.Components[0].Resources = append(c.Components[0].Resources, Resource{
-		Name:    resourceName,
-		Type:    PlainTextResourceType,
-		Version: c.Components[0].Version,
-		Input: &Input{
-			Type: BinaryResourceInput,
-			Data: base64.StdEncoding.EncodeToString(data),
-		},
-	})
 }
 
 func (c *Constructor) addFileAsDirResource(resourceName, filePath string) error {

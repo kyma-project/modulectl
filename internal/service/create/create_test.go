@@ -283,7 +283,9 @@ func (*moduleConfigServiceStub) ParseAndValidateModuleConfig(_ string) (*content
 
 type moduleConfigServiceParseErrorStub struct{}
 
-func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (*contentprovider.ModuleConfig, error) {
+func (*moduleConfigServiceParseErrorStub) ParseAndValidateModuleConfig(_ string) (
+	*contentprovider.ModuleConfig, error,
+) {
 	return nil, errors.New("failed to read module config file")
 }
 
@@ -327,7 +329,6 @@ func (c *componentConstructorServiceStub) AddImagesToConstructor(_ *component.Co
 }
 
 func (c *componentConstructorServiceStub) AddResources(_ *component.Constructor,
-	_ *contentprovider.ModuleConfig,
 	_ *types.ResourcePaths,
 ) error {
 	return nil
@@ -341,7 +342,8 @@ func (c *componentConstructorServiceStub) CreateConstructorFile(_ *component.Con
 
 type componentArchiveServiceStub struct{}
 
-func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (*comparch.ComponentArchive,
+func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (
+	*comparch.ComponentArchive,
 	error,
 ) {
 	return &comparch.ComponentArchive{}, nil
@@ -391,10 +393,11 @@ func (*CRDParserServiceStub) IsCRDClusterScoped(_ *types.ResourcePaths) (bool, e
 
 type ModuleResourceServiceStub struct{}
 
-func (*ModuleResourceServiceStub) GenerateModuleResources(_ *contentprovider.ModuleConfig,
+func (*ModuleResourceServiceStub) GenerateModuleResources(
 	_ *types.ResourcePaths,
-) ([]resources.Resource, error) {
-	return []resources.Resource{}, nil
+	_ string,
+) []resources.Resource {
+	return []resources.Resource{}
 }
 
 type imageVersionVerifierStub struct{}

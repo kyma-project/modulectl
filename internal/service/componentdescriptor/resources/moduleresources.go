@@ -2,7 +2,6 @@ package resources
 
 import (
 	"errors"
-	"fmt"
 
 	"ocm.software/ocm/api/ocm/compdesc"
 	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
@@ -12,7 +11,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 var ErrNilTarGenerator = errors.New("tarGenerator must not be nil")
@@ -41,25 +39,20 @@ type Resource struct {
 	AccessHandler AccessHandler
 }
 
-func (s *Service) GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
-	resourcePaths *types.ResourcePaths,
-) ([]Resource, error) {
+func (s *Service) GenerateModuleResources(resourcePaths *types.ResourcePaths, version string,
+) []Resource {
 	moduleImageResource := GenerateModuleImageResource()
-	metadataResource, err := GenerateMetadataResource(moduleConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate metadata resource: %w", err)
-	}
 	rawManifestResource := GenerateRawManifestResource(s.tarGenerator, resourcePaths.RawManifest)
-	resources := []Resource{moduleImageResource, metadataResource, rawManifestResource}
+	resources := []Resource{moduleImageResource, rawManifestResource}
 	if resourcePaths.DefaultCR != "" {
 		defaultCRResource := GenerateDefaultCRResource(s.tarGenerator, resourcePaths.DefaultCR)
 		resources = append(resources, defaultCRResource)
 	}
 
 	for idx := range resources {
-		resources[idx].Version = moduleConfig.Version
+		resources[idx].Version = version
 	}
-	return resources, nil
+	return resources
 }
 
 func GenerateModuleImageResource() Resource {
@@ -104,24 +97,4 @@ func GenerateDefaultCRResource(tarGen accesshandler.TarGenerator, defaultCRPath 
 		},
 		AccessHandler: accesshandler.NewTar(tarGen, defaultCRPath),
 	}
-}
-
-func GenerateMetadataResource(moduleConfig *contentprovider.ModuleConfig) (Resource, error) {
-	yamlData, err := GenerateMetadataYaml(moduleConfig)
-	if err != nil {
-		return Resource{}, err
-	}
-
-	return Resource{
-		Resource: compdesc.Resource{
-			ResourceMeta: compdesc.ResourceMeta{
-				ElementMeta: compdesc.ElementMeta{
-					Name: common.MetadataResourceName,
-				},
-				Type:     artifacttypes.PLAIN_TEXT,
-				Relation: ocmv1.LocalRelation,
-			},
-		},
-		AccessHandler: accesshandler.NewYaml(string(yamlData)),
-	}, nil
 }

@@ -58,7 +58,6 @@ type ComponentConstructorService interface {
 		images []string,
 	) error
 	AddResources(componentConstructor *component.Constructor,
-		moduleConfig *contentprovider.ModuleConfig,
 		resourcePaths *types.ResourcePaths,
 	) error
 	CreateConstructorFile(componentConstructor *component.Constructor,
@@ -108,9 +107,8 @@ type CRDParserService interface {
 }
 
 type ModuleResourceService interface {
-	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
-		resourcesPaths *types.ResourcePaths,
-	) ([]resources.Resource, error)
+	GenerateModuleResources(resourcesPaths *types.ResourcePaths, version string,
+	) []resources.Resource
 }
 
 type ImageVersionVerifierService interface {
@@ -307,8 +305,7 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	}
 
 	opts.Out.Write("- Generating module resources\n")
-	if err = s.componentConstructorService.AddResources(constructor, moduleConfig,
-		resourcePaths); err != nil {
+	if err = s.componentConstructorService.AddResources(constructor, resourcePaths); err != nil {
 		return fmt.Errorf("failed to add resources to component constructor: %w", err)
 	}
 
@@ -367,11 +364,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		}
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
-	if err != nil {
-		return fmt.Errorf("failed to generate module resources: %w", err)
-	}
-
+	moduleResources := s.moduleResourceService.GenerateModuleResources(resourcePaths, moduleConfig.Version)
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(archive,
 		moduleResources); err != nil {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)
