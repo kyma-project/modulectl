@@ -44,7 +44,7 @@ func resolveUserPasswordCredentials(userPasswordCreds string) (credentials.Crede
 	}, nil
 }
 
-// validateCredFormat checks if the credentials string is in the format "username:password", where both username and password contain at least one non-whitespace character
+// validateCredFormat checks if the credentials string is in the format "username:password", where both username and password contain at least one non-whitespace character.
 func validateCredFormat(creds string) bool {
 	return !regexp.MustCompile(`^\S+:\S+$`).MatchString(creds)
 }

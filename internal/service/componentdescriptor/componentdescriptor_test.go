@@ -499,7 +499,7 @@ func TestAddOciArtifactsToDescriptor_WhenImagesContainEmptyOrWhitespace_SkipsAnd
 	require.Equal(t, "alpine", descriptor.Resources[0].Name)
 }
 
-// Test helper functions
+// Test helper functions.
 func createEmptyDescriptor() *compdesc.ComponentDescriptor {
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{

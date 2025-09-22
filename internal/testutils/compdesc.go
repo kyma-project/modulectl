@@ -3,7 +3,7 @@ package testutils
 import (
 	"ocm.software/ocm/api/ocm/compdesc"
 
-	// Make sure init is being called and v2 is registered
+	// Make sure init is being called and v2 is registered.
 	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
 

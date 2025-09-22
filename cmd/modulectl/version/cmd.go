@@ -10,7 +10,7 @@ const (
 	long  = "This command prints the current semantic version of the modulectl binary set at build time."
 )
 
-// Version will contain the binary version injected by make build target
+// Version will contain the binary version injected by make build target.
 var Version string //nolint:gochecknoglobals // This is a variable meant to be set at build time
 
 func NewCmd() (*cobra.Command, error) {

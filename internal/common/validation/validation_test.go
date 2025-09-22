@@ -1,7 +1,6 @@
 package validation_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/kyma-project/modulectl/internal/common/validation"
@@ -271,7 +270,6 @@ func TestValidateMapEntries(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateMapEntries(tt.resources); (err != nil) != tt.wantErr {
-				fmt.Println(err.Error())
 				t.Errorf("ValidateMapEntries() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -318,7 +316,6 @@ func TestValidateIsValidHttpsUrl(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateIsValidHTTPSURL(tt.url); (err != nil) != tt.wantErr {
-				fmt.Println(err.Error())
 				t.Errorf("ValidateIsValidUrl() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

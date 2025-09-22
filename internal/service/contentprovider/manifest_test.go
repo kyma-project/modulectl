@@ -253,7 +253,7 @@ func (m *mockManifestParser) Parse(_ string) ([]*unstructured.Unstructured, erro
 	return m.manifests, nil
 }
 
-// test helper functions
+// test helper functions.
 type containerSpec struct {
 	name    string
 	image   string

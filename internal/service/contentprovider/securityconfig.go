@@ -64,11 +64,11 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 }
 
 type SecurityScanConfig struct {
-	ModuleName string        `json:"module-name" yaml:"module-name" comment:"string, name of your module"`
-	BDBA       []string      `json:"bdba" yaml:"bdba" comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis"`
-	Mend       MendSecConfig `json:"mend" yaml:"mend" comment:"Mend security scanner specific configuration"`
-	DevBranch  string        `json:"dev-branch" yaml:"dev-branch" comment:"string, name of the development branch"`
-	RcTag      string        `json:"rc-tag" yaml:"rc-tag" comment:"string, release candidate tag"`
+	ModuleName string        `comment:"string, name of your module"                                                       json:"module-name" yaml:"module-name"`
+	BDBA       []string      `comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis" json:"bdba"        yaml:"bdba"`
+	Mend       MendSecConfig `comment:"Mend security scanner specific configuration"                                      json:"mend"        yaml:"mend"`
+	DevBranch  string        `comment:"string, name of the development branch"                                            json:"dev-branch"  yaml:"dev-branch"`
+	RcTag      string        `comment:"string, release candidate tag"                                                     json:"rc-tag"      yaml:"rc-tag"`
 }
 
 func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
@@ -100,14 +100,14 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
 }
 
 type MendSecConfig struct {
-	Language    string   `json:"language" yaml:"language" comment:"string, indicating the programming language the scanner has to analyze"`
-	SubProjects string   `json:"subprojects" yaml:"subprojects" comment:"string, specifying any subprojects"`
-	Exclude     []string `json:"exclude" yaml:"exclude" comment:"list, directories within the repository which should not be scanned"`
+	Language    string   `comment:"string, indicating the programming language the scanner has to analyze" json:"language"    yaml:"language"`
+	SubProjects string   `comment:"string, specifying any subprojects"                                     json:"subprojects" yaml:"subprojects"`
+	Exclude     []string `comment:"list, directories within the repository which should not be scanned"    json:"exclude"     yaml:"exclude"`
 }
 
 // revert this again with https://github.com/kyma-project/modulectl/issues/269
 // isCorrectManagerVersion checks if the image matches the expected registry and version for the manager
-// the exact image name is unknown
+// the exact image name is unknown.
 func isCorrectManagerVersion(image, moduleVersion string) bool {
 	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)
 	matched, err := regexp.MatchString(regex, image)

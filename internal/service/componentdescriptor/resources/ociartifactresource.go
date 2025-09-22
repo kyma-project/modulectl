@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	// Semantic versioning format following e.g: x.y.z or vx.y,z
+	// Semantic versioning format following e.g: x.y.z or vx.y,z.
 	semverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$`
 )
 

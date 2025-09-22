@@ -29,7 +29,7 @@ type fakeParser struct {
 	resources []*unstructured.Unstructured
 }
 
-// Implement the Parse method to satisfy manifestparser.Service
+// Implement the Parse method to satisfy manifestparser.Service.
 func (f *fakeParser) Parse(_ string) ([]*unstructured.Unstructured, error) {
 	return f.resources, nil
 }

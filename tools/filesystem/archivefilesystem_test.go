@@ -173,7 +173,7 @@ func (m *mockFile) WriteTo(w io.Writer) (int64, error) {
 	panic("mockFile is intended to be used only when readError is set")
 }
 
-// If Close() is overridden like this it works even if the mockFile.File is nil
+// If Close() is overridden like this it works even if the mockFile.File is nil.
 func (m *mockFile) Close() error {
 	return nil
 }

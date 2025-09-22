@@ -365,7 +365,7 @@ func TestIsMainOrLatestTag_ValidCases(t *testing.T) {
 	}
 }
 
-// Test helper functions
+// Test helper functions.
 func assertImageInfo(t *testing.T, info *image.ImageInfo, expectedName, expectedTag, expectedDigest, expectedFullURL string) {
 	t.Helper()
 

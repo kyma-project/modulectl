@@ -2,22 +2,24 @@ version: "2"
 linters:
   default: all
   disable:
-    - contextcheck
-    - depguard
-    - exhaustruct
-    - forbidigo
-    - godot
-    - ireturn
-    - lll
-    - nlreturn
-    - paralleltest
-    - sqlclosecheck
-    - tagalign
-    - tagliatelle
-    - wsl
+    - contextcheck # too many false positives
+    - depguard # checks if package imports are whitelisted
+    - exhaustruct # too subjective and harms code readability
+    - nlreturn # too strict and mostly code is not more readable
+    - paralleltest # should be enabled consciously for long running tests
+    - lll # revive.line-length-limit serve same purpose
+    - sqlclosecheck # not needed for this project
+    - wsl # too strict and mostly code is not more readable
     - wsl_v5 # too strict
-    - noinlineerr # we want to keep inlining errors
+    - noinlineerr # we want to keep inlining
   settings:
+    forbidigo:
+      # Forbid the following identifiers (list of regexp).
+      # Default: ["^(fmt\\.Print(|f|ln)|print|println)$"]
+      forbid:
+        # Built-in bootstrapping functions.
+        - pattern: ^fmt\.Print\(
+          msg: "use fmt.Println instead of fmt.Print if console output is needed"
     cyclop:
       max-complexity: 20
     funlen:
@@ -59,10 +61,15 @@ linters:
         - empty
         - stdlib
         - vfs.FileSystem
+        - vfs.File
         - internal.BlobAccess
         - internal.ComponentVersionAccess
         - internal.Credentials
         - internal.Repository
+        - cpi.BlobAccess
+        - cpi.ComponentVersionAccess
+        - credentials.Credentials
+        - cpi.Repository
     nestif:
       min-complexity: 6
     nolintlint:
@@ -79,7 +86,6 @@ linters:
           arguments:
             - 120
           severity: warning
-          disabled: true
     varnamelen:
       ignore-names:
         - ok
@@ -119,7 +125,7 @@ linters:
         text: "QF1012: Use fmt.Fprintf"
       - linters:
           - lll
-        source: '^// http '
+        source: "^// http "
     paths:
       - third_party$
       - builtin$
