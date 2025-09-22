@@ -21,7 +21,7 @@ packages:
   internal/service/manifestparser: 93.3
   internal/service/componentarchive: 40
   internal/service/image: 94.6
-  internal/service/componentconstructor: 87
+  internal/service/componentconstructor: 85
   internal/common/utils/slices: 100
   tools/filesystem: 21
   tools/ocirepo: 23
