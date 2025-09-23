@@ -107,10 +107,14 @@ type MendSecConfig struct {
 	Language    string   `comment:"string, indicating the programming language the scanner has to analyze" json:"language"    yaml:"language"`
 	SubProjects string   `comment:"string, specifying any subprojects"                                     json:"subprojects" yaml:"subprojects"`
 	Exclude     []string `comment:"list, directories within the repository which should not be scanned"    json:"exclude"     yaml:"exclude"`
+	Language    string   `comment:"string, indicating the programming language the scanner has to analyze" json:"language"    yaml:"language"`
+	SubProjects string   `comment:"string, specifying any subprojects"                                     json:"subprojects" yaml:"subprojects"`
+	Exclude     []string `comment:"list, directories within the repository which should not be scanned"    json:"exclude"     yaml:"exclude"`
 }
 
 // revert this again with https://github.com/kyma-project/modulectl/issues/269
 // isCorrectManagerVersion checks if the image matches the expected registry and version for the manager
+// the exact image name is unknown.
 // the exact image name is unknown.
 func isCorrectManagerVersion(image, moduleVersion string) bool {
 	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)

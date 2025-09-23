@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources/accesshandler"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
@@ -18,9 +17,7 @@ func TestModuleResourceService_ReturnErrorWhenFileSystemNil(t *testing.T) {
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *testing.T) {
-	moduleConfig := &contentprovider.ModuleConfig{
-		Version: "1.0.0",
-	}
+	version := "1.0.0"
 	mockFs := &fileSystemStub{}
 	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
@@ -28,33 +25,25 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 	defaultCRPath := "path/to/defaultCR"
 
 	resourcePaths := types.NewResourcePaths(defaultCRPath, manifestPath, "")
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
-	require.NoError(t, err)
-	require.Len(t, res, 4)
+	res := moduleResourceService.GenerateModuleResources(resourcePaths, version)
+	require.Len(t, res, 3)
 
 	require.Equal(t, "module-image", res[0].Name)
 	require.Equal(t, "ociArtifact", res[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
 	require.Nil(t, res[0].AccessHandler)
 
-	require.Equal(t, "metadata", res[1].Name)
-	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, "raw-manifest", res[1].Name)
+	require.Equal(t, "directoryTree", res[1].Type)
 	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
-	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
-	require.True(t, ok)
-	require.NotEmpty(t, metadataResourceHandler.String)
-
-	require.Equal(t, "raw-manifest", res[2].Name)
-	require.Equal(t, "directoryTree", res[2].Type)
-	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
-	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	manifestResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
-	require.Equal(t, "default-cr", res[3].Name)
-	require.Equal(t, "directoryTree", res[3].Type)
-	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
-	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
+	require.Equal(t, "default-cr", res[2].Name)
+	require.Equal(t, "directoryTree", res[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
+	defaultCRResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.GetPath())
 
@@ -64,35 +53,25 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithDefaultCRPath(t *test
 }
 
 func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *testing.T) {
-	moduleConfig := &contentprovider.ModuleConfig{
-		Version: "1.0.0",
-	}
+	version := "1.0.0"
 	mockFs := &fileSystemStub{}
 	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
 	manifestPath := "path/to/manifest"
 
 	resourcePaths := types.NewResourcePaths("", manifestPath, "")
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
-	require.NoError(t, err)
-	require.Len(t, res, 3)
+	res := moduleResourceService.GenerateModuleResources(resourcePaths, version)
+	require.Len(t, res, 2)
 
 	require.Equal(t, "module-image", res[0].Name)
 	require.Equal(t, "ociArtifact", res[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
 	require.Nil(t, res[0].AccessHandler)
 
-	require.Equal(t, "metadata", res[1].Name)
-	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, "raw-manifest", res[1].Name)
+	require.Equal(t, "directoryTree", res[1].Type)
 	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
-	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
-	require.True(t, ok)
-	require.NotEmpty(t, metadataResourceHandler.String)
-
-	require.Equal(t, "raw-manifest", res[2].Name)
-	require.Equal(t, "directoryTree", res[2].Type)
-	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
-	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	manifestResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
@@ -102,9 +81,7 @@ func TestGenerateModuleResources_ReturnCorrectResourcesWithoutDefaultCRPath(t *t
 }
 
 func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
-	moduleConfig := &contentprovider.ModuleConfig{
-		Version: "1.0.0",
-	}
+	version := "1.0.0"
 	mockFs := &fileSystemStub{}
 	moduleResourceService, err := resources.NewService(mockFs)
 	require.NoError(t, err)
@@ -112,33 +89,25 @@ func TestGenerateModuleResources_ReturnCorrectResources(t *testing.T) {
 	defaultCRPath := "path/to/defaultCR"
 
 	resourcePaths := types.NewResourcePaths(defaultCRPath, manifestPath, "")
-	res, err := moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
-	require.NoError(t, err)
-	require.Len(t, res, 4)
+	res := moduleResourceService.GenerateModuleResources(resourcePaths, version)
+	require.Len(t, res, 3)
 
 	require.Equal(t, "module-image", res[0].Name)
 	require.Equal(t, "ociArtifact", res[0].Type)
 	require.Equal(t, ocmv1.ExternalRelation, res[0].Relation)
 	require.Nil(t, res[0].AccessHandler)
 
-	require.Equal(t, "metadata", res[1].Name)
-	require.Equal(t, "plainText", res[1].Type)
+	require.Equal(t, "raw-manifest", res[1].Name)
+	require.Equal(t, "directoryTree", res[1].Type)
 	require.Equal(t, ocmv1.LocalRelation, res[1].Relation)
-	metadataResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Yaml)
-	require.True(t, ok)
-	require.NotEmpty(t, metadataResourceHandler.String)
-
-	require.Equal(t, "raw-manifest", res[2].Name)
-	require.Equal(t, "directoryTree", res[2].Type)
-	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
-	manifestResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
+	manifestResourceHandler, ok := res[1].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/manifest", manifestResourceHandler.GetPath())
 
-	require.Equal(t, "default-cr", res[3].Name)
-	require.Equal(t, "directoryTree", res[3].Type)
-	require.Equal(t, ocmv1.LocalRelation, res[3].Relation)
-	defaultCRResourceHandler, ok := res[3].AccessHandler.(*accesshandler.Tar)
+	require.Equal(t, "default-cr", res[2].Name)
+	require.Equal(t, "directoryTree", res[2].Type)
+	require.Equal(t, ocmv1.LocalRelation, res[2].Relation)
+	defaultCRResourceHandler, ok := res[2].AccessHandler.(*accesshandler.Tar)
 	require.True(t, ok)
 	require.Equal(t, "path/to/defaultCR", defaultCRResourceHandler.GetPath())
 

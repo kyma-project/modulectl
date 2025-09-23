@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 )
 
 const (
@@ -26,13 +25,29 @@ func TestService_AddResources_Success(t *testing.T) {
 	service := componentconstructor.NewService()
 
 	constructor := component.NewConstructor(testModuleName, testModuleVersion)
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:    testModuleName,
-		Version: testModuleVersion,
-	}
 	resourcePaths := types.NewResourcePaths("", testManifestPath, testModuleTemplatePath)
 
-	err := service.AddResources(constructor, moduleConfig, resourcePaths)
+	err := service.AddResources(constructor, resourcePaths)
+
+	require.NoError(t, err)
+	require.Len(t, constructor.Components[0].Resources, 2)
+
+	resources := constructor.Components[0].Resources
+	resourceNames := make([]string, len(resources))
+	for i, resource := range resources {
+		resourceNames[i] = resource.Name
+	}
+	require.Contains(t, resourceNames, common.RawManifestResourceName)
+	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
+}
+
+func TestService_AddResources_WithDefaultCR(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+	resourcePaths := types.NewResourcePaths(testDefaultCRPath, testManifestPath, testModuleTemplatePath)
+
+	err := service.AddResources(constructor, resourcePaths)
 
 	require.NoError(t, err)
 	require.Len(t, constructor.Components[0].Resources, 3)
@@ -43,47 +58,8 @@ func TestService_AddResources_Success(t *testing.T) {
 		resourceNames[i] = resource.Name
 	}
 	require.Contains(t, resourceNames, common.RawManifestResourceName)
-	require.Contains(t, resourceNames, common.MetadataResourceName)
-	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
-}
-
-func TestService_AddResources_WithDefaultCR(t *testing.T) {
-	service := componentconstructor.NewService()
-
-	constructor := component.NewConstructor(testModuleName, testModuleVersion)
-
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:    testModuleName,
-		Version: testModuleVersion,
-	}
-	resourcePaths := types.NewResourcePaths(testDefaultCRPath, testManifestPath, testModuleTemplatePath)
-
-	err := service.AddResources(constructor, moduleConfig, resourcePaths)
-
-	require.NoError(t, err)
-	require.Len(t, constructor.Components[0].Resources, 4)
-
-	resources := constructor.Components[0].Resources
-	resourceNames := make([]string, len(resources))
-	for i, resource := range resources {
-		resourceNames[i] = resource.Name
-	}
-	require.Contains(t, resourceNames, common.RawManifestResourceName)
-	require.Contains(t, resourceNames, common.MetadataResourceName)
 	require.Contains(t, resourceNames, common.DefaultCRResourceName)
 	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
-}
-
-func TestService_AddResources_ReturnsError_WhenConfigNil(t *testing.T) {
-	service := componentconstructor.NewService()
-
-	constructor := component.NewConstructor(testModuleName, testModuleVersion)
-	resourcePaths := types.NewResourcePaths(testDefaultCRPath, testManifestPath, testModuleTemplatePath)
-
-	err := service.AddResources(constructor, nil, resourcePaths)
-
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to generate metadata yaml")
 }
 
 func TestService_CreateConstructorFile_Success(t *testing.T) {
@@ -117,16 +93,39 @@ func TestService_AddResourcesAndCreateConstructorFile_Success(t *testing.T) {
 	service := componentconstructor.NewService()
 
 	constructor := component.NewConstructor(testModuleName, testModuleVersion)
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:    testModuleName,
-		Version: testModuleVersion,
-	}
 	resourcePaths := types.NewResourcePaths("", testManifestPath, testModuleTemplatePath)
 
 	tempDir := t.TempDir()
 	outputFile := filepath.Join(tempDir, testOutputFileName)
 
-	err := service.AddResources(constructor, moduleConfig, resourcePaths)
+	err := service.AddResources(constructor, resourcePaths)
+	require.NoError(t, err)
+
+	err = service.CreateConstructorFile(constructor, outputFile)
+	require.NoError(t, err)
+
+	require.FileExists(t, outputFile)
+	require.Len(t, constructor.Components[0].Resources, 2)
+
+	resources := constructor.Components[0].Resources
+	resourceNames := make([]string, len(resources))
+	for i, resource := range resources {
+		resourceNames[i] = resource.Name
+	}
+	require.Contains(t, resourceNames, common.RawManifestResourceName)
+	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
+}
+
+func TestService_AddResourcesAndCreateConstructorFile_WithDefaultCR(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+	resourcePaths := types.NewResourcePaths(testDefaultCRPath, testManifestPath, testModuleTemplatePath)
+
+	tempDir := t.TempDir()
+	outputFile := filepath.Join(tempDir, testOutputFileName)
+
+	err := service.AddResources(constructor, resourcePaths)
 	require.NoError(t, err)
 
 	err = service.CreateConstructorFile(constructor, outputFile)
@@ -141,40 +140,6 @@ func TestService_AddResourcesAndCreateConstructorFile_Success(t *testing.T) {
 		resourceNames[i] = resource.Name
 	}
 	require.Contains(t, resourceNames, common.RawManifestResourceName)
-	require.Contains(t, resourceNames, common.MetadataResourceName)
-	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
-}
-
-func TestService_AddResourcesAndCreateConstructorFile_WithDefaultCR(t *testing.T) {
-	service := componentconstructor.NewService()
-
-	constructor := component.NewConstructor(testModuleName, testModuleVersion)
-
-	moduleConfig := &contentprovider.ModuleConfig{
-		Name:    testModuleName,
-		Version: testModuleVersion,
-	}
-	resourcePaths := types.NewResourcePaths(testDefaultCRPath, testManifestPath, testModuleTemplatePath)
-
-	tempDir := t.TempDir()
-	outputFile := filepath.Join(tempDir, testOutputFileName)
-
-	err := service.AddResources(constructor, moduleConfig, resourcePaths)
-	require.NoError(t, err)
-
-	err = service.CreateConstructorFile(constructor, outputFile)
-	require.NoError(t, err)
-
-	require.FileExists(t, outputFile)
-	require.Len(t, constructor.Components[0].Resources, 4)
-
-	resources := constructor.Components[0].Resources
-	resourceNames := make([]string, len(resources))
-	for i, resource := range resources {
-		resourceNames[i] = resource.Name
-	}
-	require.Contains(t, resourceNames, common.RawManifestResourceName)
-	require.Contains(t, resourceNames, common.MetadataResourceName)
 	require.Contains(t, resourceNames, common.DefaultCRResourceName)
 	require.Contains(t, resourceNames, common.ModuleTemplateResourceName)
 }

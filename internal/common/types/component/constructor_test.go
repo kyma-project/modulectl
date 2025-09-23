@@ -1,7 +1,6 @@
 package component_test
 
 import (
-	"encoding/base64"
 	"path/filepath"
 	"testing"
 
@@ -198,25 +197,6 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 		require.Equal(t, imageInfos[i].FullURL, resource.Access.ImageReference, "resource %d: image reference mismatch",
 			i)
 	}
-}
-
-func TestConstructor_AddBinaryDataAsFileResource(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	testData := []byte("test metadata content")
-	constructor.AddBinaryDataResource(common.MetadataResourceName, testData)
-
-	require.Len(t, constructor.Components[0].Resources, 1)
-	resource := constructor.Components[0].Resources[0]
-	require.Equal(t, common.MetadataResourceName, resource.Name)
-	require.Equal(t, component.PlainTextResourceType, resource.Type)
-	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.BinaryResourceInput, resource.Input.Type)
-	require.NotEmpty(t, resource.Input.Data)
-
-	decodedData, err := base64.StdEncoding.DecodeString(resource.Input.Data)
-	require.NoError(t, err, "expected input data to be valid base64")
-	require.Equal(t, testData, decodedData)
 }
 
 func TestConstructor_AddFileResource_ModuleTemplate(t *testing.T) {

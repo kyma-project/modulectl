@@ -8,9 +8,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/kyma-project/modulectl/internal/common"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/kyma-project/lifecycle-manager/api/shared"
+	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"ocm.software/ocm/api/ocm"
 	"ocm.software/ocm/api/ocm/compdesc"
@@ -21,8 +20,10 @@ import (
 	"ocm.software/ocm/api/ocm/extensions/accessmethods/ociartifact"
 	"ocm.software/ocm/api/ocm/extensions/repositories/ocireg"
 
-	"github.com/kyma-project/lifecycle-manager/api/shared"
-	"github.com/kyma-project/lifecycle-manager/api/v1beta2"
+	"github.com/kyma-project/modulectl/internal/common"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 const (
@@ -447,18 +448,13 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(repo.Object["type"]).To(Equal(ocireg.Type))
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(3))
+				Expect(descriptor.Resources).To(HaveLen(2))
 				resource := descriptor.Resources[0]
 				Expect(resource.Name).To(Equal("template-operator"))
 				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 				Expect(resource.Type).To(Equal("ociArtifact"))
 				Expect(resource.Version).To(Equal(moduleVersion))
 				resource = descriptor.Resources[1]
-				Expect(resource.Name).To(Equal("metadata"))
-				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
-				Expect(resource.Type).To(Equal("plainText"))
-				Expect(resource.Version).To(Equal(moduleVersion))
-				resource = descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("raw-manifest"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
@@ -472,16 +468,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(ociartifactAccessSpec0.GetType()).To(Equal(ociartifact.Type))
 
 				By("And descriptor.component.resources[1].access should be correct")
-				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
-				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec1, ok := resourceAccessSpec1.(*localblob.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(localBlobAccessSpec1.GetType()).To(Equal(localblob.Type))
-				Expect(localBlobAccessSpec1.LocalReference).To(ContainSubstring("sha256:"))
-				Expect(localBlobAccessSpec1.MediaType).To(Equal("application/x-yaml"))
-
-				By("And descriptor.component.resources[2].access should be correct")
-				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[2].Access)
+				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(descriptor.Resources[1].Access)
 				Expect(err).ToNot(HaveOccurred())
 				localBlobAccessSpec2, ok := resourceAccessSpec2.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
@@ -665,8 +652,8 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(4))
-				resource := descriptor.Resources[3]
+				Expect(descriptor.Resources).To(HaveLen(3))
+				resource := descriptor.Resources[2]
 				Expect(resource.Name).To(Equal("default-cr"))
 				Expect(resource.Relation).To(Equal(ocmv1.LocalRelation))
 				Expect(resource.Type).To(Equal("directoryTree"))
@@ -710,7 +697,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(descriptor).ToNot(BeNil())
 
 				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(4))
+				Expect(descriptor.Resources).To(HaveLen(3))
 
 				resource := findResourceByNameVersionType(descriptor.Resources, "template-operator", moduleVersion,
 					"ociArtifact")
@@ -1430,7 +1417,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(string(constructorData)).To(ContainSubstring("name: kyma-project.io/module/template-operator"))
 				Expect(string(constructorData)).To(ContainSubstring("version: " + moduleVersion))
 				Expect(string(constructorData)).To(ContainSubstring("resources:"))
-				Expect(string(constructorData)).To(ContainSubstring(common.MetadataResourceName))
 				Expect(string(constructorData)).To(ContainSubstring(common.RawManifestResourceName))
 				Expect(string(constructorData)).To(ContainSubstring(common.ModuleTemplateResourceName))
 			})

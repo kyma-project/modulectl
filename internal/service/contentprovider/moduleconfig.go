@@ -102,7 +102,10 @@ type ModuleConfig struct {
 
 type Manager struct {
 	metav1.GroupVersionKind `comment:"required, the GVK of the manager" yaml:",inline"`
+	metav1.GroupVersionKind `comment:"required, the GVK of the manager" yaml:",inline"`
 
+	Name      string `comment:"required, the name of the manager" yaml:"name"`
+	Namespace string `comment:"optional, the path to the manager" yaml:"namespace"`
 	Name      string `comment:"required, the name of the manager" yaml:"name"`
 	Namespace string `comment:"optional, the path to the manager" yaml:"namespace"`
 }
