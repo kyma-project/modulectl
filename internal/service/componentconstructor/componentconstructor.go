@@ -8,8 +8,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
-	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/image"
 	"github.com/kyma-project/modulectl/tools/filesystem"
 )
@@ -22,16 +20,9 @@ func NewService() *Service {
 
 func (s *Service) AddResources(
 	componentConstructor *component.Constructor,
-	moduleConfig *contentprovider.ModuleConfig,
 	resourcePaths *types.ResourcePaths,
 ) error {
-	metadataYaml, err := resources.GenerateMetadataYaml(moduleConfig)
-	if err != nil {
-		return fmt.Errorf("failed to generate metadata yaml: %w", err)
-	}
-
-	componentConstructor.AddBinaryDataResource(common.MetadataResourceName, metadataYaml)
-	err = componentConstructor.AddFileResource(common.RawManifestResourceName, resourcePaths.RawManifest)
+	err := componentConstructor.AddFileResource(common.RawManifestResourceName, resourcePaths.RawManifest)
 	if err != nil {
 		return fmt.Errorf("failed to create raw manifest resource: %w", err)
 	}
