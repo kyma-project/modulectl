@@ -57,7 +57,7 @@ func (opts Options) Validate() error {
 	} else {
 		if isGitDir := isGitDirectory(opts.ModuleSourcesGitDirectory); !isGitDir {
 			return fmt.Errorf("currently configured module-sources-git-directory \"%s\" must point to "+
-				" a valid git repository: %w",
+				"a valid git repository: %w",
 				opts.ModuleSourcesGitDirectory, commonerrors.ErrInvalidOption)
 		}
 	}
