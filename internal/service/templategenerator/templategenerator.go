@@ -179,8 +179,8 @@ func (s *Service) GenerateModuleTemplate(
 	}
 	if moduleConfig.Manifest.IsURL() {
 		mtData.Resources = contentprovider.Resources{
-			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest;
-			// may be overwritten by explicitly provided entries
+            // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+			"rawManifest": moduleConfig.Manifest.String(),
 		}
 	}
 
