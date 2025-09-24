@@ -64,11 +64,11 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 }
 
 type SecurityScanConfig struct {
-	ModuleName string        `comment:"string, name of your module"                                                       json:"module-name" yaml:"module-name"`
+	ModuleName string        `comment:"string, name of your module"                                                       json:"module-name" yaml:"module-name"` //nolint:tagliatelle // requires externally as snake case
 	BDBA       []string      `comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis" json:"bdba"        yaml:"bdba"`
 	Mend       MendSecConfig `comment:"Mend security scanner specific configuration"                                      json:"mend"        yaml:"mend"`
-	DevBranch  string        `comment:"string, name of the development branch"                                            json:"dev-branch"  yaml:"dev-branch"`
-	RcTag      string        `comment:"string, release candidate tag"                                                     json:"rc-tag"      yaml:"rc-tag"`
+	DevBranch  string        `comment:"string, name of the development branch"                                            json:"dev-branch"  yaml:"dev-branch"` //nolint:tagliatelle // requires externally as snake case
+	RcTag      string        `comment:"string, release candidate tag"                                                     json:"rc-tag"      yaml:"rc-tag"`     //nolint:tagliatelle // requires externally as snake case
 }
 
 func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
