@@ -238,9 +238,8 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	configFilePath := path.Dir(opts.ConfigFile)
-	// If the manifest is a local file reference,
-	// it's entry in the module config file will be relative to the module config file location
-	//  (usually the same directory).
+    // If the manifest is a local file reference, it's entry in the module config file will be relative to the module 
+	// config file location (usually the same directory).
 	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest, configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to resolve manifest file: %w", err)
