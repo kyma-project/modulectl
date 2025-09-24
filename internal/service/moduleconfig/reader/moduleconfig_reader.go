@@ -60,8 +60,7 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	if moduleConfig.Manifest.IsURL() {
 		if moduleConfig.Manifest.URL().Scheme != "https" {
 			return fmt.Errorf(
-				"failed to validate manifest: %w",
-				fmt.Errorf(
+				"failed to validate manifest: %w", fmt.Errorf(
 					"'%s' is not using https scheme: %w",
 					moduleConfig.Manifest.String(),
 					commonerrors.ErrInvalidOption,
