@@ -112,7 +112,6 @@ type MendSecConfig struct {
 // revert this again with https://github.com/kyma-project/modulectl/issues/269
 // isCorrectManagerVersion checks if the image matches the expected registry and version for the manager
 // the exact image name is unknown.
-// the exact image name is unknown.
 func isCorrectManagerVersion(image, moduleVersion string) bool {
 	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)
 	matched, err := regexp.MatchString(regex, image)

@@ -152,10 +152,8 @@ func TestGenerateTarArchive(t *testing.T) {
 
 // VerifyTar inspects the tar archive in data[] and performs basic checks for GNU tar compliance:
 //  1. Valid structure (can be fully read by archive/tar)
-//  2. Proper 1024-byte trailer of zeroes at the end: "[...] an archive
-//     consists of a series of file entries terminated by an end-of-archive entry,
-//
-// which consists of two 512 blocks of zero bytes.
+//  2. Proper 1024-byte trailer of zeroes at the end: "[...] an archive consists of a series of file entries terminated
+//     by an end-of-archive entry, which consists of two 512 blocks of zero bytes.
 func verifyTar(data []byte) error {
 	// Structural check via tar.Reader
 	r := bytes.NewReader(data)

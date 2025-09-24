@@ -238,7 +238,7 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	configFilePath := path.Dir(opts.ConfigFile)
-    // If the manifest is a local file reference, it's entry in the module config file will be relative to the module 
+	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module
 	// config file location (usually the same directory).
 	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest, configFilePath)
 	if err != nil {
@@ -247,7 +247,7 @@ func (s *Service) Run(opts Options) error {
 
 	var defaultCRFilePath string
 	if !moduleConfig.DefaultCR.IsEmpty() {
-		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the 
+		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the
 		// module config file location (usually the same directory).
 		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR, configFilePath)
 		if err != nil {
