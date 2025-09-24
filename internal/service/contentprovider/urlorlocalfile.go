@@ -61,8 +61,8 @@ func (u *UrlOrLocalFile) FromString(val string) error {
 			return fmt.Errorf("'%s' is not a valid URL: Missing host: %w", val, commonerrors.ErrInvalidArg)
 		}
 		u.url = parsedURL
-		u.value = val // the original string value for the String() method
-		// (to avoid any automatic URL encoding done by url.Parse)
+		// the original string value for the String() method (to avoid any automatic URL encoding done by url.Parse)
+		u.value = val
 		return nil
 	}
 	// If the scheme is not present, we treat it as a local file path.
