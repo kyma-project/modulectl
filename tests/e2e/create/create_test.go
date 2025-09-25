@@ -659,9 +659,9 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(resource.Type).To(Equal("directoryTree"))
 				Expect(resource.Version).To(Equal(moduleVersion))
 
-				By("And descriptor.component.resources[3].access should be correct")
+				By("And descriptor.component.resources[2].access should be correct")
 				defaultCRResourceAccessSpec, err := ocm.DefaultContext().
-					AccessSpecForSpec(descriptor.Resources[3].Access)
+					AccessSpecForSpec(descriptor.Resources[2].Access)
 				Expect(err).ToNot(HaveOccurred())
 				defaultCRAccessSpec, ok := defaultCRResourceAccessSpec.(*localblob.AccessSpec)
 				Expect(ok).To(BeTrue())
