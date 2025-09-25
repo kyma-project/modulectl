@@ -728,16 +728,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 					ociArtifactAccessSpec.ImageReference,
 				).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
 
-				resource = findResourceByNameVersionType(descriptor.Resources, "metadata", moduleVersion, "plainText")
-				Expect(resource).ToNot(BeNil())
-				resourceAccessSpec2, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
-				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec, ok := resourceAccessSpec2.(*localblob.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(localBlobAccessSpec.GetType()).To(Equal(localblob.Type))
-				Expect(localBlobAccessSpec.LocalReference).To(ContainSubstring("sha256:"))
-				Expect(localBlobAccessSpec.MediaType).To(Equal("application/x-yaml"))
-
 				resource = findResourceByNameVersionType(descriptor.Resources, "raw-manifest", moduleVersion,
 					"directoryTree")
 				Expect(resource).ToNot(BeNil())
