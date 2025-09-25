@@ -54,7 +54,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -86,7 +85,6 @@ spec:
 `),
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -119,7 +117,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -146,7 +143,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -177,7 +173,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -206,7 +201,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -228,7 +222,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -251,7 +244,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:             "example.com/component",
-				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
@@ -272,7 +264,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:             "example.com/component",
-				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
@@ -293,7 +284,6 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -312,7 +302,6 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -335,7 +324,6 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -358,7 +346,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -421,7 +408,7 @@ func assertCommon(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
-	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "namespace: \"\"")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.NotContains(t, mockFS.writtenTemplate, "---")
 	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
