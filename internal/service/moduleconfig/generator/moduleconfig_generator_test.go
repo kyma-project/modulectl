@@ -127,7 +127,6 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Mandatory:        false,
 		RequiresDowntime: false,
 		DefaultCR:        defaultCR,
-		Namespace:        "kcp-system",
 		Security:         "path/to/securityConfig",
 		Labels:           map[string]string{"label1": "value1"},
 		Annotations:      map[string]string{"annotation1": "value1"},

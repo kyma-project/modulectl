@@ -58,18 +58,6 @@ func ValidateModuleVersion(version string) error {
 	return nil
 }
 
-func ValidateModuleNamespace(namespace string) error {
-	if namespace == "" {
-		return fmt.Errorf("opts.ModuleNamespace must not be empty: %w", commonerrors.ErrInvalidOption)
-	}
-
-	if err := ValidateNamespace(namespace); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ValidateNamespace(namespace string) error {
 	if len(namespace) > namespaceMaxLength {
 		return fmt.Errorf("opts.ModuleNamespace length must not exceed %q characters: %w",

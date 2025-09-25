@@ -95,7 +95,6 @@ type ModuleConfig struct {
 	AssociatedResources []*metav1.GroupVersionKind `comment:"optional, optional, resources that should be cleaned up with the module deletion"                                                  yaml:"associatedResources"`
 	Resources           Resources                  `comment:"optional, additional resources of the module that may be fetched"                                                                  yaml:"resources,omitempty"`
 	RequiresDowntime    bool                       `comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"     yaml:"requiresDowntime"`
-	Namespace           string                     `comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"                                             yaml:"namespace"`
 	Internal            bool                       `comment:"optional, default=false, indicates whether the module is internal"                                                                 yaml:"internal"`
 	Beta                bool                       `comment:"optional, default=false, indicates whether the module is beta"                                                                     yaml:"beta"`
 }

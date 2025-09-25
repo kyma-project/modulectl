@@ -98,52 +98,6 @@ func TestValidateModuleVersion(t *testing.T) {
 	}
 }
 
-func TestValidateModuleNamespace(t *testing.T) {
-	tests := []struct {
-		name            string
-		moduleNamespace string
-		wantErr         bool
-	}{
-		{
-			name:            "empty module namespace",
-			moduleNamespace: "",
-			wantErr:         true,
-		},
-		{
-			name:            "valid module namespace",
-			moduleNamespace: "kyma-system",
-			wantErr:         false,
-		},
-		{
-			name:            "invalid module namespace - whitespaces",
-			moduleNamespace: " kyma-system ",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - contains capital letters",
-			moduleNamespace: "Kyma-System",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - contains special characters",
-			moduleNamespace: "kyma_system",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - starts with hyphen",
-			moduleNamespace: "-kyma-system",
-			wantErr:         true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validation.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
-				t.Errorf("ValidateModuleNamespace() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestValidateNamespace(t *testing.T) {
 	tests := []struct {
 		name            string

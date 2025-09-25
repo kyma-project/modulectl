@@ -43,7 +43,7 @@ const (
 kind: ModuleTemplate
 metadata:
   name: {{.ResourceName}}
-  namespace: {{.Namespace}}
+  namespace: ""
 {{- with .Labels}}
   labels:
     {{- range $key, $value := . }}
@@ -164,7 +164,6 @@ func (s *Service) GenerateModuleTemplate(
 	mtData := moduleTemplateData{
 		ModuleName:          shortName,
 		ResourceName:        moduleTemplateName,
-		Namespace:           moduleConfig.Namespace,
 		ModuleVersion:       moduleConfig.Version,
 		Descriptor:          covertedDescriptor,
 		Repository:          moduleConfig.Repository,

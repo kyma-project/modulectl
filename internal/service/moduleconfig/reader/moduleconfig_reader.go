@@ -53,10 +53,6 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate module version: %w", err)
 	}
 
-	if err := validation.ValidateModuleNamespace(moduleConfig.Namespace); err != nil {
-		return fmt.Errorf("failed to validate module namespace: %w", err)
-	}
-
 	if moduleConfig.Manifest.IsURL() {
 		if moduleConfig.Manifest.URL().Scheme != "https" {
 			return fmt.Errorf(
@@ -167,10 +163,6 @@ func ParseModuleConfig(configFilePath string, fileSystem FileSystem) (*contentpr
 	moduleConfig := &contentprovider.ModuleConfig{}
 	if err := yaml.Unmarshal(moduleConfigData, moduleConfig); err != nil {
 		return nil, fmt.Errorf("failed to parse module config file: %w", err)
-	}
-
-	if moduleConfig.Namespace == "" {
-		moduleConfig.Namespace = "kcp-system"
 	}
 
 	return moduleConfig, nil

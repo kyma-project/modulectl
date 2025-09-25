@@ -46,7 +46,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	}, result.Icons)
 	require.False(t, result.Mandatory)
 	require.False(t, result.RequiresDowntime)
-	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
@@ -89,7 +88,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("./test"), // valid local file path
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -104,7 +102,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -122,7 +119,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -138,7 +134,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -157,7 +152,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "invalid name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -175,7 +169,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "invalid version",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -187,29 +180,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				commonerrors.ErrInvalidOption),
 		},
 		{
-			name: "invalid module namespace",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:          "github.com/module-name",
-				Version:       "0.0.1",
-				Namespace:     "invalid namespace",
-				Manifest:      exampleManifest,
-				Repository:    exampleRepository,
-				Documentation: exampleDocumentation,
-				Icons: contentprovider.Icons{
-					"module-icon": exampleIcon,
-				},
-			},
-			expectedError: fmt.Errorf(
-				"namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
-				commonerrors.ErrInvalidOption,
-			),
-		},
-		{
 			name: "empty manifest path",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      emptyManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -225,7 +199,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    "",
 				Documentation: exampleDocumentation,
@@ -241,7 +214,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    "some repository",
 				Documentation: exampleDocumentation,
@@ -257,7 +229,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: "",
@@ -273,7 +244,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: "some documentation",
@@ -291,7 +261,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -305,7 +274,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -321,7 +289,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -337,7 +304,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -356,7 +322,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -377,7 +342,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -396,7 +360,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -415,7 +378,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("file://path/to/manifest"),
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -433,7 +395,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				DefaultCR:     contentprovider.MustUrlOrLocalFile("file://path/to/defaultCR"),
 				Repository:    exampleRepository,
@@ -630,7 +591,6 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Mandatory:        false,
 	RequiresDowntime: false,
 	DefaultCR:        contentprovider.MustUrlOrLocalFile("https://example.com/path/to/defaultCR"),
-	Namespace:        "kcp-system",
 	Security:         "path/to/securityConfig",
 	Labels:           map[string]string{"label1": "value1"},
 	Annotations:      map[string]string{"annotation1": "value1"},
