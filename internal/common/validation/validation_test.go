@@ -1,7 +1,6 @@
 package validation_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/kyma-project/modulectl/internal/common/validation"
@@ -94,52 +93,6 @@ func TestValidateModuleVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateModuleVersion(tt.moduleVersion); (err != nil) != tt.wantErr {
 				t.Errorf("ValidateModuleVersion() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestValidateModuleNamespace(t *testing.T) {
-	tests := []struct {
-		name            string
-		moduleNamespace string
-		wantErr         bool
-	}{
-		{
-			name:            "empty module namespace",
-			moduleNamespace: "",
-			wantErr:         true,
-		},
-		{
-			name:            "valid module namespace",
-			moduleNamespace: "kyma-system",
-			wantErr:         false,
-		},
-		{
-			name:            "invalid module namespace - whitespaces",
-			moduleNamespace: " kyma-system ",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - contains capital letters",
-			moduleNamespace: "Kyma-System",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - contains special characters",
-			moduleNamespace: "kyma_system",
-			wantErr:         true,
-		},
-		{
-			name:            "invalid module namespace - starts with hyphen",
-			moduleNamespace: "-kyma-system",
-			wantErr:         true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validation.ValidateModuleNamespace(tt.moduleNamespace); (err != nil) != tt.wantErr {
-				t.Errorf("ValidateModuleNamespace() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -241,8 +194,8 @@ func TestValidateMapEntries(t *testing.T) {
 		{
 			name: "valid resources",
 			resources: map[string]string{
-				"first":  "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
-				"second": "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				"first":  "https://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
+				"second": "https://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: false,
 		},
@@ -263,7 +216,7 @@ func TestValidateMapEntries(t *testing.T) {
 		{
 			name: "non-https schema",
 			resources: map[string]string{
-				"first": "http://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				"first": "http://github.com/somerepo/releases/download/1.0.1/template-operator.yaml",
 			},
 			wantErr: true,
 		},
@@ -271,7 +224,6 @@ func TestValidateMapEntries(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateMapEntries(tt.resources); (err != nil) != tt.wantErr {
-				fmt.Println(err.Error())
 				t.Errorf("ValidateMapEntries() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -318,7 +270,6 @@ func TestValidateIsValidHttpsUrl(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := validation.ValidateIsValidHTTPSURL(tt.url); (err != nil) != tt.wantErr {
-				fmt.Println(err.Error())
 				t.Errorf("ValidateIsValidUrl() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -19,7 +19,10 @@ import (
 func TestGenerateTarArchive(t *testing.T) {
 	t.Run("should generate tar data successfully", func(t *testing.T) {
 		// given
-		expectedData := []byte("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+		expectedData := []byte(
+			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+				"Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+		)
 
 		mockFs := memoryfs.New()
 		err := mockFs.MkdirAll("test/path", 0o755)
@@ -65,8 +68,18 @@ func TestGenerateTarArchive(t *testing.T) {
 		// when
 		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
-		require.ErrorContains(t, err, "unable to get file info for", "error should be specific enough to identify it's origin")
-		require.ErrorContains(t, err, "file does not exist", "error should contain additional details from the underlying file system")
+		require.ErrorContains(
+			t,
+			err,
+			"unable to get file info for",
+			"error should be specific enough to identify it's origin",
+		)
+		require.ErrorContains(
+			t,
+			err,
+			"file does not exist",
+			"error should contain additional details from the underlying file system",
+		)
 		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
 	})
 	t.Run("should return an error when file can't be open", func(t *testing.T) {
@@ -89,7 +102,12 @@ func TestGenerateTarArchive(t *testing.T) {
 		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
 		require.ErrorContains(t, err, "unable to open file", "error should be specific enough to identify it's origin")
-		require.ErrorContains(t, err, "hard drive joined the resistance", "error should contain additional details from the underlying file system")
+		require.ErrorContains(
+			t,
+			err,
+			"hard drive joined the resistance",
+			"error should contain additional details from the underlying file system",
+		)
 		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
 	})
 
@@ -116,16 +134,26 @@ func TestGenerateTarArchive(t *testing.T) {
 		// when
 		tarData, err := afs.ArchiveFile("test/path/file.txt")
 		require.Error(t, err, "expected error when file does not exist")
-		require.ErrorContains(t, err, "unable to copy file data", "error should be specific enough to identify it's origin")
-		require.ErrorContains(t, err, "file decided to take a vacation", "error should contain additional details from the underlying file system")
+		require.ErrorContains(
+			t,
+			err,
+			"unable to copy file data",
+			"error should be specific enough to identify it's origin",
+		)
+		require.ErrorContains(
+			t,
+			err,
+			"file decided to take a vacation",
+			"error should contain additional details from the underlying file system",
+		)
 		assert.Nil(t, tarData, "tarData should be nil when file does not exist")
 	})
 }
 
 // VerifyTar inspects the tar archive in data[] and performs basic checks for GNU tar compliance:
 //  1. Valid structure (can be fully read by archive/tar)
-//  2. Proper 1024-byte trailer of zeroes at the end: "[...] an archive
-//     consists of a series of file entries terminated by an end-of-archive entry, which consists of two 512 blocks of zero bytes."
+//  2. Proper 1024-byte trailer of zeroes at the end: "[...] an archive consists of a series of file entries terminated
+//     by an end-of-archive entry, which consists of two 512 blocks of zero bytes.
 func verifyTar(data []byte) error {
 	// Structural check via tar.Reader
 	r := bytes.NewReader(data)
@@ -158,7 +186,8 @@ func verifyTar(data []byte) error {
 	return nil
 }
 
-// A wrapper around vfs.File that allows to simulate read errors when a value of mockFile is used as a source in io.Copy().
+// A wrapper around vfs.File that allows to simulate read errors
+// when a value of mockFile is used as a source in io.Copy().
 type mockFile struct {
 	vfs.File
 
@@ -173,7 +202,7 @@ func (m *mockFile) WriteTo(w io.Writer) (int64, error) {
 	panic("mockFile is intended to be used only when readError is set")
 }
 
-// If Close() is overridden like this it works even if the mockFile.File is nil
+// If Close() is overridden like this it works even if the mockFile.File is nil.
 func (m *mockFile) Close() error {
 	return nil
 }

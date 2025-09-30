@@ -105,7 +105,12 @@ func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsError_WhenInvalidManag
 	err := config.ValidateBDBAImageTags("1.2.3")
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:1.2.3'")
+	require.Contains(
+		t,
+		err.Error(),
+		"no image with the correct manager version found in BDBA images"+
+			" 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:1.2.3'",
+	)
 }
 
 func Test_SecurityScanConfig_ValidateBDBAImageTags_ReturnsNoError_WhenValidTagsProvided(t *testing.T) {

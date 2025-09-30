@@ -67,7 +67,7 @@ func ValidateAndParseImageInfo(imageURL string) (*ImageInfo, error) {
 	return info, nil
 }
 
-// ParseImageInfo parses image reference and extracts all components
+// ParseImageInfo parses image reference and extracts all components.
 func ParseImageInfo(imageURL string) (*ImageInfo, error) {
 	if imageURL == "" {
 		return nil, fmt.Errorf("failed to parse image reference: %w", ErrEmptyImageURL)

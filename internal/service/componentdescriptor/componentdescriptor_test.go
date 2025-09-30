@@ -218,7 +218,11 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDigestImage_AppendsResourceWithC
 	if !ok {
 		t.Fatalf("expected AccessSpec type, got %T", resource.Access)
 	}
-	require.Equal(t, "alpine@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab", access.ImageReference)
+	require.Equal(
+		t,
+		"alpine@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+		access.ImageReference,
+	)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *testing.T) {
@@ -499,7 +503,7 @@ func TestAddOciArtifactsToDescriptor_WhenImagesContainEmptyOrWhitespace_SkipsAnd
 	require.Equal(t, "alpine", descriptor.Resources[0].Name)
 }
 
-// Test helper functions
+// Test helper functions.
 func createEmptyDescriptor() *compdesc.ComponentDescriptor {
 	descriptor := &compdesc.ComponentDescriptor{
 		ComponentSpec: compdesc.ComponentSpec{

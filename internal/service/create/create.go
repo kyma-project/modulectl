@@ -58,7 +58,6 @@ type ComponentConstructorService interface {
 		images []string,
 	) error
 	AddResources(componentConstructor *component.Constructor,
-		moduleConfig *contentprovider.ModuleConfig,
 		resourcePaths *types.ResourcePaths,
 	) error
 	CreateConstructorFile(componentConstructor *component.Constructor,
@@ -108,9 +107,8 @@ type CRDParserService interface {
 }
 
 type ModuleResourceService interface {
-	GenerateModuleResources(moduleConfig *contentprovider.ModuleConfig,
-		resourcesPaths *types.ResourcePaths,
-	) ([]resources.Resource, error)
+	GenerateModuleResources(resourcesPaths *types.ResourcePaths, version string,
+	) []resources.Resource
 }
 
 type ImageVersionVerifierService interface {
@@ -240,7 +238,8 @@ func (s *Service) Run(opts Options) error {
 	}
 
 	configFilePath := path.Dir(opts.ConfigFile)
-	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module
+	// config file location (usually the same directory).
 	manifestFilePath, err := s.manifestFileResolver.Resolve(moduleConfig.Manifest, configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to resolve manifest file: %w", err)
@@ -248,7 +247,8 @@ func (s *Service) Run(opts Options) error {
 
 	var defaultCRFilePath string
 	if !moduleConfig.DefaultCR.IsEmpty() {
-		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the module config file location (usually the same directory).
+		// If the defaultCR is a local file reference, it's entry in the module config file will be relative to the
+		// module config file location (usually the same directory).
 		defaultCRFilePath, err = s.defaultCRFileResolver.Resolve(moduleConfig.DefaultCR, configFilePath)
 		if err != nil {
 			return fmt.Errorf("failed to resolve default CR file: %w", err)
@@ -307,8 +307,7 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	}
 
 	opts.Out.Write("- Generating module resources\n")
-	if err = s.componentConstructorService.AddResources(constructor, moduleConfig,
-		resourcePaths); err != nil {
+	if err = s.componentConstructorService.AddResources(constructor, resourcePaths); err != nil {
 		return fmt.Errorf("failed to add resources to component constructor: %w", err)
 	}
 
@@ -367,11 +366,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		}
 	}
 
-	moduleResources, err := s.moduleResourceService.GenerateModuleResources(moduleConfig, resourcePaths)
-	if err != nil {
-		return fmt.Errorf("failed to generate module resources: %w", err)
-	}
-
+	moduleResources := s.moduleResourceService.GenerateModuleResources(resourcePaths, moduleConfig.Version)
 	if err = s.componentArchiveService.AddModuleResourcesToArchive(archive,
 		moduleResources); err != nil {
 		return fmt.Errorf("failed to add module resources to component archive: %w", err)
@@ -415,9 +410,12 @@ func (s *Service) ensureComponentVersionDoesNotExist(archive *comparch.Component
 
 	if opts.OverwriteComponentVersion {
 		opts.Out.Write(
-			fmt.Sprintf("\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
+			fmt.Sprintf(
+				"\tComponent %s in version %s already exists and is overwritten. Use this for testing purposes only.\n",
 				archive.GetName(),
-				archive.GetVersion()))
+				archive.GetVersion(),
+			),
+		)
 		return nil
 	}
 

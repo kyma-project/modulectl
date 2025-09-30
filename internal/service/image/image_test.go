@@ -45,7 +45,15 @@ func TestIsImageReferenceCandidate_ValidImagesWithTagsAndDigests(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := image.IsImageReferenceCandidate(tt.input)
-			require.Equal(t, tt.expected, result, "IsImageReferenceCandidate(%q) = %v, want %v", tt.input, result, tt.expected)
+			require.Equal(
+				t,
+				tt.expected,
+				result,
+				"IsImageReferenceCandidate(%q) = %v, want %v",
+				tt.input,
+				result,
+				tt.expected,
+			)
 		})
 	}
 }
@@ -96,7 +104,15 @@ func TestIsImageReferenceCandidate_InvalidImages(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := image.IsImageReferenceCandidate(tt.input)
-			require.Equal(t, tt.expected, result, "IsImageReferenceCandidate(%q) = %v, want %v", tt.input, result, tt.expected)
+			require.Equal(
+				t,
+				tt.expected,
+				result,
+				"IsImageReferenceCandidate(%q) = %v, want %v",
+				tt.input,
+				result,
+				tt.expected,
+			)
 		})
 	}
 }
@@ -214,7 +230,15 @@ func TestParseImageInfo_InvalidImages(t *testing.T) {
 			require.Error(t, err, "ParseImageInfo(%q) expected error but got info: %+v", tt.imageURL, info)
 
 			if tt.expectedError != nil {
-				require.ErrorIs(t, err, tt.expectedError, "ParseImageInfo(%q) error = %v, want %v", tt.imageURL, err, tt.expectedError)
+				require.ErrorIs(
+					t,
+					err,
+					tt.expectedError,
+					"ParseImageInfo(%q) error = %v, want %v",
+					tt.imageURL,
+					err,
+					tt.expectedError,
+				)
 			}
 		})
 	}
@@ -303,7 +327,15 @@ func TestValidateAndParseImageInfo_InvalidImagesWithDisallowedTags(t *testing.T)
 		t.Run(tt.name, func(t *testing.T) {
 			info, err := image.ValidateAndParseImageInfo(tt.imageURL)
 			require.Error(t, err, "ValidateAndParseImageInfo(%q) expected error but got info: %+v", tt.imageURL, info)
-			require.ErrorIs(t, err, tt.expectedError, "ValidateAndParseImageInfo(%q) error = %v, want %v", tt.imageURL, err, tt.expectedError)
+			require.ErrorIs(
+				t,
+				err,
+				tt.expectedError,
+				"ValidateAndParseImageInfo(%q) error = %v, want %v",
+				tt.imageURL,
+				err,
+				tt.expectedError,
+			)
 		})
 	}
 }
@@ -365,8 +397,12 @@ func TestIsMainOrLatestTag_ValidCases(t *testing.T) {
 	}
 }
 
-// Test helper functions
-func assertImageInfo(t *testing.T, info *image.ImageInfo, expectedName, expectedTag, expectedDigest, expectedFullURL string) {
+// Test helper functions.
+func assertImageInfo(
+	t *testing.T,
+	info *image.ImageInfo,
+	expectedName, expectedTag, expectedDigest, expectedFullURL string,
+) {
 	t.Helper()
 
 	require.Equal(t, expectedName, info.Name, "Name mismatch")

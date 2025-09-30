@@ -127,7 +127,12 @@ func TestNewOciArtifactResource_WhenValidImageWithInvalidTag_CreatesResourceWith
 }
 
 func TestNewOciArtifactResource_WhenComplexTagNormalization_HandlesSpecialCharacters(t *testing.T) {
-	imageInfo := createImageInfo("registry.io/myimage:feature/branch@with#special$chars", "myimage", "feature/branch@with#special$chars", "")
+	imageInfo := createImageInfo(
+		"registry.io/myimage:feature/branch@with#special$chars",
+		"myimage",
+		"feature/branch@with#special$chars",
+		"",
+	)
 
 	result, err := resources.NewOciArtifactResource(imageInfo)
 

@@ -10,13 +10,17 @@ import (
 func Test_DefaultCR_GetDefaultContent_ReturnsExpectedValue(t *testing.T) {
 	defaultCRContentProvider := contentprovider.NewDefaultCR()
 
-	expectedDefault := `# This is the file that contains the defaultCR for your module, which is the Custom Resource that will be created upon module enablement.
-# Make sure this file contains *ONLY* the Custom Resource (not the Custom Resource Definition, which should be a part of your module manifest)
+	expectedDefault := `# This is the file that contains the defaultCR for your module, ` +
+		`which is the Custom Resource that will be created upon module enablement.
+# Make sure this file contains *ONLY* the Custom Resource (not the Custom Resource Definition, ` +
+		`which should be a part of your module manifest)
 
 `
 
 	defaultCRGeneratedDefaultContentWithNil, _ := defaultCRContentProvider.GetDefaultContent(nil)
-	defaultCRGeneratedDefaultContentWithEmptyMap, _ := defaultCRContentProvider.GetDefaultContent(make(types.KeyValueArgs))
+	defaultCRGeneratedDefaultContentWithEmptyMap, _ := defaultCRContentProvider.GetDefaultContent(
+		make(types.KeyValueArgs),
+	)
 
 	t.Parallel()
 	tests := []struct {

@@ -43,7 +43,7 @@ const (
 kind: ModuleTemplate
 metadata:
   name: {{.ResourceName}}
-  namespace: {{.Namespace}}
+  namespace: ""
 {{- with .Labels}}
   labels:
     {{- range $key, $value := . }}
@@ -164,7 +164,6 @@ func (s *Service) GenerateModuleTemplate(
 	mtData := moduleTemplateData{
 		ModuleName:          shortName,
 		ResourceName:        moduleTemplateName,
-		Namespace:           moduleConfig.Namespace,
 		ModuleVersion:       moduleConfig.Version,
 		Descriptor:          covertedDescriptor,
 		Repository:          moduleConfig.Repository,
@@ -179,7 +178,8 @@ func (s *Service) GenerateModuleTemplate(
 	}
 	if moduleConfig.Manifest.IsURL() {
 		mtData.Resources = contentprovider.Resources{
-			"rawManifest": moduleConfig.Manifest.String(), // defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+			// defaults rawManifest to Manifest; may be overwritten by explicitly provided entries
+			"rawManifest": moduleConfig.Manifest.String(),
 		}
 	}
 
@@ -207,7 +207,9 @@ func (s *Service) GenerateModuleTemplate(
 	return nil
 }
 
-func ConvertDescriptorIfNotNil(descriptorToRender *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptorVersion, error) {
+func ConvertDescriptorIfNotNil(
+	descriptorToRender *compdesc.ComponentDescriptor,
+) (*compdesc.ComponentDescriptorVersion, error) {
 	var covertedDescriptor *compdesc.ComponentDescriptorVersion
 	if descriptorToRender != nil {
 		converted, err := compdesc.Convert(descriptorToRender)

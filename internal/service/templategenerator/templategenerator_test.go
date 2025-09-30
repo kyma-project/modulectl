@@ -31,7 +31,8 @@ func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.
 }
 
 func TestGenerateModuleTemplate_Success(t *testing.T) {
-	commonManifestValue := "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"
+	commonManifestValue := "https://github.com/kyma-project/template-operator/releases/" +
+		"download/1.0.1/template-operator.yaml"
 	commonManifest := contentprovider.MustUrlOrLocalFile(commonManifestValue)
 
 	defaultData := []byte(`apiVersion: operator.kyma-project.io/v1alpha1
@@ -53,13 +54,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
 				Manifest:    commonManifest,
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -83,7 +85,6 @@ spec:
 `),
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -99,9 +100,11 @@ spec:
 			name: "With Overwritten Raw Manifest",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
-				Name:      "example.com/component",
-				Manifest:  commonManifest,
-				Resources: contentprovider.Resources{"rawManifest": "https://some.other/location/template-operator.yaml"},
+				Name:     "example.com/component",
+				Manifest: commonManifest,
+				Resources: contentprovider.Resources{
+					"rawManifest": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -114,7 +117,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -141,7 +143,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -172,7 +173,6 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
@@ -201,13 +201,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   false,
 				Manifest:    commonManifest,
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -221,13 +222,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
 				Manifest:    commonManifest,
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -242,13 +244,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:             "example.com/component",
-				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
 				RequiresDowntime: true,
 				Manifest:         commonManifest,
-				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -261,13 +264,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:             "example.com/component",
-				Namespace:        "default",
 				Version:          "1.0.0",
 				Labels:           map[string]string{"key": "value"},
 				Annotations:      map[string]string{"annotation": "value"},
 				RequiresDowntime: false,
 				Manifest:         commonManifest,
-				Resources:        contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -280,12 +284,13 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Manifest:    commonManifest,
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -297,13 +302,16 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
-				Manifest:    contentprovider.MustUrlOrLocalFile("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"),
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
-				Internal:    true,
+				Manifest: contentprovider.MustUrlOrLocalFile(
+					"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				),
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
+				Internal: true,
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -316,13 +324,16 @@ spec:
 			data: nil,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
-				Manifest:    contentprovider.MustUrlOrLocalFile("https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"),
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
-				Beta:        true,
+				Manifest: contentprovider.MustUrlOrLocalFile(
+					"https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml",
+				),
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
+				Beta: true,
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -335,13 +346,14 @@ spec:
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
-				Namespace:   "default",
 				Version:     "1.0.0",
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Mandatory:   true,
 				Manifest:    commonManifest,
-				Resources:   contentprovider.Resources{"someResource": "https://some.other/location/template-operator.yaml"},
+				Resources: contentprovider.Resources{
+					"someResource": "https://some.other/location/template-operator.yaml",
+				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
@@ -396,7 +408,7 @@ func assertCommon(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "version: 1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
-	require.Contains(t, mockFS.writtenTemplate, "default")
+	require.Contains(t, mockFS.writtenTemplate, "namespace: \"\"")
 	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.NotContains(t, mockFS.writtenTemplate, "---")
 	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")

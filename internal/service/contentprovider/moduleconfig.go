@@ -80,31 +80,30 @@ func (s *ModuleConfigProvider) validateArgs(args types.KeyValueArgs) error {
 }
 
 type ModuleConfig struct {
-	Name                string                     `yaml:"name" comment:"required, the name of the module"`
-	Version             string                     `yaml:"version" comment:"required, the version of the module"`
-	Manifest            UrlOrLocalFile             `yaml:"manifest" comment:"required, reference to the manifest, must be a URL or a local file path"`
-	Repository          string                     `yaml:"repository" comment:"required, reference to the repository, must be a URL"`
-	Documentation       string                     `yaml:"documentation" comment:"required, reference to the documentation, must be a URL"`
-	Icons               Icons                      `yaml:"icons,omitempty" comment:"required, icons used for UI"`
-	DefaultCR           UrlOrLocalFile             `yaml:"defaultCR" comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL or a local file path"`
-	Mandatory           bool                       `yaml:"mandatory" comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"`
-	Security            string                     `yaml:"security" comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"`
-	Labels              map[string]string          `yaml:"labels" comment:"optional, additional labels for the generated ModuleTemplate CR"`
-	Annotations         map[string]string          `yaml:"annotations" comment:"optional, additional annotations for the generated ModuleTemplate CR"`
-	Manager             *Manager                   `yaml:"manager" comment:"optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module"`
-	AssociatedResources []*metav1.GroupVersionKind `yaml:"associatedResources" comment:"optional, optional, resources that should be cleaned up with the module deletion"`
-	Resources           Resources                  `yaml:"resources,omitempty" comment:"optional, additional resources of the module that may be fetched"`
-	RequiresDowntime    bool                       `yaml:"requiresDowntime" comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"`
-	Namespace           string                     `yaml:"namespace" comment:"optional, default=kcp-system, the namespace where the ModuleTemplate will be deployed"`
-	Internal            bool                       `yaml:"internal" comment:"optional, default=false, indicates whether the module is internal"`
-	Beta                bool                       `yaml:"beta" comment:"optional, default=false, indicates whether the module is beta"`
+	Name                string                     `comment:"required, the name of the module"                                                                                                  yaml:"name"`
+	Version             string                     `comment:"required, the version of the module"                                                                                               yaml:"version"`
+	Manifest            UrlOrLocalFile             `comment:"required, reference to the manifest, must be a URL or a local file path"                                                           yaml:"manifest"`
+	Repository          string                     `comment:"required, reference to the repository, must be a URL"                                                                              yaml:"repository"`
+	Documentation       string                     `comment:"required, reference to the documentation, must be a URL"                                                                           yaml:"documentation"`
+	Icons               Icons                      `comment:"required, icons used for UI"                                                                                                       yaml:"icons,omitempty"`
+	DefaultCR           UrlOrLocalFile             `comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL or a local file path"                   yaml:"defaultCR"` //nolint:tagliatelle // prefer defaultCR over defaultCr
+	Mandatory           bool                       `comment:"optional, default=false, indicates whether the module is mandatory to be installed on all clusters"                                yaml:"mandatory"`
+	Security            string                     `comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"                             yaml:"security"`
+	Labels              map[string]string          `comment:"optional, additional labels for the generated ModuleTemplate CR"                                                                   yaml:"labels"`
+	Annotations         map[string]string          `comment:"optional, additional annotations for the generated ModuleTemplate CR"                                                              yaml:"annotations"`
+	Manager             *Manager                   `comment:"optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module" yaml:"manager"`
+	AssociatedResources []*metav1.GroupVersionKind `comment:"optional, optional, resources that should be cleaned up with the module deletion"                                                  yaml:"associatedResources"`
+	Resources           Resources                  `comment:"optional, additional resources of the module that may be fetched"                                                                  yaml:"resources,omitempty"`
+	RequiresDowntime    bool                       `comment:"optional, default=false, indicates whether the module requires downtime to support maintenance windows during module upgrades"     yaml:"requiresDowntime"`
+	Internal            bool                       `comment:"optional, default=false, indicates whether the module is internal"                                                                 yaml:"internal"`
+	Beta                bool                       `comment:"optional, default=false, indicates whether the module is beta"                                                                     yaml:"beta"`
 }
 
 type Manager struct {
-	metav1.GroupVersionKind `yaml:",inline" comment:"required, the GVK of the manager"`
+	metav1.GroupVersionKind `comment:"required, the GVK of the manager" yaml:",inline"`
 
-	Name      string `yaml:"name" comment:"required, the name of the manager"`
-	Namespace string `yaml:"namespace" comment:"optional, the path to the manager"`
+	Name      string `comment:"required, the name of the manager" yaml:"name"`
+	Namespace string `comment:"optional, the path to the manager" yaml:"namespace"`
 }
 
 // Icons represents a map of icon names to links.

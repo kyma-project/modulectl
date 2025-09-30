@@ -12,21 +12,21 @@ import (
 )
 
 type TestStruct struct {
-	Name           string `yaml:"name" comment:"required, the name of the module"`
-	Count          int    `yaml:"count" comment:"required, the count of items"`
-	Active         bool   `yaml:"active" comment:"optional, indicates if the module is active"`
-	AdditionalInfo Nested `yaml:"additionalInfo" comment:"optional, additional information about the module"`
+	Name           string `comment:"required, the name of the module"                  yaml:"name"`
+	Count          int    `comment:"required, the count of items"                      yaml:"count"`
+	Active         bool   `comment:"optional, indicates if the module is active"       yaml:"active"`
+	AdditionalInfo Nested `comment:"optional, additional information about the module" yaml:"additionalInfo"`
 }
 
 type Nested struct {
-	NestedName  string       `yaml:"nestedName" comment:"required, the name of the nested structure"`
-	NestedCount int          `yaml:"nestedCount" comment:"required, the count of items in the nested structure"`
-	NestedInner DoubleNested `yaml:"nestedInner" comment:"optional, additional nested structure"`
+	NestedName  string       `comment:"required, the name of the nested structure"           yaml:"nestedName"`
+	NestedCount int          `comment:"required, the count of items in the nested structure" yaml:"nestedCount"`
+	NestedInner DoubleNested `comment:"optional, additional nested structure"                yaml:"nestedInner"`
 }
 
 type DoubleNested struct {
-	DoubleNestedName  string `yaml:"doubleNestedName" comment:"required, the name of the double nested structure"`
-	DoubleNestedCount int    `yaml:"doubleNestedCount" comment:"required, the count of items in the double nested structure"`
+	DoubleNestedName  string `comment:"required, the name of the double nested structure"           yaml:"doubleNestedName"`
+	DoubleNestedCount int    `comment:"required, the count of items in the double nested structure" yaml:"doubleNestedCount"`
 }
 
 func TestSerializeWithoutMarshalYAML(t *testing.T) {
@@ -63,21 +63,21 @@ additionalInfo: # optional, additional information about the module
 }
 
 type TestStructWithMarshalYAML struct {
-	Name           string            `yaml:"name" comment:"required, the name of the module"`
-	Count          int               `yaml:"count" comment:"required, the count of items"`
-	Active         bool              `yaml:"active" comment:"optional, indicates if the module is active"`
-	AdditionalInfo NestedWithMarshal `yaml:"additionalInfo" comment:"optional, additional information about the module"`
+	Name           string            `comment:"required, the name of the module"                  yaml:"name"`
+	Count          int               `comment:"required, the count of items"                      yaml:"count"`
+	Active         bool              `comment:"optional, indicates if the module is active"       yaml:"active"`
+	AdditionalInfo NestedWithMarshal `comment:"optional, additional information about the module" yaml:"additionalInfo"`
 }
 
 type NestedWithMarshal struct {
-	NestedName  string                  `yaml:"nestedName" comment:"required, the name of the nested structure"`
-	NestedCount int                     `yaml:"nestedCount" comment:"required, the count of items in the nested structure"`
-	NestedInner DoubleNestedWithMarshal `yaml:"nestedInner" comment:"optional, additional nested structure"`
+	NestedName  string                  `comment:"required, the name of the nested structure"           yaml:"nestedName"`
+	NestedCount int                     `comment:"required, the count of items in the nested structure" yaml:"nestedCount"`
+	NestedInner DoubleNestedWithMarshal `comment:"optional, additional nested structure"                yaml:"nestedInner"`
 }
 
 type DoubleNestedWithMarshal struct {
-	DoubleNestedName  string `yaml:"doubleNestedName" comment:"required, the name of the double nested structure"`
-	DoubleNestedCount int    `yaml:"doubleNestedCount" comment:"required, the count of items in the double nested structure"`
+	DoubleNestedName  string `comment:"required, the name of the double nested structure"           yaml:"doubleNestedName"`
+	DoubleNestedCount int    `comment:"required, the count of items in the double nested structure" yaml:"doubleNestedCount"`
 }
 
 func (d DoubleNestedWithMarshal) MarshalYAML() (any, error) {
@@ -117,7 +117,7 @@ additionalInfo: # optional, additional information about the module
 	assert.YAMLEq(t, expectedYAML, ymlData, "YAML output should match the expected format")
 }
 
-// Helper function to (s)trip (l)eading (n)ew(l)ines
+// Helper function to (s)trip (l)eading (n)ew(l)ines.
 func slnl(s string) string {
 	return strings.TrimPrefix(s, "\n")
 }

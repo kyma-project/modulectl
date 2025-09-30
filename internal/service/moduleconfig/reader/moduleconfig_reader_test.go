@@ -19,7 +19,8 @@ const (
 	exampleRepository    = "https://example.com/path/to/repository"
 	exampleDocumentation = "https://example.com/path/to/documentation"
 	exampleIcon          = "https://example.com/path/to/some-icon"
-	exampleRawManifest   = "https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml"
+	exampleRawManifest   = "https://github.com/kyma-project/template-operator/" +
+		"releases/download/1.0.1/template-operator.yaml"
 )
 
 func Test_ParseModuleConfig_ReturnsError_WhenFileReaderReturnsError(t *testing.T) {
@@ -45,7 +46,6 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	}, result.Icons)
 	require.False(t, result.Mandatory)
 	require.False(t, result.RequiresDowntime)
-	require.Equal(t, "kcp-system", result.Namespace)
 	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, map[string]string{"label1": "value1"}, result.Labels)
 	require.Equal(t, map[string]string{"annotation1": "value1"}, result.Annotations)
@@ -88,7 +88,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("./test"), // valid local file path
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -103,7 +102,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -111,14 +109,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate manifest: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "default CR file name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -134,7 +134,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -143,14 +142,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				},
 				DefaultCR: contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: must not be an absolute path: %w", commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate default CR: must not be an absolute path: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "invalid name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -158,15 +159,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"opts.ModuleName must match the required pattern, e.g: 'github.com/path-to/your-repo': %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module version",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "invalid version",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -178,27 +180,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				commonerrors.ErrInvalidOption),
 		},
 		{
-			name: "invalid module namespace",
-			moduleConfig: &contentprovider.ModuleConfig{
-				Name:          "github.com/module-name",
-				Version:       "0.0.1",
-				Namespace:     "invalid namespace",
-				Manifest:      exampleManifest,
-				Repository:    exampleRepository,
-				Documentation: exampleDocumentation,
-				Icons: contentprovider.Icons{
-					"module-icon": exampleIcon,
-				},
-			},
-			expectedError: fmt.Errorf("namespace must match the required pattern, only small alphanumeric characters and hyphens: %w",
-				commonerrors.ErrInvalidOption),
-		},
-		{
 			name: "empty manifest path",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      emptyManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -214,7 +199,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    "",
 				Documentation: exampleDocumentation,
@@ -230,7 +214,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    "some repository",
 				Documentation: exampleDocumentation,
@@ -246,7 +229,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: "",
@@ -262,7 +244,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: "some documentation",
@@ -270,15 +251,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate documentation: 'some documentation' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate documentation: 'some documentation' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "empty icons",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -292,7 +274,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -308,7 +289,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -324,7 +304,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -332,15 +311,17 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": "this is not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate module icons: failed to validate link: 'this is not a URL' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate module icons: failed to validate link:"+
+					" 'this is not a URL' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module resources - not a URL",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -351,15 +332,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"key": "%% not a URL",
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate resources: failed to validate link: '%%%% not a URL' is not a valid URL: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate resources: failed to validate link: '%%%% not a URL' is not a valid URL: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module resources - empty name",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -378,7 +360,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -397,7 +378,6 @@ func Test_ValidateModuleConfig(t *testing.T) {
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      contentprovider.MustUrlOrLocalFile("file://path/to/manifest"),
 				Repository:    exampleRepository,
 				Documentation: exampleDocumentation,
@@ -405,15 +385,16 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate manifest: 'file://path/to/manifest' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate manifest: 'file://path/to/manifest' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 		{
 			name: "invalid module defaultCR - schema is not https",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
-				Namespace:     "kcp-system",
 				Manifest:      exampleManifest,
 				DefaultCR:     contentprovider.MustUrlOrLocalFile("file://path/to/defaultCR"),
 				Repository:    exampleRepository,
@@ -422,8 +403,10 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate default CR: 'file://path/to/defaultCR' is not using https scheme: %w",
-				commonerrors.ErrInvalidOption),
+			expectedError: fmt.Errorf(
+				"failed to validate default CR: 'file://path/to/defaultCR' is not using https scheme: %w",
+				commonerrors.ErrInvalidOption,
+			),
 		},
 	}
 	for _, test := range tests {
@@ -608,7 +591,6 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Mandatory:        false,
 	RequiresDowntime: false,
 	DefaultCR:        contentprovider.MustUrlOrLocalFile("https://example.com/path/to/defaultCR"),
-	Namespace:        "kcp-system",
 	Security:         "path/to/securityConfig",
 	Labels:           map[string]string{"label1": "value1"},
 	Annotations:      map[string]string{"annotation1": "value1"},
