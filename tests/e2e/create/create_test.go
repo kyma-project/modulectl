@@ -1381,7 +1381,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				By("And template should have no descriptor")
-				Expect(template.Spec.Descriptor.Raw).To(BeNil())
+				Expect(string(template.Spec.Descriptor.Raw)).To(MatchJSON(`{}`))
 
 				By("And template should have basic info")
 				Expect(template.Spec.ModuleName).To(Equal("template-operator"))
