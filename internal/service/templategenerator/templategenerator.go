@@ -93,9 +93,11 @@ spec:
     version: {{.GroupVersionKind.Version}}
     kind: {{.GroupVersionKind.Kind}}
 {{- end}}
-{{- with .Descriptor}}
+{{- if .Descriptor}}
   descriptor:
-{{yaml . | printf "%s" | indent 4}}
+{{yaml .Descriptor | printf "%s" | indent 4}}
+{{- else}}
+  descriptor: {}
 {{- end}}
 {{- with .Resources}}
   resources:

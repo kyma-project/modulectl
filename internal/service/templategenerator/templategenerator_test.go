@@ -357,7 +357,7 @@ spec:
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
 				t.Helper()
-				require.NotContains(t, mockFS.writtenTemplate, "descriptor:")
+				require.Contains(t, mockFS.writtenTemplate, "descriptor: {}")
 			},
 		},
 	}
@@ -416,6 +416,7 @@ func assertCommon(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "metadata:")
 	require.Contains(t, mockFS.writtenTemplate, "name: sample-yaml")
 	require.Contains(t, mockFS.writtenTemplate, "spec:")
+	require.Contains(t, mockFS.writtenTemplate, "descriptor:")
 	require.Contains(t, mockFS.writtenTemplate, "resourceFilePath: ./module-data.yaml")
 	require.NotContains(t, mockFS.writtenTemplate, "operator.kyma-project.io/beta")
 	require.NotContains(t, mockFS.writtenTemplate, "operator.kyma-project.io/internal")
