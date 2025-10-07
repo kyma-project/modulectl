@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/distribution/reference v0.6.0
-	github.com/go-git/go-git/v5 v5.16.2
+	github.com/go-git/go-git/v5 v5.16.3
 	github.com/google/go-containerregistry v0.20.6
 	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241220120036-4210b9ef25e5
 	github.com/mandelsoft/goutils v0.0.0-20241227142622-83a787399095
