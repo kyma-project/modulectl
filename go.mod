@@ -7,7 +7,7 @@ require (
 	github.com/distribution/reference v0.6.0
 	github.com/go-git/go-git/v5 v5.16.3
 	github.com/google/go-containerregistry v0.20.6
-	github.com/kyma-project/lifecycle-manager/api v0.0.0-20241220120036-4210b9ef25e5
+	github.com/kyma-project/lifecycle-manager/api v1.0.0
 	github.com/mandelsoft/goutils v0.0.0-20241227142622-83a787399095
 	github.com/mandelsoft/vfs v0.4.4
 	github.com/onsi/ginkgo/v2 v2.26.0
