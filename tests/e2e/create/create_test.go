@@ -1493,7 +1493,7 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	Expect(template.Spec.RequiresDowntime).To(BeFalse())
 
 	By("And module template should not have operator.kyma-project.io/internal label")
-	val, ok = template.Labels[shared.InternalLabel]
+	val, ok := template.Labels[shared.InternalLabel]
 	Expect(val).To(BeEmpty())
 	Expect(ok).To(BeFalse())
 
