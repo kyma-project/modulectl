@@ -228,7 +228,7 @@ func TestConstructor_AddFileResource_RawManifest(t *testing.T) {
 	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
 	require.Equal(t, "/path/to", resource.Input.Path)
 	require.Equal(t, []string{"manifest.yaml"}, resource.Input.IncludeFiles)
-	require.True(t, resource.Input.Compress)
+	require.False(t, resource.Input.Compress)
 }
 
 func TestConstructor_AddFileResource_DefaultCR(t *testing.T) {
@@ -245,7 +245,7 @@ func TestConstructor_AddFileResource_DefaultCR(t *testing.T) {
 	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
 	require.Equal(t, "/path/to", resource.Input.Path)
 	require.Equal(t, []string{"cr.yaml"}, resource.Input.IncludeFiles)
-	require.True(t, resource.Input.Compress)
+	require.False(t, resource.Input.Compress)
 }
 
 func TestConstructor_AddFileResource_UnknownResourceName(t *testing.T) {
