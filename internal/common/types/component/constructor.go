@@ -198,7 +198,7 @@ func (c *Constructor) addFileAsDirResource(resourceName, filePath string) error 
 		Input: &Input{
 			Type:         DirectoryInputType,
 			Path:         dir,
-			Compress:     false,// what could be the branch name and commit message after disabling compression?
+			Compress:     false,
 			IncludeFiles: []string{filepath.Base(filePath)},
 		},
 	})
