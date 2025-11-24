@@ -21,9 +21,9 @@ jobs:
       OCI_REPOSITORY_URL: http://k3d-oci.localhost:5001
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Checkout template-operator
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: kyma-project/template-operator
           path: template-operator
