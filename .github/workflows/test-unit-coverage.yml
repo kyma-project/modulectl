@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out reporting tools
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: kyma-project/qa-toolkit
           path: scripts
@@ -26,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r $pip_requirements
       - name: Check out the sourcecode
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: codebase
       - name: Set up Go
