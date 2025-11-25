@@ -202,16 +202,17 @@ func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T)
 
 	// when
 	err = svc.Run(opts)
-	require.Contains(t, err.Error(), "failed to add images to component descriptor") // error is expected due to stubs
+	require.Contains(t, err.Error(), "failed to add images to component descriptor") // error is expected because\
+	// this legacy code path is not fully stubbed
 
 	// then
 	assert.Equal(t, 1, manifestResolverStub.cleanupTempFilesCallCount,
-		"expected manifest resolver to clean up temp files")
+		"expected manifest resolver to clean up temporary files")
 	assert.Equal(t, 1, defaultCRResolverStub.cleanupTempFilesCallCount,
-		"expected default CR resolver to clean up temp files")
+		"expected default CR resolver to clean up temporary files")
 }
 
-func Test_CreateModule_DoesNotCleanUpTempFiles_WhenRegistryPushIsDisabled(t *testing.T) {
+func Test_CreateModule_DoesNotCleanUpTempFiles_WhenConstructorMode_AndSuccess(t *testing.T) {
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
@@ -222,18 +223,46 @@ func Test_CreateModule_DoesNotCleanUpTempFiles_WhenRegistryPushIsDisabled(t *tes
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().withDisableOCMRegistryPush(true).withOutputConstructorFile("constructor.yaml").
-		build() // component-constructor mode enabled
+	opts := newCreateOptionsBuilder().
+		withOutputConstructorFile("constructor.yaml").
+		withDisableOCMRegistryPush(true). // component-constructor mode enabled
+		build()
 
 	// when
 	err = svc.Run(opts)
-	require.NoError(t, err)
 
 	// then
+	require.NoError(t, err)
 	assert.Equal(t, 0, manifestResolverStub.cleanupTempFilesCallCount,
-		"expected manifest resolver not to clean up temp files")
+		"expected manifest resolver not to clean up temporary files on success")
 	assert.Equal(t, 0, defaultCRResolverStub.cleanupTempFilesCallCount,
-		"expected default CR resolver not to clean up temp files")
+		"expected default CR resolver not to clean up temporary files on success")
+}
+
+func Test_CreateModule_CleansUpTempFiles_WhenConstructorMode_AndError(t *testing.T) {
+	manifestResolverStub := &fileResolverStub{}
+	defaultCRResolverStub := &fileResolverStub{}
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceErrorStub{},
+		&securityConfigServiceStub{}, &componentConstructorServiceStub{}, &componentArchiveServiceStub{},
+		&registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
+		manifestResolverStub, defaultCRResolverStub,
+		&fileExistsStub{})
+	require.NoError(t, err)
+
+	opts := newCreateOptionsBuilder().
+		withOutputConstructorFile("constructor.yaml").
+		withDisableOCMRegistryPush(true). // component-constructor mode enabled
+		build()
+	// when
+	err = svc.Run(opts)
+
+	// then
+	require.Contains(t, err.Error(), "failed to add git sources to constructor")
+	assert.Equal(t, 1, manifestResolverStub.cleanupTempFilesCallCount,
+		"expected manifest resolver to clean up temporary files on error")
+	assert.Equal(t, 1, defaultCRResolverStub.cleanupTempFilesCallCount,
+		"expected default CR resolver to clean up temporary files on error")
 }
 
 type createOptionsBuilder struct {
@@ -365,6 +394,20 @@ func (*gitSourcesServiceStub) AddGitSources(_ *compdesc.ComponentDescriptor,
 	_, _, _ string,
 ) error {
 	return nil
+}
+
+type gitSourcesServiceErrorStub struct{}
+
+func (s *gitSourcesServiceErrorStub) AddGitSourcesToConstructor(_ *component.Constructor,
+	_, _ string,
+) error {
+	return errors.New("unexpected error")
+}
+
+func (*gitSourcesServiceErrorStub) AddGitSources(_ *compdesc.ComponentDescriptor,
+	_, _, _ string,
+) error {
+	return errors.New("unexpected error")
 }
 
 type securityConfigServiceStub struct{}

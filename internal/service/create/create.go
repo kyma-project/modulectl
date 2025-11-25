@@ -230,8 +230,6 @@ func (s *Service) Run(opts Options) error {
 		return err
 	}
 
-	defer s.cleanupTempFiles(opts)
-
 	moduleConfig, err := s.moduleConfigService.ParseAndValidateModuleConfig(opts.ConfigFile)
 	if err != nil {
 		return fmt.Errorf("failed to parse module config: %w", err)
@@ -259,7 +257,11 @@ func (s *Service) Run(opts Options) error {
 
 	if opts.DisableOCMRegistryPush {
 		err = s.useComponentConstructor(moduleConfig, resourcePaths, opts)
+		if err != nil { // only clean up if an error occurs
+			s.cleanupTempFiles(opts)
+		}
 	} else {
+		defer s.cleanupTempFiles(opts) // clean up temp files always
 		err = s.useComponentDescriptor(moduleConfig, resourcePaths, opts)
 	}
 	if err != nil {
@@ -506,12 +508,6 @@ func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {
-	if opts.DisableOCMRegistryPush {
-		// Don't clean up temp files in component-constructor mode/
-		// as they are required to create a valid OCM artifact.
-		return
-	}
-
 	if err := s.defaultCRFileResolver.CleanupTempFiles(); err != nil {
 		opts.Out.Write(fmt.Sprintf("failed to cleanup temporary default CR files: %v\n", err))
 	}
