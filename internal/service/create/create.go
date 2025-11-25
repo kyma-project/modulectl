@@ -506,6 +506,12 @@ func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {
+	if opts.DisableOCMRegistryPush {
+		// Don't clean up temp files in component-constructor mode/
+		// as they are required to create a valid OCM artifact.
+		return
+	}
+
 	if err := s.defaultCRFileResolver.CleanupTempFiles(); err != nil {
 		opts.Out.Write(fmt.Sprintf("failed to cleanup temporary default CR files: %v\n", err))
 	}
