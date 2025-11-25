@@ -222,7 +222,8 @@ func Test_CreateModule_DoesNotCleanUpTempFiles_WhenRegistryPushIsDisabled(t *tes
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().withDisableOCMRegistryPush(true).build() // component-constructor mode enabled
+	opts := newCreateOptionsBuilder().withDisableOCMRegistryPush(true).withOutputConstructorFile("constructor.yaml").
+		build() // component-constructor mode enabled
 
 	// when
 	err = svc.Run(opts)
@@ -289,6 +290,11 @@ func (b *createOptionsBuilder) withModuleSourcesGitDirectory(moduleSourcesGitDir
 
 func (b *createOptionsBuilder) withDisableOCMRegistryPush(disableRegistryPush bool) *createOptionsBuilder {
 	b.options.DisableOCMRegistryPush = disableRegistryPush
+	return b
+}
+
+func (b *createOptionsBuilder) withOutputConstructorFile(outputConstructorFile string) *createOptionsBuilder {
+	b.options.OutputConstructorFile = outputConstructorFile
 	return b
 }
 
