@@ -225,7 +225,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-func (s *Service) Run(opts Options) error {
+func (s *Service) Run(opts Options) (rErr error) { //nolint:nonamedreturns // named return to detect error in defer
 	if err := opts.Validate(); err != nil {
 		return err
 	}
@@ -234,6 +234,12 @@ func (s *Service) Run(opts Options) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse module config: %w", err)
 	}
+
+	defer func() {
+		if rErr != nil { // only clean up if an error occurs
+			s.cleanupTempFiles(opts)
+		}
+	}()
 
 	configFilePath := path.Dir(opts.ConfigFile)
 	// If the manifest is a local file reference, it's entry in the module config file will be relative to the module
@@ -257,12 +263,11 @@ func (s *Service) Run(opts Options) error {
 
 	if opts.DisableOCMRegistryPush {
 		err = s.useComponentConstructor(moduleConfig, resourcePaths, opts)
-		if err != nil { // only clean up if an error occurs
+	} else {
+		err = s.useComponentDescriptor(moduleConfig, resourcePaths, opts)
+		if err == nil {
 			s.cleanupTempFiles(opts)
 		}
-	} else {
-		defer s.cleanupTempFiles(opts) // clean up temp files always
-		err = s.useComponentDescriptor(moduleConfig, resourcePaths, opts)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to process component: %w", err)
