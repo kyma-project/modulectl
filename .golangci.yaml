@@ -26,6 +26,9 @@ linters:
       lines: 80
       statements: 50
       ignore-comments: true
+    gomoddirectives:
+      replace-allow-list:
+        - github.com/ThalesIgnite/crypto11
     importas:
       alias:
         - pkg: github.com/kyma-project/modulectl/tools/io
