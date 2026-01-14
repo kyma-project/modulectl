@@ -4,21 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"gopkg.in/yaml.v3"
-	"ocm.software/ocm/api/ocm/compdesc"
-	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
-
-	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-)
-
-const (
-	SecBaseLabelKey = "security.kyma-project.io"
-
-	ScanLabelKey   = "scan"
-	SecScanEnabled = "enabled"
+	"gopkg.in/yaml.v3"
 )
 
 var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
@@ -65,28 +53,4 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 	}
 
 	return securityConfig, nil
-}
-
-func (s *SecurityConfigService) AppendSecurityScanEnabledLabel(descriptor *compdesc.ComponentDescriptor,
-) error {
-	if err := appendLabelToAccessor(descriptor, ScanLabelKey, SecScanEnabled, SecBaseLabelKey); err != nil {
-		return fmt.Errorf("failed to append security label to descriptor: %w", err)
-	}
-	return nil
-}
-
-func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey string) error {
-	labels := labeled.GetLabels()
-	securityLabelKey := fmt.Sprintf("%s/%s", baseKey, key)
-	labelValue, err := ocmv1.NewLabel(securityLabelKey, value, ocmv1.WithVersion(common.OCMVersion))
-	if err != nil {
-		return fmt.Errorf("failed to create security label: %w", err)
-	}
-	labels = append(labels, *labelValue)
-	labeled.SetLabels(labels)
-	return nil
-}
-
-func (s *SecurityConfigService) AppendSecurityScanEnabledLabelToConstructor(constructor *component.Constructor) {
-	constructor.AddLabel(fmt.Sprintf("%s/%s", SecBaseLabelKey, ScanLabelKey), SecScanEnabled, common.OCMVersion)
 }
