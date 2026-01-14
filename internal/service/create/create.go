@@ -38,12 +38,8 @@ type FileResolver interface {
 
 type SecurityConfigService interface {
 	ParseSecurityConfigData(securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
-	AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
-		securityConfig contentprovider.SecurityScanConfig,
-	) error
-	AppendSecurityScanConfigToConstructor(constructor *component.Constructor,
-		securityConfig contentprovider.SecurityScanConfig,
-	)
+	AppendSecurityScanEnabledLabel(descriptor *compdesc.ComponentDescriptor) error
+	AppendSecurityScanEnabledLabelToConstructor(constructor *component.Constructor)
 }
 
 type GitSourcesService interface {
@@ -460,7 +456,7 @@ func (s *Service) configureSecScannerConfForConstructor(constructor *component.C
 		return nil, fmt.Errorf("failed to get security config: %w", err)
 	}
 
-	s.securityConfigService.AppendSecurityScanConfigToConstructor(constructor, *securityConfig)
+	s.securityConfigService.AppendSecurityScanEnabledLabelToConstructor(constructor)
 	return securityConfig.BDBA, nil
 }
 
@@ -473,7 +469,7 @@ func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescript
 		return nil, fmt.Errorf("failed to get security config: %w", err)
 	}
 
-	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
+	if err = s.securityConfigService.AppendSecurityScanEnabledLabel(descriptor); err != nil {
 		return nil, fmt.Errorf("failed to append security scan config: %w", err)
 	}
 	return securityConfig.BDBA, nil

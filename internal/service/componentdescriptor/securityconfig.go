@@ -67,7 +67,7 @@ func (s *SecurityConfigService) ParseSecurityConfigData(securityConfigFile strin
 	return securityConfig, nil
 }
 
-func (s *SecurityConfigService) AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
+func (s *SecurityConfigService) AppendSecurityScanEnabledLabel(descriptor *compdesc.ComponentDescriptor,
 ) error {
 	if err := appendLabelToAccessor(descriptor, ScanLabelKey, SecScanEnabled, SecBaseLabelKey); err != nil {
 		return fmt.Errorf("failed to append security label to descriptor: %w", err)
@@ -87,6 +87,6 @@ func appendLabelToAccessor(labeled compdesc.LabelsAccessor, key, value, baseKey 
 	return nil
 }
 
-func (s *SecurityConfigService) AppendSecurityScanConfigToConstructor(constructor *component.Constructor) {
+func (s *SecurityConfigService) AppendSecurityScanEnabledLabelToConstructor(constructor *component.Constructor) {
 	constructor.AddLabel(fmt.Sprintf("%s/%s", SecBaseLabelKey, ScanLabelKey), SecScanEnabled, common.OCMVersion)
 }
