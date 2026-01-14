@@ -283,7 +283,7 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	var securityConfigImages []string
 	var err error
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConfForConstructor(constructor, moduleConfig, opts)
+		securityConfigImages, err = s.configureSecScannerConfForConstructor(moduleConfig, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
@@ -337,7 +337,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 
 	var securityConfigImages []string
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+		securityConfigImages, err = s.configureSecScannerConf(moduleConfig, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
@@ -445,8 +445,8 @@ func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts 
 	return componentVersionAccess.GetDescriptor(), nil
 }
 
-func (s *Service) configureSecScannerConfForConstructor(constructor *component.Constructor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options,
+func (s *Service) configureSecScannerConfForConstructor(moduleConfig *contentprovider.ModuleConfig,
+	opts Options,
 ) ([]string, error) {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.getSecurityConfig(moduleConfig)
@@ -456,9 +456,7 @@ func (s *Service) configureSecScannerConfForConstructor(constructor *component.C
 	return securityConfig.BDBA, nil
 }
 
-func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options,
-) ([]string, error) {
+func (s *Service) configureSecScannerConf(moduleConfig *contentprovider.ModuleConfig, opts Options) ([]string, error) {
 	opts.Out.Write("- Configuring security scanners config\n")
 	securityConfig, err := s.getSecurityConfig(moduleConfig)
 	if err != nil {

@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"gopkg.in/yaml.v3"
+
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
-	"gopkg.in/yaml.v3"
 )
 
 var ErrSecurityConfigFileDoesNotExist = errors.New("security config file does not exist")
