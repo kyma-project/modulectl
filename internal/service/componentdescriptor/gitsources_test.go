@@ -1,16 +1,13 @@
 package componentdescriptor_test
 
 import (
-	"encoding/json"
 	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/testutils"
 )
 
@@ -28,11 +25,7 @@ func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 	require.Equal(t, "Github", source.Type)
 	require.Equal(t, "module-sources", source.Name)
 	require.Equal(t, moduleVersion, source.Version)
-	require.Len(t, source.Labels, 1)
-	require.Equal(t, "git.kyma-project.io/ref", source.Labels[0].Name)
-	require.Equal(t, "v1", source.Labels[0].Version)
-	expectedLabel := json.RawMessage(`"HEAD"`)
-	require.Equal(t, expectedLabel, source.Labels[0].Value)
+	require.Len(t, source.Labels, 0)
 }
 
 func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
@@ -62,10 +55,7 @@ func TestGitSourcesService_AddGitSourcesToConstructor_AddsCorrectSource(t *testi
 	require.Equal(t, component.GithubSourceType, source.Type)
 	require.Equal(t, "module-sources", source.Name)
 	require.Equal(t, "1.0.0", source.Version)
-	require.Len(t, source.Labels, 1)
-	require.Equal(t, common.RefLabel, source.Labels[0].Name)
-	require.Equal(t, git.HeadRef, source.Labels[0].Value)
-	require.Equal(t, common.OCMVersion, source.Labels[0].Version)
+	require.Len(t, source.Labels, 0)
 	require.NotNil(t, source.Access)
 	require.Equal(t, component.GithubAccessType, source.Access.Type)
 	require.Equal(t, "gitRepoUrl", source.Access.RepoUrl)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/kyma-project/modulectl/internal/common"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
@@ -50,11 +49,7 @@ func TestConstructor_AddGitSource(t *testing.T) {
 	require.Equal(t, common.OCMIdentityName, source.Name)
 	require.Equal(t, component.GithubSourceType, source.Type)
 	require.Equal(t, "1.0.0", source.Version)
-	require.Len(t, source.Labels, 1)
-	label := source.Labels[0]
-	require.Equal(t, common.RefLabel, label.Name)
-	require.Equal(t, git.HeadRef, label.Value)
-	require.Equal(t, common.OCMVersion, label.Version)
+	require.Len(t, source.Labels, 0)
 	require.Equal(t, component.GithubAccessType, source.Access.Type)
 	require.Equal(t, "https://github.com/kyma-project/modulectl", source.Access.RepoUrl)
 	require.Equal(t, "abc123def456", source.Access.Commit)

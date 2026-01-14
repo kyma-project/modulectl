@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/git"
 )
 
 type GitService interface {
@@ -35,17 +34,12 @@ func NewGitSourcesService(gitService GitService) (*GitSourcesService, error) {
 func (s *GitSourcesService) AddGitSources(componentDescriptor *compdesc.ComponentDescriptor,
 	gitRepoPath, gitRepoURL, moduleVersion string,
 ) error {
-	label, err := ocmv1.NewLabel(common.RefLabel, git.HeadRef, ocmv1.WithVersion(common.OCMVersion))
-	if err != nil {
-		return fmt.Errorf("failed to create label: %w", err)
-	}
-
 	sourceMeta := compdesc.SourceMeta{
 		Type: identity.CONSUMER_TYPE,
 		ElementMeta: compdesc.ElementMeta{
 			Name:    common.OCMIdentityName,
 			Version: moduleVersion,
-			Labels:  ocmv1.Labels{*label},
+			Labels:  ocmv1.Labels{},
 		},
 	}
 
