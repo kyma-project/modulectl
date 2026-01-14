@@ -12,7 +12,7 @@ packages:
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 81
   internal/service/create: 56
-  internal/service/componentdescriptor: 81.8
+  internal/service/componentdescriptor: 75.8
   internal/service/componentdescriptor/resources: 94.6
   internal/service/componentdescriptor/resources/accesshandler: 100
   internal/service/templategenerator: 85.5

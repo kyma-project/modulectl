@@ -49,7 +49,7 @@ func TestConstructor_AddGitSource(t *testing.T) {
 	require.Equal(t, common.OCMIdentityName, source.Name)
 	require.Equal(t, component.GithubSourceType, source.Type)
 	require.Equal(t, "1.0.0", source.Version)
-	require.Len(t, source.Labels, 0)
+	require.Empty(t, source.Labels)
 	require.Equal(t, component.GithubAccessType, source.Access.Type)
 	require.Equal(t, "https://github.com/kyma-project/modulectl", source.Access.RepoUrl)
 	require.Equal(t, "abc123def456", source.Access.Commit)

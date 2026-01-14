@@ -25,7 +25,7 @@ func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
 	require.Equal(t, "Github", source.Type)
 	require.Equal(t, "module-sources", source.Name)
 	require.Equal(t, moduleVersion, source.Version)
-	require.Len(t, source.Labels, 0)
+	require.Empty(t, source.Labels)
 }
 
 func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
@@ -55,7 +55,7 @@ func TestGitSourcesService_AddGitSourcesToConstructor_AddsCorrectSource(t *testi
 	require.Equal(t, component.GithubSourceType, source.Type)
 	require.Equal(t, "module-sources", source.Name)
 	require.Equal(t, "1.0.0", source.Version)
-	require.Len(t, source.Labels, 0)
+	require.Empty(t, source.Labels)
 	require.NotNil(t, source.Access)
 	require.Equal(t, component.GithubAccessType, source.Access.Type)
 	require.Equal(t, "gitRepoUrl", source.Access.RepoUrl)
