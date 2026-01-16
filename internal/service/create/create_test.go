@@ -187,7 +187,6 @@ func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testin
 }
 
 func Test_CreateModule_ReturnsError_WhenRegistryPushIsDisabled_AndVersionCheckFails(t *testing.T) {
-
 	expectedErrMsg := "no matched version 1.0.4 found in Deployment or StatefulSet"
 
 	manifestResolverStub := &fileResolverStub{}
@@ -210,7 +209,7 @@ func Test_CreateModule_ReturnsError_WhenRegistryPushIsDisabled_AndVersionCheckFa
 
 	// then
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "failed to verify module resources: " + expectedErrMsg)
+	require.Contains(t, err.Error(), "failed to verify module resources: "+expectedErrMsg)
 }
 
 func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T) {
@@ -534,8 +533,7 @@ func (*ModuleResourceServiceStub) GenerateModuleResources(
 	return []resources.Resource{}
 }
 
-type imageVersionVerifierStub struct{
-}
+type imageVersionVerifierStub struct{}
 
 func (*imageVersionVerifierStub) VerifyModuleResources(_ *contentprovider.ModuleConfig,
 	_ string,
@@ -543,7 +541,7 @@ func (*imageVersionVerifierStub) VerifyModuleResources(_ *contentprovider.Module
 	return nil
 }
 
-type imageVersionVerifierErrorStub struct{
+type imageVersionVerifierErrorStub struct {
 	errMsg string
 }
 
