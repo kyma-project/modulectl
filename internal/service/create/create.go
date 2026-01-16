@@ -302,6 +302,13 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 
 	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
 
+	if !opts.SkipVersionValidation {
+		if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig,
+			resourcePaths.RawManifest); err != nil {
+			return fmt.Errorf("failed to verify module resources: %w", err)
+		}
+	}
+
 	opts.Out.Write("- Adding oci artifacts to component descriptor\n")
 	if err := s.componentConstructorService.AddImagesToConstructor(constructor, images); err != nil {
 		return fmt.Errorf("failed to add images to component constructor: %w", err)

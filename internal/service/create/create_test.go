@@ -186,6 +186,33 @@ func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testin
 		"currently configured module-sources-git-directory \".\" must point to a valid git repository")
 }
 
+func Test_CreateModule_ReturnsError_WhenRegistryPushIsDisabled_AndVersionCheckFails(t *testing.T) {
+
+	expectedErrMsg := "no matched version 1.0.4 found in Deployment or StatefulSet"
+
+	manifestResolverStub := &fileResolverStub{}
+	defaultCRResolverStub := &fileResolverStub{}
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+		&componentConstructorServiceStub{},
+		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&ModuleResourceServiceStub{}, &imageVersionVerifierErrorStub{expectedErrMsg}, &manifestServiceStub{},
+		manifestResolverStub, defaultCRResolverStub,
+		&fileExistsStub{})
+	require.NoError(t, err)
+
+	opts := newCreateOptionsBuilder().
+		withOutputConstructorFile("constructor.yaml").
+		withDisableOCMRegistryPush(true). // component-constructor mode enabled
+		build()
+
+	// when
+	err = svc.Run(opts)
+
+	// then
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to verify module resources: " + expectedErrMsg)
+}
+
 func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T) {
 	// given
 	manifestResolverStub := &fileResolverStub{}
@@ -507,11 +534,25 @@ func (*ModuleResourceServiceStub) GenerateModuleResources(
 	return []resources.Resource{}
 }
 
-type imageVersionVerifierStub struct{}
+type imageVersionVerifierStub struct{
+}
 
 func (*imageVersionVerifierStub) VerifyModuleResources(_ *contentprovider.ModuleConfig,
 	_ string,
 ) error {
+	return nil
+}
+
+type imageVersionVerifierErrorStub struct{
+	errMsg string
+}
+
+func (ivs *imageVersionVerifierErrorStub) VerifyModuleResources(_ *contentprovider.ModuleConfig,
+	_ string,
+) error {
+	if ivs.errMsg != "" {
+		return errors.New(ivs.errMsg)
+	}
 	return nil
 }
 
