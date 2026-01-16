@@ -1474,6 +1474,7 @@ func validateMinimalModuleTemplate(template *v1beta2.ModuleTemplate, descriptor 
 	Expect(ok).To(BeTrue())
 	Expect(github.Type).To(Equal(githubAccessSpec.Type))
 	Expect(githubAccessSpec.RepoURL).To(Equal("https://github.com/kyma-project/template-operator"))
+	Expect(githubAccessSpec.Commit).To(Not(BeEmpty()))
 
 	By("And spec.associatedResources should be empty")
 	Expect(template.Spec.AssociatedResources).To(BeEmpty())
