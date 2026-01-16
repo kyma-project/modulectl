@@ -412,19 +412,8 @@ func (*gitSourcesServiceErrorStub) AddGitSources(_ *compdesc.ComponentDescriptor
 
 type securityConfigServiceStub struct{}
 
-func (s *securityConfigServiceStub) AppendSecurityScanConfigToConstructor(_ *component.Constructor,
-	_ contentprovider.SecurityScanConfig,
-) {
-}
-
 func (*securityConfigServiceStub) ParseSecurityConfigData(_ string) (*contentprovider.SecurityScanConfig, error) {
 	return &contentprovider.SecurityScanConfig{}, nil
-}
-
-func (*securityConfigServiceStub) AppendSecurityScanConfig(_ *compdesc.ComponentDescriptor,
-	_ contentprovider.SecurityScanConfig,
-) error {
-	return nil
 }
 
 type componentConstructorServiceStub struct{}

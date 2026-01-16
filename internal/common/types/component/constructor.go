@@ -7,7 +7,6 @@ import (
 	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
-	"github.com/kyma-project/modulectl/internal/service/git"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
@@ -23,7 +22,6 @@ const (
 	DirectoryInputType        = "dir"
 
 	PlainTextResourceType = "PlainText"
-	BinaryResourceInput   = "binary"
 	FileResourceInput     = "file"
 )
 
@@ -109,13 +107,7 @@ func (c *Constructor) AddGitSource(gitRepoURL, commitHash string) {
 		Name:    common.OCMIdentityName,
 		Type:    GithubSourceType,
 		Version: c.Components[0].Version,
-		Labels: []Label{
-			{
-				Name:    common.RefLabel,
-				Value:   git.HeadRef,
-				Version: common.OCMVersion,
-			},
-		},
+		Labels:  []Label{},
 		Access: &Access{
 			Type:    GithubAccessType,
 			RepoUrl: gitRepoURL,

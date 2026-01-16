@@ -38,12 +38,6 @@ type FileResolver interface {
 
 type SecurityConfigService interface {
 	ParseSecurityConfigData(securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
-	AppendSecurityScanConfig(descriptor *compdesc.ComponentDescriptor,
-		securityConfig contentprovider.SecurityScanConfig,
-	) error
-	AppendSecurityScanConfigToConstructor(constructor *component.Constructor,
-		securityConfig contentprovider.SecurityScanConfig,
-	)
 }
 
 type GitSourcesService interface {
@@ -289,9 +283,9 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	var securityConfigImages []string
 	var err error
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConfForConstructor(constructor, moduleConfig, opts)
+		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
 		if err != nil {
-			return fmt.Errorf("failed to configure security scanners: %w", err)
+			return fmt.Errorf("failed to get security scanners images: %w", err)
 		}
 	}
 
@@ -343,7 +337,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 
 	var securityConfigImages []string
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConf(descriptor, moduleConfig, opts)
+		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
@@ -451,30 +445,11 @@ func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts 
 	return componentVersionAccess.GetDescriptor(), nil
 }
 
-func (s *Service) configureSecScannerConfForConstructor(constructor *component.Constructor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options,
-) ([]string, error) {
-	opts.Out.Write("- Configuring security scanners config\n")
+func (s *Service) getSecurityConfigImages(moduleConfig *contentprovider.ModuleConfig, opts Options) ([]string, error) {
+	opts.Out.Write("- Parsing security scanners config for images\n")
 	securityConfig, err := s.getSecurityConfig(moduleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get security config: %w", err)
-	}
-
-	s.securityConfigService.AppendSecurityScanConfigToConstructor(constructor, *securityConfig)
-	return securityConfig.BDBA, nil
-}
-
-func (s *Service) configureSecScannerConf(descriptor *compdesc.ComponentDescriptor,
-	moduleConfig *contentprovider.ModuleConfig, opts Options,
-) ([]string, error) {
-	opts.Out.Write("- Configuring security scanners config\n")
-	securityConfig, err := s.getSecurityConfig(moduleConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get security config: %w", err)
-	}
-
-	if err = s.securityConfigService.AppendSecurityScanConfig(descriptor, *securityConfig); err != nil {
-		return nil, fmt.Errorf("failed to append security scan config: %w", err)
 	}
 	return securityConfig.BDBA, nil
 }
