@@ -6,8 +6,6 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
-const HeadRef = "HEAD"
-
 type Service struct {
 	latestCommit string
 }

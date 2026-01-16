@@ -61,8 +61,11 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 }
 
 type SecurityScanConfig struct {
-	ModuleName string   `comment:"string, name of your module"                                                       json:"module-name" yaml:"module-name"` //nolint:tagliatelle // requires externally as snake case
-	BDBA       []string `comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis" json:"bdba"        yaml:"bdba"`
+	ModuleName string        `comment:"string, name of your module"                                                       json:"module-name" yaml:"module-name"` //nolint:tagliatelle // requires externally as snake case
+	BDBA       []string      `comment:"list, includes the images which must be scanned by the Black Duck Binary Analysis" json:"bdba"        yaml:"bdba"`
+	Mend       MendSecConfig `comment:"Mend security scanner specific configuration"                                      json:"mend"        yaml:"mend"`
+	DevBranch  string        `comment:"string, name of the development branch"                                            json:"dev-branch"  yaml:"dev-branch"` //nolint:tagliatelle // requires externally as snake case
+	RcTag      string        `comment:"string, release candidate tag"                                                     json:"rc-tag"      yaml:"rc-tag"`     //nolint:tagliatelle // requires externally as snake case
 }
 
 func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
@@ -95,6 +98,12 @@ func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
 
 	s.BDBA = filteredImages
 	return nil
+}
+
+type MendSecConfig struct {
+	Language    string   `comment:"string, indicating the programming language the scanner has to analyze" json:"language"    yaml:"language"`
+	SubProjects string   `comment:"string, specifying any subprojects"                                     json:"subprojects" yaml:"subprojects"`
+	Exclude     []string `comment:"list, directories within the repository which should not be scanned"    json:"exclude"     yaml:"exclude"`
 }
 
 // revert this again with https://github.com/kyma-project/modulectl/issues/269

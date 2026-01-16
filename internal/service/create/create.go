@@ -283,9 +283,9 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	var securityConfigImages []string
 	var err error
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConfForConstructor(moduleConfig, opts)
+		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
 		if err != nil {
-			return fmt.Errorf("failed to configure security scanners: %w", err)
+			return fmt.Errorf("failed to get security scanners images: %w", err)
 		}
 	}
 
@@ -337,7 +337,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 
 	var securityConfigImages []string
 	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.configureSecScannerConf(moduleConfig, opts)
+		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
 		if err != nil {
 			return fmt.Errorf("failed to configure security scanners: %w", err)
 		}
@@ -445,19 +445,8 @@ func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts 
 	return componentVersionAccess.GetDescriptor(), nil
 }
 
-func (s *Service) configureSecScannerConfForConstructor(moduleConfig *contentprovider.ModuleConfig,
-	opts Options,
-) ([]string, error) {
-	opts.Out.Write("- Configuring security scanners config\n")
-	securityConfig, err := s.getSecurityConfig(moduleConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get security config: %w", err)
-	}
-	return securityConfig.BDBA, nil
-}
-
-func (s *Service) configureSecScannerConf(moduleConfig *contentprovider.ModuleConfig, opts Options) ([]string, error) {
-	opts.Out.Write("- Configuring security scanners config\n")
+func (s *Service) getSecurityConfigImages(moduleConfig *contentprovider.ModuleConfig, opts Options) ([]string, error) {
+	opts.Out.Write("- Parsing security scanners config for images\n")
 	securityConfig, err := s.getSecurityConfig(moduleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get security config: %w", err)
