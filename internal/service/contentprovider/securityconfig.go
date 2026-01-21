@@ -57,6 +57,9 @@ func (s *SecurityConfig) getSecurityConfig(moduleName string) SecurityScanConfig
 			"europe-docker.pkg.dev/kyma-project/prod/myimage:1.2.3",
 			"europe-docker.pkg.dev/kyma-project/prod/external/ghcr.io/mymodule/anotherimage:4.5.6",
 		},
+		Mend: MendSecConfig{
+			Exclude: []string{"**/test/**", "**/*_test.go"},
+		},
 	}
 }
 
