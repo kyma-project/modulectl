@@ -346,7 +346,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	if moduleConfig.Security != "" {
 		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
 		if err != nil {
-			return fmt.Errorf("failed to configure security scanners: %w", err)
+			return fmt.Errorf("failed to get security scanners images: %w", err)
 		}
 	}
 
