@@ -760,7 +760,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).Should(HaveOccurred())
 			Expect(
 				err.Error(),
-			).Should(ContainSubstring("failed to configure security scanners: failed to get security config: failed to parse security config data: security config file does not exist"))
+			).Should(ContainSubstring("failed to get security scanners images: failed to get security config: failed to parse security config data: security config file does not exist"))
 		})
 	})
 
