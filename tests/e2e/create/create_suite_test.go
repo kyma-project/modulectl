@@ -136,7 +136,7 @@ func (cmd *createCmd) execute() error {
 
 	println(" >>> Executing command: modulectl", strings.Join(args, " "))
 
-	command = exec.Command("modulectl", args...)
+	command = exec.Command("/Users/Mo/Projects/kyma-operator-manager/modulectl/bin/modulectl-darwin", args...)
 	cmdOut, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("create command failed with output: %s and error: %w", cmdOut, err)

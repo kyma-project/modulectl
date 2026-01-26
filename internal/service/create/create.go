@@ -12,7 +12,6 @@ import (
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/common/utils/slices"
 	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
@@ -34,10 +33,6 @@ type FileResolver interface {
 	// For local file paths, it will resolve the path relative to the provided basePath (absolute or relative).
 	Resolve(fileRef contentprovider.UrlOrLocalFile, basePath string) (string, error)
 	CleanupTempFiles() []error
-}
-
-type SecurityConfigService interface {
-	ParseSecurityConfigData(securityConfigFile string) (*contentprovider.SecurityScanConfig, error)
 }
 
 type GitSourcesService interface {
@@ -116,7 +111,6 @@ type ManifestService interface {
 type Service struct {
 	moduleConfigService         ModuleConfigService
 	gitSourcesService           GitSourcesService
-	securityConfigService       SecurityConfigService
 	componentConstructorService ComponentConstructorService
 	componentArchiveService     ComponentArchiveService
 	registryService             RegistryService
@@ -130,10 +124,8 @@ type Service struct {
 	fileSystem                  FileSystem
 }
 
-//nolint:funlen // this is a straight down aggregation of the individual services
 func NewService(moduleConfigService ModuleConfigService,
 	gitSourcesService GitSourcesService,
-	securityConfigService SecurityConfigService,
 	componentConstructorService ComponentConstructorService,
 	componentArchiveService ComponentArchiveService,
 	registryService RegistryService,
@@ -152,10 +144,6 @@ func NewService(moduleConfigService ModuleConfigService,
 
 	if gitSourcesService == nil {
 		return nil, fmt.Errorf("gitSourcesService must not be nil: %w", commonerrors.ErrInvalidArg)
-	}
-
-	if securityConfigService == nil {
-		return nil, fmt.Errorf("securityConfigService must not be nil: %w", commonerrors.ErrInvalidArg)
 	}
 
 	if componentConstructorService == nil {
@@ -204,7 +192,6 @@ func NewService(moduleConfigService ModuleConfigService,
 	return &Service{
 		moduleConfigService:         moduleConfigService,
 		gitSourcesService:           gitSourcesService,
-		securityConfigService:       securityConfigService,
 		componentConstructorService: componentConstructorService,
 		componentArchiveService:     componentArchiveService,
 		registryService:             registryService,
@@ -280,21 +267,10 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		return fmt.Errorf("failed to add git sources to constructor: %w", err)
 	}
 
-	var securityConfigImages []string
-	var err error
-	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
-		if err != nil {
-			return fmt.Errorf("failed to get security scanners images: %w", err)
-		}
-	}
-
-	manifestImages, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
+	images, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
 	if err != nil {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
-
-	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
 
 	if !opts.SkipVersionValidation {
 		if err := s.imageVersionVerifierService.VerifyModuleResources(moduleConfig,
@@ -342,20 +318,11 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		return fmt.Errorf("failed to add git sources: %w", err)
 	}
 
-	var securityConfigImages []string
-	if moduleConfig.Security != "" {
-		securityConfigImages, err = s.getSecurityConfigImages(moduleConfig, opts)
-		if err != nil {
-			return fmt.Errorf("failed to get security scanners images: %w", err)
-		}
-	}
-
-	manifestImages, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
+	images, err := s.extractImagesFromManifest(resourcePaths.RawManifest, opts)
 	if err != nil {
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	images := slices.MergeAndDeduplicate(securityConfigImages, manifestImages)
 	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
@@ -450,29 +417,6 @@ func (s *Service) pushComponentVersion(archive *comparch.ComponentArchive, opts 
 	}
 
 	return componentVersionAccess.GetDescriptor(), nil
-}
-
-func (s *Service) getSecurityConfigImages(moduleConfig *contentprovider.ModuleConfig, opts Options) ([]string, error) {
-	opts.Out.Write("- Parsing security scanners config for images\n")
-	securityConfig, err := s.getSecurityConfig(moduleConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get security config: %w", err)
-	}
-	return securityConfig.BDBA, nil
-}
-
-func (s *Service) getSecurityConfig(moduleConfig *contentprovider.ModuleConfig,
-) (*contentprovider.SecurityScanConfig, error) {
-	securityConfig, err := s.securityConfigService.ParseSecurityConfigData(moduleConfig.Security)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse security config data: %w", err)
-	}
-
-	err = securityConfig.ValidateBDBAImageTags(moduleConfig.Version)
-	if err != nil {
-		return nil, fmt.Errorf("failed to validate security config images: %w", err)
-	}
-	return securityConfig, nil
 }
 
 func (s *Service) extractImagesFromManifest(manifestFilePath string, opts Options) ([]string, error) {

@@ -122,10 +122,6 @@ func buildModuleService() (*create.Service, error) {
 
 	componentConstructorService := componentconstructor.NewService()
 
-	securityConfigService, err := componentdescriptor.NewSecurityConfigService(fileSystemUtil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create security config service: %w", err)
-	}
 	memoryFileSystem := memoryfs.New()
 	osFileSystem := osfs.New()
 	archiveFileSystemService, err := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
@@ -157,7 +153,7 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		securityConfigService, componentConstructorService, componentArchiveService, registryService,
+		componentConstructorService, componentArchiveService, registryService,
 		moduleTemplateService,
 		crdParserService, moduleResourceService, imageVersionVerifierService, manifestService, manifestFileResolver,
 		defaultCRFileResolver, fileSystemUtil)

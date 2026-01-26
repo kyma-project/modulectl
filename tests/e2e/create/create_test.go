@@ -674,7 +674,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
-		By("When invoked with valid module-config containing security-scanner-config and different version",
+		By("When invoked with valid module-config referencing security config (which is now ignored)",
 			func() {
 				cmd = createCmd{
 					moduleConfigFile:          withSecurityConfig,
@@ -690,77 +690,28 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And module template file should be generated")
 			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
 
-			By("And the module template should contain the expected content", func() {
+			By("And the module template should contain only images from manifest (security config is ignored)", func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
 				Expect(descriptor).ToNot(BeNil())
 
-				By("And descriptor.component.resources should be correct")
-				Expect(descriptor.Resources).To(HaveLen(3))
+				By("And descriptor.component.resources should only contain manifest images")
+				// The security config previously added template-operator:2.0.0, which should no longer be present
+				imageResources := getImageResourcesMap(descriptor)
+				// Should only have the module image from the manifest (template-operator:1.0.3), NOT template-operator:2.0.0 from security config
+				Expect(len(imageResources)).To(BeNumerically(">=", 1), "Should have at least the module image from manifest")
 
+				// Verify the image from the remote manifest is present
 				resource := findResourceByNameVersionType(descriptor.Resources, "template-operator", moduleVersion,
 					"ociArtifact")
 				Expect(resource).ToNot(BeNil())
-				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
 
-				resourceAccessSpec0, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
-				Expect(err).ToNot(HaveOccurred())
-				ociArtifactAccessSpec, ok := resourceAccessSpec0.(*ociartifact.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(
-					ociArtifactAccessSpec.ImageReference,
-				).To(Equal(fmt.Sprintf("europe-docker.pkg.dev/kyma-project/prod/template-operator:%s",
-					moduleVersion)))
-
+				// Verify that template-operator:2.0.0 from security config is NOT present
 				resource = findResourceByNameVersionType(descriptor.Resources, "template-operator", "2.0.0",
 					"ociArtifact")
-				Expect(resource).ToNot(BeNil())
-				Expect(resource.Relation).To(Equal(ocmv1.ExternalRelation))
-
-				resourceAccessSpec1, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
-				Expect(err).ToNot(HaveOccurred())
-				ociArtifactAccessSpec, ok = resourceAccessSpec1.(*ociartifact.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(ociArtifactAccessSpec.GetType()).To(Equal(ociartifact.Type))
-				Expect(
-					ociArtifactAccessSpec.ImageReference,
-				).To(Equal("europe-docker.pkg.dev/kyma-project/prod/template-operator:2.0.0"))
-
-				resource = findResourceByNameVersionType(descriptor.Resources, "raw-manifest", moduleVersion,
-					"directoryTree")
-				Expect(resource).ToNot(BeNil())
-				resourceAccessSpec3, err := ocm.DefaultContext().AccessSpecForSpec(resource.Access)
-				Expect(err).ToNot(HaveOccurred())
-				localBlobAccessSpec2, ok := resourceAccessSpec3.(*localblob.AccessSpec)
-				Expect(ok).To(BeTrue())
-				Expect(localBlobAccessSpec2.GetType()).To(Equal(localblob.Type))
-				Expect(localBlobAccessSpec2.LocalReference).To(ContainSubstring("sha256:"))
-				Expect(localBlobAccessSpec2.MediaType).To(Equal("application/x-tar"))
+				Expect(resource).To(BeNil(), "template-operator:2.0.0 from security config should not be present")
 			})
-		})
-	})
-
-	It("Given 'modulectl create' command", func() {
-		var cmd createCmd
-		By("When invoked with invalid module-config containing not existing security-scanner-config",
-			func() {
-				cmd = createCmd{
-					moduleConfigFile:          invalidSecurityConfig,
-					registry:                  ociRegistry,
-					insecure:                  true,
-					output:                    templateOutputPath,
-					moduleSourcesGitDirectory: templateOperatorPath,
-				}
-			})
-		By("Then the command should succeed", func() {
-			err := cmd.execute()
-
-			Expect(err).Should(HaveOccurred())
-			Expect(
-				err.Error(),
-			).Should(ContainSubstring("failed to get security scanners images: failed to get security config: failed to parse security config data: security config file does not exist"))
 		})
 	})
 
@@ -1101,7 +1052,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			By("And module template file should be generated")
 			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
 
-			By("And the module template should contain merged and deduplicated images", func() {
+			By("And the module template should contain images from manifest only (not from security config)", func() {
 				template, err := readModuleTemplate(templateOutputPath)
 				Expect(err).ToNot(HaveOccurred())
 				descriptor := getDescriptor(template)
@@ -1109,7 +1060,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 				imageResources := getImageResourcesMap(descriptor)
 
-				Expect(len(imageResources)).To(Equal(5), "Expected exactly 5 image resources")
+				Expect(len(imageResources)).To(Equal(4), "Expected exactly 4 image resources from manifest only")
 
 				expectedImages := map[string]struct {
 					reference string
@@ -1117,7 +1068,6 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 				}{
 					"template-operator": {"europe-docker.pkg.dev/kyma-project/prod/template-operator:1.0.3", "1.0.3"},
 					"webhook":           {"europe-docker.pkg.dev/kyma-project/prod/webhook:v1.2.0", "v1.2.0"},
-					"nginx":             {"nginx:1.25.0", "1.25.0"},
 					"postgres":          {"postgres:15.3", "0.0.0-15.3"},
 					"static-c7742da0": {
 						"gcr.io/distroless/static@sha256:c7742da01aa7ee169d59e58a91c35da9c13e67f555dcd8b2ada15887aa619e6c",

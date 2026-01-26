@@ -22,7 +22,7 @@ import (
 )
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
-	_, err := create.NewService(nil, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	_, err := create.NewService(nil, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
 		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{}, &ModuleResourceServiceStub{},
 		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
@@ -33,7 +33,7 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -50,7 +50,7 @@ func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -67,7 +67,7 @@ func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -84,7 +84,7 @@ func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.
 }
 
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -102,7 +102,7 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 
 func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
-		&securityConfigServiceStub{}, &componentConstructorServiceStub{},
+		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
 		&fileResolverStub{},
@@ -118,7 +118,7 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 }
 
 func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverErrorStub{},
@@ -135,7 +135,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t 
 }
 
 func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -152,7 +152,7 @@ func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -169,7 +169,7 @@ func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *test
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
@@ -191,7 +191,7 @@ func Test_CreateModule_ReturnsError_WhenRegistryPushIsDisabled_AndVersionCheckFa
 
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierErrorStub{expectedErrMsg}, &manifestServiceStub{},
@@ -216,7 +216,7 @@ func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T)
 	// given
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
@@ -241,7 +241,7 @@ func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T)
 func Test_CreateModule_DoesNotCleanUpTempFiles_WhenConstructorMode_AndSuccess(t *testing.T) {
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{}, &securityConfigServiceStub{},
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
 		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
@@ -269,7 +269,7 @@ func Test_CreateModule_CleansUpTempFiles_WhenConstructorMode_AndError(t *testing
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceErrorStub{},
-		&securityConfigServiceStub{}, &componentConstructorServiceStub{}, &componentArchiveServiceStub{},
+		&componentConstructorServiceStub{}, &componentArchiveServiceStub{},
 		&registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
 		manifestResolverStub, defaultCRResolverStub,
@@ -434,12 +434,6 @@ func (*gitSourcesServiceErrorStub) AddGitSources(_ *compdesc.ComponentDescriptor
 	_, _, _ string,
 ) error {
 	return errors.New("unexpected error")
-}
-
-type securityConfigServiceStub struct{}
-
-func (*securityConfigServiceStub) ParseSecurityConfigData(_ string) (*contentprovider.SecurityScanConfig, error) {
-	return &contentprovider.SecurityScanConfig{}, nil
 }
 
 type componentConstructorServiceStub struct{}
