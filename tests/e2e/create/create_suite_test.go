@@ -61,6 +61,8 @@ const (
 	withManifestShaDigest         = validConfigs + "with-manifest-sha-digest.yaml"
 	withManifestAndSecurity       = validConfigs + "with-manifest-and-security.yaml"
 	withManifestNoImages          = validConfigs + "with-manifest-no-deployment-statefulset.yaml"
+	withSecurityScanDisabled      = validConfigs + "with-securityScanEnabled-false.yaml"
+	withSecurityScanEnabled       = validConfigs + "with-securityScanEnabled-true.yaml"
 
 	ociRegistry          = "http://k3d-oci.localhost:5001"
 	templateOutputPath   = "/tmp/template.yaml"

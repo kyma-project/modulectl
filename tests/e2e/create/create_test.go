@@ -1340,6 +1340,150 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 	})
 })
 
+var _ = Describe("Test 'create' command with securityScanEnabled flag", Ordered, func() {
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with module-config where securityScanEnabled is explicitly set to true", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withSecurityScanEnabled,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("Then component descriptor should have security scan label at component level", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				By("And descriptor.component.labels should contain security.kyma-project.io/scan")
+				labelsMap := flatten(descriptor.Labels)
+				Expect(labelsMap).To(HaveKey("security.kyma-project.io/scan"))
+				Expect(labelsMap["security.kyma-project.io/scan"]).To(Equal("enabled"))
+			})
+
+			By("And image resources should have security scan labels at resource level", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				Expect(len(imageResources)).To(BeNumerically(">", 0), "Should have at least one image resource")
+
+				By("And each image resource should have scan.security.kyma-project.io/type label")
+				for _, resource := range imageResources {
+					labelsMap := flatten(resource.Labels)
+					Expect(labelsMap).To(HaveKey("scan.security.kyma-project.io/type"))
+					Expect(labelsMap["scan.security.kyma-project.io/type"]).To(Equal("third-party-image"))
+				}
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with module-config where securityScanEnabled is set to false", func() {
+			cmd = createCmd{
+				moduleConfigFile:          withSecurityScanDisabled,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("Then component descriptor should NOT have security scan label at component level", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				By("And descriptor.component.labels should NOT contain security.kyma-project.io/scan")
+				labelsMap := flatten(descriptor.Labels)
+				Expect(labelsMap).ToNot(HaveKey("security.kyma-project.io/scan"))
+			})
+
+			By("And image resources should NOT have security scan labels at resource level", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				Expect(len(imageResources)).To(BeNumerically(">", 0), "Should have at least one image resource")
+
+				By("And each image resource should NOT have scan.security.kyma-project.io/type label")
+				for _, resource := range imageResources {
+					labelsMap := flatten(resource.Labels)
+					Expect(labelsMap).ToNot(HaveKey("scan.security.kyma-project.io/type"))
+				}
+			})
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
+		By("When invoked with module-config where securityScanEnabled is not set (default behavior)", func() {
+			cmd = createCmd{
+				moduleConfigFile:          minimalConfig,
+				registry:                  ociRegistry,
+				insecure:                  true,
+				output:                    templateOutputPath,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should succeed", func() {
+			Expect(cmd.execute()).To(Succeed())
+
+			By("And module template file should be generated")
+			Expect(filesIn("/tmp/")).Should(ContainElement("template.yaml"))
+
+			By("Then component descriptor should have security scan label (default enabled)", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				By("And descriptor.component.labels should contain security.kyma-project.io/scan")
+				labelsMap := flatten(descriptor.Labels)
+				Expect(labelsMap).To(HaveKey("security.kyma-project.io/scan"))
+				Expect(labelsMap["security.kyma-project.io/scan"]).To(Equal("enabled"))
+			})
+
+			By("And image resources should have security scan labels (default enabled)", func() {
+				template, err := readModuleTemplate(templateOutputPath)
+				Expect(err).ToNot(HaveOccurred())
+				descriptor := getDescriptor(template)
+				Expect(descriptor).ToNot(BeNil())
+
+				imageResources := getImageResources(descriptor)
+				Expect(len(imageResources)).To(BeNumerically(">", 0), "Should have at least one image resource")
+
+				By("And each image resource should have scan.security.kyma-project.io/type label")
+				for _, resource := range imageResources {
+					labelsMap := flatten(resource.Labels)
+					Expect(labelsMap).To(HaveKey("scan.security.kyma-project.io/type"))
+					Expect(labelsMap["scan.security.kyma-project.io/type"]).To(Equal("third-party-image"))
+				}
+			})
+		})
+	})
+})
+
 func readModuleTemplate(filepath string) (*v1beta2.ModuleTemplate, error) {
 	moduleTemplate := &v1beta2.ModuleTemplate{}
 	moduleFile, err := os.ReadFile(filepath)

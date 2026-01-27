@@ -309,7 +309,7 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 // functions rather than passing the full ModuleConfig. This keeps the componentdescriptor package decoupled from
 // the contentprovider package, which is good for modularity and testability. If more ModuleConfig fields need to
 // flow down to the component descriptor layer in the future, consider introducing a ComponentDescriptorOptions
-// struct to avoid parameter proliferation while maintaining loose coupling.
+// struct to prevent the function signature from getting too long.
 func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleConfig,
 	resourcePaths *types.ResourcePaths,
 	opts Options,
