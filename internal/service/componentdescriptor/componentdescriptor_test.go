@@ -66,7 +66,7 @@ func Test_InitializeComponentDescriptor_WithSecurityScanEnabled_AddsSecurityLabe
 	require.NoError(t, err)
 	require.Len(t, descriptor.Labels, 1)
 	require.Equal(t, "security.kyma-project.io/scan", descriptor.Labels[0].Name)
-	require.JSONEq(t, `"enabled"`, string(descriptor.Labels[0].Value))
+	require.Equal(t, `"enabled"`, string(descriptor.Labels[0].Value))
 	require.Equal(t, "v1", descriptor.Labels[0].Version)
 }
 

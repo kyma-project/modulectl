@@ -304,12 +304,6 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 }
 
 // This method will be deprecated in the future along with the OCM registry push support.
-//
-// Note on architecture: We pass individual flags (e.g., securityScanEnabled) as parameters to componentdescriptor
-// functions rather than passing the full ModuleConfig. This keeps the componentdescriptor package decoupled from
-// the contentprovider package, which is good for modularity and testability. If more ModuleConfig fields need to
-// flow down to the component descriptor layer in the future, consider introducing a ComponentDescriptorOptions
-// struct to prevent the function signature from getting too long.
 func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleConfig,
 	resourcePaths *types.ResourcePaths,
 	opts Options,
@@ -332,7 +326,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	err = addImagesOciArtifactsToDescriptor(descriptor, images, moduleConfig, opts)
+	err = addImagesOciArtifactsToDescriptor(descriptor, images, securityScanEnabled, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
 	}
@@ -438,10 +432,9 @@ func (s *Service) extractImagesFromManifest(manifestFilePath string, opts Option
 }
 
 func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
-	images []string, moduleConfig *contentprovider.ModuleConfig, opts Options,
+	images []string, securityScanEnabled bool, opts Options,
 ) error {
 	opts.Out.Write("- Adding oci artifacts to component descriptor\n")
-	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
 	if err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, securityScanEnabled); err != nil {
 		return fmt.Errorf("failed to add images to component descriptor: %w", err)
 	}

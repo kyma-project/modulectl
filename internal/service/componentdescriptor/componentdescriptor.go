@@ -27,7 +27,6 @@ func InitializeComponentDescriptor(
 
 	componentDescriptor.Provider = ocmv1.Provider{Name: common.ProviderName, Labels: ocmv1.Labels{*providerLabel}}
 
-	// Add component-level security scan label if enabled
 	if securityScanEnabled {
 		securityLabel, err := ocmv1.NewLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue,
 			ocmv1.WithVersion(common.VersionV1))
