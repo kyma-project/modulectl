@@ -88,6 +88,7 @@ type ModuleConfig struct {
 	Icons               Icons                      `comment:"required, icons used for UI"                                                                                                       yaml:"icons,omitempty"`
 	DefaultCR           UrlOrLocalFile             `comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL or a local file path"                   yaml:"defaultCR"` //nolint:tagliatelle // prefer defaultCR over defaultCr
 	Security            string                     `comment:"optional, reference to a YAML file containing the security scanners config, must be a local file path"                             yaml:"security"`
+	SecurityScanEnabled *bool                      `comment:"optional, default=true, indicates whether security scanning labels should be added to the OCM descriptor"                          yaml:"securityScanEnabled"`
 	Labels              map[string]string          `comment:"optional, additional labels for the generated ModuleTemplate CR"                                                                   yaml:"labels"`
 	Annotations         map[string]string          `comment:"optional, additional annotations for the generated ModuleTemplate CR"                                                              yaml:"annotations"`
 	Manager             *Manager                   `comment:"optional, module resource that indicates the installation readiness of the module, typically the manager deployment of the module" yaml:"manager"`

@@ -22,14 +22,18 @@ const (
 
 var ErrInvalidImageFormat = errors.New("invalid image url format")
 
-func NewOciArtifactResource(imageInfo *image.ImageInfo) (*compdesc.Resource, error) {
+func NewOciArtifactResource(imageInfo *image.ImageInfo, securityScanEnabled bool) (*compdesc.Resource, error) {
 	if imageInfo == nil || imageInfo.FullURL == "" {
 		return nil, fmt.Errorf("image info is nil or empty: %w", ErrInvalidImageFormat)
 	}
 
-	typeLabel, err := createLabel()
-	if err != nil {
-		return nil, err
+	var labels []ocmv1.Label
+	if securityScanEnabled {
+		typeLabel, err := createLabel()
+		if err != nil {
+			return nil, err
+		}
+		labels = []ocmv1.Label{*typeLabel}
 	}
 	version, resourceName := GenerateOCMVersionAndName(imageInfo)
 	access := ociartifact.New(imageInfo.FullURL)
@@ -41,7 +45,7 @@ func NewOciArtifactResource(imageInfo *image.ImageInfo) (*compdesc.Resource, err
 			Relation: ocmv1.ExternalRelation,
 			ElementMeta: compdesc.ElementMeta{
 				Name:    resourceName,
-				Labels:  []ocmv1.Label{*typeLabel},
+				Labels:  labels,
 				Version: version,
 			},
 		},

@@ -9,6 +9,8 @@ const (
 	OCMIdentityName = "module-sources"
 	OCMVersion      = "v1"
 
+	SecurityScanLabelKey      = "security.kyma-project.io/scan"
+	SecurityScanEnabledValue  = "enabled"
 	SecScanBaseLabelKey       = "scan.security.kyma-project.io"
 	TypeLabelKey              = "type"
 	ThirdPartyImageLabelValue = "third-party-image"

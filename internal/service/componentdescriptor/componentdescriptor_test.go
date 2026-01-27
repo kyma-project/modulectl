@@ -18,7 +18,7 @@ import (
 func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
 	expectedProviderLabel := json.RawMessage(`"modulectl"`)
 
 	require.NoError(t, err)
@@ -36,7 +36,7 @@ func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 func Test_InitializeComponentDescriptor_ReturnsErrWhenInvalidName(t *testing.T) {
 	moduleName := "test-module"
 	moduleVersion := "0.0.1"
-	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion)
+	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
 
 	expectedError := errors.New("failed to validate component descriptor")
 	require.ErrorContains(t, err, expectedError.Error())
@@ -45,7 +45,7 @@ func Test_InitializeComponentDescriptor_ReturnsErrWhenInvalidName(t *testing.T) 
 func Test_InitializeComponentDescriptor_LabelCreationFails(t *testing.T) {
 	badName := string([]byte{0x7f})
 	moduleVersion := "0.0.1"
-	_, err := componentdescriptor.InitializeComponentDescriptor(badName, moduleVersion)
+	_, err := componentdescriptor.InitializeComponentDescriptor(badName, moduleVersion, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
 }
@@ -53,9 +53,30 @@ func Test_InitializeComponentDescriptor_LabelCreationFails(t *testing.T) {
 func Test_InitializeComponentDescriptor_EmptyVersion_ReturnsError(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := ""
-	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion)
+	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
+}
+
+func Test_InitializeComponentDescriptor_WithSecurityScanEnabled_AddsSecurityLabel(t *testing.T) {
+	moduleName := "github.com/test-module"
+	moduleVersion := "0.0.1"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
+
+	require.NoError(t, err)
+	require.Len(t, descriptor.Labels, 1)
+	require.Equal(t, "security.kyma-project.io/scan", descriptor.Labels[0].Name)
+	require.Equal(t, json.RawMessage(`"enabled"`), descriptor.Labels[0].Value)
+	require.Equal(t, "v1", descriptor.Labels[0].Version)
+}
+
+func Test_InitializeComponentDescriptor_WithSecurityScanDisabled_DoesNotAddSecurityLabel(t *testing.T) {
+	moduleName := "github.com/test-module"
+	moduleVersion := "0.0.1"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, false)
+
+	require.NoError(t, err)
+	require.Len(t, descriptor.Labels, 0)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
@@ -65,7 +86,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -95,7 +116,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithComplexRegistryPath_AppendsResou
 		"europe-docker.pkg.dev/kyma-project/prod/external/istio/proxyv2:1.25.3-distroless",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -112,7 +133,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithGcrImage_AppendsResource(t *test
 		"gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -127,7 +148,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithInvalidImage_ReturnsError(t *tes
 	descriptor := createEmptyDescriptor()
 	images := []string{"invalid-image-no-tag"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "no tag or digest found")
@@ -137,7 +158,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithEmptyImageList_DoesNothing(t *te
 	descriptor := createEmptyDescriptor()
 	images := []string{}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Empty(t, descriptor.Resources)
@@ -149,7 +170,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithRegistryPortImage_AppendsResourc
 		"localhost:5000/myimage:v1.0.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -166,7 +187,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDockerHubImage_AppendsResource(t
 		"istio/proxyv2:1.19.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -184,7 +205,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMultipleImages_CreatesCorrectLab
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -204,7 +225,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithDigestImage_AppendsResourceWithC
 		"alpine@sha256:abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -234,7 +255,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithMalformedImage_ReturnsError(t *t
 	}
 
 	for _, img := range images {
-		err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, []string{img})
+		err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, []string{img}, true)
 		require.Error(t, err)
 	}
 }
@@ -257,7 +278,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithExistingResources_AppendsToExist
 		"alpine:3.15.4",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -270,7 +291,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithNilDescriptor_Panics(t *testing.
 	images := []string{"alpine:3.15.4"}
 
 	require.Panics(t, func() {
-		_ = componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+		_ = componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 	})
 }
 
@@ -280,7 +301,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithoutTag_ReturnsError(t *
 		"alpine",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "no tag or digest found in alpine")
@@ -294,7 +315,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithValidImageAfterError_StopsProces
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -310,7 +331,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithVariousTagFormats_AppendsResourc
 		"myapp:feature-branch",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 4)
@@ -335,7 +356,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledAfterDefaults_MaintainsDescriptorVal
 		"nginx:1.21.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 
@@ -349,7 +370,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithImageWithMultipleSlashes_Extract
 		"registry.example.com/team/project/subproject/app:v1.0.0",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -365,7 +386,7 @@ func TestAddImagesToOcmDescriptor_WhenCalledWithShortDigest_ReturnsError(t *test
 		"alpine@sha256:short",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid reference format")
@@ -393,7 +414,7 @@ func TestAddOciArtifactsToDescriptor_WhenImageListIsEmpty_LeavesResourcesUnchang
 	})
 	images := []string{}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -404,7 +425,7 @@ func TestAddOciArtifactsToDescriptor_WhenDuplicateImages_DoesNotAddDuplicates(t 
 	descriptor := createEmptyDescriptor()
 	images := []string{"alpine:3.15.4", "alpine:3.15.4"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -415,7 +436,7 @@ func TestAddOciArtifactsToDescriptor_WhenManyInvalidAndOneValidImage_AddsOnlyVal
 	descriptor := createEmptyDescriptor()
 	images := []string{"", ":", "notvalid", "alpine:3.15.4"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Empty(t, descriptor.Resources)
@@ -425,7 +446,7 @@ func TestAddOciArtifactsToDescriptor_WhenAllImagesValid_AddsAll(t *testing.T) {
 	descriptor := createEmptyDescriptor()
 	images := []string{"alpine:3.15.4", "nginx:1.21.0"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 2)
@@ -446,7 +467,7 @@ func TestAddOciArtifactsToDescriptor_WhenDescriptorHasInvalidResource_ReturnsVal
 	})
 	images := []string{"alpine:3.15.4"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
@@ -459,7 +480,7 @@ func TestAddOciArtifactsToDescriptor_WhenImagesResultInDuplicateResources_DoesNo
 		"library/alpine:3.15.4",
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 1)
@@ -470,7 +491,7 @@ func TestAddOciArtifactsToDescriptor_WhenCompdescValidateFailsAfterResourceAddit
 	descriptor.SetName("invalid name with spaces")
 	images := []string{"alpine:3.15.4"}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
@@ -483,7 +504,7 @@ func TestAddOciArtifactsToDescriptor_WhenLargeNumberOfImages_AddsAllResources(t 
 		images = append(images, fmt.Sprintf("alpine:3.15.%d", i))
 	}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.NoError(t, err)
 	require.Len(t, descriptor.Resources, 50)
@@ -496,7 +517,7 @@ func TestAddOciArtifactsToDescriptor_WhenImagesContainEmptyOrWhitespace_SkipsAnd
 	descriptor := createEmptyDescriptor()
 	images := []string{"alpine:3.15.4", "", "   "}
 
-	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images)
+	err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, true)
 
 	require.Error(t, err)
 	require.Len(t, descriptor.Resources, 1)

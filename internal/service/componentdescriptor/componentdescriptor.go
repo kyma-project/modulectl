@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
-func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*compdesc.ComponentDescriptor, error) {
+func InitializeComponentDescriptor(moduleName string, moduleVersion string, securityScanEnabled bool) (*compdesc.ComponentDescriptor, error) {
 	componentDescriptor := &compdesc.ComponentDescriptor{}
 	componentDescriptor.SetName(moduleName)
 	componentDescriptor.SetVersion(moduleVersion)
@@ -25,6 +25,16 @@ func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*co
 
 	componentDescriptor.Provider = ocmv1.Provider{Name: common.ProviderName, Labels: ocmv1.Labels{*providerLabel}}
 
+	// Add component-level security scan label if enabled
+	if securityScanEnabled {
+		securityLabel, err := ocmv1.NewLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue,
+			ocmv1.WithVersion(common.VersionV1))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create security label: %w", err)
+		}
+		componentDescriptor.Labels = ocmv1.Labels{*securityLabel}
+	}
+
 	compdesc.DefaultResources(componentDescriptor)
 
 	if err = compdesc.Validate(componentDescriptor); err != nil {
@@ -34,14 +44,14 @@ func InitializeComponentDescriptor(moduleName string, moduleVersion string) (*co
 	return componentDescriptor, nil
 }
 
-func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string) error {
+func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string, securityScanEnabled bool) error {
 	for _, img := range images {
 		imageInfo, err := image.ValidateAndParseImageInfo(img)
 		if err != nil {
 			return fmt.Errorf("image validation failed for %s: %w", img, err)
 		}
 
-		resource, err := resources.NewOciArtifactResource(imageInfo)
+		resource, err := resources.NewOciArtifactResource(imageInfo, securityScanEnabled)
 		if err != nil {
 			return fmt.Errorf("failed to create resource for %s: %w", img, err)
 		}

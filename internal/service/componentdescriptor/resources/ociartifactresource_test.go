@@ -19,7 +19,7 @@ func TestErrInvalidImageFormat_WhenAccessed_ReturnsCorrectMessage(t *testing.T) 
 }
 
 func TestNewOciArtifactResource_WhenImageInfoIsNil_ReturnsError(t *testing.T) {
-	result, err := resources.NewOciArtifactResource(nil)
+	result, err := resources.NewOciArtifactResource(nil, true)
 
 	require.Nil(t, result)
 	require.Error(t, err)
@@ -30,7 +30,7 @@ func TestNewOciArtifactResource_WhenImageInfoIsNil_ReturnsError(t *testing.T) {
 func TestNewOciArtifactResource_WhenImageInfoHasEmptyURL_ReturnsError(t *testing.T) {
 	imageInfo := createImageInfo("", "test-image", "v1.0.0", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.Nil(t, result)
 	require.Error(t, err)
@@ -41,7 +41,7 @@ func TestNewOciArtifactResource_WhenImageInfoHasEmptyURL_ReturnsError(t *testing
 func TestNewOciArtifactResource_WhenValidImageWithSemverTag_CreatesResourceCorrectly(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:v1.2.3", "myimage", "v1.2.3", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -60,7 +60,7 @@ func TestNewOciArtifactResource_WhenValidImageWithSemverTag_CreatesResourceCorre
 func TestNewOciArtifactResource_WhenValidImageWithSemverNoVPrefix_CreatesResourceCorrectly(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:1.2.3", "myimage", "1.2.3", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -71,7 +71,7 @@ func TestNewOciArtifactResource_WhenValidImageWithDigestAndSemverTag_CreatesReso
 	digest := "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
 	imageInfo := createImageInfo("registry.io/myimage@"+digest, "myimage", "v1.2.3", digest)
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -83,7 +83,7 @@ func TestNewOciArtifactResource_WhenValidImageWithDigestAndInvalidTag_CreatesRes
 	digest := "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
 	imageInfo := createImageInfo("registry.io/myimage@"+digest, "myimage", "latest", digest)
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -95,7 +95,7 @@ func TestNewOciArtifactResource_WhenDigestWithoutTag_CreatesResourceWithDefaultV
 	digest := "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
 	imageInfo := createImageInfo("registry.io/myimage@"+digest, "myimage", "", digest)
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -107,7 +107,7 @@ func TestNewOciArtifactResource_WhenVeryShortDigest_HandlesCorrectly(t *testing.
 	digest := "sha256:abcdefghijkl"
 	imageInfo := createImageInfo("registry.io/myimage@"+digest, "myimage", "", digest)
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -118,7 +118,7 @@ func TestNewOciArtifactResource_WhenVeryShortDigest_HandlesCorrectly(t *testing.
 func TestNewOciArtifactResource_WhenValidImageWithInvalidTag_CreatesResourceWithNormalizedVersion(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:latest", "myimage", "latest", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -134,7 +134,7 @@ func TestNewOciArtifactResource_WhenComplexTagNormalization_HandlesSpecialCharac
 		"",
 	)
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -144,7 +144,7 @@ func TestNewOciArtifactResource_WhenComplexTagNormalization_HandlesSpecialCharac
 func TestNewOciArtifactResource_WhenTagWithLeadingTrailingSpecialChars_NormalizesCorrectly(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:---.valid-tag.---", "myimage", "---.valid-tag.---", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -154,7 +154,7 @@ func TestNewOciArtifactResource_WhenTagWithLeadingTrailingSpecialChars_Normalize
 func TestNewOciArtifactResource_WhenEmptyTagNormalization_UsesUnknown(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:@#$%", "myimage", "@#$%", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -164,7 +164,7 @@ func TestNewOciArtifactResource_WhenEmptyTagNormalization_UsesUnknown(t *testing
 func TestNewOciArtifactResource_WhenTagWithOnlySpecialChars_UsesUnknown(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:...-...", "myimage", "...-...", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -174,7 +174,7 @@ func TestNewOciArtifactResource_WhenTagWithOnlySpecialChars_UsesUnknown(t *testi
 func TestNewOciArtifactResource_WhenSemverWithPrerelease_IdentifiesAsValidSemver(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:v1.2.3-alpha.1", "myimage", "v1.2.3-alpha.1", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -184,7 +184,7 @@ func TestNewOciArtifactResource_WhenSemverWithPrerelease_IdentifiesAsValidSemver
 func TestNewOciArtifactResource_WhenSemverWithBuildMetadata_IdentifiesAsValidSemver(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:1.2.3+build.123", "myimage", "1.2.3+build.123", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -194,7 +194,7 @@ func TestNewOciArtifactResource_WhenSemverWithBuildMetadata_IdentifiesAsValidSem
 func TestNewOciArtifactResource_WhenSemverWithPrereleaseAndBuildMetadata_IdentifiesAsValidSemver(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:v2.1.0-rc.1+build.456", "myimage", "v2.1.0-rc.1+build.456", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -204,7 +204,7 @@ func TestNewOciArtifactResource_WhenSemverWithPrereleaseAndBuildMetadata_Identif
 func TestNewOciArtifactResource_WhenInvalidSemverMissingPatch_CreatesNormalizedVersion(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:v1.2", "myimage", "v1.2", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -214,7 +214,7 @@ func TestNewOciArtifactResource_WhenInvalidSemverMissingPatch_CreatesNormalizedV
 func TestNewOciArtifactResource_WhenInvalidSemverWithLetters_CreatesNormalizedVersion(t *testing.T) {
 	imageInfo := createImageInfo("registry.io/myimage:v1.2.3a", "myimage", "v1.2.3a", "")
 
-	result, err := resources.NewOciArtifactResource(imageInfo)
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
@@ -291,6 +291,27 @@ func TestAddResourceIfNotExists_WhenEmptyResourcesList_AddsResource(t *testing.T
 
 	require.Len(t, descriptor.Resources, 1)
 	require.Equal(t, "new-resource", descriptor.Resources[0].Name)
+}
+
+func TestNewOciArtifactResource_WhenSecurityScanEnabled_AddsSecurityLabel(t *testing.T) {
+	imageInfo := createImageInfo("alpine:3.15.4", "alpine", "3.15.4", "")
+
+	result, err := resources.NewOciArtifactResource(imageInfo, true)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Labels, 1)
+	require.Equal(t, "scan.security.kyma-project.io/type", result.Labels[0].Name)
+}
+
+func TestNewOciArtifactResource_WhenSecurityScanDisabled_DoesNotAddSecurityLabel(t *testing.T) {
+	imageInfo := createImageInfo("alpine:3.15.4", "alpine", "3.15.4", "")
+
+	result, err := resources.NewOciArtifactResource(imageInfo, false)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Labels, 0)
 }
 
 func createImageInfo(fullURL, name, tag, digest string) *image.ImageInfo {

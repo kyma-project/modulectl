@@ -308,7 +308,8 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	resourcePaths *types.ResourcePaths,
 	opts Options,
 ) error {
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version)
+	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version, securityScanEnabled)
 	if err != nil {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
@@ -323,7 +324,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		return fmt.Errorf("failed to extract images from manifest: %w", err)
 	}
 
-	err = addImagesOciArtifactsToDescriptor(descriptor, images, opts)
+	err = addImagesOciArtifactsToDescriptor(descriptor, images, moduleConfig, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create oci artifact component for raw manifest: %w", err)
 	}
@@ -429,13 +430,22 @@ func (s *Service) extractImagesFromManifest(manifestFilePath string, opts Option
 }
 
 func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
-	images []string, opts Options,
+	images []string, moduleConfig *contentprovider.ModuleConfig, opts Options,
 ) error {
 	opts.Out.Write("- Adding oci artifacts to component descriptor\n")
-	if err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images); err != nil {
+	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
+	if err := componentdescriptor.AddOciArtifactsToDescriptor(descriptor, images, securityScanEnabled); err != nil {
 		return fmt.Errorf("failed to add images to component descriptor: %w", err)
 	}
 	return nil
+}
+
+// getSecurityScanEnabled returns true if securityScanEnabled is nil or true, false if explicitly set to false
+func getSecurityScanEnabled(moduleConfig *contentprovider.ModuleConfig) bool {
+	if moduleConfig.SecurityScanEnabled == nil {
+		return true // default is enabled
+	}
+	return *moduleConfig.SecurityScanEnabled
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {
