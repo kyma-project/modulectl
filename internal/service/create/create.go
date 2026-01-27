@@ -304,12 +304,20 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 }
 
 // This method will be deprecated in the future along with the OCM registry push support.
+//
+// Note on architecture: We pass individual flags (e.g., securityScanEnabled) as parameters to componentdescriptor
+// functions rather than passing the full ModuleConfig. This keeps the componentdescriptor package decoupled from
+// the contentprovider package, which is good for modularity and testability. If more ModuleConfig fields need to
+// flow down to the component descriptor layer in the future, consider introducing a ComponentDescriptorOptions
+// struct to avoid parameter proliferation while maintaining loose coupling.
 func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleConfig,
 	resourcePaths *types.ResourcePaths,
 	opts Options,
 ) error {
 	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleConfig.Name, moduleConfig.Version, securityScanEnabled)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(
+		moduleConfig.Name, moduleConfig.Version, securityScanEnabled,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
@@ -440,7 +448,7 @@ func addImagesOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor,
 	return nil
 }
 
-// getSecurityScanEnabled returns true if securityScanEnabled is nil or true, false if explicitly set to false
+// getSecurityScanEnabled returns true if securityScanEnabled is nil or true, false if explicitly set to false.
 func getSecurityScanEnabled(moduleConfig *contentprovider.ModuleConfig) bool {
 	if moduleConfig.SecurityScanEnabled == nil {
 		return true // default is enabled

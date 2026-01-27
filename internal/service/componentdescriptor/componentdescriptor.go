@@ -11,7 +11,9 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
-func InitializeComponentDescriptor(moduleName string, moduleVersion string, securityScanEnabled bool) (*compdesc.ComponentDescriptor, error) {
+func InitializeComponentDescriptor(
+	moduleName string, moduleVersion string, securityScanEnabled bool,
+) (*compdesc.ComponentDescriptor, error) {
 	componentDescriptor := &compdesc.ComponentDescriptor{}
 	componentDescriptor.SetName(moduleName)
 	componentDescriptor.SetVersion(moduleVersion)
@@ -44,7 +46,9 @@ func InitializeComponentDescriptor(moduleName string, moduleVersion string, secu
 	return componentDescriptor, nil
 }
 
-func AddOciArtifactsToDescriptor(descriptor *compdesc.ComponentDescriptor, images []string, securityScanEnabled bool) error {
+func AddOciArtifactsToDescriptor(
+	descriptor *compdesc.ComponentDescriptor, images []string, securityScanEnabled bool,
+) error {
 	for _, img := range images {
 		imageInfo, err := image.ValidateAndParseImageInfo(img)
 		if err != nil {

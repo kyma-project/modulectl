@@ -311,7 +311,7 @@ func TestNewOciArtifactResource_WhenSecurityScanDisabled_DoesNotAddSecurityLabel
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
-	require.Len(t, result.Labels, 0)
+	require.Empty(t, result.Labels)
 }
 
 func createImageInfo(fullURL, name, tag, digest string) *image.ImageInfo {

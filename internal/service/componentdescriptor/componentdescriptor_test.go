@@ -66,7 +66,7 @@ func Test_InitializeComponentDescriptor_WithSecurityScanEnabled_AddsSecurityLabe
 	require.NoError(t, err)
 	require.Len(t, descriptor.Labels, 1)
 	require.Equal(t, "security.kyma-project.io/scan", descriptor.Labels[0].Name)
-	require.Equal(t, json.RawMessage(`"enabled"`), descriptor.Labels[0].Value)
+	require.JSONEq(t, `"enabled"`, string(descriptor.Labels[0].Value))
 	require.Equal(t, "v1", descriptor.Labels[0].Version)
 }
 
@@ -76,7 +76,7 @@ func Test_InitializeComponentDescriptor_WithSecurityScanDisabled_DoesNotAddSecur
 	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, false)
 
 	require.NoError(t, err)
-	require.Len(t, descriptor.Labels, 0)
+	require.Empty(t, descriptor.Labels)
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {
