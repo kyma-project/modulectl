@@ -43,7 +43,7 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 
 		var cmd scaffoldCmd
 		It("When `modulectl scaffold` command is invoked without any args", func() {
-			cmd = scaffoldCmd{}
+			cmd = scaffoldCmd{moduleTeam: "jellyfish"}
 		})
 
 		It("Then the command should succeed", func() {
@@ -74,7 +74,9 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 
 		var cmd scaffoldCmd
 		It("When `modulectl scaffold` command is invoked without any args", func() {
-			cmd = scaffoldCmd{}
+			cmd = scaffoldCmd{
+				moduleTeam: "jellyfish",
+			}
 		})
 		It("Then the command should fail", func() {
 			err := cmd.execute()
@@ -98,7 +100,8 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 		var cmd scaffoldCmd
 		It("When `modulectl scaffold` command is invoked with --overwrite flag", func() {
 			cmd = scaffoldCmd{
-				overwrite: true,
+				moduleTeam: "jellyfish",
+				overwrite:  true,
 			}
 		})
 
@@ -130,6 +133,7 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 			cmd = scaffoldCmd{
 				moduleName:                    "github.com/custom/module",
 				moduleVersion:                 "3.2.1",
+				moduleTeam:                    "custom-team",
 				moduleConfigFileFlag:          "custom-module-config.yaml",
 				genManifestFlag:               "custom-manifest.yaml",
 				genDefaultCRFlag:              "custom-default-cr.yaml",
@@ -173,6 +177,7 @@ var _ = Describe("Test 'scaffold' command", Ordered, func() {
 		var cmd scaffoldCmd
 		It("When `modulectl scaffold` command is invoked with arguments that match existing files names", func() {
 			cmd = scaffoldCmd{
+				moduleTeam:                    "jellyfish",
 				genManifestFlag:               "custom-manifest.yaml",
 				genDefaultCRFlag:              "custom-default-cr.yaml",
 				genSecurityScannersConfigFlag: "custom-security-scanners-config.yaml",

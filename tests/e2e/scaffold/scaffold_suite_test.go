@@ -21,6 +21,7 @@ func Test_Scaffold(t *testing.T) {
 type scaffoldCmd struct {
 	moduleName                    string
 	moduleVersion                 string
+	moduleTeam                    string
 	moduleConfigFileFlag          string
 	genDefaultCRFlag              string
 	genSecurityScannersConfigFlag string
@@ -39,6 +40,10 @@ func (cmd *scaffoldCmd) execute() error {
 
 	if cmd.moduleVersion != "" {
 		args = append(args, "--module-version="+cmd.moduleVersion)
+	}
+
+	if cmd.moduleTeam != "" {
+		args = append(args, "--module-team="+cmd.moduleTeam)
 	}
 
 	if cmd.moduleConfigFileFlag != "" {
@@ -77,6 +82,9 @@ func (cmd *scaffoldCmd) toConfigBuilder() *moduleConfigBuilder {
 	}
 	if cmd.moduleVersion != "" {
 		res.withVersion(cmd.moduleVersion)
+	}
+	if cmd.moduleTeam != "" {
+		res.withTeam(cmd.moduleTeam)
 	}
 	if cmd.genDefaultCRFlag != "" {
 		res.withDefaultCRPath(cmd.genDefaultCRFlag)
@@ -125,10 +133,16 @@ func (mcb *moduleConfigBuilder) withSecurityScannersPath(val string) *moduleConf
 	return mcb
 }
 
+func (mcb *moduleConfigBuilder) withTeam(val string) *moduleConfigBuilder {
+	mcb.Team = val
+	return mcb
+}
+
 func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 	return mcb.
 		withName("kyma-project.io/module/mymodule").
 		withVersion("0.0.1").
+		withTeam("jellyfish").
 		withManifestPath("manifest.yaml")
 }
 
@@ -139,6 +153,7 @@ func (mcb *moduleConfigBuilder) defaults() *moduleConfigBuilder {
 type moduleConfig struct {
 	Name          string            `yaml:"name"        comment:"required, the name of the Module"`
 	Version       string            `yaml:"version"     comment:"required, the version of the Module"`
+	Team          string            `yaml:"team"        comment:"required, the team responsible for the Module"`
 	ManifestPath  string            `yaml:"manifest"    comment:"required, relative path or remote URL to the manifests"`
 	DefaultCRPath string            `yaml:"defaultCR"   comment:"optional, relative path or remote URL to a YAML file containing the default CR for the module"`
 	Security      string            `yaml:"security"    comment:"optional, name of the security scanners config file"`
