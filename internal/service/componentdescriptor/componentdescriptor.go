@@ -12,7 +12,7 @@ import (
 )
 
 func InitializeComponentDescriptor(
-	moduleName string, moduleVersion string, securityScanEnabled bool,
+	moduleName, moduleVersion, team string, securityScanEnabled bool,
 ) (*compdesc.ComponentDescriptor, error) {
 	componentDescriptor := &compdesc.ComponentDescriptor{}
 	componentDescriptor.SetName(moduleName)
@@ -27,13 +27,29 @@ func InitializeComponentDescriptor(
 
 	componentDescriptor.Provider = ocmv1.Provider{Name: common.ProviderName, Labels: ocmv1.Labels{*providerLabel}}
 
+	// Add responsibles label with team information
+	responsiblesValue := []map[string]interface{}{
+		{
+			"github_hostname": common.GitHubHostname,
+			"teamname":        team,
+			"type":            common.ResponsibleTypeGitHubTeam,
+		},
+	}
+	responsiblesLabel, err := ocmv1.NewLabel(common.ResponsiblesLabelKey, responsiblesValue,
+		ocmv1.WithVersion(common.VersionV1))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create responsibles label: %w", err)
+	}
+
+	componentDescriptor.Labels = ocmv1.Labels{*responsiblesLabel}
+
 	if securityScanEnabled {
 		securityLabel, err := ocmv1.NewLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue,
 			ocmv1.WithVersion(common.VersionV1))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create security label: %w", err)
 		}
-		componentDescriptor.Labels = ocmv1.Labels{*securityLabel}
+		componentDescriptor.Labels = append(componentDescriptor.Labels, *securityLabel)
 	}
 
 	compdesc.DefaultResources(componentDescriptor)

@@ -43,6 +43,10 @@ const (
 	ModuleVersionFlagName    = "module-version"
 	ModuleVersionFlagDefault = "0.0.1"
 	moduleVersionFlagUsage   = `Specifies the module version in the generated module config file (default "0.0.1").`
+
+	TeamFlagName    = "module-team"
+	TeamFlagDefault = ""
+	teamFlagUsage   = `Specifies the team name from github.tools.sap/orgs/kyma/teams responsible for the module (required).`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
@@ -57,6 +61,7 @@ func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
 		securityConfigFileFlagUsage)
 	flags.StringVar(&opts.ModuleName, ModuleNameFlagName, ModuleNameFlagDefault, moduleNameFlagUsage)
 	flags.StringVar(&opts.ModuleVersion, ModuleVersionFlagName, ModuleVersionFlagDefault, moduleVersionFlagUsage)
+	flags.StringVar(&opts.Team, TeamFlagName, TeamFlagDefault, teamFlagUsage)
 
 	flags.Lookup(SecurityConfigFileFlagName).NoOptDefVal = SecurityConfigFileFlagNoOptDefault
 	flags.Lookup(DefaultCRFlagName).NoOptDefVal = DefaultCRFlagNoOptDefault

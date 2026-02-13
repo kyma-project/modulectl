@@ -15,6 +15,10 @@ const (
 	TypeLabelKey              = "type"
 	ThirdPartyImageLabelValue = "third-party-image"
 
+	ResponsiblesLabelKey      = "cloud.gardener.cnudie/responsibles"
+	GitHubHostname            = "github.tools.sap"
+	ResponsibleTypeGitHubTeam = "githubTeam"
+
 	ModuleImageResourceName    = "module-image"
 	RawManifestResourceName    = "raw-manifest"
 	DefaultCRResourceName      = "default-cr"

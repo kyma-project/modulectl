@@ -111,6 +111,7 @@ func (s *Service) Run(opts Options) error {
 		types.KeyValueArgs{
 			contentprovider.ArgModuleName:         opts.ModuleName,
 			contentprovider.ArgModuleVersion:      opts.ModuleVersion,
+			contentprovider.ArgTeam:               opts.Team,
 			contentprovider.ArgManifestFile:       opts.ManifestFileName,
 			contentprovider.ArgDefaultCRFile:      defaultCRFilePath,
 			contentprovider.ArgSecurityConfigFile: securityConfigFilePath,

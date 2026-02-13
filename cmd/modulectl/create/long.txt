@@ -15,6 +15,7 @@ The module config file is a YAML file used to configure the following attributes
 - version:              a string, required, the version of the module
 - manifest:             a string, required, reference to the manifest, must be a URL or a local file reference: name or a relative path
 - repository:           a string, required, reference to the repository, must be a URL
+- team:                 a string, required, the team name responsible for the module, as defined in github.tools.sap/orgs/kyma/teams
 - documentation:        a string, required, reference to the documentation, must be a URL
 - icons:                a map with string keys and values, required, icons used for UI
     - name:             a string, required, the name of the icon
