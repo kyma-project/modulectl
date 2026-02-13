@@ -46,7 +46,7 @@ const (
 
 	TeamFlagName    = "module-team"
 	TeamFlagDefault = ""
-	teamFlagUsage   = `Specifies the team name responsible for the module (required).`
+	teamFlagUsage   = `Specifies the team name from github.tools.sap/orgs/kyma/teams responsible for the module (required).`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
