@@ -8,7 +8,7 @@ import (
 
 type ObjectToYAMLConverter struct{}
 
-func (*ObjectToYAMLConverter) ConvertToYaml(obj interface{}) string {
+func (*ObjectToYAMLConverter) ConvertToYaml(obj any) string {
 	reflectValue := reflect.ValueOf(obj)
 	var yamlBuilder strings.Builder
 	generateYamlWithComments(&yamlBuilder, reflectValue, 0, "")

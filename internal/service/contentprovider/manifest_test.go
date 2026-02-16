@@ -225,12 +225,12 @@ func TestExtractImagesFromManifest_MalformedContainer(t *testing.T) {
 	mockParser := &mockManifestParser{
 		manifests: []*unstructured.Unstructured{
 			{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"kind": "Deployment",
-					"spec": map[string]interface{}{
-						"template": map[string]interface{}{
-							"spec": map[string]interface{}{
-								"containers": []interface{}{"not-a-map"},
+					"spec": map[string]any{
+						"template": map[string]any{
+							"spec": map[string]any{
+								"containers": []any{"not-a-map"},
 							},
 						},
 					},
@@ -270,14 +270,14 @@ type envVar struct {
 
 func createDeployment(name string, containers []containerSpec) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"kind": "Deployment",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name": name,
 			},
-			"spec": map[string]interface{}{
-				"template": map[string]interface{}{
-					"spec": map[string]interface{}{
+			"spec": map[string]any{
+				"template": map[string]any{
+					"spec": map[string]any{
 						"containers": createContainers(containers),
 					},
 				},
@@ -288,14 +288,14 @@ func createDeployment(name string, containers []containerSpec) *unstructured.Uns
 
 func createStatefulSet(name string, containers []containerSpec) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"kind": "StatefulSet",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name": name,
 			},
-			"spec": map[string]interface{}{
-				"template": map[string]interface{}{
-					"spec": map[string]interface{}{
+			"spec": map[string]any{
+				"template": map[string]any{
+					"spec": map[string]any{
 						"containers": createContainers(containers),
 					},
 				},
@@ -310,14 +310,14 @@ func createDeploymentWithInitContainers(
 	initContainers []containerSpec,
 ) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"kind": "Deployment",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name": name,
 			},
-			"spec": map[string]interface{}{
-				"template": map[string]interface{}{
-					"spec": map[string]interface{}{
+			"spec": map[string]any{
+				"template": map[string]any{
+					"spec": map[string]any{
 						"containers":     createContainers(containers),
 						"initContainers": createContainers(initContainers),
 					},
@@ -329,14 +329,14 @@ func createDeploymentWithInitContainers(
 
 func createDeploymentWithEnvImages(containers []containerSpec) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"kind": "Deployment",
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name": "app",
 			},
-			"spec": map[string]interface{}{
-				"template": map[string]interface{}{
-					"spec": map[string]interface{}{
+			"spec": map[string]any{
+				"template": map[string]any{
+					"spec": map[string]any{
 						"containers": createContainers(containers),
 					},
 				},
@@ -345,17 +345,17 @@ func createDeploymentWithEnvImages(containers []containerSpec) *unstructured.Uns
 	}
 }
 
-func createContainers(containers []containerSpec) []interface{} {
-	result := make([]interface{}, 0, len(containers))
+func createContainers(containers []containerSpec) []any {
+	result := make([]any, 0, len(containers))
 	for _, container := range containers {
-		containerObj := map[string]interface{}{
+		containerObj := map[string]any{
 			"name":  container.name,
 			"image": container.image,
 		}
 		if len(container.envVars) > 0 {
-			envVars := make([]interface{}, 0, len(container.envVars))
+			envVars := make([]any, 0, len(container.envVars))
 			for _, env := range container.envVars {
-				envVars = append(envVars, map[string]interface{}{
+				envVars = append(envVars, map[string]any{
 					"name":  env.name,
 					"value": env.value,
 				})
@@ -369,9 +369,9 @@ func createContainers(containers []containerSpec) []interface{} {
 
 func createUnsupportedResource(kind, name string) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
-		Object: map[string]interface{}{
+		Object: map[string]any{
 			"kind": kind,
-			"metadata": map[string]interface{}{
+			"metadata": map[string]any{
 				"name": name,
 			},
 		},

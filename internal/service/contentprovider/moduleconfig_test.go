@@ -280,6 +280,6 @@ type mcObjectToYAMLConverterStub struct{}
 
 const mcConvertedContent = "content"
 
-func (o *mcObjectToYAMLConverterStub) ConvertToYaml(_ interface{}) string {
+func (o *mcObjectToYAMLConverterStub) ConvertToYaml(_ any) string {
 	return mcConvertedContent
 }

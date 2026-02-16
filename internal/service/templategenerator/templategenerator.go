@@ -221,7 +221,7 @@ func ConvertDescriptorIfNotNil(
 }
 
 func parseDefaultCRYaml(data []byte) ([]byte, error) {
-	var crData map[string]interface{}
+	var crData map[string]any
 	if err := yaml.Unmarshal(data, &crData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal cr data: %w", err)
 	}

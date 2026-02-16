@@ -77,7 +77,7 @@ func extractFromContainers(manifest *unstructured.Unstructured, imageSet map[str
 	}
 
 	for _, container := range containers {
-		containerMap, ok := container.(map[string]interface{})
+		containerMap, ok := container.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -99,14 +99,14 @@ func extractFromContainers(manifest *unstructured.Unstructured, imageSet map[str
 	return nil
 }
 
-func extractFromEnv(container map[string]interface{}, imageSet map[string]struct{}) error {
+func extractFromEnv(container map[string]any, imageSet map[string]struct{}) error {
 	envVars, found, _ := unstructured.NestedSlice(container, "env")
 	if !found {
 		return nil
 	}
 
 	for _, envVar := range envVars {
-		envMap, ok := envVar.(map[string]interface{})
+		envMap, ok := envVar.(map[string]any)
 		if !ok {
 			continue
 		}

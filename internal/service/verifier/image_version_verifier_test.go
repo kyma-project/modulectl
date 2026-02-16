@@ -15,7 +15,7 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/verifier"
 )
 
-func makeUnstructuredFromObj(obj interface{}) *unstructured.Unstructured {
+func makeUnstructuredFromObj(obj any) *unstructured.Unstructured {
 	u := &unstructured.Unstructured{}
 	m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {

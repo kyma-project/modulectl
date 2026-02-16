@@ -112,7 +112,7 @@ type Manager struct {
 type Icons map[string]string
 
 // UnmarshalYAML unmarshals Icons from YAML format.
-func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (i *Icons) UnmarshalYAML(unmarshal func(any) error) error {
 	dataMap, err := unmarshalToMap(unmarshal)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal Icons: %w", err)
@@ -122,7 +122,7 @@ func (i *Icons) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // MarshalYAML marshals Icons to YAML format.
-func (i *Icons) MarshalYAML() (interface{}, error) {
+func (i *Icons) MarshalYAML() (any, error) {
 	return marshalFromMap(*i)
 }
 
@@ -130,7 +130,7 @@ func (i *Icons) MarshalYAML() (interface{}, error) {
 type Resources map[string]string
 
 // UnmarshalYAML unmarshals Resources from YAML format.
-func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (rm *Resources) UnmarshalYAML(unmarshal func(any) error) error {
 	dataMap, err := unmarshalToMap(unmarshal)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal Resources: %w", err)
@@ -140,11 +140,11 @@ func (rm *Resources) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // MarshalYAML marshals Resources to YAML format.
-func (rm *Resources) MarshalYAML() (interface{}, error) {
+func (rm *Resources) MarshalYAML() (any, error) {
 	return marshalFromMap(*rm)
 }
 
-func unmarshalToMap(unmarshal func(interface{}) error) (map[string]string, error) {
+func unmarshalToMap(unmarshal func(any) error) (map[string]string, error) {
 	var items []nameLinkItem
 	if err := unmarshal(&items); err == nil {
 		resultMap := make(map[string]string)
@@ -165,7 +165,7 @@ func unmarshalToMap(unmarshal func(interface{}) error) (map[string]string, error
 	return resultMap, nil
 }
 
-func marshalFromMap(dataMap map[string]string) (interface{}, error) {
+func marshalFromMap(dataMap map[string]string) (any, error) {
 	items := make([]nameLinkItem, 0, len(dataMap))
 	for name, link := range dataMap {
 		items = append(items, nameLinkItem{Name: name, Link: link})
