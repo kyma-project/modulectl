@@ -17,6 +17,7 @@ import (
 const (
 	moduleConfigFile     = "config.yaml"
 	exampleRepository    = "https://example.com/path/to/repository"
+	exampleTeam          = "test-team"
 	exampleDocumentation = "https://example.com/path/to/documentation"
 	exampleIcon          = "https://example.com/path/to/some-icon"
 	exampleRawManifest   = "https://github.com/kyma-project/template-operator/" +
@@ -39,6 +40,7 @@ func Test_ParseModuleConfig_Returns_CorrectModuleConfig(t *testing.T) {
 	require.Equal(t, "https://example.com/path/to/manifests", result.Manifest.String())
 	require.Equal(t, "https://example.com/path/to/defaultCR", result.DefaultCR.String())
 	require.Equal(t, exampleRepository, result.Repository)
+	require.Equal(t, exampleTeam, result.Team)
 	require.Equal(t, exampleDocumentation, result.Documentation)
 	require.Equal(t, "path/to/securityConfig", result.Security)
 	require.Equal(t, contentprovider.Icons{
@@ -89,6 +91,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      contentprovider.MustUrlOrLocalFile("./test"), // valid local file path
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -103,6 +106,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      contentprovider.MustUrlOrLocalFile("/some/path/test.yaml"), // invalid absolute path
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -120,6 +124,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -135,6 +140,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -153,6 +159,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -170,6 +177,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "invalid version",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -185,6 +193,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      emptyManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -200,6 +209,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    "",
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -215,6 +225,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    "some repository",
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -224,12 +235,29 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				commonerrors.ErrInvalidOption),
 		},
 		{
+			name: "empty team",
+			moduleConfig: &contentprovider.ModuleConfig{
+				Name:          "github.com/module-name",
+				Version:       "0.0.1",
+				Manifest:      exampleManifest,
+				Repository:    exampleRepository,
+				Team:          "",
+				Documentation: exampleDocumentation,
+				Icons: contentprovider.Icons{
+					"module-icon": exampleIcon,
+				},
+			},
+			expectedError: fmt.Errorf("failed to validate team: must not be empty: %w",
+				commonerrors.ErrInvalidOption),
+		},
+		{
 			name: "empty documentation",
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:          "github.com/module-name",
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: "",
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -245,6 +273,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: "some documentation",
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -262,6 +291,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons:         contentprovider.Icons{},
 			},
@@ -275,6 +305,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"": exampleIcon,
@@ -290,6 +321,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": "",
@@ -305,6 +337,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": "this is not a URL",
@@ -323,6 +356,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -343,6 +377,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -361,6 +396,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      exampleManifest,
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -379,6 +415,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Version:       "0.0.1",
 				Manifest:      contentprovider.MustUrlOrLocalFile("file://path/to/manifest"),
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -397,6 +434,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 				Manifest:      exampleManifest,
 				DefaultCR:     contentprovider.MustUrlOrLocalFile("file://path/to/defaultCR"),
 				Repository:    exampleRepository,
+				Team:          exampleTeam,
 				Documentation: exampleDocumentation,
 				Icons: contentprovider.Icons{
 					"module-icon": exampleIcon,
@@ -583,6 +621,7 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Version:       "0.0.1",
 	Manifest:      contentprovider.MustUrlOrLocalFile("https://example.com/path/to/manifests"),
 	Repository:    exampleRepository,
+	Team:          exampleTeam,
 	Documentation: exampleDocumentation,
 	Icons: contentprovider.Icons{
 		"module-icon": exampleIcon,

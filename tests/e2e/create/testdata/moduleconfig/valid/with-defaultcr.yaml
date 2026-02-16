@@ -3,6 +3,7 @@ version: 1.0.3
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.3/template-operator.yaml
 defaultCR: https://github.com/kyma-project/template-operator/releases/download/1.0.3/default-sample-cr.yaml
 repository: https://github.com/kyma-project/template-operator
+team: jellyfish
 documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
 icons:
   - name: module-icon

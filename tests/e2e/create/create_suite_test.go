@@ -28,6 +28,7 @@ const (
 	missingManifestConfig      = invalidConfigs + "missing-manifest.yaml"
 	missingDocumentationConfig = invalidConfigs + "missing-documentation.yaml"
 	missingRepositoryConfig    = invalidConfigs + "missing-repository.yaml"
+	missingTeamConfig          = invalidConfigs + "missing-team.yaml"
 	missingIconsConfig         = invalidConfigs + "missing-icons.yaml"
 	nonHttpsRepository         = invalidConfigs + "non-https-repository.yaml"
 	nonHttpsDocumentation      = invalidConfigs + "non-https-documentation.yaml"

@@ -168,6 +168,24 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 
 	It("Given 'modulectl create' command", func() {
 		var cmd createCmd
+		By("When invoked with missing team", func() {
+			cmd = createCmd{
+				registry:                  ociRegistry,
+				moduleConfigFile:          missingTeamConfig,
+				moduleSourcesGitDirectory: templateOperatorPath,
+			}
+		})
+		By("Then the command should fail", func() {
+			err := cmd.execute()
+			Expect(err).Should(HaveOccurred())
+			Expect(
+				err.Error(),
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate team: must not be empty: invalid Option"))
+		})
+	})
+
+	It("Given 'modulectl create' command", func() {
+		var cmd createCmd
 		By("When invoked with non https repository", func() {
 			cmd = createCmd{
 				registry:                  ociRegistry,

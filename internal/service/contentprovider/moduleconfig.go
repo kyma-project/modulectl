@@ -53,6 +53,7 @@ func (s *ModuleConfigProvider) getModuleConfig(args types.KeyValueArgs) (*Module
 	return &ModuleConfig{
 		Name:      args[ArgModuleName],
 		Version:   args[ArgModuleVersion],
+		Team:      args[ArgTeam],
 		Manifest:  manifest,
 		Security:  args[ArgSecurityConfigFile],
 		DefaultCR: defaultCR,
@@ -84,6 +85,7 @@ type ModuleConfig struct {
 	Version             string                     `comment:"required, the version of the module"                                                                                               yaml:"version"`
 	Manifest            UrlOrLocalFile             `comment:"required, reference to the manifest, must be a URL or a local file path"                                                           yaml:"manifest"`
 	Repository          string                     `comment:"required, reference to the repository, must be a URL"                                                                              yaml:"repository"`
+	Team                string                     `comment:"required, module team defined in github.tools.sap"                                                                                 yaml:"team"`
 	Documentation       string                     `comment:"required, reference to the documentation, must be a URL"                                                                           yaml:"documentation"`
 	Icons               Icons                      `comment:"required, icons used for UI"                                                                                                       yaml:"icons,omitempty"`
 	DefaultCR           UrlOrLocalFile             `comment:"optional, reference to a YAML file containing the default CR for the module, must be a URL or a local file path"                   yaml:"defaultCR"` //nolint:tagliatelle // prefer defaultCR over defaultCr

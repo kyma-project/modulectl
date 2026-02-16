@@ -253,7 +253,8 @@ func newScaffoldOptionsBuilder() *scaffoldOptionsBuilder {
 		withModuleConfigFileOverwrite(false).
 		withSecurityConfigFileName("security-config.yaml").
 		withModuleName("github.com/kyma-project/test").
-		withModuleVersion("0.0.1")
+		withModuleVersion("0.0.1").
+		withTeam("test-team")
 }
 
 func (b *scaffoldOptionsBuilder) build() scaffold.Options {
@@ -302,5 +303,10 @@ func (b *scaffoldOptionsBuilder) withModuleName(moduleName string) *scaffoldOpti
 
 func (b *scaffoldOptionsBuilder) withModuleVersion(moduleVersion string) *scaffoldOptionsBuilder {
 	b.options.ModuleVersion = moduleVersion
+	return b
+}
+
+func (b *scaffoldOptionsBuilder) withTeam(team string) *scaffoldOptionsBuilder {
+	b.options.Team = team
 	return b
 }

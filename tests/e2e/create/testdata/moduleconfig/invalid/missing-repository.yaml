@@ -1,5 +1,6 @@
 name: kyma-project.io/module/template-operator
 version: 1.0.0
+team: jellyfish
 manifest: https://github.com/kyma-project/template-operator/releases/download/1.0.1/template-operator.yaml
 documentation: https://github.com/kyma-project/template-operator/blob/main/README.md
 icons:

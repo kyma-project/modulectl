@@ -310,7 +310,7 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 ) error {
 	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
 	descriptor, err := componentdescriptor.InitializeComponentDescriptor(
-		moduleConfig.Name, moduleConfig.Version, securityScanEnabled,
+		moduleConfig.Name, moduleConfig.Version, moduleConfig.Team, securityScanEnabled,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)

@@ -18,7 +18,8 @@ import (
 func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
+	team := "test-team"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, true)
 	expectedProviderLabel := json.RawMessage(`"modulectl"`)
 
 	require.NoError(t, err)
@@ -31,12 +32,18 @@ func Test_InitializeComponentDescriptor_ReturnsCorrectDescriptor(t *testing.T) {
 	require.Equal(t, expectedProviderLabel, descriptor.Provider.Labels[0].Value)
 	require.Equal(t, "v1", descriptor.Provider.Labels[0].Version)
 	require.Empty(t, descriptor.Resources)
+
+	// Verify responsibles label
+	require.Len(t, descriptor.Labels, 2) // responsibles + security scan
+	require.Equal(t, "cloud.gardener.cnudie/responsibles", descriptor.Labels[0].Name)
+	require.Equal(t, "v1", descriptor.Labels[0].Version)
 }
 
 func Test_InitializeComponentDescriptor_ReturnsErrWhenInvalidName(t *testing.T) {
 	moduleName := "test-module"
 	moduleVersion := "0.0.1"
-	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
+	team := "test-team"
+	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, true)
 
 	expectedError := errors.New("failed to validate component descriptor")
 	require.ErrorContains(t, err, expectedError.Error())
@@ -45,7 +52,8 @@ func Test_InitializeComponentDescriptor_ReturnsErrWhenInvalidName(t *testing.T) 
 func Test_InitializeComponentDescriptor_LabelCreationFails(t *testing.T) {
 	badName := string([]byte{0x7f})
 	moduleVersion := "0.0.1"
-	_, err := componentdescriptor.InitializeComponentDescriptor(badName, moduleVersion, true)
+	team := "test-team"
+	_, err := componentdescriptor.InitializeComponentDescriptor(badName, moduleVersion, team, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
 }
@@ -53,7 +61,8 @@ func Test_InitializeComponentDescriptor_LabelCreationFails(t *testing.T) {
 func Test_InitializeComponentDescriptor_EmptyVersion_ReturnsError(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := ""
-	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
+	team := "test-team"
+	_, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to validate component descriptor")
 }
@@ -61,22 +70,53 @@ func Test_InitializeComponentDescriptor_EmptyVersion_ReturnsError(t *testing.T) 
 func Test_InitializeComponentDescriptor_WithSecurityScanEnabled_AddsSecurityLabel(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, true)
+	team := "test-team"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, true)
 
 	require.NoError(t, err)
-	require.Len(t, descriptor.Labels, 1)
-	require.Equal(t, "security.kyma-project.io/scan", descriptor.Labels[0].Name)
-	require.Equal(t, `"enabled"`, string(descriptor.Labels[0].Value))
+	require.Len(t, descriptor.Labels, 2) // responsibles + security scan
+	require.Equal(t, "cloud.gardener.cnudie/responsibles", descriptor.Labels[0].Name)
 	require.Equal(t, "v1", descriptor.Labels[0].Version)
+	require.Equal(t, "security.kyma-project.io/scan", descriptor.Labels[1].Name)
+	require.Equal(t, `"enabled"`, string(descriptor.Labels[1].Value))
+	require.Equal(t, "v1", descriptor.Labels[1].Version)
 }
 
 func Test_InitializeComponentDescriptor_WithSecurityScanDisabled_DoesNotAddSecurityLabel(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, false)
+	team := "test-team"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, false)
 
 	require.NoError(t, err)
-	require.Empty(t, descriptor.Labels)
+	require.Len(t, descriptor.Labels, 1) // only responsibles label
+	require.Equal(t, "cloud.gardener.cnudie/responsibles", descriptor.Labels[0].Name)
+	require.Equal(t, "v1", descriptor.Labels[0].Version)
+}
+
+func Test_InitializeComponentDescriptor_AddsResponsiblesLabel(t *testing.T) {
+	moduleName := "github.com/test-module"
+	moduleVersion := "0.0.1"
+	team := "my-awesome-team"
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, false)
+
+	require.NoError(t, err)
+	require.Len(t, descriptor.Labels, 1)
+
+	responsiblesLabel := descriptor.Labels[0]
+	require.Equal(t, "cloud.gardener.cnudie/responsibles", responsiblesLabel.Name)
+	require.Equal(t, "v1", responsiblesLabel.Version)
+
+	// Parse the label value to verify structure
+	var responsibles []map[string]interface{}
+	err = json.Unmarshal(responsiblesLabel.Value, &responsibles)
+	require.NoError(t, err)
+	require.Len(t, responsibles, 1)
+
+	responsible := responsibles[0]
+	require.Equal(t, "github.tools.sap", responsible["github_hostname"])
+	require.Equal(t, "my-awesome-team", responsible["teamname"])
+	require.Equal(t, "githubTeam", responsible["type"])
 }
 
 func TestAddImagesToOcmDescriptor_WhenCalledWithValidImages_AppendsResources(t *testing.T) {

@@ -20,6 +20,7 @@ type Options struct {
 	SecurityConfigFileName    string
 	ModuleName                string
 	ModuleVersion             string
+	Team                      string
 }
 
 func (opts Options) Validate() error {
@@ -37,6 +38,10 @@ func (opts Options) Validate() error {
 
 	if err := opts.validateVersion(); err != nil {
 		return err
+	}
+
+	if opts.Team == "" {
+		return fmt.Errorf("opts.Team must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.ModuleConfigFileName == "" {

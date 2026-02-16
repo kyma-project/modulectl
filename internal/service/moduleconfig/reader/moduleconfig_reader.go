@@ -77,6 +77,10 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate repository: %w", err)
 	}
 
+	if moduleConfig.Team == "" {
+		return fmt.Errorf("failed to validate team: must not be empty: %w", commonerrors.ErrInvalidOption)
+	}
+
 	if err := validation.ValidateIsValidHTTPSURL(moduleConfig.Documentation); err != nil {
 		return fmt.Errorf("failed to validate documentation: %w", err)
 	}
