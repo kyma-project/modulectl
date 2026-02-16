@@ -55,7 +55,7 @@ metadata:
 	}
 	var svcObj, deployObj unstructured.Unstructured
 
-	docs := [][]byte{}
+	docs := make([][]byte, 0, 2)
 	for _, doc := range []string{
 		"apiVersion: v1\nkind: Service\nmetadata:\n  name: test-svc\n",
 		"apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: test-deploy\n",

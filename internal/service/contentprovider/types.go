@@ -1,5 +1,5 @@
 package contentprovider
 
 type ObjectToYAMLConverter interface {
-	ConvertToYaml(obj interface{}) string
+	ConvertToYaml(obj any) string
 }

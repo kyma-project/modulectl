@@ -262,15 +262,15 @@ type objectToYAMLConverterStub struct{}
 
 const convertedContent = "content"
 
-func (o *objectToYAMLConverterStub) ConvertToYaml(_ interface{}) string {
+func (o *objectToYAMLConverterStub) ConvertToYaml(_ any) string {
 	return convertedContent
 }
 
 type objectToYAMLConverterCapture struct {
-	capturedConfig interface{}
+	capturedConfig any
 }
 
-func (o *objectToYAMLConverterCapture) ConvertToYaml(obj interface{}) string {
+func (o *objectToYAMLConverterCapture) ConvertToYaml(obj any) string {
 	o.capturedConfig = obj
 	// Verify the structure
 	config, ok := obj.(contentprovider.SecurityScanConfig)

@@ -1,6 +1,6 @@
 module github.com/kyma-project/modulectl
 
-go 1.25.5
+go 1.26.0
 
 //required as of OCM v0.34.3
 replace github.com/ThalesIgnite/crypto11 => github.com/ThalesGroup/crypto11 v1.6.0

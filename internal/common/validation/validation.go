@@ -26,7 +26,7 @@ func ValidateModuleName(name string) error {
 
 	if len(name) > moduleNameMaxLength {
 		return fmt.Errorf(
-			"opts.ModuleName length must not exceed %q characters: %w",
+			"opts.ModuleName length must not exceed %d characters: %w",
 			moduleNameMaxLength,
 			commonerrors.ErrInvalidOption,
 		)
@@ -60,7 +60,7 @@ func ValidateModuleVersion(version string) error {
 
 func ValidateNamespace(namespace string) error {
 	if len(namespace) > namespaceMaxLength {
-		return fmt.Errorf("opts.ModuleNamespace length must not exceed %q characters: %w",
+		return fmt.Errorf("opts.ModuleNamespace length must not exceed %d characters: %w",
 			namespaceMaxLength,
 			commonerrors.ErrInvalidOption)
 	}

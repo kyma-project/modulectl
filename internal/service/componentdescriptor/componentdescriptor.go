@@ -28,7 +28,7 @@ func InitializeComponentDescriptor(
 	componentDescriptor.Provider = ocmv1.Provider{Name: common.ProviderName, Labels: ocmv1.Labels{*providerLabel}}
 
 	// Add responsibles label with team information
-	responsiblesValue := []map[string]interface{}{
+	responsiblesValue := []map[string]any{
 		{
 			"github_hostname": common.GitHubHostname,
 			"teamname":        team,

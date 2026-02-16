@@ -108,7 +108,7 @@ func Test_InitializeComponentDescriptor_AddsResponsiblesLabel(t *testing.T) {
 	require.Equal(t, "v1", responsiblesLabel.Version)
 
 	// Parse the label value to verify structure
-	var responsibles []map[string]interface{}
+	var responsibles []map[string]any
 	err = json.Unmarshal(responsiblesLabel.Value, &responsibles)
 	require.NoError(t, err)
 	require.Len(t, responsibles, 1)
@@ -539,7 +539,7 @@ func TestAddOciArtifactsToDescriptor_WhenCompdescValidateFailsAfterResourceAddit
 
 func TestAddOciArtifactsToDescriptor_WhenLargeNumberOfImages_AddsAllResources(t *testing.T) {
 	descriptor := createEmptyDescriptor()
-	images := []string{}
+	images := make([]string, 0, 50)
 	for i := range 50 {
 		images = append(images, fmt.Sprintf("alpine:3.15.%d", i))
 	}
