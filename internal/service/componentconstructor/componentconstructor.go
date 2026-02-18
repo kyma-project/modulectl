@@ -67,3 +67,21 @@ func (s *Service) AddImagesToConstructor(
 	componentConstructor.AddImageAsResource(imageInfos)
 	return nil
 }
+
+// SetComponentLabel sets a top-level label on the first component of the constructor.
+// The label version defaults to "v1".
+// The label is overwritten if it already exists.
+func (s *Service) SetComponentLabel(
+	componentConstructor *component.Constructor,
+	labelName, value string,
+) {
+	labels := componentConstructor.Components[0].Labels
+	for i, label := range labels {
+		if label.Name == labelName {
+			labels[i].Value = value
+			return
+		}
+	}
+
+	componentConstructor.AddLabel(labelName, value, common.VersionV1)
+}

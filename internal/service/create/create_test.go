@@ -456,6 +456,10 @@ func (c *componentConstructorServiceStub) CreateConstructorFile(_ *component.Con
 	return nil
 }
 
+func (c *componentConstructorServiceStub) SetComponentLabel(componentConstructor *component.Constructor,
+	name, value string) {
+}
+
 type componentArchiveServiceStub struct{}
 
 func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (
