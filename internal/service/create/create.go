@@ -262,6 +262,17 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 ) error {
 	constructor := component.NewConstructor(moduleConfig.Name, moduleConfig.Version)
 
+	// Add responsibles label with team information
+	if err := constructor.AddResponsiblesLabel(moduleConfig.Team); err != nil {
+		return fmt.Errorf("failed to add responsibles label: %w", err)
+	}
+
+	// Add security scan label if enabled
+	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
+	if securityScanEnabled {
+		constructor.AddSecurityScanLabel()
+	}
+
 	if err := s.gitSourcesService.AddGitSourcesToConstructor(constructor, opts.ModuleSourcesGitDirectory,
 		moduleConfig.Repository); err != nil {
 		return fmt.Errorf("failed to add git sources to constructor: %w", err)

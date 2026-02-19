@@ -47,7 +47,7 @@ type Access struct {
 
 type Label struct {
 	Name    string `yaml:"name"`
-	Value   string `yaml:"value"`
+	Value   any    `yaml:"value"`
 	Version string `yaml:"version,omitempty"`
 }
 
@@ -118,7 +118,7 @@ func (c *Constructor) AddGitSource(gitRepoURL, commitHash string) {
 	c.Components[0].Sources = append(c.Components[0].Sources, source)
 }
 
-func (c *Constructor) AddLabel(key, value, version string) {
+func (c *Constructor) AddLabel(key string, value any, version string) {
 	labels := c.Components[0].Labels
 	labelValue := Label{
 		Name:    key,
@@ -129,7 +129,7 @@ func (c *Constructor) AddLabel(key, value, version string) {
 	c.Components[0].Labels = labels
 }
 
-func (c *Constructor) AddLabelToSources(key, value, version string) {
+func (c *Constructor) AddLabelToSources(key string, value any, version string) {
 	for index, source := range c.Components[0].Sources {
 		labels := source.Labels
 		labelValue := Label{
@@ -140,6 +140,22 @@ func (c *Constructor) AddLabelToSources(key, value, version string) {
 		labels = append(labels, labelValue)
 		c.Components[0].Sources[index].Labels = labels
 	}
+}
+
+func (c *Constructor) AddResponsiblesLabel(team string) error {
+	responsiblesValue := []map[string]any{
+		{
+			"github_hostname": common.GitHubHostname,
+			"teamname":        team,
+			"type":            common.ResponsibleTypeGitHubTeam,
+		},
+	}
+	c.AddLabel(common.ResponsiblesLabelKey, responsiblesValue, common.VersionV1)
+	return nil
+}
+
+func (c *Constructor) AddSecurityScanLabel() {
+	c.AddLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue, common.VersionV1)
 }
 
 func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
