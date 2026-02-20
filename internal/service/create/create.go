@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"strconv"
 
+	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"ocm.software/ocm/api/ocm/compdesc"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
+	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
@@ -52,6 +55,7 @@ type ComponentConstructorService interface {
 	CreateConstructorFile(componentConstructor *component.Constructor,
 		outputFile string,
 	) error
+	SetComponentLabel(componentConstructor *component.Constructor, name, value string)
 }
 
 type ComponentArchiveService interface {
@@ -305,6 +309,25 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	if err = s.componentConstructorService.AddResources(constructor, resourcePaths); err != nil {
 		return fmt.Errorf("failed to add resources to component constructor: %w", err)
 	}
+
+	opts.Out.Write("- Setting OCM Component labels\n")
+	s.componentConstructorService.SetComponentLabel(constructor,
+		shared.BetaLabel, strconv.FormatBool(moduleConfig.Beta))
+
+	s.componentConstructorService.SetComponentLabel(constructor,
+		shared.InternalLabel, strconv.FormatBool(moduleConfig.Internal))
+
+	s.componentConstructorService.SetComponentLabel(constructor,
+		common.RequiresDowntimeLabelKey,
+		strconv.FormatBool(moduleConfig.RequiresDowntime))
+
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
+	}
+	s.componentConstructorService.SetComponentLabel(constructor,
+		shared.IsClusterScopedAnnotation,
+		strconv.FormatBool(isCRDClusterScoped))
 
 	opts.Out.Write("- Creating component constructor file\n")
 	if err = s.componentConstructorService.CreateConstructorFile(constructor,
