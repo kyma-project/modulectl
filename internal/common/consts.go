@@ -23,4 +23,6 @@ const (
 	RawManifestResourceName    = "raw-manifest"
 	DefaultCRResourceName      = "default-cr"
 	ModuleTemplateResourceName = "moduletemplate"
+
+	RequiresDowntimeLabelKey = "operator.kyma-project.io/requiresDowntime"
 )
