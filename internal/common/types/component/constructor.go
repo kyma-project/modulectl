@@ -139,19 +139,6 @@ func (c *Constructor) AddLabel(key, value, version string) {
 	c.Components[0].Labels = labels
 }
 
-func (c *Constructor) AddLabelToSources(key, value, version string) {
-	for index, source := range c.Components[0].Sources {
-		labels := source.Labels
-		labelValue := Label{
-			Name:    key,
-			Value:   value,
-			Version: version,
-		}
-		labels = append(labels, labelValue)
-		c.Components[0].Sources[index].Labels = labels
-	}
-}
-
 func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 	for _, imageInfo := range imageInfos {
 		version, resourceName := resources.GenerateOCMVersionAndName(imageInfo)

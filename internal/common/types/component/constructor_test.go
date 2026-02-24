@@ -110,36 +110,6 @@ func TestConstructor_AddLabel_Multiple(t *testing.T) {
 	}
 }
 
-func TestConstructor_AddLabelToSources(t *testing.T) {
-	constructor := component.NewConstructor("test-component", "1.0.0")
-
-	constructor.AddGitSource("https://github.com/test/repo1", "commit1")
-	constructor.AddGitSource("https://github.com/test/repo2", "commit2")
-
-	initialLabelCounts := make([]int, len(constructor.Components[0].Sources))
-	for i, source := range constructor.Components[0].Sources {
-		initialLabelCounts[i] = len(source.Labels)
-	}
-
-	constructor.AddLabelToSources("test-key", "test-value", common.VersionV1)
-
-	for i, source := range constructor.Components[0].Sources {
-		require.Len(t, source.Labels, initialLabelCounts[i]+1, "source %d: label count mismatch", i)
-
-		var foundLabel *component.Label
-		for _, label := range source.Labels {
-			if label.Name == "test-key" {
-				foundLabel = &label
-				break
-			}
-		}
-
-		require.NotNil(t, foundLabel, "source %d: added label not found", i)
-		require.Equal(t, "test-value", foundLabel.Value, "source %d: label value mismatch", i)
-		require.Equal(t, common.VersionV1, foundLabel.Version, "source %d: label version mismatch", i)
-	}
-}
-
 func TestConstructor_AddImageAsResource(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
