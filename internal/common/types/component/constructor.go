@@ -51,6 +51,16 @@ type Label struct {
 	Version string `yaml:"version,omitempty"`
 }
 
+// ResponsibleEntry represents a responsible team entry in OCM component descriptor.
+// Field names use snake_case to match OCM specification format.
+//
+//nolint:tagliatelle // OCM spec requires snake_case field names
+type ResponsibleEntry struct {
+	GitHubHostname string `yaml:"github_hostname"`
+	TeamName       string `yaml:"teamname"`
+	Type           string `yaml:"type"`
+}
+
 type Resource struct {
 	Name     string  `yaml:"name"`
 	Type     string  `yaml:"type"`

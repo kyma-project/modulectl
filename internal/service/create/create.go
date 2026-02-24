@@ -58,7 +58,6 @@ type ComponentConstructorService interface {
 	) error
 	SetComponentLabel(componentConstructor *component.Constructor, name, value string)
 	SetResponsiblesLabel(componentConstructor *component.Constructor, team string)
-	SetSecurityScanLabel(componentConstructor *component.Constructor)
 }
 
 type ComponentArchiveService interface {
@@ -269,15 +268,6 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 ) error {
 	constructor := component.NewConstructor(moduleConfig.Name, moduleConfig.Version)
 
-	// Add responsibles label with team information
-	s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
-
-	// Add security scan label if enabled
-	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
-	if securityScanEnabled {
-		s.componentConstructorService.SetSecurityScanLabel(constructor)
-	}
-
 	if err := s.gitSourcesService.AddGitSourcesToConstructor(constructor, opts.ModuleSourcesGitDirectory,
 		moduleConfig.Repository); err != nil {
 		return fmt.Errorf("failed to add git sources to constructor: %w", err)
@@ -330,6 +320,16 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		shared.IsClusterScopedAnnotation,
 		strconv.FormatBool(isCRDClusterScoped))
 
+	// Add security scan label if enabled
+	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
+	if securityScanEnabled {
+		s.componentConstructorService.SetComponentLabel(constructor,
+			common.SecurityScanLabelKey, common.SecurityScanEnabledValue)
+	}
+
+	// Add responsibles label with team information
+	s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
+
 	opts.Out.Write("- Creating component constructor file\n")
 	if err = s.componentConstructorService.CreateConstructorFile(constructor,
 		opts.OutputConstructorFile); err != nil {
@@ -352,22 +352,8 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	}
 
 	// Add OCM component labels
-	opts.Out.Write("- Setting OCM Component labels\n")
-	if err = addLabelToDescriptor(descriptor, shared.BetaLabel, strconv.FormatBool(moduleConfig.Beta)); err != nil {
-		return fmt.Errorf("failed to add beta label: %w", err)
-	}
-	if err = addLabelToDescriptor(descriptor, shared.InternalLabel, strconv.FormatBool(moduleConfig.Internal)); err != nil {
-		return fmt.Errorf("failed to add internal label: %w", err)
-	}
-	if err = addLabelToDescriptor(descriptor, common.RequiresDowntimeLabelKey, strconv.FormatBool(moduleConfig.RequiresDowntime)); err != nil {
-		return fmt.Errorf("failed to add requires downtime label: %w", err)
-	}
-	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
-	if err != nil {
-		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
-	}
-	if err = addLabelToDescriptor(descriptor, shared.IsClusterScopedAnnotation, strconv.FormatBool(isCRDClusterScoped)); err != nil {
-		return fmt.Errorf("failed to add is cluster scoped label: %w", err)
+	if err = s.setComponentDescriptorLabels(descriptor, moduleConfig, resourcePaths, opts); err != nil {
+		return err
 	}
 
 	if err = s.gitSourcesService.AddGitSources(descriptor, opts.ModuleSourcesGitDirectory, moduleConfig.Repository,
@@ -421,6 +407,35 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	err = s.createModuleTemplate(moduleConfig, descriptor, resourcePaths)
 	if err != nil {
 		return fmt.Errorf("failed to create module template: %w", err)
+	}
+	return nil
+}
+
+func (s *Service) setComponentDescriptorLabels(
+	descriptor *compdesc.ComponentDescriptor,
+	moduleConfig *contentprovider.ModuleConfig,
+	resourcePaths *types.ResourcePaths,
+	opts Options,
+) error {
+	opts.Out.Write("- Setting OCM Component labels\n")
+	if err := addLabelToDescriptor(descriptor, shared.BetaLabel, strconv.FormatBool(moduleConfig.Beta)); err != nil {
+		return fmt.Errorf("failed to add beta label: %w", err)
+	}
+	internalValue := strconv.FormatBool(moduleConfig.Internal)
+	if err := addLabelToDescriptor(descriptor, shared.InternalLabel, internalValue); err != nil {
+		return fmt.Errorf("failed to add internal label: %w", err)
+	}
+	requiresDowntimeValue := strconv.FormatBool(moduleConfig.RequiresDowntime)
+	if err := addLabelToDescriptor(descriptor, common.RequiresDowntimeLabelKey, requiresDowntimeValue); err != nil {
+		return fmt.Errorf("failed to add requires downtime label: %w", err)
+	}
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
+	}
+	isClusterScopedValue := strconv.FormatBool(isCRDClusterScoped)
+	if err = addLabelToDescriptor(descriptor, shared.IsClusterScopedAnnotation, isClusterScopedValue); err != nil {
+		return fmt.Errorf("failed to add is cluster scoped label: %w", err)
 	}
 	return nil
 }

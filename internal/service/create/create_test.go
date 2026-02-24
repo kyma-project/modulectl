@@ -464,9 +464,6 @@ func (c *componentConstructorServiceStub) SetResponsiblesLabel(componentConstruc
 	team string) {
 }
 
-func (c *componentConstructorServiceStub) SetSecurityScanLabel(componentConstructor *component.Constructor) {
-}
-
 type componentArchiveServiceStub struct{}
 
 func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (
