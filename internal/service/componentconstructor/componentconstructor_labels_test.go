@@ -141,3 +141,94 @@ func TestService_SetLabel_OnlyFirstComponent(t *testing.T) {
 	assert.Equal(t, "bar", constructor.Components[0].Labels[0].Value)
 	assert.Equal(t, common.VersionV1, constructor.Components[0].Labels[0].Version)
 }
+
+func TestService_SetResponsiblesLabel(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	// given
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+	require.Empty(t, constructor.Components[0].Labels)
+
+	// when
+	service.SetResponsiblesLabel(constructor, "test-team")
+
+	// then
+	require.Len(t, constructor.Components[0].Labels, 1)
+
+	label := constructor.Components[0].Labels[0]
+	assert.Equal(t, common.ResponsiblesLabelKey, label.Name)
+	assert.Equal(t, common.VersionV1, label.Version)
+
+	// Verify the value is stored as a slice
+	responsiblesValue, ok := label.Value.([]map[string]any)
+	require.True(t, ok, "label value should be []map[string]any, got %T", label.Value)
+	require.Len(t, responsiblesValue, 1)
+
+	responsible := responsiblesValue[0]
+	assert.Equal(t, common.GitHubHostname, responsible["github_hostname"])
+	assert.Equal(t, "test-team", responsible["teamname"])
+	assert.Equal(t, common.ResponsibleTypeGitHubTeam, responsible["type"])
+}
+
+func TestService_SetResponsiblesLabel_WithDifferentTeam(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	// given
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+
+	// when
+	service.SetResponsiblesLabel(constructor, "another-team")
+
+	// then
+	require.Len(t, constructor.Components[0].Labels, 1)
+
+	label := constructor.Components[0].Labels[0]
+	responsiblesValue, ok := label.Value.([]map[string]any)
+	require.True(t, ok, "label value should be []map[string]any")
+	assert.Equal(t, "another-team", responsiblesValue[0]["teamname"])
+}
+
+func TestService_SetSecurityScanLabel(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	// given
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+	require.Empty(t, constructor.Components[0].Labels)
+
+	// when
+	service.SetSecurityScanLabel(constructor)
+
+	// then
+	require.Len(t, constructor.Components[0].Labels, 1)
+
+	label := constructor.Components[0].Labels[0]
+	assert.Equal(t, common.SecurityScanLabelKey, label.Name)
+	assert.Equal(t, common.SecurityScanEnabledValue, label.Value)
+	assert.Equal(t, common.VersionV1, label.Version)
+}
+
+func TestService_SetResponsiblesLabel_AndSecurityScanLabel(t *testing.T) {
+	service := componentconstructor.NewService()
+
+	// given
+	constructor := component.NewConstructor(testModuleName, testModuleVersion)
+
+	// when
+	service.SetResponsiblesLabel(constructor, "test-team")
+	service.SetSecurityScanLabel(constructor)
+
+	// then
+	require.Len(t, constructor.Components[0].Labels, 2)
+
+	// Verify responsibles label
+	responsiblesLabel := constructor.Components[0].Labels[0]
+	assert.Equal(t, common.ResponsiblesLabelKey, responsiblesLabel.Name)
+	responsiblesValue, ok := responsiblesLabel.Value.([]map[string]any)
+	require.True(t, ok, "label value should be []map[string]any")
+	assert.Equal(t, "test-team", responsiblesValue[0]["teamname"])
+
+	// Verify security scan label
+	securityLabel := constructor.Components[0].Labels[1]
+	assert.Equal(t, common.SecurityScanLabelKey, securityLabel.Name)
+	assert.Equal(t, common.SecurityScanEnabledValue, securityLabel.Value)
+}

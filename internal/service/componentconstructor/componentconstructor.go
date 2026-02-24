@@ -85,3 +85,28 @@ func (s *Service) SetComponentLabel(
 
 	componentConstructor.AddLabel(labelName, value, common.VersionV1)
 }
+
+// SetResponsiblesLabel sets the cloud.gardener.cnudie/responsibles label with team information.
+func (s *Service) SetResponsiblesLabel(
+	componentConstructor *component.Constructor,
+	team string,
+) {
+	responsiblesValue := []map[string]any{
+		{
+			"github_hostname": common.GitHubHostname,
+			"teamname":        team,
+			"type":            common.ResponsibleTypeGitHubTeam,
+		},
+	}
+	label := component.Label{
+		Name:    common.ResponsiblesLabelKey,
+		Value:   responsiblesValue,
+		Version: common.VersionV1,
+	}
+	componentConstructor.Components[0].Labels = append(componentConstructor.Components[0].Labels, label)
+}
+
+// SetSecurityScanLabel sets the security.kyma-project.io/scan label to enabled.
+func (s *Service) SetSecurityScanLabel(componentConstructor *component.Constructor) {
+	componentConstructor.AddLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue, common.VersionV1)
+}

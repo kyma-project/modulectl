@@ -56,6 +56,8 @@ type ComponentConstructorService interface {
 		outputFile string,
 	) error
 	SetComponentLabel(componentConstructor *component.Constructor, name, value string)
+	SetResponsiblesLabel(componentConstructor *component.Constructor, team string)
+	SetSecurityScanLabel(componentConstructor *component.Constructor)
 }
 
 type ComponentArchiveService interface {
@@ -267,14 +269,12 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 	constructor := component.NewConstructor(moduleConfig.Name, moduleConfig.Version)
 
 	// Add responsibles label with team information
-	if err := constructor.AddResponsiblesLabel(moduleConfig.Team); err != nil {
-		return fmt.Errorf("failed to add responsibles label: %w", err)
-	}
+	s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
 
 	// Add security scan label if enabled
 	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
 	if securityScanEnabled {
-		constructor.AddSecurityScanLabel()
+		s.componentConstructorService.SetSecurityScanLabel(constructor)
 	}
 
 	if err := s.gitSourcesService.AddGitSourcesToConstructor(constructor, opts.ModuleSourcesGitDirectory,
