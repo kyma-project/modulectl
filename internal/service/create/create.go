@@ -8,6 +8,7 @@ import (
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"ocm.software/ocm/api/ocm/compdesc"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
@@ -350,6 +351,25 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
 	}
 
+	// Add OCM component labels
+	opts.Out.Write("- Setting OCM Component labels\n")
+	if err = addLabelToDescriptor(descriptor, shared.BetaLabel, strconv.FormatBool(moduleConfig.Beta)); err != nil {
+		return fmt.Errorf("failed to add beta label: %w", err)
+	}
+	if err = addLabelToDescriptor(descriptor, shared.InternalLabel, strconv.FormatBool(moduleConfig.Internal)); err != nil {
+		return fmt.Errorf("failed to add internal label: %w", err)
+	}
+	if err = addLabelToDescriptor(descriptor, common.RequiresDowntimeLabelKey, strconv.FormatBool(moduleConfig.RequiresDowntime)); err != nil {
+		return fmt.Errorf("failed to add requires downtime label: %w", err)
+	}
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
+	}
+	if err = addLabelToDescriptor(descriptor, shared.IsClusterScopedAnnotation, strconv.FormatBool(isCRDClusterScoped)); err != nil {
+		return fmt.Errorf("failed to add is cluster scoped label: %w", err)
+	}
+
 	if err = s.gitSourcesService.AddGitSources(descriptor, opts.ModuleSourcesGitDirectory, moduleConfig.Repository,
 		moduleConfig.Version); err != nil {
 		return fmt.Errorf("failed to add git sources: %w", err)
@@ -481,6 +501,15 @@ func getSecurityScanEnabled(moduleConfig *contentprovider.ModuleConfig) bool {
 		return true // default is enabled
 	}
 	return *moduleConfig.SecurityScanEnabled
+}
+
+func addLabelToDescriptor(descriptor *compdesc.ComponentDescriptor, name, value string) error {
+	label, err := ocmv1.NewLabel(name, value, ocmv1.WithVersion(common.VersionV1))
+	if err != nil {
+		return fmt.Errorf("failed to create label %s: %w", name, err)
+	}
+	descriptor.Labels = append(descriptor.Labels, *label)
+	return nil
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {

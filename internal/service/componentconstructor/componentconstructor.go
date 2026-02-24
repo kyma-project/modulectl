@@ -108,5 +108,5 @@ func (s *Service) SetResponsiblesLabel(
 
 // SetSecurityScanLabel sets the security.kyma-project.io/scan label to enabled.
 func (s *Service) SetSecurityScanLabel(componentConstructor *component.Constructor) {
-	componentConstructor.AddLabel(common.SecurityScanLabelKey, common.SecurityScanEnabledValue, common.VersionV1)
+	s.SetComponentLabel(componentConstructor, common.SecurityScanLabelKey, common.SecurityScanEnabledValue)
 }
