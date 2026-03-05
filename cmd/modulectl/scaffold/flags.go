@@ -46,7 +46,7 @@ const (
 
 	TeamFlagName    = "module-team"
 	TeamFlagDefault = ""
-	teamFlagUsage   = `Specifies the team name (e.g: "kyma/<your-team-name>") responsible for the module (required).`
+	teamFlagUsage   = `Specifies the name of the team responsible for the module in the "kyma/<your-team-name>" format (e.g., "kyma/jellyfish") (required).`
 )
 
 func parseFlags(flags *pflag.FlagSet, opts *scaffold.Options) {
