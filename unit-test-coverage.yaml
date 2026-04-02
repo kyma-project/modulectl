@@ -4,7 +4,6 @@ packages:
   internal/common/validation: 92
   internal/common/types/component: 90
   internal/service/scaffold: 91
-  internal/service/credential: 83
   internal/service/contentprovider: 91.8
   internal/service/filegenerator: 100
   internal/service/filegenerator/reusefilegenerator: 94
@@ -13,15 +12,9 @@ packages:
   internal/service/moduleconfig/reader: 81
   internal/service/create: 56
   internal/service/componentdescriptor: 75.8
-  internal/service/componentdescriptor/resources: 94.6
-  internal/service/componentdescriptor/resources/accesshandler: 100
   internal/service/templategenerator: 85.5
   internal/service/crdparser: 73
-  internal/service/registry: 80
   internal/service/manifestparser: 93.3
-  internal/service/componentarchive: 40
   internal/service/image: 94.6
   internal/service/componentconstructor: 85
   internal/common/utils/slices: 100
-  tools/filesystem: 21
-  tools/ocirepo: 23
