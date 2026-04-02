@@ -3,10 +3,11 @@ package component
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/kyma-project/modulectl/internal/common"
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
@@ -141,7 +142,7 @@ func (c *Constructor) AddLabel(key, value, version string) {
 
 func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 	for _, imageInfo := range imageInfos {
-		version, resourceName := resources.GenerateOCMVersionAndName(imageInfo)
+		version, resourceName := generateOCMVersionAndName(imageInfo)
 		resource := Resource{
 			Name:     resourceName,
 			Type:     OCIArtifactResourceType,
@@ -221,4 +222,49 @@ func getAbsPath(filePath string) (string, error) {
 		filePath = absPath
 	}
 	return filePath, nil
+}
+
+// Semantic versioning format following e.g: x.y.z or vx.y,z.
+const semverPattern = `^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$` //nolint:revive,lll // for readability
+
+func generateOCMVersionAndName(info *image.ImageInfo) (string, string) {
+	if info.Digest != "" {
+		shortDigest := info.Digest[:12]
+		var version string
+		switch {
+		case info.Tag != "" && isValidSemverForOCM(info.Tag):
+			version = fmt.Sprintf("%s+sha256.%s", info.Tag, shortDigest)
+		case info.Tag != "":
+			version = fmt.Sprintf("0.0.0-%s+sha256.%s", normalizeTagForOCM(info.Tag), shortDigest)
+		default:
+			version = "0.0.0+sha256." + shortDigest
+		}
+		resourceName := fmt.Sprintf("%s-%s", info.Name, info.Digest[:8])
+		return version, resourceName
+	}
+
+	var version string
+	if isValidSemverForOCM(info.Tag) {
+		version = info.Tag
+	} else {
+		version = "0.0.0-" + normalizeTagForOCM(info.Tag)
+	}
+
+	resourceName := info.Name
+	return version, resourceName
+}
+
+func normalizeTagForOCM(tag string) string {
+	reg := regexp.MustCompile(`[^a-zA-Z0-9.-]`)
+	normalized := reg.ReplaceAllString(tag, "-")
+	normalized = strings.Trim(normalized, "-.")
+	if normalized == "" {
+		normalized = "unknown"
+	}
+	return normalized
+}
+
+func isValidSemverForOCM(version string) bool {
+	matched, _ := regexp.MatchString(semverPattern, version)
+	return matched
 }

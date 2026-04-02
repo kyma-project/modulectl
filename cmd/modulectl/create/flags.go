@@ -12,39 +12,14 @@ const (
 	ConfigFileFlagDefault = "module-config.yaml"
 	configFileFlagUsage   = "Specifies the path to the module configuration file."
 
-	CredentialsFlagName    = "registry-credentials" //nolint:gosec // Not hardcoded credentials, rather just flag name
-	CredentialsFlagDefault = ""
-	credentialsFlagUsage   = "Basic authentication credentials for the given repository in the <user:password> format."
-
-	InsecureFlagName    = "insecure"
-	InsecureFlagDefault = false
-	insecureFlagUsage   = "Allows to use a less secure (non-tls) connection for registry access, e.g. localhost when testing. Should only be used in dev scenarios."
-
 	TemplateOutputFlagName    = "output"
 	templateOutputFlagShort   = "o"
 	TemplateOutputFlagDefault = "template.yaml"
-	templateOutputFlagUsage   = `Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").`
-
-	RegistryURLFlagName    = "registry"
-	registryFlagShort      = "r"
-	RegistryURLFlagDefault = ""
-	registryURLFlagUsage   = "Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor."
-
-	OverwriteComponentVersionFlagName    = "overwrite"
-	overwriteComponentVersionFlagUsage   = "Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes."
-	OverwriteComponentVersionFlagDefault = false
-
-	DryRunFlagName    = "dry-run"
-	dryRunFlagUsage   = "Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true."
-	DryRunFlagDefault = false
+	templateOutputFlagUsage   = `Path to write the ModuleTemplate file to (default "template.yaml").`
 
 	ModuleSourcesGitDirectoryFlagName    = "module-sources-git-directory"
 	ModuleSourcesGitDirectoryFlagDefault = "."
 	ModuleSourcesGitDirectoryFlagUsage   = "Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository."
-
-	DisableOCMRegistryPushFlagName    = "disable-ocm-registry-push"
-	DisableOCMRegistryPushFlagDefault = false
-	DisableOCMRegistryPushFlagUsage   = "Disables the push of the component version to the OCM registry."
 
 	OutputConstructorFileFlagName    = "output-constructor-file"
 	OutputConstructorFileFlagDefault = "component-constructor.yaml"
@@ -57,47 +32,21 @@ func parseFlags(flags *pflag.FlagSet, opts *create.Options) {
 		configFileFlagShort,
 		ConfigFileFlagDefault,
 		configFileFlagUsage)
-	flags.StringVar(&opts.Credentials,
-		CredentialsFlagName,
-		CredentialsFlagDefault,
-		credentialsFlagUsage)
-	flags.BoolVar(&opts.Insecure,
-		InsecureFlagName,
-		InsecureFlagDefault,
-		insecureFlagUsage)
 	flags.StringVarP(&opts.TemplateOutput,
 		TemplateOutputFlagName,
 		templateOutputFlagShort,
 		TemplateOutputFlagDefault,
 		templateOutputFlagUsage)
-	flags.StringVarP(&opts.RegistryURL,
-		RegistryURLFlagName,
-		registryFlagShort,
-		RegistryURLFlagDefault,
-		registryURLFlagUsage)
 	flags.StringVar(&opts.ModuleSourcesGitDirectory,
 		ModuleSourcesGitDirectoryFlagName,
 		ModuleSourcesGitDirectoryFlagDefault,
 		ModuleSourcesGitDirectoryFlagUsage)
-	flags.BoolVar(&opts.OverwriteComponentVersion,
-		OverwriteComponentVersionFlagName,
-		OverwriteComponentVersionFlagDefault,
-		overwriteComponentVersionFlagUsage)
-	flags.BoolVar(&opts.DryRun,
-		DryRunFlagName,
-		DryRunFlagDefault,
-		dryRunFlagUsage)
 
 	// Feature toggle flag for skipping version validation, should be removed once all module confirmed in the internal backlog issue: 7573
 	flags.BoolVar(&opts.SkipVersionValidation,
 		"skip-version-validation",
 		true,
 		"Skipping image and ocm version validation")
-
-	flags.BoolVar(&opts.DisableOCMRegistryPush,
-		DisableOCMRegistryPushFlagName,
-		DisableOCMRegistryPushFlagDefault,
-		DisableOCMRegistryPushFlagUsage)
 
 	flags.StringVar(&opts.OutputConstructorFile,
 		OutputConstructorFileFlagName,

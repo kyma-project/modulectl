@@ -3,7 +3,6 @@ package create_test
 import (
 	"errors"
 	"os"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,18 +46,14 @@ func Test_Execute_ReturnsError_WhenModuleServiceReturnsError(t *testing.T) {
 
 func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	moduleConfigFile := testutils.RandomName(10)
-	credentials := testutils.RandomName(10)
-	insecure := "true"
 	templateOutput := testutils.RandomName(10)
-	registryURL := testutils.RandomName(10)
+	constructorFile := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
 		"--config-file", moduleConfigFile,
-		"--insecure", insecure,
 		"--output", templateOutput,
-		"--registry", registryURL,
-		"--registry-credentials", credentials,
+		"--output-constructor-file", constructorFile,
 	}
 
 	svc := &moduleServiceStub{}
@@ -67,26 +62,19 @@ func Test_Execute_ParsesAllModuleOptions(t *testing.T) {
 	err := cmd.Execute()
 	require.NoError(t, err)
 
-	insecureFlagSet, err := strconv.ParseBool(insecure)
-	require.NoError(t, err)
-
 	assert.Equal(t, moduleConfigFile, svc.opts.ConfigFile)
-	assert.Equal(t, credentials, svc.opts.Credentials)
-	assert.Equal(t, insecureFlagSet, svc.opts.Insecure)
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
-	assert.Equal(t, registryURL, svc.opts.RegistryURL)
+	assert.Equal(t, constructorFile, svc.opts.OutputConstructorFile)
 }
 
 func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 	configFile := testutils.RandomName(10)
 	templateOutput := testutils.RandomName(10)
-	registry := testutils.RandomName(10)
 
 	os.Args = []string{
 		"create",
 		"-c", configFile,
 		"-o", templateOutput,
-		"-r", registry,
 	}
 
 	svc := &moduleServiceStub{}
@@ -97,7 +85,6 @@ func Test_Execute_ParsesModuleShortOptions(t *testing.T) {
 
 	assert.Equal(t, configFile, svc.opts.ConfigFile)
 	assert.Equal(t, templateOutput, svc.opts.TemplateOutput)
-	assert.Equal(t, registry, svc.opts.RegistryURL)
 }
 
 func Test_Execute_ModuleParsesDefaults(t *testing.T) {
@@ -112,10 +99,8 @@ func Test_Execute_ModuleParsesDefaults(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, createcmd.ConfigFileFlagDefault, svc.opts.ConfigFile)
-	assert.Equal(t, createcmd.CredentialsFlagDefault, svc.opts.Credentials)
-	assert.Equal(t, createcmd.InsecureFlagDefault, svc.opts.Insecure)
 	assert.Equal(t, createcmd.TemplateOutputFlagDefault, svc.opts.TemplateOutput)
-	assert.Equal(t, createcmd.RegistryURLFlagDefault, svc.opts.RegistryURL)
+	assert.Equal(t, createcmd.OutputConstructorFileFlagDefault, svc.opts.OutputConstructorFile)
 }
 
 // Test Stubs

@@ -7,15 +7,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"ocm.software/ocm/api/ocm/compdesc"
-	"ocm.software/ocm/api/ocm/cpi"
-	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/componentarchive"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/create"
 	iotools "github.com/kyma-project/modulectl/tools/io"
@@ -23,8 +18,8 @@ import (
 
 func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 	_, err := create.NewService(nil, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{}, &componentArchiveServiceStub{}, &registryServiceStub{},
-		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{}, &ModuleResourceServiceStub{},
+		&componentConstructorServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
 		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{}, &fileResolverStub{},
 		&fileExistsStub{})
 
@@ -33,68 +28,33 @@ func Test_NewService_ReturnsError_WhenModuleConfigServiceIsNil(t *testing.T) {
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleConfigFileIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
+	svc := newTestService(t)
 
 	opts := newCreateOptionsBuilder().withModuleConfigFile("").build()
 
-	err = svc.Run(opts)
+	err := svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.ConfigFile")
 }
 
 func Test_CreateModule_ReturnsError_WhenOutIsNil(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
+	svc := newTestService(t)
 
 	opts := newCreateOptionsBuilder().withOut(nil).build()
 
-	err = svc.Run(opts)
+	err := svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.Out")
 }
 
-func Test_CreateModule_ReturnsError_WhenCredentialsIsInInvalidFormat(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().withCredentials("user").build()
-
-	err = svc.Run(opts)
-
-	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
-	require.Contains(t, err.Error(), "opts.Credentials")
-}
-
 func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
+	svc := newTestService(t)
 
 	opts := newCreateOptionsBuilder().withTemplateOutput("").build()
 
-	err = svc.Run(opts)
+	err := svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.TemplateOutput")
@@ -103,8 +63,8 @@ func Test_CreateModule_ReturnsError_WhenTemplateOutputIsEmpty(t *testing.T) {
 func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceParseErrorStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
 		&fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
@@ -120,8 +80,8 @@ func Test_CreateModule_ReturnsError_WhenParseAndValidateModuleConfigReturnsError
 func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverErrorStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverErrorStub{},
 		&fileResolverStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
@@ -137,8 +97,8 @@ func Test_CreateModule_ReturnsError_WhenResolvingManifestFilePathReturnsError(t 
 func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t *testing.T) {
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
 		&fileResolverErrorStub{},
 		&fileExistsStub{})
 	require.NoError(t, err)
@@ -152,112 +112,64 @@ func Test_CreateModule_ReturnsError_WhenResolvingDefaultCRFilePathReturnsError(t
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleSourcesGitDirectoryIsEmpty(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
+	svc := newTestService(t)
 
 	opts := newCreateOptionsBuilder().withModuleSourcesGitDirectory("").build()
 
-	err = svc.Run(opts)
+	err := svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(), "opts.ModuleSourcesGitDirectory must not be empty")
 }
 
 func Test_CreateModule_ReturnsError_WhenModuleSourcesIsNotGitDirectory(t *testing.T) {
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
-		&fileResolverStub{},
-		&fileExistsStub{})
-	require.NoError(t, err)
+	svc := newTestService(t)
 
 	opts := newCreateOptionsBuilder().withModuleSourcesGitDirectory(".").build()
 
-	err = svc.Run(opts)
+	err := svc.Run(opts)
 
 	require.ErrorIs(t, err, commonerrors.ErrInvalidOption)
 	require.Contains(t, err.Error(),
 		"currently configured module-sources-git-directory \".\" must point to a valid git repository")
 }
 
-func Test_CreateModule_ReturnsError_WhenRegistryPushIsDisabled_AndVersionCheckFails(t *testing.T) {
+func Test_CreateModule_ReturnsError_WhenVersionCheckFails(t *testing.T) {
 	expectedErrMsg := "no matched version 1.0.4 found in Deployment or StatefulSet"
 
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierErrorStub{expectedErrMsg}, &manifestServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierErrorStub{expectedErrMsg}, &manifestServiceStub{},
 		manifestResolverStub, defaultCRResolverStub,
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().
-		withOutputConstructorFile("constructor.yaml").
-		withDisableOCMRegistryPush(true). // component-constructor mode enabled
-		build()
+	opts := newCreateOptionsBuilder().build()
 
-	// when
 	err = svc.Run(opts)
 
-	// then
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to verify module resources: "+expectedErrMsg)
 }
 
-func Test_CreateModule_CleansUpTempFiles_WhenRegistryPushIsEnabled(t *testing.T) {
-	// given
+func Test_CreateModule_DoesNotCleanUpTempFiles_OnSuccess(t *testing.T) {
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
 		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{},
 		manifestResolverStub, defaultCRResolverStub,
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().withDisableOCMRegistryPush(false).build() // registry push enabled
+	opts := newCreateOptionsBuilder().build()
 
-	// when
-	err = svc.Run(opts)
-	require.Contains(t, err.Error(), "failed to add images to component descriptor") // error is expected because\
-	// this legacy code path is not fully stubbed
-
-	// then
-	assert.Equal(t, 1, manifestResolverStub.cleanupTempFilesCallCount,
-		"expected manifest resolver to clean up temporary files")
-	assert.Equal(t, 1, defaultCRResolverStub.cleanupTempFilesCallCount,
-		"expected default CR resolver to clean up temporary files")
-}
-
-func Test_CreateModule_DoesNotCleanUpTempFiles_WhenConstructorMode_AndSuccess(t *testing.T) {
-	manifestResolverStub := &fileResolverStub{}
-	defaultCRResolverStub := &fileResolverStub{}
-	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
-		&componentConstructorServiceStub{},
-		&componentArchiveServiceStub{}, &registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
-		manifestResolverStub, defaultCRResolverStub,
-		&fileExistsStub{})
-	require.NoError(t, err)
-
-	opts := newCreateOptionsBuilder().
-		withOutputConstructorFile("constructor.yaml").
-		withDisableOCMRegistryPush(true). // component-constructor mode enabled
-		build()
-
-	// when
 	err = svc.Run(opts)
 
-	// then
 	require.NoError(t, err)
 	assert.Equal(t, 0, manifestResolverStub.cleanupTempFilesCallCount,
 		"expected manifest resolver not to clean up temporary files on success")
@@ -265,30 +177,39 @@ func Test_CreateModule_DoesNotCleanUpTempFiles_WhenConstructorMode_AndSuccess(t 
 		"expected default CR resolver not to clean up temporary files on success")
 }
 
-func Test_CreateModule_CleansUpTempFiles_WhenConstructorMode_AndError(t *testing.T) {
+func Test_CreateModule_CleansUpTempFiles_OnError(t *testing.T) {
 	manifestResolverStub := &fileResolverStub{}
 	defaultCRResolverStub := &fileResolverStub{}
 	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceErrorStub{},
-		&componentConstructorServiceStub{}, &componentArchiveServiceStub{},
-		&registryServiceStub{}, &ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
-		&ModuleResourceServiceStub{}, &imageVersionVerifierStub{}, &manifestServiceStub{},
+		&componentConstructorServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{},
 		manifestResolverStub, defaultCRResolverStub,
 		&fileExistsStub{})
 	require.NoError(t, err)
 
-	opts := newCreateOptionsBuilder().
-		withOutputConstructorFile("constructor.yaml").
-		withDisableOCMRegistryPush(true). // component-constructor mode enabled
-		build()
-	// when
+	opts := newCreateOptionsBuilder().build()
+
 	err = svc.Run(opts)
 
-	// then
 	require.Contains(t, err.Error(), "failed to add git sources to constructor")
 	assert.Equal(t, 1, manifestResolverStub.cleanupTempFilesCallCount,
 		"expected manifest resolver to clean up temporary files on error")
 	assert.Equal(t, 1, defaultCRResolverStub.cleanupTempFilesCallCount,
 		"expected default CR resolver to clean up temporary files on error")
+}
+
+// newTestService creates a service with all default stubs for convenience.
+func newTestService(t *testing.T) *create.Service {
+	t.Helper()
+	svc, err := create.NewService(&moduleConfigServiceStub{}, &gitSourcesServiceStub{},
+		&componentConstructorServiceStub{},
+		&ModuleTemplateServiceStub{}, &CRDParserServiceStub{},
+		&imageVersionVerifierStub{}, &manifestServiceStub{}, &fileResolverStub{},
+		&fileResolverStub{},
+		&fileExistsStub{})
+	require.NoError(t, err)
+	return svc
 }
 
 type createOptionsBuilder struct {
@@ -303,9 +224,8 @@ func newCreateOptionsBuilder() *createOptionsBuilder {
 	return builder.
 		withOut(iotools.NewDefaultOut(io.Discard)).
 		withModuleConfigFile("create-module-config.yaml").
-		withRegistryURL("https://registry.kyma.cx").
 		withTemplateOutput("test").
-		withCredentials("user:password").
+		withOutputConstructorFile("constructor.yaml").
 		withModuleSourcesGitDirectory("../../../")
 }
 
@@ -323,28 +243,13 @@ func (b *createOptionsBuilder) withModuleConfigFile(moduleConfigFile string) *cr
 	return b
 }
 
-func (b *createOptionsBuilder) withRegistryURL(registryURL string) *createOptionsBuilder {
-	b.options.RegistryURL = registryURL
-	return b
-}
-
 func (b *createOptionsBuilder) withTemplateOutput(templateOutput string) *createOptionsBuilder {
 	b.options.TemplateOutput = templateOutput
 	return b
 }
 
-func (b *createOptionsBuilder) withCredentials(credentials string) *createOptionsBuilder {
-	b.options.Credentials = credentials
-	return b
-}
-
 func (b *createOptionsBuilder) withModuleSourcesGitDirectory(moduleSourcesGitDirectory string) *createOptionsBuilder {
 	b.options.ModuleSourcesGitDirectory = moduleSourcesGitDirectory
-	return b
-}
-
-func (b *createOptionsBuilder) withDisableOCMRegistryPush(disableRegistryPush bool) *createOptionsBuilder {
-	b.options.DisableOCMRegistryPush = disableRegistryPush
 	return b
 }
 
@@ -416,22 +321,10 @@ func (s *gitSourcesServiceStub) AddGitSourcesToConstructor(_ *component.Construc
 	return nil
 }
 
-func (*gitSourcesServiceStub) AddGitSources(_ *compdesc.ComponentDescriptor,
-	_, _, _ string,
-) error {
-	return nil
-}
-
 type gitSourcesServiceErrorStub struct{}
 
 func (s *gitSourcesServiceErrorStub) AddGitSourcesToConstructor(_ *component.Constructor,
 	_, _ string,
-) error {
-	return errors.New("unexpected error")
-}
-
-func (*gitSourcesServiceErrorStub) AddGitSources(_ *compdesc.ComponentDescriptor,
-	_, _, _ string,
 ) error {
 	return errors.New("unexpected error")
 }
@@ -456,54 +349,17 @@ func (c *componentConstructorServiceStub) CreateConstructorFile(_ *component.Con
 	return nil
 }
 
-func (c *componentConstructorServiceStub) SetComponentLabel(componentConstructor *component.Constructor,
-	name, value string) {
+func (c *componentConstructorServiceStub) SetComponentLabel(_ *component.Constructor,
+	_, _ string) {
 }
 
-func (c *componentConstructorServiceStub) SetResponsiblesLabel(componentConstructor *component.Constructor,
-	team string) {
-}
-
-type componentArchiveServiceStub struct{}
-
-func (*componentArchiveServiceStub) CreateComponentArchive(_ *compdesc.ComponentDescriptor) (
-	*comparch.ComponentArchive,
-	error,
-) {
-	return &comparch.ComponentArchive{}, nil
-}
-
-func (*componentArchiveServiceStub) AddModuleResourcesToArchive(_ componentarchive.ComponentArchive,
-	_ []resources.Resource,
-) error {
-	return nil
-}
-
-type registryServiceStub struct{}
-
-func (*registryServiceStub) PushComponentVersion(_ *comparch.ComponentArchive, _, _ bool,
-	_, _ string,
-) error {
-	return nil
-}
-
-func (*registryServiceStub) GetComponentVersion(_ *comparch.ComponentArchive, _ bool,
-	_, _ string,
-) (cpi.ComponentVersionAccess, error) {
-	var componentVersion cpi.ComponentVersionAccess
-	return componentVersion, nil
-}
-
-func (*registryServiceStub) ExistsComponentVersion(_ *comparch.ComponentArchive, _ bool,
-	_, _ string,
-) (bool, error) {
-	return false, nil
+func (c *componentConstructorServiceStub) SetResponsiblesLabel(_ *component.Constructor,
+	_ string) {
 }
 
 type ModuleTemplateServiceStub struct{}
 
 func (*ModuleTemplateServiceStub) GenerateModuleTemplate(_ *contentprovider.ModuleConfig,
-	_ *compdesc.ComponentDescriptor,
 	_ []byte, _ bool, _ string,
 ) error {
 	return nil
@@ -513,15 +369,6 @@ type CRDParserServiceStub struct{}
 
 func (*CRDParserServiceStub) IsCRDClusterScoped(_ *types.ResourcePaths) (bool, error) {
 	return false, nil
-}
-
-type ModuleResourceServiceStub struct{}
-
-func (*ModuleResourceServiceStub) GenerateModuleResources(
-	_ *types.ResourcePaths,
-	_ string,
-) []resources.Resource {
-	return []resources.Resource{}
 }
 
 type imageVersionVerifierStub struct{}

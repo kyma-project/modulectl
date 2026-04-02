@@ -164,6 +164,126 @@ func TestConstructor_AddImageAsResource_Multiple(t *testing.T) {
 	}
 }
 
+func TestConstructor_AddImageAsResource_SemverTagWithDigest(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "2.3.4",
+		Digest:  "abcdef123456abcdef",
+		FullURL: "registry.io/myimage:2.3.4@sha256:abcdef123456abcdef",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "2.3.4+sha256.abcdef123456", resource.Version)
+	require.Equal(t, "myimage-abcdef12", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_NonSemverTagWithDigest(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "latest",
+		Digest:  "abcdef123456abcdef",
+		FullURL: "registry.io/myimage:latest@sha256:abcdef123456abcdef",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "0.0.0-latest+sha256.abcdef123456", resource.Version)
+	require.Equal(t, "myimage-abcdef12", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_NoTagWithDigest(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "",
+		Digest:  "abcdef123456abcdef",
+		FullURL: "registry.io/myimage@sha256:abcdef123456abcdef",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "0.0.0+sha256.abcdef123456", resource.Version)
+	require.Equal(t, "myimage-abcdef12", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_SemverTagWithoutDigest(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "v1.2.3",
+		Digest:  "",
+		FullURL: "registry.io/myimage:v1.2.3",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "v1.2.3", resource.Version)
+	require.Equal(t, "myimage", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_NonSemverTagWithoutDigest(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "main",
+		Digest:  "",
+		FullURL: "registry.io/myimage:main",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "0.0.0-main", resource.Version)
+	require.Equal(t, "myimage", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_SpecialCharsInTag(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "feat/my_branch",
+		Digest:  "",
+		FullURL: "registry.io/myimage:feat/my_branch",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	// Special chars should be normalized: / and _ become -
+	require.Equal(t, "0.0.0-feat-my-branch", resource.Version)
+	require.Equal(t, "myimage", resource.Name)
+}
+
+func TestConstructor_AddImageAsResource_SemverWithPrerelease(t *testing.T) {
+	constructor := component.NewConstructor("test-component", "1.0.0")
+
+	imageInfo := &image.ImageInfo{
+		Name:    "myimage",
+		Tag:     "1.0.0-rc.1",
+		Digest:  "",
+		FullURL: "registry.io/myimage:1.0.0-rc.1",
+	}
+
+	constructor.AddImageAsResource([]*image.ImageInfo{imageInfo})
+
+	resource := constructor.Components[0].Resources[0]
+	require.Equal(t, "1.0.0-rc.1", resource.Version)
+	require.Equal(t, "myimage", resource.Name)
+}
+
 func TestConstructor_AddFileResource_ModuleTemplate(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
