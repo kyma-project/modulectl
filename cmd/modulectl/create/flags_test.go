@@ -1,7 +1,6 @@
 package create_test
 
 import (
-	"strconv"
 	"testing"
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
@@ -18,20 +17,20 @@ func Test_CreateFlagsDefaults(t *testing.T) {
 			value:    createcmd.ConfigFileFlagDefault,
 			expected: "module-config.yaml",
 		},
-		{name: createcmd.CredentialsFlagName, value: createcmd.CredentialsFlagDefault, expected: ""},
-		{name: createcmd.InsecureFlagName, value: strconv.FormatBool(createcmd.InsecureFlagDefault), expected: "false"},
-		{name: createcmd.TemplateOutputFlagName, value: createcmd.TemplateOutputFlagDefault, expected: "template.yaml"},
-		{name: createcmd.RegistryURLFlagName, value: createcmd.RegistryURLFlagDefault, expected: ""},
 		{
-			name:     createcmd.OverwriteComponentVersionFlagName,
-			value:    strconv.FormatBool(createcmd.OverwriteComponentVersionFlagDefault),
-			expected: "false",
+			name:     createcmd.TemplateOutputFlagName,
+			value:    createcmd.TemplateOutputFlagDefault,
+			expected: "template.yaml",
 		},
-		{name: createcmd.DryRunFlagName, value: strconv.FormatBool(createcmd.DryRunFlagDefault), expected: "false"},
 		{
 			name:     createcmd.ModuleSourcesGitDirectoryFlagName,
 			value:    createcmd.ModuleSourcesGitDirectoryFlagDefault,
 			expected: ".",
+		},
+		{
+			name:     createcmd.OutputConstructorFileFlagName,
+			value:    createcmd.OutputConstructorFileFlagDefault,
+			expected: "component-constructor.yaml",
 		},
 	}
 

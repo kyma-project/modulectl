@@ -10,8 +10,6 @@ import (
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"ocm.software/ocm/api/oci"
-	"ocm.software/ocm/api/ocm/compdesc"
 	"sigs.k8s.io/yaml"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
@@ -49,13 +47,13 @@ metadata:
     {{- range $key, $value := . }}
     {{ printf "%q" $key }}: {{ printf "%q" $value }}
     {{- end}}
-{{- end}} 
+{{- end}}
 {{- with .Annotations}}
   annotations:
     {{- range $key, $value := . }}
     {{ printf "%q" $key }}: {{ printf "%q" $value }}
     {{- end}}
-{{- end}} 
+{{- end}}
 spec:
   moduleName: {{.ModuleName}}
   version: {{.ModuleVersion}}
@@ -85,19 +83,14 @@ spec:
 {{- with .Manager}}
   manager:
     name: {{.Name}}
-    {{- if .Namespace}}      
+    {{- if .Namespace}}
     namespace: {{.Namespace}}
     {{- end}}
     group: {{.GroupVersionKind.Group}}
     version: {{.GroupVersionKind.Version}}
     kind: {{.GroupVersionKind.Kind}}
 {{- end}}
-{{- if .Descriptor}}
-  descriptor:
-{{yaml .Descriptor | printf "%s" | indent 4}}
-{{- else}}
   descriptor: {}
-{{- end}}
 {{- with .Resources}}
   resources:
     {{- range $key, $value := . }}
@@ -113,7 +106,6 @@ type moduleTemplateData struct {
 	ResourceName        string
 	Namespace           string
 	ModuleVersion       string
-	Descriptor          *compdesc.ComponentDescriptorVersion
 	Repository          string
 	Documentation       string
 	Icons               contentprovider.Icons
@@ -128,7 +120,6 @@ type moduleTemplateData struct {
 
 func (s *Service) GenerateModuleTemplate(
 	moduleConfig *contentprovider.ModuleConfig,
-	descriptorToRender *compdesc.ComponentDescriptor,
 	data []byte,
 	isCrdClusterScoped bool,
 	templateOutput string,
@@ -140,11 +131,7 @@ func (s *Service) GenerateModuleTemplate(
 	labels := generateLabels(moduleConfig)
 	annotations := generateAnnotations(moduleConfig, isCrdClusterScoped)
 
-	ref, err := oci.ParseRef(moduleConfig.Name)
-	if err != nil {
-		return fmt.Errorf("failed to parse ref: %w", err)
-	}
-	shortName := trimShortNameFromRef(ref)
+	shortName := extractShortName(moduleConfig.Name)
 	labels[shared.ModuleName] = shortName
 	moduleTemplateName := shortName + "-" + moduleConfig.Version
 
@@ -156,16 +143,10 @@ func (s *Service) GenerateModuleTemplate(
 		return fmt.Errorf("failed to parse module template: %w", err)
 	}
 
-	covertedDescriptor, err := ConvertDescriptorIfNotNil(descriptorToRender)
-	if err != nil {
-		return err
-	}
-
 	mtData := moduleTemplateData{
 		ModuleName:          shortName,
 		ResourceName:        moduleTemplateName,
 		ModuleVersion:       moduleConfig.Version,
-		Descriptor:          covertedDescriptor,
 		Repository:          moduleConfig.Repository,
 		Documentation:       moduleConfig.Documentation,
 		Icons:               moduleConfig.Icons,
@@ -204,20 +185,6 @@ func (s *Service) GenerateModuleTemplate(
 	}
 
 	return nil
-}
-
-func ConvertDescriptorIfNotNil(
-	descriptorToRender *compdesc.ComponentDescriptor,
-) (*compdesc.ComponentDescriptorVersion, error) {
-	var covertedDescriptor *compdesc.ComponentDescriptorVersion
-	if descriptorToRender != nil {
-		converted, err := compdesc.Convert(descriptorToRender)
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert descriptor: %w", err)
-		}
-		covertedDescriptor = &converted
-	}
-	return covertedDescriptor, nil
 }
 
 func parseDefaultCRYaml(data []byte) ([]byte, error) {
@@ -285,12 +252,14 @@ func indent(spaces int, input string) string {
 	return out.String()
 }
 
-func trimShortNameFromRef(ref oci.RefSpec) string {
-	t := strings.Split(ref.Repository, "/")
-	if len(t) == 0 {
+// extractShortName extracts the last segment from a module name path.
+// For example, "kyma-project.io/module/telemetry" returns "telemetry".
+func extractShortName(moduleName string) string {
+	parts := strings.Split(moduleName, "/")
+	if len(parts) == 0 {
 		return ""
 	}
-	return t[len(t)-1]
+	return parts[len(parts)-1]
 }
 
 // copyEntries copies entries from src map to dst map, allocating dst if it is nil.

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	iotools "github.com/kyma-project/modulectl/tools/io"
@@ -14,15 +12,9 @@ import (
 type Options struct {
 	Out                       iotools.Out
 	ConfigFile                string
-	Credentials               string
-	Insecure                  bool
 	TemplateOutput            string
-	RegistryURL               string
 	ModuleSourcesGitDirectory string
-	OverwriteComponentVersion bool
-	DryRun                    bool
 	SkipVersionValidation     bool
-	DisableOCMRegistryPush    bool
 	OutputConstructorFile     string
 }
 
@@ -39,17 +31,8 @@ func (opts Options) Validate() error {
 		return fmt.Errorf("opts.TemplateOutput must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
-	if opts.OutputConstructorFile == "" && opts.DisableOCMRegistryPush {
-		return fmt.Errorf("opts.OutputConstructorFile must not be empty when OCM registry push is disabled: %w",
-			commonerrors.ErrInvalidOption)
-	}
-
-	// Only validate registry related args if OCM registry push is not disabled
-	if !opts.DisableOCMRegistryPush {
-		err := opts.validateArgsForRegistryPush()
-		if err != nil {
-			return err
-		}
+	if opts.OutputConstructorFile == "" {
+		return fmt.Errorf("opts.OutputConstructorFile must not be empty: %w", commonerrors.ErrInvalidOption)
 	}
 
 	if opts.ModuleSourcesGitDirectory == "" {
@@ -62,34 +45,6 @@ func (opts Options) Validate() error {
 		}
 	}
 
-	if opts.OverwriteComponentVersion {
-		opts.Out.Write("Warning: overwrite flag is set to true. This should ONLY be used for testing purposes.\n")
-	}
-
-	if opts.DryRun {
-		opts.Out.Write("Warning: dry-run flag is set to true. The descriptor will NOT be pushed.\n")
-	}
-
-	return nil
-}
-
-func (opts Options) validateArgsForRegistryPush() error {
-	if opts.Credentials != "" {
-		matched, err := regexp.MatchString("(.+):(.+)", opts.Credentials)
-		if err != nil {
-			return fmt.Errorf("opts.Credentials could not be parsed: %w: %w", commonerrors.ErrInvalidOption, err)
-		} else if !matched {
-			return fmt.Errorf("opts.Credentials is in invalid format: %w", commonerrors.ErrInvalidOption)
-		}
-	}
-
-	if opts.RegistryURL == "" {
-		return fmt.Errorf("opts.RegistryURL must not be empty: %w", commonerrors.ErrInvalidOption)
-	}
-
-	if !strings.HasPrefix(opts.RegistryURL, "http") {
-		return fmt.Errorf("opts.RegistryURL does not start with http(s): %w", commonerrors.ErrInvalidOption)
-	}
 	return nil
 }
 

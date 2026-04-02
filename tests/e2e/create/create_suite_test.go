@@ -65,26 +65,17 @@ const (
 	withSecurityScanDisabled      = validConfigs + "with-securityScanEnabled-false.yaml"
 	withSecurityScanEnabled       = validConfigs + "with-securityScanEnabled-true.yaml"
 
-	ociRegistry          = "http://k3d-oci.localhost:5001"
 	templateOutputPath   = "/tmp/template.yaml"
-	privateOciRegistry   = "http://k3d-private-oci.localhost:5002"
-	ociRegistryCreds     = "k3duser:k3dpass"
-	templateOperatorPath = "../../../template-operator"
+	templateOperatorPath = "../../../"
 )
 
 // Command wrapper for `modulectl create`
 
 type createCmd struct {
-	registry                  string
 	output                    string
 	moduleConfigFile          string
-	registryCreds             string
 	moduleSourcesGitDirectory string
-	insecure                  bool
-	overwrite                 bool
-	dryRun                    bool
 	skipVersionValidation     bool
-	disableOCMRegistryPush    bool
 	outputConstructorFile     string
 }
 
@@ -97,40 +88,16 @@ func (cmd *createCmd) execute() error {
 		args = append(args, "--config-file="+cmd.moduleConfigFile)
 	}
 
-	if cmd.registry != "" {
-		args = append(args, "--registry="+cmd.registry)
-	}
-
 	if cmd.output != "" {
 		args = append(args, "--output="+cmd.output)
-	}
-
-	if cmd.registryCreds != "" {
-		args = append(args, "--registry-credentials="+cmd.registryCreds)
 	}
 
 	if cmd.moduleSourcesGitDirectory != "" {
 		args = append(args, "--module-sources-git-directory="+cmd.moduleSourcesGitDirectory)
 	}
 
-	if cmd.insecure {
-		args = append(args, "--insecure")
-	}
-
-	if cmd.overwrite {
-		args = append(args, "--overwrite")
-	}
-
-	if cmd.dryRun {
-		args = append(args, "--dry-run")
-	}
-
 	if cmd.skipVersionValidation {
 		args = append(args, "--skip-version-validation")
-	}
-
-	if cmd.disableOCMRegistryPush {
-		args = append(args, "--disable-ocm-registry-push")
 	}
 
 	if cmd.outputConstructorFile != "" {
