@@ -8,37 +8,7 @@ import (
 
 	"github.com/kyma-project/modulectl/internal/common/types/component"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/testutils"
 )
-
-func TestGitSourcesService_AddGitSources_ReturnsCorrectSources(t *testing.T) {
-	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceStub{latestCommit: "latest"})
-	require.NoError(t, err)
-	moduleVersion := "1.0.0"
-	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
-
-	err = gitSourcesService.AddGitSources(descriptor, "gitRepoPath", "gitRepoUrl", moduleVersion)
-
-	require.NoError(t, err)
-	require.Len(t, descriptor.Sources, 1)
-	source := descriptor.Sources[0]
-	require.Equal(t, "Github", source.Type)
-	require.Equal(t, "module-sources", source.Name)
-	require.Equal(t, moduleVersion, source.Version)
-	require.Empty(t, source.Labels)
-}
-
-func TestGitSourcesService_AddGitSources_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
-	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceErrorStub{})
-	require.NoError(t, err)
-
-	moduleVersion := "1.0.0"
-	descriptor := testutils.CreateComponentDescriptor("test.io/module/test", moduleVersion)
-
-	err = gitSourcesService.AddGitSources(descriptor, "gitRepoPath", "gitRepoUrl", moduleVersion)
-	require.Error(t, err)
-	require.ErrorContains(t, err, "failed to get latest commit")
-}
 
 func TestGitSourcesService_AddGitSourcesToConstructor_AddsCorrectSource(t *testing.T) {
 	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceStub{latestCommit: "abcdefg"})

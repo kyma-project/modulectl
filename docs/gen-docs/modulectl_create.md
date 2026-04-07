@@ -2,15 +2,16 @@
 title: modulectl create
 ---
 
-Creates a module bundled as an OCI artifact.
+Creates a module template and component constructor.
+
 
 ## Synopsis
 
-Use this command to create a Kyma module, bundle it as an OCI artifact, and push it to the OCI registry optionally.
+Use this command to create a Kyma module template and component constructor file.
 
 ### Detailed description
 
-This command allows you to create a Kyma module as an OCI artifact and optionally push it to the OCI registry of your choice.
+This command allows you to create a Kyma ModuleTemplate CR and a component constructor file for use with the OCM CLI.
 For more information about Kyma modules see the [documentation](https://kyma-project.io/#/06-modules/README).
 
 ### Configuration
@@ -53,39 +54,33 @@ The file referenced by the **defaultCR** attribute contains a default custom res
 The CRD used for the validation must exist in the set of the module's resources.
 The **resources** are copied to the ModuleTemplate **spec.resources**. If it does not have an entry named 'raw-manifest', the ModuleTemplate **spec.resources** populates this entry from the **manifest** field specified in the module config file.
 
-### Modules as OCI artifacts
-Modules are built and distributed as OCI artifacts. 
-This command creates a component descriptor in the configured descriptor path (./mod as a default) and packages all the contents on the provided path as an OCI artifact.
-The internal structure of the artifact conforms to the [Open Component Model](https://ocm.software/) scheme version 3.
+### Component Constructor
 
-If you configured the "--registry" flag, the created module is validated and pushed to the configured registry.
+This command generates a component constructor YAML file that can be used with the OCM CLI to build and push OCI artifacts.
+The component constructor file contains the component descriptor metadata, including module resources, images, and git sources.
 
 
 ```bash
-modulectl create [--config-file MODULE_CONFIG_FILE] [--registry MODULE_REGISTRY] [flags]
+modulectl create [--config-file MODULE_CONFIG_FILE] [flags]
+
 ```
 
 ## Examples
 
 ```bash
-Build a simple module and push it to a remote registry
-		modulectl create --config-file=/path/to/module-config-file --registry http://localhost:5001/unsigned --insecure
+Build a simple module
+		modulectl create --config-file=/path/to/module-config-file
+
 ```
 
 ## Flags
 
 ```bash
 -c, --config-file string                    Specifies the path to the module configuration file.
-    --disable-ocm-registry-push             Disables the push of the component version to the OCM registry.
-    --dry-run                               Skips the push of the module descriptor to the registry. Checks if the component version already exists in the registry and fails the command if it does and --overwrite is not set to true.
 -h, --help                                  Provides help for the create command.
-    --insecure                              Allows to use a less secure (non-tls) connection for registry access, e.g. localhost when testing. Should only be used in dev scenarios.
     --module-sources-git-directory string   Path to the directory containing the module sources. If not set, the current directory is used. The directory must contain a valid Git repository.
--o, --output string                         Path to write the ModuleTemplate file to, if the module is uploaded to a registry (default "template.yaml").
+-o, --output string                         Path to write the ModuleTemplate file to (default "template.yaml").
     --output-constructor-file string        Path to write the component constructor file to (default "component-constructor.yaml").
-    --overwrite                             Overwrites the pushed component version if it already exists in the OCI registry. Use the flag ONLY for testing purposes.
--r, --registry string                       Context URL of the repository. The repository URL will be automatically added to the repository contexts in the module descriptor.
-    --registry-credentials string           Basic authentication credentials for the given repository in the <user:password> format.
     --skip-version-validation               Skipping image and ocm version validation
 ```
 

@@ -6,13 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"ocm.software/ocm/api/ocm/compdesc"
 
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
-	"github.com/kyma-project/modulectl/internal/testutils"
-
-	_ "ocm.software/ocm/api/ocm/compdesc/versions/v2"
 )
 
 func TestNew_WhenCalledWithNilDependencies_ReturnsError(t *testing.T) {
@@ -24,7 +20,7 @@ func TestNew_WhenCalledWithNilDependencies_ReturnsError(t *testing.T) {
 func TestGenerateModuleTemplate_WhenCalledWithNilConfig_ReturnsError(t *testing.T) {
 	svc, _ := templategenerator.NewService(&mockFileSystem{})
 
-	err := svc.GenerateModuleTemplate(nil, nil, nil, false, "")
+	err := svc.GenerateModuleTemplate(nil, nil, false, "")
 
 	require.Error(t, err)
 	require.ErrorIs(t, err, templategenerator.ErrEmptyModuleConfig)
@@ -294,7 +290,7 @@ spec:
 			},
 		},
 		{
-			name: "With Nil Descriptor",
+			name: "Descriptor Is Always Empty",
 			data: defaultData,
 			moduleConfig: &contentprovider.ModuleConfig{
 				Name:        "example.com/component",
@@ -318,12 +314,7 @@ spec:
 			mockFS := &mockFileSystem{}
 			svc, _ := templategenerator.NewService(mockFS)
 
-			var descriptor *compdesc.ComponentDescriptor
-			if tt.name != "With Nil Descriptor" {
-				descriptor = testutils.CreateComponentDescriptor("example.com/component", "1.0.0")
-			}
-
-			err := svc.GenerateModuleTemplate(tt.moduleConfig, descriptor, tt.data, true, "output.yaml")
+			err := svc.GenerateModuleTemplate(tt.moduleConfig, tt.data, true, "output.yaml")
 
 			require.NoError(t, err)
 			require.Equal(t, "output.yaml", mockFS.path)
@@ -360,7 +351,6 @@ func assertCommon(t *testing.T, mockFS *mockFileSystem) {
 	require.Contains(t, mockFS.writtenTemplate, "moduleName: component")
 	require.Contains(t, mockFS.writtenTemplate, "component-1.0.0")
 	require.Contains(t, mockFS.writtenTemplate, "namespace: \"\"")
-	require.Contains(t, mockFS.writtenTemplate, "example.com/component")
 	require.NotContains(t, mockFS.writtenTemplate, "---")
 	require.Contains(t, mockFS.writtenTemplate, "apiVersion: operator.kyma-project.io/v1alpha1")
 	require.Contains(t, mockFS.writtenTemplate, "kind: Sample")

@@ -3,21 +3,16 @@ package modulectl
 import (
 	"fmt"
 
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/spf13/cobra"
 
 	createcmd "github.com/kyma-project/modulectl/cmd/modulectl/create"
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 	"github.com/kyma-project/modulectl/cmd/modulectl/version"
-	"github.com/kyma-project/modulectl/internal/service/componentarchive"
 	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
 	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor/resources"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/kyma-project/modulectl/internal/service/create"
-	"github.com/kyma-project/modulectl/internal/service/credential"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator"
 	"github.com/kyma-project/modulectl/internal/service/filegenerator/reusefilegenerator"
 	"github.com/kyma-project/modulectl/internal/service/fileresolver"
@@ -25,12 +20,10 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/manifestparser"
 	moduleconfiggenerator "github.com/kyma-project/modulectl/internal/service/moduleconfig/generator"
 	moduleconfigreader "github.com/kyma-project/modulectl/internal/service/moduleconfig/reader"
-	"github.com/kyma-project/modulectl/internal/service/registry"
 	"github.com/kyma-project/modulectl/internal/service/scaffold"
 	"github.com/kyma-project/modulectl/internal/service/templategenerator"
 	"github.com/kyma-project/modulectl/internal/service/verifier"
 	"github.com/kyma-project/modulectl/tools/filesystem"
-	"github.com/kyma-project/modulectl/tools/ocirepo"
 	"github.com/kyma-project/modulectl/tools/yaml"
 
 	_ "embed"
@@ -122,28 +115,8 @@ func buildModuleService() (*create.Service, error) {
 
 	componentConstructorService := componentconstructor.NewService()
 
-	memoryFileSystem := memoryfs.New()
-	osFileSystem := osfs.New()
-	archiveFileSystemService, err := filesystem.NewArchiveFileSystem(memoryFileSystem, osFileSystem)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create archive file system service: %w", err)
-	}
-	componentArchiveService, err := componentarchive.NewService(archiveFileSystemService)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create component archive service: %w", err)
-	}
-	moduleResourceService, err := resources.NewService(archiveFileSystemService)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create module resource service: %w", err)
-	}
-
 	imageVersionVerifierService := verifier.NewService(manifestParser)
 
-	ociRepo := &ocirepo.OCIRepo{}
-	registryService, err := registry.NewService(ociRepo, nil, credential.ResolveCredentials)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create registry service: %w", err)
-	}
 	moduleTemplateService, err := templategenerator.NewService(fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module template service: %w", err)
@@ -153,9 +126,9 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create crd parser service: %w", err)
 	}
 	moduleService, err := create.NewService(moduleConfigService, gitSourcesService,
-		componentConstructorService, componentArchiveService, registryService,
+		componentConstructorService,
 		moduleTemplateService,
-		crdParserService, moduleResourceService, imageVersionVerifierService, manifestService, manifestFileResolver,
+		crdParserService, imageVersionVerifierService, manifestService, manifestFileResolver,
 		defaultCRFileResolver, fileSystemUtil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create module service: %w", err)
