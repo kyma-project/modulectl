@@ -92,6 +92,10 @@ Each command's `Use`, `Short`, `Long`, and `Example` strings live in embedded `.
 - `make test` runs only unit tests — safe to run anytime with no external setup
 - See `docs/contributor/local-test-setup.md` for full e2e environment setup
 
+## Code conventions
+
+Go import aliases, nolint policy, and static-binary constraints load automatically when editing `.go` files — see [`.claude/rules/go-conventions.md`](.claude/rules/go-conventions.md).
+
 ## CVE triage
 
 Two scanners run against this repo (`sec-scanners-config.yaml`): **Checkmarx One** (SAST) and **Mend** (Go module SCA). No BDBA — modulectl has no container image. When triaging a CVE finding, see [`.claude/cve-triage/context.md`](.claude/cve-triage/context.md).
