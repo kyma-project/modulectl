@@ -92,6 +92,10 @@ Each command's `Use`, `Short`, `Long`, and `Example` strings live in embedded `.
 - `make test` runs only unit tests — safe to run anytime with no external setup
 - See `docs/contributor/local-test-setup.md` for full e2e environment setup
 
+## CVE triage
+
+Two scanners run against this repo (`sec-scanners-config.yaml`): **Checkmarx One** (SAST) and **Mend** (Go module SCA). No BDBA — modulectl has no container image. When triaging a CVE finding, see [`.claude/cve-triage/context.md`](.claude/cve-triage/context.md).
+
 ## Model usage
 
 Follow the Kyma team's Claude Code workflow:
