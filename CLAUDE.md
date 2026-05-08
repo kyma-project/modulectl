@@ -91,3 +91,12 @@ Each command's `Use`, `Short`, `Long`, and `Example` strings live in embedded `.
 - E2E tests: `tests/e2e/` with Ginkgo, test the full CLI binary against a real local registry
 - `make test` runs only unit tests — safe to run anytime with no external setup
 - See `docs/contributor/local-test-setup.md` for full e2e environment setup
+
+## Model usage
+
+Follow the Kyma team's Claude Code workflow:
+
+- **Planning complex tasks** — switch to Opus: `/model claude-opus-4-7`
+- **Implementation** — use the default Sonnet: `/model claude-sonnet-4-6`
+
+Use Opus when you need to understand an unfamiliar subsystem, design a non-trivial change, or reason about cross-cutting impacts. Switch back to Sonnet once the approach is clear and you are writing code.
