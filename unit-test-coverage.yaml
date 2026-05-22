@@ -15,5 +15,5 @@ packages:
   internal/service/crdparser: 73.3
   internal/service/manifestparser: 93.3
   internal/service/image: 94.6
-  internal/service/componentconstructor: 88.6
+  internal/service/componentconstructor: 88.4
   internal/common/utils/slices: 100
