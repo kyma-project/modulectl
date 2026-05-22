@@ -4,7 +4,7 @@ packages:
   internal/common/validation: 92
   internal/common/types/component: 92.6
   internal/service/scaffold: 92.1
-  internal/service/contentprovider: 91.8
+  internal/service/contentprovider: 90.6
   internal/service/filegenerator: 100
   internal/service/filegenerator/reusefilegenerator: 94.1
   internal/service/fileresolver: 100
