@@ -54,7 +54,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^versions\\.yaml$/"],
+      "managerFilePatterns": ["^versions\\.yaml$"],
       "matchStrings": ["golangciLint: \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver",
