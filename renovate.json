@@ -26,6 +26,12 @@
       "enabled": true
     },
     {
+      "matchManagers": ["gomod"],
+      "addLabels": ["go"],
+      "schedule": ["every day"],
+      "enabled": true
+    },
+    {
       "matchDatasources": ["golang-version"],
       "rangeStrategy": "bump"
     },
@@ -49,6 +55,16 @@
       "matchManagers": ["gomod"],
       "groupName": "All Kubernetes packages",
       "matchPackagePrefixes": ["k8s.io/", "sigs.k8s.io/"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "All Istio packages",
+      "matchPackagePrefixes": ["istio.io/"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "Ginkgo and Gomega",
+      "matchPackageNames": ["github.com/onsi/ginkgo/v2", "github.com/onsi/gomega"]
     }
   ],
   "customManagers": [
