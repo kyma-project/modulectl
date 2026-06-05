@@ -1,14 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## What this repo is
-
 modulectl is a **CLI tool for Kyma module developers**. It provides commands to scaffold a new module structure and to package and push a module as an OCI artifact to a registry, ready for consumption by [Lifecycle Manager](https://github.com/kyma-project/lifecycle-manager).
 
-It is a [Cobra](https://github.com/spf13/cobra)-based CLI written in Go. There is no operator, no controller, and no Kubernetes runtime dependency — it is a developer toolchain binary.
+It is a [Cobra](https://github.com/spf13/cobra)-based CLI written in Go. There is no operator, no controller, and no Kubernetes runtime dependency — it is a developer toolchain binary. It builds cross-platform (`CGO_ENABLED=0`, no FIPS requirement).
 
-## Commands
+To build modulectl, run `make build`.
+
+## modulectl provides the following commands
 
 | Command | What it does |
 |---|---|
@@ -18,7 +16,7 @@ It is a [Cobra](https://github.com/spf13/cobra)-based CLI written in Go. There i
 
 Full flag reference: `docs/gen-docs/` (auto-generated — do not edit manually, run `make docs` to regenerate).
 
-## Architecture
+## modulectl follows a layered architecture
 
 ```
 cmd/modulectl/      ← CLI entrypoint, Cobra command definitions
@@ -28,15 +26,15 @@ tools/              ← Shared low-level utilities (filesystem, yaml, io)
 
 The composition root is in `cmd/modulectl/cmd.go` — all dependencies are wired there, not inside the service packages.
 
-## Build and test
+## modulectl uses a unit and e2e test setup
 
-modulectl builds cross-platform (`CGO_ENABLED=0`, no FIPS requirement). Run `make build` for all platform variants, `make test` for unit tests with race detector.
+Run `make test` for unit tests with race detector.
 
 E2E tests require a local registry — set it up first with `./scripts/re-create-test-registry.sh && ./scripts/build-modulectl.sh`, then run `make test-create-cmd` or `make test-scaffold-cmd`. See `docs/contributor/local-test-setup.md` for the full walkthrough.
 
-## Code conventions
+## modulectl uses the following code conventions
 
-Go conventions load automatically when editing `.go` files — see [`.claude/rules/go-conventions.md`](.claude/rules/go-conventions.md).
+Go nolint and import ordering rules load automatically when editing `.go` files — see [`.claude/rules/go-conventions.md`](.claude/rules/go-conventions.md).
 
 Key rules from `.golangci.yaml`:
 - **All linters enabled by default** — check `.golangci.yaml` before adding `//nolint`
