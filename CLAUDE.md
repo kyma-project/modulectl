@@ -21,61 +21,18 @@ Full flag reference: `docs/gen-docs/` (auto-generated — do not edit manually, 
 ## Architecture
 
 ```
-cmd/modulectl/          ← CLI entrypoint, Cobra command definitions
-  create/               ← `create` command flags and wiring
-  scaffold/             ← `scaffold` command flags and wiring
-internal/service/       ← Business logic, one package per concern
-  create/               ← Orchestrates module packaging
-  scaffold/             ← Orchestrates scaffold generation
-  componentconstructor/ ← Builds the OCM component descriptor
-  contentprovider/      ← Parses module-config.yaml
-  moduleconfig/         ← Reads and validates module configuration
-  filegenerator/        ← Writes scaffold files
-  git/                  ← Git source metadata
-  verifier/             ← Validates module inputs
-tools/                  ← Shared low-level utilities (filesystem, yaml, io)
+cmd/modulectl/      ← CLI entrypoint, Cobra command definitions
+internal/service/   ← Business logic, one package per concern
+tools/              ← Shared low-level utilities (filesystem, yaml, io)
 ```
 
 The composition root is in `cmd/modulectl/cmd.go` — all dependencies are wired there, not inside the service packages.
 
-## Build and test commands
+## Build and test
 
-modulectl builds cross-platform. There is no FIPS requirement — `CGO_ENABLED=0` with a plain `go build`.
+modulectl builds cross-platform (`CGO_ENABLED=0`, no FIPS requirement). Run `make build` for all platform variants, `make test` for unit tests with race detector.
 
-| Target | What it does |
-|---|---|
-| `make build` | Build all four platform variants (darwin/linux × amd64/arm64) to `bin/` |
-| `make build-darwin` | Build for macOS amd64 |
-| `make build-linux` | Build for Linux amd64 |
-| `make build-darwin-arm` | Build for macOS arm64 |
-| `make build-linux-arm` | Build for Linux arm64 |
-| `make test` | Unit tests with race detector (excludes e2e) |
-| `make lint` | golangci-lint |
-| `make docs` | Regenerate CLI reference docs in `docs/gen-docs/` |
-
-### Running a single unit test
-
-```sh
-go test -run TestFoo ./internal/service/create/... -v -race
-```
-
-### E2E tests (`tests/e2e/`)
-
-E2E tests require a local registry. Set it up first:
-
-```sh
-./scripts/re-create-test-registry.sh
-./scripts/build-modulectl.sh
-```
-
-Then run individual suites:
-
-| Target | What it does |
-|---|---|
-| `make test-create-cmd` | Run `create` command e2e suite |
-| `make test-scaffold-cmd` | Run `scaffold` command e2e suite |
-
-See `docs/contributor/local-test-setup.md` for the full local setup walkthrough.
+E2E tests require a local registry — set it up first with `./scripts/re-create-test-registry.sh && ./scripts/build-modulectl.sh`, then run `make test-create-cmd` or `make test-scaffold-cmd`. See `docs/contributor/local-test-setup.md` for the full walkthrough.
 
 ## Code conventions
 
@@ -98,11 +55,3 @@ Key rules from `.golangci.yaml`:
 - Ask what type to use when creating a PR: `deps`, `chore`, `docs`, `feat`, `fix`, `refactor`, `test`.
 - PR description should contain a short summary of the changes and, if applicable, a reference to the issue using the `closes` or `resolves` keyword.
 - Never mention Claude or any AI agent in commits or PRs (no author attribution, no `Co-Authored-By`, no references in commit messages).
-
-## Documentation
-
-When reviewing or editing documentation in `docs/`, the SAP/Kyma technical writing styleguide loads automatically — see [`.claude/rules/documentation-style.md`](.claude/rules/documentation-style.md).
-
-- `docs/gen-docs/` — auto-generated CLI reference (do not edit manually, use `make docs`)
-- `docs/contributor/` — development and local test setup guides
-- `docs/user/` — end-user guides
