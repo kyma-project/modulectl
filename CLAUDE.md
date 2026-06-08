@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-modulectl is a **CLI tool for Kyma module developers**. It provides commands to scaffold a new module structure and to package and push a module as an OCI artifact to a registry, ready for consumption by [Lifecycle Manager](https://github.com/kyma-project/lifecycle-manager).
+modulectl is a **CLI tool for Kyma module developers**. It provides commands to scaffold a new module structure and to prepare data for the `ocm` command that further builds the module as an Open Component Model (OCM) artifact and pushes it to an OCI registry, ready for consumption by [Lifecycle Manager](https://github.com/kyma-project/lifecycle-manager).
 
 It is a [Cobra](https://github.com/spf13/cobra)-based CLI written in Go. There is no operator, no controller, and no Kubernetes runtime dependency — it is a developer toolchain binary. It builds cross-platform (`CGO_ENABLED=0`, no FIPS requirement).
 
