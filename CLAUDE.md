@@ -10,7 +10,7 @@ To build modulectl, run `make build`.
 
 | Command | What it does |
 |---|---|
-| `modulectl create` | Packages a module as an OCI artifact and pushes it to a registry |
+| `modulectl create` | Creates input files for the module as required by the `ocm` tool |
 | `modulectl scaffold` | Generates the files needed to start a new module (`module-config.yaml`, default CR, etc.) |
 | `modulectl version` | Prints the current version |
 
