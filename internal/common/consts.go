@@ -25,4 +25,6 @@ const (
 	ModuleTemplateResourceName = "moduletemplate"
 
 	RequiresDowntimeLabelKey = "operator.kyma-project.io/requiresDowntime"
+
+	OriginalImageReferenceLabelKey = "kyma-project.io/original-image-reference"
 )
