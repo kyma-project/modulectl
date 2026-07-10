@@ -26,5 +26,5 @@ const (
 
 	RequiresDowntimeLabelKey = "operator.kyma-project.io/requiresDowntime"
 
-	OriginalImageReferenceLabelKey = "kyma-project.io/original-image-reference"
+	OriginalImageReferenceLabelKey = ProviderName + "/original-image-reference"
 )
