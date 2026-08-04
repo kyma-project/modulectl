@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	GithubSourceType = "Github"
-	GithubAccessType = "gitHub"
+	GithubSourceType = "git"
+	GithubAccessType = "GitHub"
 
 	OCIArtifactResourceType     = "ociArtifact"
 	OCIArtifactResourceRelation = "external"
@@ -22,7 +22,7 @@ const (
 	DirectoryTreeResourceType = "directoryTree"
 	DirectoryInputType        = "dir"
 
-	PlainTextResourceType = "PlainText"
+	PlainTextResourceType = "plainText"
 	FileResourceInput     = "file"
 )
 
