@@ -13,12 +13,15 @@ import (
 )
 
 const (
-	testModuleName         = "test-module"
-	testModuleVersion      = "1.0.0"
-	testManifestPath       = "/path/to/manifest.yaml"
-	testDefaultCRPath      = "/path/to/defaultcr.yaml"
-	testModuleTemplatePath = "/path/to/moduletemplate.yaml"
-	testOutputFileName     = "output.yaml"
+	testModuleName          = "test-module"
+	testModuleVersion       = "1.0.0"
+	testManifestPath        = "/path/to/manifest.yaml"
+	testDefaultCRPath       = "/path/to/defaultcr.yaml"
+	testModuleTemplatePath  = "/path/to/moduletemplate.yaml"
+	testOutputFileName      = "output.yaml"
+	ociArtifactResourceType = "ociArtifact/v1"
+	ociArtifactRelation     = "external"
+	ociArtifactAccessType   = "ociRegistry"
 )
 
 func TestService_AddResources_Success(t *testing.T) {
@@ -167,7 +170,7 @@ func TestService_AddImagesToConstructor_Success(t *testing.T) {
 			require.NotEmpty(t, resource.Name)
 			require.NotEmpty(t, resource.Version)
 			require.NotEmpty(t, resource.Access)
-			require.Equal(t, component.OCIArtifactAccessType, resource.Access.Type)
+			require.Equal(t, ociArtifactAccessType, resource.Access.Type)
 			require.NotEmpty(t, resource.Access.ImageReference)
 			require.Len(t, resource.Labels, 2)
 			require.Equal(t, common.SecScanBaseLabelKey+"/"+common.TypeLabelKey, resource.Labels[0].Name)
@@ -303,10 +306,10 @@ func TestService_AddImagesToConstructor_SingleImage(t *testing.T) {
 	require.Len(t, imageResources, 1)
 
 	imageResource := imageResources[0]
-	require.Equal(t, component.OCIArtifactResourceType, imageResource.Type)
-	require.Equal(t, component.OCIArtifactResourceRelation, imageResource.Relation)
+	require.Equal(t, ociArtifactResourceType, imageResource.Type)
+	require.Equal(t, ociArtifactRelation, imageResource.Relation)
 	require.Equal(t, "ghcr.io/example/test-image:v2.1.3", imageResource.Access.ImageReference)
-	require.Equal(t, component.OCIArtifactAccessType, imageResource.Access.Type)
+	require.Equal(t, ociArtifactAccessType, imageResource.Access.Type)
 	require.NotEmpty(t, imageResource.Name)
 	require.NotEmpty(t, imageResource.Version)
 }

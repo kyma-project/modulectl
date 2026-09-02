@@ -15,9 +15,9 @@ const (
 	GithubSourceType = "git"
 	GithubAccessType = "GitHub"
 
-	OCIArtifactResourceType     = "ociArtifact"
+	OCIArtifactResourceType     = "ociArtifact/v1"
 	OCIArtifactResourceRelation = "external"
-	OCIArtifactAccessType       = "ociArtifact"
+	OCIArtifactAccessType       = "ociRegistry"
 
 	DirectoryTreeResourceType = "directoryTree"
 	DirectoryInputType        = "dir"

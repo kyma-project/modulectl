@@ -11,6 +11,18 @@ import (
 	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
+const (
+	githubSourceType        = "git"
+	githubAccessType        = "GitHub"
+	ociArtifactResourceType = "ociArtifact/v1"
+	ociArtifactRelation     = "external"
+	ociArtifactAccessType   = "ociRegistry"
+	directoryTreeType       = "directoryTree"
+	directoryInputType      = "dir"
+	plainTextType           = "plainText"
+	fileInputType           = "file"
+)
+
 func TestNewConstructor(t *testing.T) {
 	constructor := component.NewConstructor("test-component", "1.0.0")
 
@@ -47,10 +59,10 @@ func TestConstructor_AddGitSource(t *testing.T) {
 	require.Len(t, constructor.Components[0].Sources, 1)
 	source := constructor.Components[0].Sources[0]
 	require.Equal(t, common.OCMIdentityName, source.Name)
-	require.Equal(t, component.GithubSourceType, source.Type)
+	require.Equal(t, githubSourceType, source.Type)
 	require.Equal(t, "1.0.0", source.Version)
 	require.Empty(t, source.Labels)
-	require.Equal(t, component.GithubAccessType, source.Access.Type)
+	require.Equal(t, githubAccessType, source.Access.Type)
 	require.Equal(t, "https://github.com/kyma-project/modulectl", source.Access.RepoUrl)
 	require.Equal(t, "abc123def456", source.Access.Commit)
 }
@@ -124,8 +136,8 @@ func TestConstructor_AddImageAsResource(t *testing.T) {
 
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
-	require.Equal(t, component.OCIArtifactResourceType, resource.Type)
-	require.Equal(t, component.OCIArtifactResourceRelation, resource.Relation)
+	require.Equal(t, ociArtifactResourceType, resource.Type)
+	require.Equal(t, ociArtifactRelation, resource.Relation)
 	require.Len(t, resource.Labels, 2)
 
 	expectedLabelName := common.SecScanBaseLabelKey + "/" + common.TypeLabelKey
@@ -135,7 +147,7 @@ func TestConstructor_AddImageAsResource(t *testing.T) {
 	require.Equal(t, common.OriginalImageReferenceLabelKey, resource.Labels[1].Name)
 	require.Equal(t, imageInfo.FullURL, resource.Labels[1].Value)
 	require.Equal(t, common.OCMVersion, resource.Labels[1].Version)
-	require.Equal(t, component.OCIArtifactAccessType, resource.Access.Type)
+	require.Equal(t, ociArtifactAccessType, resource.Access.Type)
 	require.Equal(t, imageInfo.FullURL, resource.Access.ImageReference)
 }
 
@@ -296,9 +308,9 @@ func TestConstructor_AddFileResource_ModuleTemplate(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.ModuleTemplateResourceName, resource.Name)
-	require.Equal(t, component.PlainTextResourceType, resource.Type)
+	require.Equal(t, plainTextType, resource.Type)
 	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.FileResourceInput, resource.Input.Type)
+	require.Equal(t, fileInputType, resource.Input.Type)
 	require.Equal(t, "/path/to/file.yaml", resource.Input.Path)
 }
 
@@ -311,9 +323,9 @@ func TestConstructor_AddFileResource_RawManifest(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.RawManifestResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, directoryTreeType, resource.Type)
 	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
+	require.Equal(t, directoryInputType, resource.Input.Type)
 	require.Equal(t, "/path/to", resource.Input.Path)
 	require.Equal(t, []string{"manifest.yaml"}, resource.Input.IncludeFiles)
 	require.False(t, resource.Input.Compress)
@@ -328,9 +340,9 @@ func TestConstructor_AddFileResource_DefaultCR(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.DefaultCRResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, directoryTreeType, resource.Type)
 	require.Equal(t, "1.0.0", resource.Version)
-	require.Equal(t, component.DirectoryInputType, resource.Input.Type)
+	require.Equal(t, directoryInputType, resource.Input.Type)
 	require.Equal(t, "/path/to", resource.Input.Path)
 	require.Equal(t, []string{"cr.yaml"}, resource.Input.IncludeFiles)
 	require.False(t, resource.Input.Compress)
@@ -354,7 +366,7 @@ func TestConstructor_AddFileResource_ModuleTemplate_RelativePath(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.ModuleTemplateResourceName, resource.Name)
-	require.Equal(t, component.PlainTextResourceType, resource.Type)
+	require.Equal(t, plainTextType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "path should be converted to absolute")
 	require.Contains(t, resource.Input.Path, "relative/path/file.yaml")
 }
@@ -368,7 +380,7 @@ func TestConstructor_AddFileResource_RawManifest_RelativePath(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.RawManifestResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, directoryTreeType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
 	require.Contains(t, resource.Input.Path, "relative/path")
 	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
@@ -383,7 +395,7 @@ func TestConstructor_AddFileResource_DefaultCR_CurrentDirectory(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.DefaultCRResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, directoryTreeType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
 	require.Equal(t, "cr.yaml", resource.Input.IncludeFiles[0])
 }
@@ -397,7 +409,7 @@ func TestConstructor_AddFileResource_RawManifest_ParentDirectory(t *testing.T) {
 	require.Len(t, constructor.Components[0].Resources, 1)
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, common.RawManifestResourceName, resource.Name)
-	require.Equal(t, component.DirectoryTreeResourceType, resource.Type)
+	require.Equal(t, directoryTreeType, resource.Type)
 	require.True(t, filepath.IsAbs(resource.Input.Path), "directory path should be converted to absolute")
 	require.Equal(t, "manifest.yaml", resource.Input.IncludeFiles[0])
 }
