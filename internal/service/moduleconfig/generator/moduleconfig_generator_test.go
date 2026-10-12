@@ -139,11 +139,9 @@ func (*fileExistsStub) ReadFile(_ string) ([]byte, error) {
 		Manager: &contentprovider.Manager{
 			Name:      "manager-name",
 			Namespace: "manager-namespace",
-			GroupVersionKind: metav1.GroupVersionKind{
-				Group:   "apps",
-				Version: "v1",
-				Kind:    "Deployment",
-			},
+			Group:     "apps",
+			Version:   "v1",
+			Kind:      "Deployment",
 		},
 		Resources: contentprovider.Resources{},
 	}

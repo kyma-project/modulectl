@@ -144,7 +144,7 @@ func NewService(moduleConfigService ModuleConfigService,
 	}, nil
 }
 
-func (s *Service) Run(opts Options) (rErr error) { //nolint:nonamedreturns // named return to detect error in defer
+func (s *Service) Run(opts Options) (rErr error) {
 	if err := opts.Validate(); err != nil {
 		return err
 	}

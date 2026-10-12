@@ -58,8 +58,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "Deployment with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "Deployment",
+					Name: "test-manager",
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
@@ -79,8 +79,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "Deployment with image that has no tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "Deployment",
+					Name: "test-manager",
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
@@ -100,8 +100,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "StatefulSet with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.StatefulSet{
-					TypeMeta:   metav1.TypeMeta{Kind: "StatefulSet"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "StatefulSet",
+					Name: "test-manager",
 					Spec: appsv1.StatefulSetSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
@@ -121,8 +121,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "Deployment with non-matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "Deployment",
+					Name: "test-manager",
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
@@ -142,8 +142,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "Deployment with multiple containers, one with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "Deployment",
+					Name: "test-manager",
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{
@@ -164,8 +164,8 @@ func TestService_VerifyModuleResources(t *testing.T) {
 			name: "Deployment with multiple containers, none with matching image tag",
 			resources: []*unstructured.Unstructured{
 				makeUnstructuredFromObj(&appsv1.Deployment{
-					TypeMeta:   metav1.TypeMeta{Kind: "Deployment"},
-					ObjectMeta: metav1.ObjectMeta{Name: "test-manager"},
+					Kind: "Deployment",
+					Name: "test-manager",
 					Spec: appsv1.DeploymentSpec{
 						Template: corev1.PodTemplateSpec{
 							Spec: corev1.PodSpec{

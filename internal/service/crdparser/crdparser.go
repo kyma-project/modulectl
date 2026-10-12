@@ -57,7 +57,7 @@ func (s *Service) IsCRDClusterScoped(paths *types.ResourcePaths) (bool, error) {
 		return false, fmt.Errorf("error parsing default CR: %w", err)
 	}
 
-	group := strings.Split(customResource.APIVersion, "/")[0]
+	group, _, _ := strings.Cut(customResource.APIVersion, "/")
 
 	manifestData, err := s.fileSystem.ReadFile(paths.RawManifest)
 	if err != nil {

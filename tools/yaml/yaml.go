@@ -134,7 +134,7 @@ func callMarshalYAML(marshalYAMLMethod reflect.Value) (any, error) {
 
 	marshalRes := marshalYAMLResult[0].Interface()
 
-	err, ok := marshalYAMLResult[1].Interface().(error)
+	err, ok := reflect.TypeAssert[error](marshalYAMLResult[1])
 	if !ok && err != nil {
 		panic(
 			fmt.Sprintf(

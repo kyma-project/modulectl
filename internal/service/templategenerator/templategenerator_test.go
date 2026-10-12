@@ -142,11 +142,9 @@ spec:
 				Manager: &contentprovider.Manager{
 					Name:      "manager-name",
 					Namespace: "manager-ns",
-					GroupVersionKind: metav1.GroupVersionKind{
-						Group:   "apps",
-						Version: "v1",
-						Kind:    "Deployment",
-					},
+					Group:     "apps",
+					Version:   "v1",
+					Kind:      "Deployment",
 				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {
@@ -169,12 +167,10 @@ spec:
 				Labels:      map[string]string{"key": "value"},
 				Annotations: map[string]string{"annotation": "value"},
 				Manager: &contentprovider.Manager{
-					Name: "manager-name",
-					GroupVersionKind: metav1.GroupVersionKind{
-						Group:   "apps",
-						Version: "v1",
-						Kind:    "Deployment",
-					},
+					Name:    "manager-name",
+					Group:   "apps",
+					Version: "v1",
+					Kind:    "Deployment",
 				},
 			},
 			assertions: func(t *testing.T, mockFS *mockFileSystem) {

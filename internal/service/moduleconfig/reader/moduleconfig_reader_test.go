@@ -472,12 +472,10 @@ func Test_ValidateManager(t *testing.T) {
 		{
 			name: "valid manager",
 			manager: &contentprovider.Manager{
-				Name: "manager-name",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Group:   "apps",
-					Version: "v1",
-					Kind:    "Deployment",
-				},
+				Name:      "manager-name",
+				Group:     "apps",
+				Version:   "v1",
+				Kind:      "Deployment",
 				Namespace: "manager-namespace",
 			},
 			expectedError: nil,
@@ -485,12 +483,10 @@ func Test_ValidateManager(t *testing.T) {
 		{
 			name: "valid manager - empty namespace",
 			manager: &contentprovider.Manager{
-				Name: "manager-name",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Group:   "apps",
-					Version: "v1",
-					Kind:    "Deployment",
-				},
+				Name:    "manager-name",
+				Group:   "apps",
+				Version: "v1",
+				Kind:    "Deployment",
 			},
 			expectedError: nil,
 		},
@@ -499,11 +495,9 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "",
 				Namespace: "manager-namespace",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Group:   "apps",
-					Version: "v1",
-					Kind:    "Deployment",
-				},
+				Group:     "apps",
+				Version:   "v1",
+				Kind:      "Deployment",
 			},
 			expectedError: fmt.Errorf("name must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
@@ -512,10 +506,8 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Group:   "apps",
-					Version: "v1",
-				},
+				Group:     "apps",
+				Version:   "v1",
 			},
 			expectedError: fmt.Errorf("kind must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
@@ -524,10 +516,8 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Version: "v1",
-					Kind:    "Deployment",
-				},
+				Version:   "v1",
+				Kind:      "Deployment",
 			},
 			expectedError: fmt.Errorf("group must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
@@ -536,10 +526,8 @@ func Test_ValidateManager(t *testing.T) {
 			manager: &contentprovider.Manager{
 				Name:      "manager-name",
 				Namespace: "manager-namespace",
-				GroupVersionKind: metav1.GroupVersionKind{
-					Kind:  "Deployment",
-					Group: "apps",
-				},
+				Kind:      "Deployment",
+				Group:     "apps",
 			},
 			expectedError: fmt.Errorf("version must not be empty: %w", commonerrors.ErrInvalidOption),
 		},
@@ -641,11 +629,9 @@ var expectedReturnedModuleConfig = contentprovider.ModuleConfig{
 	Manager: &contentprovider.Manager{
 		Name:      "manager-name",
 		Namespace: "manager-namespace",
-		GroupVersionKind: metav1.GroupVersionKind{
-			Group:   "apps",
-			Version: "v1",
-			Kind:    "Deployment",
-		},
+		Group:     "apps",
+		Version:   "v1",
+		Kind:      "Deployment",
 	},
 	Resources: contentprovider.Resources{
 		"rawManifest": exampleRawManifest,
