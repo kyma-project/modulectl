@@ -29,6 +29,10 @@ validate-docs:
 
 build: build-linux build-darwin build-linux-arm build-darwin-arm
 
+.PHONY: build-for-codeql
+build-for-codeql: ## Compile all packages for CodeQL analysis (no codegen, no output).
+	go build -o /dev/null ./...
+
 build-darwin:
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ./bin/modulectl-darwin $(FLAGS) ./cmd
 
