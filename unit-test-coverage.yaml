@@ -17,3 +17,4 @@ packages:
   internal/service/image: 94.6
   internal/service/componentconstructor: 88.4
   internal/common/utils/slices: 100
+  tools/filesystem: 67.1
